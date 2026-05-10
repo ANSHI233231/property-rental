@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users · Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="users.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Admin · Raj Singh<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Users</h1>
+          <div class="page-subtitle">Manage Admin · PM · Maintenance · Tenant accounts</div>
+        </div>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('addUserModal').classList.add('open')">+ Add User</button>
+      </header>
+
+      <!-- Tabs -->
+      <section class="section">
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary !py-2 !text-sm">All · 142</button>
+          <button class="btn btn-secondary !py-2 !text-sm">Admins · 2</button>
+          <button class="btn btn-secondary !py-2 !text-sm">Property Managers · 18</button>
+          <button class="btn btn-secondary !py-2 !text-sm">Maintenance · 8</button>
+          <button class="btn btn-secondary !py-2 !text-sm">Tenants · 114</button>
+        </div>
+      </section>
+
+      <!-- Users table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Role</th><th>Scope</th><th>Phone</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
+              <td>Admin</td>
+              <td class="muted">All properties</td>
+              <td>98xxxxxx12</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
+              <td>Property Manager</td>
+              <td class="muted">Green Valley, Dwarka</td>
+              <td>98xxxxxx34</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
+              <td>Property Manager</td>
+              <td class="muted">Sai Heights, Lajpat Nagar</td>
+              <td>98xxxxxx56</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Raju Kumar</td>
+              <td>Maintenance</td>
+              <td class="muted">Read + Update only</td>
+              <td>98xxxxxx78</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Raj Sharma</td>
+              <td>Tenant</td>
+              <td class="muted">Unit 3A, Green Valley</td>
+              <td>98xxxxxx90</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Priya Sharma <span class="muted text-xs">(co-tenant)</span></td>
+              <td>Tenant</td>
+              <td class="muted">Unit 3A, Green Valley</td>
+              <td>98xxxxxx91</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <p class="text-sm muted mt-4">No public sign-up. Tenants are auto-created at lease signing. Co-tenants get individual logins linked to the same lease.</p>
+    </main>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal-backdrop" id="addUserModal">
+    <div class="modal">
+      <h3>Add New User</h3>
+      <p class="muted text-sm mt-1 mb-5">Tenants are normally created at lease signing — only add tenants here for manual onboarding.</p>
+
+      <label class="label" for="role">Role</label>
+      <select id="role" class="input">
+        <option>Property Manager</option>
+        <option>Maintenance Staff</option>
+        <option>Admin</option>
+      </select>
+
+      <div class="mt-4">
+        <label class="label" for="name">Full name</label>
+        <input id="name" class="input" required placeholder="e.g. Anil Kapoor" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div>
+          <label class="label" for="phone">Phone</label>
+          <input id="phone" class="input" required pattern="[0-9]{10}" title="10-digit Indian mobile number" placeholder="98xxxxxxxx" />
+        </div>
+        <div>
+          <label class="label" for="email">Email</label>
+          <input id="email" class="input" placeholder="name@gharsetu.in" />
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label" for="property">Assigned property (PM only)</label>
+        <select id="property" class="input">
+          <option>—</option>
+          <option>Green Valley Apartments, Dwarka</option>
+          <option>Sai Heights, Lajpat Nagar</option>
+        </select>
+        <p class="text-xs muted mt-1">Each PM is assigned to exactly one property.</p>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button class="btn btn-secondary" onclick="document.getElementById('addUserModal').classList.remove('open')">Cancel</button>
+        <button class="btn btn-primary">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="users.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Users</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

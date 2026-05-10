@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PM Dashboard · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Green Valley Apartments</h1>
+          <div class="page-subtitle">Sector 12, Dwarka · Property Manager: Sunita Arora</div>
+        </div>
+        <div class="topbar-user">
+          <span class="hidden md:inline">Sunita Arora</span>
+          <span class="avatar">SA</span>
+        </div>
+      </header>
+
+      <!-- KPIs -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Total Units</div><div class="kpi-value">40</div></div>
+          <div class="kpi"><div class="kpi-label">Occupied</div><div class="kpi-value" style="color:var(--color-status-paid)">36</div><div class="kpi-meta">90% occupancy</div></div>
+          <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value">4</div></div>
+          <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--color-status-overdue)">3</div><div class="kpi-meta">₹54,000 outstanding</div></div>
+        </div>
+      </section>
+
+      <!-- Lease expiry alert -->
+      <div class="alert mb-6">
+        <strong class="font-poppins">Leases expiring in 30 days: 2</strong>
+        <div>Unit 3A (Raj Sharma) ends 31/03/2026 · Unit 1B (Gupta family) ends 25/05/2026. <a href="leases.html" class="text-royal-blue font-poppins font-semibold">Review →</a></div>
+      </div>
+
+      <!-- Two column -->
+      <section class="grid lg:grid-cols-2 gap-6 section">
+        <!-- Maintenance queue -->
+        <div class="card">
+          <h3 class="section-title">Maintenance Queue</h3>
+          <div class="space-y-3">
+            <div class="card card-emergency p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex gap-2 items-center mb-1">
+                    <span class="badge badge-emergency">Emergency</span>
+                    <span class="text-xs muted">05/05/2026 · 23:42</span>
+                  </div>
+                  <div class="font-poppins font-semibold text-charcoal">Unit 7C — Water leakage</div>
+                  <p class="text-sm muted mt-1">Kitchen ceiling leak, water dripping into living room.</p>
+                </div>
+                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+              </div>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex gap-2 items-center mb-1">
+                    <span class="badge badge-partial">High</span>
+                    <span class="text-xs muted">03/05/2026</span>
+                  </div>
+                  <div class="font-poppins font-semibold text-charcoal">Unit 2A — AC not working</div>
+                  <p class="text-sm muted mt-1">In-progress · Raju Kumar.</p>
+                </div>
+                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+              </div>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex gap-2 items-center mb-1">
+                    <span class="badge badge-prepaid">Medium</span>
+                    <span class="text-xs muted">08/05/2026</span>
+                  </div>
+                  <div class="font-poppins font-semibold text-charcoal">Unit 5B — Door lock broken</div>
+                  <p class="text-sm muted mt-1">Open · awaiting assignment.</p>
+                </div>
+                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent payments -->
+        <div class="card">
+          <h3 class="section-title">Recent Payments</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Tenant</th><th>Unit</th><th>Amount</th><th>Method</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-poppins font-semibold text-charcoal">Sharma family</td><td>3A</td><td>₹18,000</td><td>UPI</td><td><span class="badge badge-paid">Paid</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">Gupta family</td><td>1B</td><td>₹22,000</td><td>Cash</td><td><span class="badge badge-paid">Paid</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">Mehta</td><td>2B</td><td>₹10,000</td><td>NEFT</td><td><span class="badge badge-partial">Partial</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">Joshi</td><td>4A</td><td>₹40,000</td><td>UPI</td><td><span class="badge badge-prepaid">Prepaid</span></td></tr>
+            </tbody>
+          </table>
+          <div class="mt-4">
+            <a href="rent-collection.html" class="btn btn-primary">Record Payment →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
+    <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Tenants</a>
+    <a href="leases.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

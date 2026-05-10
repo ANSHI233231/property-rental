@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <form class="auth-card" onsubmit="event.preventDefault(); window.location='admin/dashboard.html';">
+      <a href="index.html" class="auth-brand">Ghar<span>Setu</span></a>
+      <div class="auth-tagline">Property Rental Management</div>
+      <div class="text-center mb-6"><a href="index.html" class="text-royal-blue font-poppins font-semibold text-sm">← Back to home</a></div>
+
+      <label class="label" for="email">Email or Phone</label>
+      <input id="email" class="input" type="text" placeholder="raj@gharsetu.in or 98xxxxxxxx" autocomplete="username" required />
+
+      <div class="mt-4">
+        <label class="label" for="password">Password</label>
+        <input id="password" class="input" type="password" placeholder="••••••••" autocomplete="current-password" required minlength="8" />
+      </div>
+
+      <div class="mt-3 flex items-center justify-between text-sm">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" /> <span class="muted">Remember me</span>
+        </label>
+        <a href="forgot-password.html" class="text-royal-blue font-poppins font-semibold">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full mt-6">Login</button>
+
+      <div class="mt-6 text-center text-xs muted">
+        No public sign-up. Accounts are created by your Admin or Property Manager.
+      </div>
+
+      <hr class="divider mt-6" />
+      <div class="text-xs muted text-center font-poppins font-semibold uppercase tracking-wider mb-3">Demo — jump to a role</div>
+      <div class="grid grid-cols-2 gap-2">
+        <a href="admin/dashboard.html" class="btn btn-secondary auth-role-btn">Admin</a>
+        <a href="pm/dashboard.html" class="btn btn-secondary auth-role-btn">Property Manager</a>
+        <a href="maintenance/dashboard.html" class="btn btn-secondary auth-role-btn">Maintenance</a>
+        <a href="tenant/dashboard.html" class="btn btn-secondary auth-role-btn">Tenant</a>
+      </div>
+    </form>
+  </main>
+  <script src="assets/validation.js"></script>
+</body>
+</html>

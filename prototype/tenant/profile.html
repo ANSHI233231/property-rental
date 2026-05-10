@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
+          My Lease
+        </a>
+        <a href="rent.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>
+          Rent
+        </a>
+        <a href="maintenance.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          Maintenance
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          My Profile
+        </a>
+      </nav>
+      <div class="sidebar-footer">Tenant · Raj Sharma<br/>Unit 3A · Green Valley<br/><a class="text-saffron font-poppins" href="../login.html">Sign out</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">My Profile</h1>
+          <div class="page-subtitle">Account and security</div>
+        </div>
+        <div class="topbar-user">
+          <button class="notif-bell" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="notif-dot"></span>
+          </button>
+          <span class="hidden md:inline">Raj Sharma</span>
+          <a href="profile.html" class="avatar">RS</a>
+        </div>
+      </header>
+
+      <div class="profile-grid">
+        <section class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar-lg" style="background:#FF6F00;">RS</div>
+            <div class="profile-name">Raj Sharma</div>
+            <span class="profile-role">Tenant</span>
+          </div>
+
+          <h3>Account</h3>
+          <div class="profile-row"><span class="field">Name</span><span class="value">Raj Sharma</span></div>
+          <div class="profile-row"><span class="field">Email</span><span class="value">raj.sharma@example.com</span></div>
+          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx90</span></div>
+          <div class="profile-row"><span class="field">Unit</span><span class="value">3A · Green Valley, Dwarka</span></div>
+          <div class="profile-row"><span class="field">Co-tenant</span><span class="value">Priya Sharma</span></div>
+          <div class="profile-row"><span class="field">Member since</span><span class="value">01/04/2025</span></div>
+          <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active">Active</span></span></div>
+
+          <div class="mt-6 flex gap-2 flex-wrap">
+            <button class="btn btn-secondary !py-2 !text-sm">Edit phone / email</button>
+          </div>
+          <p class="text-xs muted mt-3">Unit, lease and co-tenant details are managed by your Property Manager (Sunita Arora).</p>
+        </section>
+
+        <section class="profile-card">
+          <h3>Security</h3>
+          <form class="mt-2">
+            <div class="mb-4">
+              <label class="label" for="cur-pw">Current password</label>
+              <input id="cur-pw" type="password" class="input" placeholder="••••••••" required />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <div><label class="label" for="new-pw">New password</label><input id="new-pw" type="password" class="input" placeholder="At least 10 characters" required minlength="10" /></div>
+              <div><label class="label" for="conf-pw">Confirm new</label><input id="conf-pw" type="password" class="input" placeholder="Repeat new password" required minlength="10" /></div>
+            </div>
+            <button type="submit" class="btn btn-primary !py-2 !text-sm">Change password</button>
+          </form>
+
+          <hr class="divider"/>
+
+          <a href="../login.html" class="btn btn-danger !py-2 !text-sm">Sign out</a>
+        </section>
+      </div>
+
+      <!-- Quick lease summary -->
+      <section class="section mt-8">
+        <h3 class="section-title">My Lease — Quick view</h3>
+        <div class="card">
+          <div class="grid sm:grid-cols-4 gap-6">
+            <div>
+              <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease starts</div>
+              <div class="font-poppins font-semibold text-charcoal text-lg mt-1">01/04/2025</div>
+            </div>
+            <div>
+              <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease ends</div>
+              <div class="font-poppins font-semibold text-charcoal text-lg mt-1">31/03/2026</div>
+            </div>
+            <div>
+              <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Monthly rent</div>
+              <div class="font-poppins font-semibold text-charcoal text-lg mt-1">₹18,000</div>
+            </div>
+            <div>
+              <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Security deposit</div>
+              <div class="font-poppins font-semibold text-charcoal text-lg mt-1">₹36,000</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Lease</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="profile.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>Profile</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

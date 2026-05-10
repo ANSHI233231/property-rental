@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Lease · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>My Lease</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Tenant · Raj Sharma<br/>Unit 3A · Green Valley<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">My Lease</h1>
+          <div class="page-subtitle">Welcome back, Raj 👋</div>
+        </div>
+        <div class="topbar-user">
+          <span class="hidden md:inline">Raj Sharma</span>
+          <span class="avatar">RS</span>
+        </div>
+      </header>
+
+      <!-- Lease summary -->
+      <section class="card mb-6">
+        <div class="flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h3>Unit 3A · Green Valley Apartments, Dwarka</h3>
+            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-2 mt-3 text-sm">
+              <div><span class="muted">Lease start:</span> <strong class="text-charcoal">01/04/2025</strong></div>
+              <div><span class="muted">Lease end:</span> <strong class="text-charcoal">31/03/2026</strong></div>
+              <div><span class="muted">Monthly rent:</span> <strong class="text-charcoal">₹18,000</strong></div>
+              <div><span class="muted">Security deposit:</span> <strong class="text-charcoal">₹36,000</strong></div>
+              <div><span class="muted">Co-tenant:</span> <strong class="text-charcoal">Priya Sharma</strong></div>
+              <div><span class="muted">Property Manager:</span> <strong class="text-charcoal">Sunita Arora</strong></div>
+            </div>
+          </div>
+          <span class="badge badge-active text-base">Active</span>
+        </div>
+      </section>
+
+      <!-- Rent status -->
+      <section id="rent" class="section">
+        <h3 class="section-title">Rent Status</h3>
+        <div class="card border-l-4" style="border-left-color: var(--color-status-overdue);">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <div class="flex gap-2 items-center mb-2">
+                <span class="badge badge-overdue">Overdue</span>
+                <span class="text-sm muted">Period: May 2026</span>
+              </div>
+              <div class="font-poppins font-bold text-2xl text-charcoal">₹18,000 due</div>
+              <p class="text-sm" style="color:var(--color-status-overdue)">+ ₹360 late fee added · Due 05/05/2026 · 4 days late</p>
+              <p class="text-sm muted mt-2">Payment is recorded by your Property Manager after you pay them. Pay via UPI / NEFT / Cash / Cheque as usual.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <h3 class="section-title">Payment History</h3>
+          <table class="data-table">
+            <thead><tr><th>Period</th><th>Status</th><th>Amount</th><th>Paid On</th><th>Method</th></tr></thead>
+            <tbody>
+              <tr><td>May 2026</td><td><span class="badge badge-overdue">Overdue</span></td><td>₹18,360</td><td>—</td><td>—</td></tr>
+              <tr><td>Apr 2026</td><td><span class="badge badge-paid">Paid</span></td><td>₹18,000</td><td>03/04/2026</td><td>UPI</td></tr>
+              <tr><td>Mar 2026</td><td><span class="badge badge-paid">Paid</span></td><td>₹18,000</td><td>05/03/2026</td><td>UPI</td></tr>
+              <tr><td>Feb 2026</td><td><span class="badge badge-prepaid">Prepaid</span></td><td>₹36,000</td><td>02/02/2026</td><td>UPI</td></tr>
+              <tr><td>Jan 2026</td><td><span class="badge badge-paid">Paid</span></td><td>—</td><td>(applied from prepay)</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Quick actions -->
+      <section class="section">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <a href="maintenance.html" class="card role-card flex items-center justify-between">
+            <div>
+              <div class="font-poppins font-semibold text-charcoal">Raise a maintenance request</div>
+              <div class="text-sm muted mt-1">Plumbing · Electrical · Carpentry · Appliances</div>
+            </div>
+            <span class="text-saffron text-2xl">→</span>
+          </a>
+          <a href="maintenance.html" class="card role-card flex items-center justify-between">
+            <div>
+              <div class="font-poppins font-semibold text-charcoal">My maintenance requests</div>
+              <div class="text-sm muted mt-1">1 open · 1 awaiting your close</div>
+            </div>
+            <span class="text-saffron text-2xl">→</span>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
+      Lease
+    </a>
+    <a href="rent.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>
+      Rent
+    </a>
+    <a href="maintenance.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+      Maint.
+    </a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

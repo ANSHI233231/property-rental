@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GharSetu — Property Rental Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          navy: '#1A237E', 'royal-blue': '#1565C0', saffron: '#FF6F00',
+          charcoal: '#212121', slate: '#546E7A',
+          'off-white': '#F8F9FA', 'light-gray': '#ECEFF1', 'mid-gray': '#CFD8DC',
+        },
+        fontFamily: { poppins: ['Poppins','sans-serif'], inter: ['Inter','sans-serif'] }
+      }}
+    }
+  </script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="bg-off-white">
+
+  <!-- Hero -->
+  <header class="bg-navy text-white">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="font-poppins font-bold text-xl tracking-wide">Ghar<span class="text-saffron">Setu</span></div>
+      <a href="login.html" class="btn btn-primary !py-2 !px-5 !text-sm">Login</a>
+    </div>
+  </header>
+
+  <section class="bg-navy text-white">
+    <div class="max-w-6xl mx-auto px-6 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="font-poppins text-saffron font-semibold uppercase tracking-widest text-sm mb-3">Delhi-First Property Management</p>
+        <h1 class="text-white !text-white" style="color:#fff; font-size:44px; line-height:1.1;">Stop Losing Track. Start Running Smoothly.</h1>
+        <p class="text-white/80 mt-5 text-lg">Replace paper folders, spreadsheets and WhatsApp groups. Manage <strong>120 units across 18 buildings</strong> from a single role-scoped dashboard.</p>
+        <div class="flex gap-3 mt-8 flex-wrap">
+          <a href="login.html" class="btn btn-primary">Login to GharSetu</a>
+          <a href="#roles" class="btn btn-secondary !text-white !border-white">Explore by role</a>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="card bg-white/10 border-white/10 backdrop-blur p-6">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Buildings</div><div class="kpi-value !text-white">18</div></div>
+            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Units</div><div class="kpi-value !text-white">120</div></div>
+            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Occupancy</div><div class="kpi-value !text-white">94%</div></div>
+            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Roles</div><div class="kpi-value !text-white">4</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roles -->
+  <section id="roles" class="max-w-6xl mx-auto px-6 py-16">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <h2>Four roles. Four scoped dashboards.</h2>
+      <p class="muted mt-2">Each user sees only what they need — no clutter, no confusion.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <a href="admin/dashboard.html" class="card role-card">
+        <div class="role-icon" style="background:#1A237E;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
+        </div>
+        <h3 class="mt-4">Admin</h3>
+        <p class="text-sm muted mt-1">Full system control across all 18 properties, users and alerts.</p>
+        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
+      </a>
+
+      <a href="pm/dashboard.html" class="card role-card">
+        <div class="role-icon" style="background:#1565C0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
+        </div>
+        <h3 class="mt-4">Property Manager</h3>
+        <p class="text-sm muted mt-1">Run one assigned property — leases, rent, tenants and maintenance.</p>
+        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
+      </a>
+
+      <a href="maintenance/dashboard.html" class="card role-card">
+        <div class="role-icon" style="background:#546E7A;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+        </div>
+        <h3 class="mt-4">Maintenance Staff</h3>
+        <p class="text-sm muted mt-1">Just the requests assigned to you. No rent or lease data.</p>
+        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
+      </a>
+
+      <a href="tenant/dashboard.html" class="card role-card">
+        <div class="role-icon" style="background:#FF6F00;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
+        </div>
+        <h3 class="mt-4">Tenant</h3>
+        <p class="text-sm muted mt-1">View your lease, rent status and raise maintenance requests.</p>
+        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Modules strip -->
+  <section class="bg-light-gray py-16">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2>Five modules. One platform.</h2>
+        <p class="muted mt-2">People · Places · Contracts · Complaints · Money</p>
+      </div>
+      <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="card text-center">
+          <div class="font-poppins font-semibold text-charcoal">Users &amp; Access</div>
+          <p class="text-sm muted mt-2">Role-scoped logins. No public sign-up.</p>
+        </div>
+        <div class="card text-center">
+          <div class="font-poppins font-semibold text-charcoal">Properties &amp; Units</div>
+          <p class="text-sm muted mt-2">18 buildings, 120 units, 5 unit states.</p>
+        </div>
+        <div class="card text-center">
+          <div class="font-poppins font-semibold text-charcoal">Leases &amp; Tenants</div>
+          <p class="text-sm muted mt-2">Co-tenant safe. Rent locked at signing.</p>
+        </div>
+        <div class="card text-center">
+          <div class="font-poppins font-semibold text-charcoal">Maintenance</div>
+          <p class="text-sm muted mt-2">Replaces WhatsApp. Nothing gets lost.</p>
+        </div>
+        <div class="card text-center">
+          <div class="font-poppins font-semibold text-charcoal">Rent Collection</div>
+          <p class="text-sm muted mt-2">Auto overdue, late fees, prepaid handling.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-navy text-white/70 py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div>© 2026 GharSetu · Trustworthy · Simple · Delhi-First</div>
+      <div class="font-poppins">Prototype · v1</div>
+    </div>
+  </footer>
+
+  <script src="assets/validation.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rent Collection · PM · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="rent-collection.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Rent Collection</h1>
+          <div class="page-subtitle">Green Valley Apartments</div>
+        </div>
+      </header>
+
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="unit-select">Unit</label>
+            <select id="unit-select" class="input">
+              <option>3A — Raj + Priya Sharma · ₹18,000</option>
+              <option>1B — Gupta family · ₹22,000</option>
+              <option>2B — Vikram Mehta · ₹22,000</option>
+              <option>4A — Akash Joshi · ₹20,000</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="period-filter">Period filter</label>
+            <select id="period-filter" class="input"><option>Last 6 months</option><option>Last 12 months</option><option>Lease lifetime</option></select>
+          </div>
+          <div>
+            <label class="label" for="status-filter">Status</label>
+            <select id="status-filter" class="input"><option>All</option><option>Overdue</option><option>Partial</option><option>Paid</option><option>Prepaid</option></select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tenant context -->
+      <section class="card mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="m-0">Unit 3A · Raj Sharma + Priya Sharma <span class="text-xs muted">(co-tenants)</span></h3>
+            <p class="text-sm muted mt-1">Lease: 01/04/2025 → 31/03/2026 · Rent ₹18,000 · Due on 5th of each month</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="badge badge-overdue">May 2026 · Overdue</span>
+            <span class="text-sm muted">Outstanding: <strong class="text-charcoal">₹18,360</strong> (incl. ₹360 late fee)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Periods table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr><th>Period</th><th>Due Date</th><th>Status</th><th>Due</th><th>Paid</th><th>Late Fee</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">May 2026</td>
+              <td>05/05/2026</td>
+              <td><span class="badge badge-overdue">Overdue</span></td>
+              <td>₹18,000</td>
+              <td>₹0</td>
+              <td style="color:var(--color-status-overdue)">₹360</td>
+              <td><button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('payModal').classList.add('open')">Record Payment</button></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Apr 2026</td>
+              <td>05/04/2026</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td>₹18,000</td>
+              <td>₹18,000</td>
+              <td>—</td>
+              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Mar 2026</td>
+              <td>05/03/2026</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td>₹18,000</td>
+              <td>₹18,000</td>
+              <td>—</td>
+              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Feb 2026</td>
+              <td>05/02/2026</td>
+              <td><span class="badge badge-prepaid">Prepaid</span></td>
+              <td>₹18,000</td>
+              <td>₹36,000 <span class="text-xs muted">(2 months together)</span></td>
+              <td>—</td>
+              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Jan 2026</td>
+              <td>05/01/2026</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td>₹18,000</td>
+              <td>₹0 <span class="text-xs muted">(applied from Feb prepay)</span></td>
+              <td>—</td>
+              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <p class="text-xs muted mt-3">A period becomes <strong>Overdue</strong> 5 calendar days past the due date. Late fee = 2% of outstanding balance per full week overdue, calculated automatically.</p>
+    </main>
+  </div>
+
+  <!-- Record Payment Modal -->
+  <div class="modal-backdrop" id="payModal">
+    <form class="modal" style="max-width:520px;" onsubmit="event.preventDefault(); document.getElementById('payModal').classList.remove('open');">
+      <h3>Record Payment — May 2026</h3>
+      <p class="muted text-sm mt-1 mb-5">Unit 3A · Raj + Priya Sharma · ₹18,000 due + ₹360 late fee</p>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="label" for="amt">Amount (₹)</label>
+          <input id="amt" class="input" type="number" min="1" required placeholder="18360" />
+        </div>
+        <div>
+          <label class="label" for="paydate">Date</label>
+          <input id="paydate" class="input" type="text" placeholder="DD/MM/YYYY" value="09/05/2026"/>
+        </div>
+        <div>
+          <label class="label" for="method">Method</label>
+          <select id="method" class="input"><option>UPI</option><option>NEFT</option><option>Cash</option><option>Cheque</option></select>
+        </div>
+        <div>
+          <label class="label" for="ref">Reference no.</label>
+          <input id="ref" class="input" placeholder="UPI txn / cheque no." />
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label">Recorded by</label>
+        <input class="input" value="Sunita Arora (auto)" disabled />
+      </div>
+
+      <div class="alert mt-5">
+        <strong class="font-poppins">Tip — Prepayment</strong>
+        <div>If the tenant pays more than ₹18,360, the excess is automatically marked as <span class="badge badge-prepaid">Prepaid</span> for June 2026 — no manual adjustment.</div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('payModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Payment</button>
+      </div>
+    </form>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
+    <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Tenants</a>
+    <a href="leases.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="rent-collection.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

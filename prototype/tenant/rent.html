@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Rent · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>My Lease</a>
+        <a href="rent.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Tenant · Raj Sharma<br/>Unit 3A · Green Valley<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">My Rent</h1>
+          <div class="page-subtitle">Unit 3A · Green Valley · Due on the 5th of each month</div>
+        </div>
+        <div class="topbar-user">
+          <span class="hidden md:inline">Raj Sharma</span>
+          <span class="avatar">RS</span>
+        </div>
+      </header>
+
+      <!-- Current period status -->
+      <section class="section">
+        <h3 class="section-title">Current Period</h3>
+        <div class="card border-l-4" style="border-left-color: var(--color-status-overdue);">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <div class="flex gap-2 items-center mb-2">
+                <span class="badge badge-overdue">Overdue</span>
+                <span class="text-sm muted">Period: May 2026 · Due 05/05/2026</span>
+              </div>
+              <div class="font-poppins font-bold text-2xl text-charcoal">₹18,360 due</div>
+              <p class="text-sm" style="color:var(--color-status-overdue)">Includes ₹360 late fee · 4 calendar days past due date</p>
+              <p class="text-sm muted mt-3">Payment is recorded by your Property Manager (Sunita Arora) after you pay them. Pay via UPI / NEFT / Cash / Cheque as usual.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI summary -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Monthly Rent</div><div class="kpi-value">₹18,000</div><div class="kpi-meta">Locked at signing</div></div>
+          <div class="kpi"><div class="kpi-label">Security Deposit</div><div class="kpi-value">₹36,000</div><div class="kpi-meta">Refunded at lease end</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-value" style="color:var(--color-status-overdue)">₹18,360</div><div class="kpi-meta">Incl. late fee</div></div>
+          <div class="kpi"><div class="kpi-label">Paid this year</div><div class="kpi-value" style="color:var(--color-status-paid)">₹72,000</div><div class="kpi-meta">4 of 5 periods</div></div>
+        </div>
+      </section>
+
+      <!-- Full payment history -->
+      <section class="section">
+        <h3 class="section-title">Payment History</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Period</th><th>Status</th><th>Due Date</th><th>Amount</th><th>Paid On</th><th>Method</th><th>Reference</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">May 2026</td>
+                <td><span class="badge badge-overdue">Overdue</span></td>
+                <td>05/05/2026</td>
+                <td>₹18,360 <span class="text-xs muted">(+ late fee)</span></td>
+                <td class="muted">—</td>
+                <td class="muted">—</td>
+                <td class="muted">—</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Apr 2026</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td>05/04/2026</td>
+                <td>₹18,000</td>
+                <td>03/04/2026</td>
+                <td>UPI</td>
+                <td>UPI/4012/2026</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Mar 2026</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td>05/03/2026</td>
+                <td>₹18,000</td>
+                <td>05/03/2026</td>
+                <td>UPI</td>
+                <td>UPI/3019/2026</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Feb 2026</td>
+                <td><span class="badge badge-prepaid">Prepaid</span></td>
+                <td>05/02/2026</td>
+                <td>₹36,000 <span class="text-xs muted">(2 months together)</span></td>
+                <td>02/02/2026</td>
+                <td>UPI</td>
+                <td>UPI/2008/2026</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Jan 2026</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td>05/01/2026</td>
+                <td>—</td>
+                <td class="muted">applied from Feb prepay</td>
+                <td class="muted">—</td>
+                <td class="muted">—</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Dec 2025</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td>05/12/2025</td>
+                <td>₹18,000</td>
+                <td>04/12/2025</td>
+                <td>NEFT</td>
+                <td>NEFT/91220</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs muted mt-3">Periods turn <span class="badge badge-overdue">Overdue</span> 5 calendar days after the due date. Late fees are calculated automatically (2% of outstanding × full weeks overdue).</p>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
+      Lease
+    </a>
+    <a href="rent.html" class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>
+      Rent
+    </a>
+    <a href="maintenance.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+      Maint.
+    </a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>
