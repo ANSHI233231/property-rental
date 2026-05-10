@@ -1,49 +1,50 @@
 /**
  * Next.js Edge Middleware — auth + role-based routing.
  *
- * The refresh token is HttpOnly and not readable from middleware JS.
- * Strategy: protect (app)/* routes by redirecting to /login when no
- * __loggedIn=1 cookie is present. The client-side AuthProvider restores
- * the session via POST /auth/refresh on mount.
+ * Strategy:
+ * 1. If no __loggedIn cookie → redirect to /login.
+ * 2. If __role cookie exists, enforce cross-role redirect:
+ *    /admin/* requires ADMIN, /pm/* requires PROPERTY_MANAGER, etc.
+ *    This is NOT a security gate — the API enforces RBAC via JWT.
+ *    The __role cookie only prevents accidental cross-role navigation (FOUC prevention).
  *
- * The __loggedIn cookie is a non-HttpOnly, SameSite=Strict, Secure=true
- * cookie set by the client after a successful login (see AuthProvider).
- * It carries no secret — its sole purpose is to let middleware know a
- * refresh cookie exists, so we can avoid a FOUC redirect for auth'd users.
- *
- * If __loggedIn is absent we redirect to /login?next=<path> immediately.
- * If __loggedIn is present but the refresh token is actually expired,
- * the client-side AuthProvider handles the redirect after the failed refresh.
+ * The __loggedIn + __role cookies are non-HttpOnly, SameSite=Strict and carry
+ * no secret. Real auth enforcement is done server-side by the NestJS API.
  */
 
 import { NextResponse, type NextRequest } from "next/server";
 
-/** Paths that require authentication (starts-with match). */
-const PROTECTED_PREFIXES = [
-  "/admin",
-  "/pm",
-  "/maintenance",
-  "/tenant",
+type AppRole = "ADMIN" | "PROPERTY_MANAGER" | "MAINTENANCE" | "TENANT";
+
+/** Maps route prefix → required role. */
+const ROLE_PREFIXES: Array<{ prefix: string; role: AppRole; home: string }> = [
+  { prefix: "/admin", role: "ADMIN", home: "/admin/dashboard" },
+  { prefix: "/pm", role: "PROPERTY_MANAGER", home: "/pm/dashboard" },
+  { prefix: "/maintenance", role: "MAINTENANCE", home: "/maintenance/dashboard" },
+  { prefix: "/tenant", role: "TENANT", home: "/tenant/dashboard" },
 ];
 
-/** Public paths — never redirect. */
-const PUBLIC_PATHS = [
-  "/login",
-  "/forgot-password",
-  "/reset-password",
-  "/",
-];
+function homeForRole(role: AppRole): string {
+  switch (role) {
+    case "ADMIN": return "/admin/dashboard";
+    case "PROPERTY_MANAGER": return "/pm/dashboard";
+    case "MAINTENANCE": return "/maintenance/dashboard";
+    case "TENANT": return "/tenant/dashboard";
+  }
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
+  // Find if this path is a protected prefix
+  const matched = ROLE_PREFIXES.find(({ prefix }) => pathname.startsWith(prefix));
 
-  if (!isProtected) return NextResponse.next();
+  if (!matched) {
+    // Not a protected route — allow
+    return NextResponse.next();
+  }
 
-  // Check for the lightweight presence indicator cookie.
+  // Check presence indicator cookie
   const loggedIn = request.cookies.get("__loggedIn")?.value === "1";
 
   if (!loggedIn) {
@@ -51,6 +52,17 @@ export function middleware(request: NextRequest) {
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Cross-role guard using the non-secret __role cookie
+  const roleCookie = request.cookies.get("__role")?.value as AppRole | undefined;
+
+  if (roleCookie && roleCookie !== matched.role) {
+    // Logged in but wrong role — redirect to their actual dashboard
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = homeForRole(roleCookie);
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
@@ -62,7 +74,6 @@ export const config = {
      * Match all request paths EXCEPT:
      *   - _next (Next.js internals)
      *   - static files (images, fonts, etc.)
-     *   - api routes (handled server-side)
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],

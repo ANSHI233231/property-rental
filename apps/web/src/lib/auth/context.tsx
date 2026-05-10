@@ -78,6 +78,20 @@ function setLoggedInCookie(value: boolean) {
   }
 }
 
+/**
+ * Set or clear the __role cookie.
+ * Non-HttpOnly, SameSite=Strict, NOT a security gate.
+ * Used by Edge middleware for cross-role redirect only.
+ */
+function setRoleCookie(role: string | null) {
+  if (typeof document === "undefined") return;
+  if (role) {
+    document.cookie = `__role=${role}; Path=/; SameSite=Strict; Max-Age=604800`;
+  } else {
+    document.cookie = "__role=; Path=/; SameSite=Strict; Max-Age=0";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Context
 // ---------------------------------------------------------------------------
@@ -117,11 +131,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) {
           setState({ user, accessToken: data.accessToken });
           setLoggedInCookie(true);
+          setRoleCookie(user.role);
         }
       } catch {
         // No valid session — stay logged out
         setToken(null);
         setLoggedInCookie(false);
+        setRoleCookie(null);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -143,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(async (res) => {
         if (!res.ok) {
           setLoggedInCookie(false);
+          setRoleCookie(null);
           return null;
         }
         const data = (await res.json()) as { accessToken: string };
@@ -180,6 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setToken(null);
           setState({ user: null, accessToken: null });
           setLoggedInCookie(false);
+          setRoleCookie(null);
           router.replace("/login");
           throw new ApiError(401, "UNAUTHORIZED", "Session expired");
         }
@@ -227,6 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(data.accessToken);
       setState({ user: data.user, accessToken: data.accessToken });
       setLoggedInCookie(true);
+      setRoleCookie(data.user.role);
     },
     [],
   );
@@ -246,6 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setState({ user: null, accessToken: null });
     setLoggedInCookie(false);
+    setRoleCookie(null);
     router.replace("/login");
   }, [router]);
 
