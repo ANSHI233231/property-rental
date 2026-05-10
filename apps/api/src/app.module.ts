@@ -7,18 +7,17 @@ import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
+import { AuditModule } from "./audit/audit.module";
+import { PropertiesModule } from "./properties/properties.module";
+import { UnitsModule } from "./units/units.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      // Read .env from the apps/api directory; the monorepo root .env.example
-      // is the documentation source. Each app maintains its own runtime .env.
       envFilePath: [".env"],
     }),
     // Global throttler configuration: 100 requests per 60-second window per IP.
-    // ThrottlerGuard is registered as APP_GUARD below so every controller inherits
-    // these limits. Individual endpoints may override via @Throttle() decorators.
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1-minute window (ms)
@@ -28,11 +27,12 @@ import { UsersModule } from "./users/users.module";
     PrismaModule,
     HealthModule,
     AuthModule,
+    AuditModule,
     UsersModule,
+    PropertiesModule,
+    UnitsModule,
   ],
   providers: [
-    // H-01 fix: register ThrottlerGuard globally so @Throttle() decorators are
-    // actually enforced. Without this the decorators are pure metadata no-ops.
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
