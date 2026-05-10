@@ -19,6 +19,11 @@ async function bootstrap(): Promise<void> {
   const port = Number(config.get<string>("API_PORT") ?? 3001);
   const host = config.get<string>("API_HOST") ?? "0.0.0.0";
 
+  app.enableCors({
+    origin: config.get<string>("WEB_ORIGIN") ?? "http://localhost:3000",
+    credentials: true,
+  });
+
   await app.listen(port, host);
   // eslint-disable-next-line no-console
   console.log(`[gharsetu-api] listening on http://${host}:${port}/api/v1`);

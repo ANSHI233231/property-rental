@@ -83,6 +83,10 @@ describe("Phase 1 Auth Integration", () => {
     app.setGlobalPrefix("api/v1");
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     app.use(cookieParser());
+    app.enableCors({
+      origin: process.env["WEB_ORIGIN"] ?? "http://localhost:3000",
+      credentials: true,
+    });
     await app.init();
 
     prisma = moduleRef.get(PrismaService);
@@ -688,6 +692,25 @@ describe("Phase 1 Auth Integration", () => {
       // A raw 32-byte opaque token is 64 hex chars; sha256 hash is also 64 hex chars
       expect(body).not.toMatch(/[a-f0-9]{64}/);
       expect(body).not.toMatch(/reset-password\//);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // BUG-001: CORS preflight — OPTIONS /auth/login with web origin
+  // -----------------------------------------------------------------------
+
+  describe("BUG-001: CORS preflight for browser login flow", () => {
+    it("OPTIONS /auth/login with Origin: http://localhost:3000 returns 204 with CORS headers", async () => {
+      const res = await st
+        .options("/api/v1/auth/login")
+        .set("Origin", "http://localhost:3000")
+        .set("Access-Control-Request-Method", "POST")
+        .set("Access-Control-Request-Headers", "content-type");
+
+      // NestJS enableCors responds to preflight with 204 (No Content)
+      expect([200, 204]).toContain(res.status);
+      expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:3000");
+      expect(res.headers["access-control-allow-credentials"]).toBe("true");
     });
   });
 });
