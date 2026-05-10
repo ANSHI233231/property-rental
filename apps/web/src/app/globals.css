@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -----------------------------------------------------------------------
+   Design tokens & utility classes — ported from prototype/assets/styles.css
+   Used to match the prototype 1:1 without duplicating every class in TSX.
+   ----------------------------------------------------------------------- */
+
+/* Form error pattern (validation.js UX contract) */
+@layer components {
+  .field-error {
+    @apply hidden text-[13px] leading-snug text-status-overdue mt-1.5;
+  }
+  .field-error.show {
+    @apply flex items-start gap-1.5;
+  }
+  .field-error.show::before {
+    content: '⚠';
+    @apply flex-shrink-0 text-[13px] leading-snug;
+  }
+
+  /* Label */
+  .label {
+    @apply block font-poppins font-medium text-[13px] text-slate uppercase tracking-[0.4px] mb-1.5;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full min-h-[44px] px-[14px] py-[10px] font-inter text-[15px] text-charcoal bg-white border border-mid-gray rounded-[6px] outline-none transition-[border] duration-150;
+  }
+  .input:focus {
+    @apply border-2 border-royal-blue px-[13px] py-[9px];
+  }
+  .input.error {
+    @apply border-2 border-status-overdue bg-bg-overdue px-[13px] py-[9px];
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-poppins font-semibold text-[15px] rounded-[6px] px-6 py-[10px] cursor-pointer border-0 transition-all duration-200 no-underline;
+  }
+  .btn-primary {
+    @apply bg-saffron text-white;
+  }
+  .btn-primary:hover {
+    @apply bg-[#d95f00];
+  }
+  .btn-secondary {
+    @apply bg-transparent text-royal-blue border-2 border-royal-blue px-[22px] py-2;
+  }
+  .btn-secondary:hover {
+    @apply bg-[rgba(21,101,192,0.06)];
+  }
+  .btn:focus-visible {
+    @apply outline-2 outline-saffron outline-offset-2;
+  }
+  .btn:disabled {
+    @apply bg-light-gray text-mid-gray cursor-not-allowed;
+  }
+
+  /* Auth shell */
+  .auth-shell {
+    @apply min-h-screen flex items-center justify-center p-6;
+    background: linear-gradient(135deg, #1A237E 0%, #1565C0 100%);
+  }
+  .auth-card {
+    @apply bg-white rounded-modal p-10 w-full max-w-[480px] shadow-[0_16px_48px_rgba(0,0,0,0.18)];
+  }
+  .auth-brand {
+    @apply block font-poppins font-bold text-[28px] text-navy text-center mb-1 no-underline transition-opacity duration-150;
+  }
+  .auth-brand:hover {
+    @apply opacity-80;
+  }
+  .auth-brand span {
+    @apply text-saffron;
+  }
+  .auth-tagline {
+    @apply text-center text-slate mb-8 text-sm;
+  }
+  .auth-role-btn {
+    @apply px-2 py-[10px] text-[13px] whitespace-nowrap;
+  }
+
+  /* Divider */
+  .divider {
+    @apply h-px bg-mid-gray my-4 border-0;
+  }
+
+  /* Muted text */
+  .muted {
+    @apply text-slate;
+  }
+}
