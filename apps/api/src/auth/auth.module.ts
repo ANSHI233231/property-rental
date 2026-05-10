@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { HashingService } from "./hashing.service";
@@ -15,15 +14,8 @@ import { PrismaModule } from "../prisma/prisma.module";
   imports: [
     PrismaModule,
     ConfigModule,
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: () => [
-        {
-          ttl: 60000, // 1 minute window
-          limit: 100, // 100 req/min per IP
-        },
-      ],
-    }),
+    // ThrottlerModule is registered globally in AppModule (H-01 fix).
+    // No local registration needed here.
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
