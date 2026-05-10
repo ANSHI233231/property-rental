@@ -201,9 +201,13 @@ export class AuthService {
       },
     });
 
-    // TODO (Phase 7): wire SMTP. For now, log to console (dev only).
-    const resetUrl = `/reset-password/${rawToken}`;
-    this.logger.log(`[DEV] Password reset URL for ${email}: ${resetUrl}`);
+    // TODO (Phase 7): wire SMTP. For now, emit the reset URL to the console in
+    // non-production environments only (H-02 fix). In production this block is
+    // skipped so the raw token never reaches any log aggregator.
+    if (this.configService.get<string>("NODE_ENV") !== "production") {
+      const resetUrl = `/reset-password/${rawToken}`;
+      this.logger.log(`[DEV] Password reset URL for ${email}: ${resetUrl}`);
+    }
   }
 
   // ---------------------------------------------------------------------------
