@@ -1,6 +1,6 @@
-// GharSetu — Prisma schema (Phase 1)
-// Phase 1 introduces the full auth/RBAC models: User, RefreshToken, PasswordResetToken.
-// The Phase 0 HealthCheck stub is removed; the health endpoint uses $queryRaw (no model).
+// GharSetu — Prisma schema (Phase 2)
+// Phase 1: User, RefreshToken, PasswordResetToken.
+// Phase 2: Property, Unit, PropertyTransferLog, AuditLog.
 
 generator client {
   provider = "prisma-client-js"
@@ -20,6 +20,13 @@ enum Role {
   PROPERTY_MANAGER
   MAINTENANCE
   TENANT
+}
+
+enum UnitState {
+  AVAILABLE
+  LISTED
+  OCCUPIED
+  MAINTENANCE
 }
 
 // ---------------------------------------------------------------------------
@@ -51,6 +58,15 @@ model User {
   created_users   User[]         @relation("CreatedByUser")
   refresh_tokens  RefreshToken[]
   password_reset_tokens PasswordResetToken[]
+
+  // Phase 2 relations
+  managed_property  Property?   @relation("PropertyManager")
+  transfer_logs_from PropertyTransferLog[] @relation("TransferFromPM")
+  transfer_logs_to   PropertyTransferLog[] @relation("TransferToPM")
+  transfer_logs_actor PropertyTransferLog[] @relation("TransferActor")
+  audit_logs        AuditLog[]  @relation("AuditActor")
+  retired_units     Unit[]      @relation("RetiredByUser")
+  created_properties Property[] @relation("PropertyCreatedBy")
 
   @@map("users")
 }
@@ -95,4 +111,132 @@ model PasswordResetToken {
 
   @@index([token_hash])
   @@map("password_reset_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Property
+// ---------------------------------------------------------------------------
+
+/// A physical building managed by one PROPERTY_MANAGER at a time (BL-19).
+/// soft-delete: add deleted_at. No hard deletes (BL-05).
+model Property {
+  id          String   @id @default(cuid())
+  name        String
+  /// Full street address stored as a single text field for flexibility.
+  address     String
+  city        String
+  /// Indian state, stored as text (e.g. "Delhi", "Maharashtra").
+  state       String
+  pincode     String   @db.Char(6)
+  /// IANA timezone string. Default: Asia/Kolkata (BL-22).
+  timezone    String   @default("Asia/Kolkata")
+
+  /// Current assigned PROPERTY_MANAGER. Nullable (unassigned).
+  /// @unique here satisfies Prisma's one-to-one constraint requirement.
+  /// A separate migration drops this standard unique and replaces it with a
+  /// partial unique index WHERE active_pm_id IS NOT NULL — enforcing BL-19
+  /// while allowing multiple properties to have no PM (active_pm_id = NULL).
+  active_pm_id String? @unique
+
+  /// Soft-delete support. Set to non-null to hide from normal queries.
+  deleted_at   DateTime?
+
+  created_by_user_id String
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  // Relations
+  active_pm    User?    @relation("PropertyManager", fields: [active_pm_id], references: [id])
+  created_by   User     @relation("PropertyCreatedBy", fields: [created_by_user_id], references: [id])
+  units        Unit[]
+  transfer_logs PropertyTransferLog[]
+
+  @@map("properties")
+}
+
+// ---------------------------------------------------------------------------
+// Unit
+// ---------------------------------------------------------------------------
+
+/// A single rentable unit within a property.
+/// monthly_rent stored as Int (paise). 1 INR = 100 paise. ₹18,000 = 1_800_000 paise.
+/// is_retired is one-way (BL-05): set true, never reset to false.
+/// A DB trigger enforces this at the Postgres level (see migration SQL).
+model Unit {
+  id          String    @id @default(cuid())
+  property_id String
+  unit_number String
+  floor       Int?
+  bedrooms    Int
+  bathrooms   Int
+  area_sqft   Int?
+  /// Stored in paise to avoid float math. ₹1 = 100 paise (BL-13, BL-03).
+  monthly_rent_paise Int
+  state       UnitState @default(AVAILABLE)
+  is_retired  Boolean   @default(false)
+  retired_at  DateTime?
+  retired_by_user_id String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // Relations
+  property    Property  @relation(fields: [property_id], references: [id])
+  retired_by  User?     @relation("RetiredByUser", fields: [retired_by_user_id], references: [id])
+
+  /// Unique unit number per property (e.g. can have "3B" in two different properties).
+  @@unique([property_id, unit_number])
+  @@index([state])
+  @@map("units")
+}
+
+// ---------------------------------------------------------------------------
+// PropertyTransferLog
+// ---------------------------------------------------------------------------
+
+/// Append-only record of every property manager transfer (BL-20).
+/// The previous PM keeps read_only_audit access (enforced at service layer).
+model PropertyTransferLog {
+  id          String   @id @default(cuid())
+  property_id String
+  from_pm_id  String?
+  to_pm_id    String?
+  /// Admin who executed the transfer.
+  actor_id    String
+  note        String?
+  created_at  DateTime @default(now())
+
+  property Property  @relation(fields: [property_id], references: [id])
+  from_pm  User?     @relation("TransferFromPM", fields: [from_pm_id], references: [id])
+  to_pm    User?     @relation("TransferToPM", fields: [to_pm_id], references: [id])
+  actor    User      @relation("TransferActor", fields: [actor_id], references: [id])
+
+  @@index([property_id, created_at])
+  @@map("property_transfer_logs")
+}
+
+// ---------------------------------------------------------------------------
+// AuditLog
+// ---------------------------------------------------------------------------
+
+/// Append-only audit trail for every state change in the system (BL-22, BL-23).
+/// Written within the same Prisma $transaction as the mutation — never stand-alone.
+/// No UPDATE or DELETE is ever issued on this table.
+model AuditLog {
+  id          String   @id @default(cuid())
+  actor_id    String
+  /// Human-readable action key e.g. 'property.create', 'unit.state_change'.
+  action      String
+  entity_type String
+  entity_id   String
+  /// JSONB snapshot before the change. Null for create operations.
+  before      Json?
+  /// JSONB snapshot after the change. Null for delete-style operations (none in v1).
+  after       Json?
+  created_at  DateTime @default(now())
+
+  actor User @relation("AuditActor", fields: [actor_id], references: [id])
+
+  @@index([actor_id, created_at])
+  @@index([entity_type, entity_id])
+  @@map("audit_log")
 }
