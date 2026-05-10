@@ -28,6 +28,11 @@ out/
 coverage/
 *.tsbuildinfo
 
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.playwright/
+
 # Prisma generated client (regenerated on install)
 apps/api/src/generated/
 apps/api/prisma/migrations/dev.db*
