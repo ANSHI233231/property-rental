@@ -3,11 +3,17 @@ import {
   NotFoundException,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
+  MethodNotAllowedException,
 } from "@nestjs/common";
+import { randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { HashingService } from "../auth/hashing.service";
+import { AuditService } from "../audit/audit.service";
 import type { UpdateProfileDto } from "./dto/update-profile.dto";
 import type { ChangePasswordDto } from "./dto/change-password.dto";
+import type { AdminCreateUserDto } from "./dto/admin-create-user.dto";
+import type { AdminUpdateUserDto } from "./dto/admin-update-user.dto";
 
 /** Safe user shape — never includes password_hash. */
 export interface SafeUser {
@@ -21,25 +27,49 @@ export interface SafeUser {
   updated_at: Date;
 }
 
+const USER_SAFE_SELECT = {
+  id: true,
+  email: true,
+  phone: true,
+  name: true,
+  role: true,
+  is_active: true,
+  created_by_user_id: true,
+  created_at: true,
+  updated_at: true,
+} as const;
+
+/** Generate a temporary password: 16 hex chars (8 random bytes). */
+function generateTempPassword(): string {
+  return `Tmp@${randomBytes(6).toString("hex")}`;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly hashing: HashingService,
+    private readonly audit: AuditService,
   ) {}
 
+  // ---------------------------------------------------------------------------
+  // Self-service endpoints (Phase 1, unchanged)
+  // ---------------------------------------------------------------------------
+
   async findById(userId: string): Promise<SafeUser> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: USER_SAFE_SELECT,
+    });
 
     if (!user || !user.is_active) {
       throw new NotFoundException("User not found");
     }
 
-    return this.sanitize(user);
+    return user;
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<SafeUser> {
-    // Check phone uniqueness only if changing it
     if (dto.phone) {
       const existing = await this.prisma.user.findFirst({
         where: { phone: dto.phone, id: { not: userId } },
@@ -55,9 +85,10 @@ export class UsersService {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.phone !== undefined ? { phone: dto.phone } : {}),
       },
+      select: USER_SAFE_SELECT,
     });
 
-    return this.sanitize(updated);
+    return updated;
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
@@ -81,11 +112,6 @@ export class UsersService {
         data: { password_hash: newHash },
       });
 
-      // Revoke all OTHER refresh tokens (keep current session alive)
-      // Note: We don't have the current session token here; the frontend
-      // will continue using the current access token until it expires.
-      // All refresh tokens are revoked — user will need to re-authenticate
-      // when the current access token expires (15 min max).
       await tx.refreshToken.updateMany({
         where: { user_id: userId, revoked_at: null },
         data: { revoked_at: new Date() },
@@ -93,25 +119,281 @@ export class UsersService {
     });
   }
 
-  private sanitize(user: {
-    id: string;
-    email: string;
-    phone: string | null;
-    name: string;
-    role: string;
-    is_active: boolean;
-    created_at: Date;
-    updated_at: Date;
-  }): SafeUser {
-    return {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      name: user.name,
-      role: user.role,
-      is_active: user.is_active,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
+  // ---------------------------------------------------------------------------
+  // Admin CRUD — Phase 2
+  // ---------------------------------------------------------------------------
+
+  /** GET /users — Admin paginated list. */
+  async listUsers(role?: string, cursor?: string, limit = 20) {
+    const take = Math.min(limit, 100);
+    const where = {
+      ...(role ? { role: role as "ADMIN" | "PROPERTY_MANAGER" | "MAINTENANCE" | "TENANT" } : {}),
     };
+
+    const items = await this.prisma.user.findMany({
+      where,
+      select: USER_SAFE_SELECT,
+      orderBy: { created_at: "asc" },
+      take: take + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = items.length > take;
+    const data = hasMore ? items.slice(0, take) : items;
+    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+
+    return {
+      data,
+      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+    };
+  }
+
+  /** POST /users — Admin creates a user. Returns tempPassword if auto-generated. */
+  async adminCreateUser(
+    dto: AdminCreateUserDto,
+    actorId: string,
+  ): Promise<SafeUser & { temp_password?: string }> {
+    // Check email uniqueness
+    const emailExists = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (emailExists) {
+      throw new ConflictException({
+        error: { code: "EMAIL_ALREADY_EXISTS", message: "A user with this email already exists" },
+      });
+    }
+
+    // Check phone uniqueness if provided
+    if (dto.phone) {
+      const phoneExists = await this.prisma.user.findFirst({ where: { phone: dto.phone } });
+      if (phoneExists) {
+        throw new ConflictException({
+          error: { code: "PHONE_ALREADY_EXISTS", message: "A user with this phone already exists" },
+        });
+      }
+    }
+
+    const isTempPassword = !dto.password;
+    const plainPassword = dto.password ?? generateTempPassword();
+    const passwordHash = await this.hashing.hashPassword(plainPassword);
+
+    const user = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email: dto.email,
+          phone: dto.phone ?? null,
+          name: dto.name,
+          role: dto.role,
+          password_hash: passwordHash,
+          created_by_user_id: actorId,
+        },
+        select: USER_SAFE_SELECT,
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "user.create",
+        entityType: "User",
+        entityId: created.id,
+        before: null,
+        after: { ...created, role: created.role },
+      });
+
+      return created;
+    });
+
+    if (isTempPassword) {
+      return { ...user, temp_password: plainPassword };
+    }
+    return user;
+  }
+
+  /** GET /users/:id — Admin fetch. Returns inactive users too. */
+  async adminFindById(id: string): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: USER_SAFE_SELECT,
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        error: { code: "RESOURCE_NOT_FOUND", message: `User ${id} not found` },
+      });
+    }
+
+    return user;
+  }
+
+  /**
+   * PATCH /users/:id — Admin update.
+   * Guards:
+   * - Cannot demote the last ADMIN (LAST_ADMIN_PROTECTED).
+   * - Cannot change role of a PM currently assigned to a property (PM_HAS_PROPERTY).
+   */
+  async adminUpdateUser(
+    id: string,
+    dto: AdminUpdateUserDto,
+    actorId: string,
+  ): Promise<SafeUser> {
+    const before = await this.adminFindById(id);
+
+    if (dto.role !== undefined && dto.role !== before.role) {
+      // Guard: cannot demote the last Admin
+      if (before.role === "ADMIN") {
+        const adminCount = await this.prisma.user.count({
+          where: { role: "ADMIN", is_active: true },
+        });
+        if (adminCount <= 1) {
+          throw new ConflictException({
+            error: {
+              code: "LAST_ADMIN_PROTECTED",
+              message: "Cannot change role of the last active Admin",
+            },
+          });
+        }
+      }
+
+      // Guard: cannot change role of a PM currently assigned to a property
+      if (before.role === "PROPERTY_MANAGER") {
+        const assignedProperty = await this.prisma.property.findFirst({
+          where: { active_pm_id: id, deleted_at: null },
+        });
+        if (assignedProperty) {
+          throw new ConflictException({
+            error: {
+              code: "PM_HAS_PROPERTY",
+              message: `Cannot change role of a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
+              details: { property_id: assignedProperty.id },
+            },
+          });
+        }
+      }
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined ? { name: dto.name } : {}),
+          ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
+          ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
+          ...(dto.role !== undefined ? { role: dto.role } : {}),
+        },
+        select: USER_SAFE_SELECT,
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "user.update",
+        entityType: "User",
+        entityId: id,
+        before,
+        after: updated,
+      });
+
+      return updated;
+    });
+  }
+
+  /**
+   * POST /users/:id/deactivate — Admin deactivates a user.
+   * Guard: cannot deactivate a PM with an active property (PM_HAS_PROPERTY).
+   */
+  async adminDeactivateUser(id: string, actorId: string): Promise<SafeUser> {
+    const user = await this.adminFindById(id);
+
+    if (!user.is_active) {
+      throw new BadRequestException({
+        error: { code: "USER_ALREADY_INACTIVE", message: "User is already inactive" },
+      });
+    }
+
+    // Guard: PM with active property
+    if (user.role === "PROPERTY_MANAGER") {
+      const assignedProperty = await this.prisma.property.findFirst({
+        where: { active_pm_id: id, deleted_at: null },
+      });
+      if (assignedProperty) {
+        throw new ConflictException({
+          error: {
+            code: "PM_HAS_PROPERTY",
+            message: `Cannot deactivate a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
+            details: { property_id: assignedProperty.id },
+          },
+        });
+      }
+    }
+
+    // Guard: cannot deactivate the last Admin
+    if (user.role === "ADMIN") {
+      const adminCount = await this.prisma.user.count({
+        where: { role: "ADMIN", is_active: true },
+      });
+      if (adminCount <= 1) {
+        throw new ConflictException({
+          error: {
+            code: "LAST_ADMIN_PROTECTED",
+            message: "Cannot deactivate the last active Admin",
+          },
+        });
+      }
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id },
+        data: { is_active: false },
+        select: USER_SAFE_SELECT,
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "user.deactivate",
+        entityType: "User",
+        entityId: id,
+        before: user,
+        after: updated,
+      });
+
+      return updated;
+    });
+  }
+
+  /** POST /users/:id/activate — Admin reactivates a user. */
+  async adminActivateUser(id: string, actorId: string): Promise<SafeUser> {
+    const user = await this.adminFindById(id);
+
+    if (user.is_active) {
+      throw new BadRequestException({
+        error: { code: "USER_ALREADY_ACTIVE", message: "User is already active" },
+      });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id },
+        data: { is_active: true },
+        select: USER_SAFE_SELECT,
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "user.activate",
+        entityType: "User",
+        entityId: id,
+        before: user,
+        after: updated,
+      });
+
+      return updated;
+    });
+  }
+
+  /** DELETE /users/:id — always 405. Use deactivate. */
+  deleteNotAllowed(): never {
+    throw new MethodNotAllowedException({
+      error: {
+        code: "METHOD_NOT_ALLOWED",
+        message: "Users cannot be deleted. Use POST /users/:id/deactivate instead.",
+      },
+    });
   }
 }
