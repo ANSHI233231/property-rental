@@ -225,136 +225,186 @@ export class UsersService {
   /**
    * PATCH /users/:id — Admin update.
    * Guards:
-   * - Cannot demote the last ADMIN (LAST_ADMIN_PROTECTED).
+   * - Cannot demote the last ADMIN via role change (LAST_ADMIN_PROTECTED).
+   * - Cannot deactivate the last ADMIN via is_active=false (LAST_ADMIN_PROTECTED).
    * - Cannot change role of a PM currently assigned to a property (PM_HAS_PROPERTY).
+   *
+   * Both last-admin checks run inside a Serializable transaction so that two
+   * concurrent requests cannot each observe "2 admins" and both succeed.
    */
   async adminUpdateUser(
     id: string,
     dto: AdminUpdateUserDto,
     actorId: string,
   ): Promise<SafeUser> {
-    const before = await this.adminFindById(id);
-
-    if (dto.role !== undefined && dto.role !== before.role) {
-      // Guard: cannot demote the last Admin
-      if (before.role === "ADMIN") {
-        const adminCount = await this.prisma.user.count({
-          where: { role: "ADMIN", is_active: true },
+    return this.prisma.$transaction(
+      async (tx) => {
+        // Re-fetch inside the transaction so we read the committed snapshot.
+        const before = await tx.user.findUnique({
+          where: { id },
+          select: USER_SAFE_SELECT,
         });
-        if (adminCount <= 1) {
-          throw new ConflictException({
-            error: {
-              code: "LAST_ADMIN_PROTECTED",
-              message: "Cannot change role of the last active Admin",
-            },
+
+        if (!before) {
+          throw new NotFoundException({
+            error: { code: "RESOURCE_NOT_FOUND", message: `User ${id} not found` },
           });
         }
-      }
 
-      // Guard: cannot change role of a PM currently assigned to a property
-      if (before.role === "PROPERTY_MANAGER") {
-        const assignedProperty = await this.prisma.property.findFirst({
-          where: { active_pm_id: id, deleted_at: null },
-        });
-        if (assignedProperty) {
-          throw new ConflictException({
-            error: {
-              code: "PM_HAS_PROPERTY",
-              message: `Cannot change role of a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
-              details: { property_id: assignedProperty.id },
-            },
+        // Guard: cannot deactivate the last Admin via is_active=false
+        if (dto.is_active === false && before.role === "ADMIN" && before.is_active === true) {
+          const adminCount = await tx.user.count({
+            where: { role: "ADMIN", is_active: true },
           });
+          if (adminCount <= 1) {
+            throw new ConflictException({
+              error: {
+                code: "LAST_ADMIN_PROTECTED",
+                message: "Cannot deactivate the last active Admin",
+              },
+            });
+          }
         }
-      }
-    }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.user.update({
-        where: { id },
-        data: {
-          ...(dto.name !== undefined ? { name: dto.name } : {}),
-          ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
-          ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
-          ...(dto.role !== undefined ? { role: dto.role } : {}),
-        },
-        select: USER_SAFE_SELECT,
-      });
+        if (dto.role !== undefined && dto.role !== before.role) {
+          // Guard: cannot demote the last Admin via role change
+          if (before.role === "ADMIN") {
+            const adminCount = await tx.user.count({
+              where: { role: "ADMIN", is_active: true },
+            });
+            if (adminCount <= 1) {
+              throw new ConflictException({
+                error: {
+                  code: "LAST_ADMIN_PROTECTED",
+                  message: "Cannot change role of the last active Admin",
+                },
+              });
+            }
+          }
 
-      await this.audit.writeLog(tx, {
-        actorId,
-        action: "user.update",
-        entityType: "User",
-        entityId: id,
-        before,
-        after: updated,
-      });
+          // Guard: cannot change role of a PM currently assigned to a property
+          if (before.role === "PROPERTY_MANAGER") {
+            const assignedProperty = await tx.property.findFirst({
+              where: { active_pm_id: id, deleted_at: null },
+            });
+            if (assignedProperty) {
+              throw new ConflictException({
+                error: {
+                  code: "PM_HAS_PROPERTY",
+                  message: `Cannot change role of a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
+                  details: { property_id: assignedProperty.id },
+                },
+              });
+            }
+          }
+        }
 
-      return updated;
-    });
+        const updated = await tx.user.update({
+          where: { id },
+          data: {
+            ...(dto.name !== undefined ? { name: dto.name } : {}),
+            ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
+            ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
+            ...(dto.role !== undefined ? { role: dto.role } : {}),
+          },
+          select: USER_SAFE_SELECT,
+        });
+
+        await this.audit.writeLog(tx, {
+          actorId,
+          action: "user.update",
+          entityType: "User",
+          entityId: id,
+          before,
+          after: updated,
+        });
+
+        return updated;
+      },
+      { isolationLevel: "Serializable" },
+    );
   }
 
   /**
    * POST /users/:id/deactivate — Admin deactivates a user.
-   * Guard: cannot deactivate a PM with an active property (PM_HAS_PROPERTY).
+   * Guards:
+   * - Cannot deactivate a PM with an active property (PM_HAS_PROPERTY).
+   * - Cannot deactivate the last Admin (LAST_ADMIN_PROTECTED).
+   *
+   * Runs in a Serializable transaction so concurrent deactivations cannot
+   * both observe N>1 admins and both succeed (H-01 fix).
    */
   async adminDeactivateUser(id: string, actorId: string): Promise<SafeUser> {
-    const user = await this.adminFindById(id);
-
-    if (!user.is_active) {
-      throw new BadRequestException({
-        error: { code: "USER_ALREADY_INACTIVE", message: "User is already inactive" },
-      });
-    }
-
-    // Guard: PM with active property
-    if (user.role === "PROPERTY_MANAGER") {
-      const assignedProperty = await this.prisma.property.findFirst({
-        where: { active_pm_id: id, deleted_at: null },
-      });
-      if (assignedProperty) {
-        throw new ConflictException({
-          error: {
-            code: "PM_HAS_PROPERTY",
-            message: `Cannot deactivate a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
-            details: { property_id: assignedProperty.id },
-          },
+    return this.prisma.$transaction(
+      async (tx) => {
+        // Re-fetch inside the transaction.
+        const user = await tx.user.findUnique({
+          where: { id },
+          select: USER_SAFE_SELECT,
         });
-      }
-    }
 
-    // Guard: cannot deactivate the last Admin
-    if (user.role === "ADMIN") {
-      const adminCount = await this.prisma.user.count({
-        where: { role: "ADMIN", is_active: true },
-      });
-      if (adminCount <= 1) {
-        throw new ConflictException({
-          error: {
-            code: "LAST_ADMIN_PROTECTED",
-            message: "Cannot deactivate the last active Admin",
-          },
+        if (!user) {
+          throw new NotFoundException({
+            error: { code: "RESOURCE_NOT_FOUND", message: `User ${id} not found` },
+          });
+        }
+
+        if (!user.is_active) {
+          throw new BadRequestException({
+            error: { code: "USER_ALREADY_INACTIVE", message: "User is already inactive" },
+          });
+        }
+
+        // Guard: PM with active property
+        if (user.role === "PROPERTY_MANAGER") {
+          const assignedProperty = await tx.property.findFirst({
+            where: { active_pm_id: id, deleted_at: null },
+          });
+          if (assignedProperty) {
+            throw new ConflictException({
+              error: {
+                code: "PM_HAS_PROPERTY",
+                message: `Cannot deactivate a PROPERTY_MANAGER currently assigned to property ${assignedProperty.id}. Transfer them first.`,
+                details: { property_id: assignedProperty.id },
+              },
+            });
+          }
+        }
+
+        // Guard: cannot deactivate the last Admin
+        if (user.role === "ADMIN") {
+          const adminCount = await tx.user.count({
+            where: { role: "ADMIN", is_active: true },
+          });
+          if (adminCount <= 1) {
+            throw new ConflictException({
+              error: {
+                code: "LAST_ADMIN_PROTECTED",
+                message: "Cannot deactivate the last active Admin",
+              },
+            });
+          }
+        }
+
+        const updated = await tx.user.update({
+          where: { id },
+          data: { is_active: false },
+          select: USER_SAFE_SELECT,
         });
-      }
-    }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.user.update({
-        where: { id },
-        data: { is_active: false },
-        select: USER_SAFE_SELECT,
-      });
+        await this.audit.writeLog(tx, {
+          actorId,
+          action: "user.deactivate",
+          entityType: "User",
+          entityId: id,
+          before: user,
+          after: updated,
+        });
 
-      await this.audit.writeLog(tx, {
-        actorId,
-        action: "user.deactivate",
-        entityType: "User",
-        entityId: id,
-        before: user,
-        after: updated,
-      });
-
-      return updated;
-    });
+        return updated;
+      },
+      { isolationLevel: "Serializable" },
+    );
   }
 
   /** POST /users/:id/activate — Admin reactivates a user. */

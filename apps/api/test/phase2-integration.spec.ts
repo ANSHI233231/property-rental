@@ -666,7 +666,7 @@ describe("Users Admin CRUD", () => {
 });
 
 // ===========================================================================
-// USERS — Last-admin protection
+// USERS — Last-admin protection (H-01 security fix coverage)
 // ===========================================================================
 
 describe("Last-admin protection", () => {
@@ -688,6 +688,94 @@ describe("Last-admin protection", () => {
   });
 
   it("POST /users/:id/deactivate on last Admin → 409 LAST_ADMIN_PROTECTED", async () => {
+    const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
+    if (admins.length > 1) return;
+
+    const res = await supertestFn(app.getHttpServer())
+      .post(`/api/v1/users/${admins[0]!.id}/deactivate`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(409);
+    expect(res.body.error?.code).toBe("LAST_ADMIN_PROTECTED");
+  });
+
+  // H-01 fix: PATCH with is_active=false on last Admin must also be blocked
+  it("H-01: PATCH /users/:id { is_active: false } on last Admin → 409 LAST_ADMIN_PROTECTED", async () => {
+    const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
+    if (admins.length > 1) {
+      // Deactivate down to one admin first, then test the guard
+      // Sort to preserve the seeded admin (which we use for auth)
+      const toDeactivate = admins.filter((a) => a.email !== ADMIN_EMAIL);
+      for (const a of toDeactivate) {
+        await prisma.user.update({ where: { id: a.id }, data: { is_active: false } });
+      }
+    }
+
+    const soleAdmin = await prisma.user.findFirst({ where: { role: "ADMIN", is_active: true } });
+    expect(soleAdmin).not.toBeNull();
+
+    const res = await supertestFn(app.getHttpServer())
+      .patch(`/api/v1/users/${soleAdmin!.id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ is_active: false });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error?.code).toBe("LAST_ADMIN_PROTECTED");
+  });
+
+  // H-01 fix: with two admins, deactivating one succeeds; then the second is blocked
+  it("H-01: two admins — deactivate one succeeds, deactivate second → 409 LAST_ADMIN_PROTECTED", async () => {
+    // Create a second admin
+    const secondAdmin = await supertestFn(app.getHttpServer())
+      .post("/api/v1/users")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        email: `secondadmin-${Date.now()}@test.local`,
+        name: "Second Admin",
+        role: "ADMIN",
+      });
+    expect(secondAdmin.status).toBe(201);
+    if (secondAdmin.body?.id) createdUserIds.push(secondAdmin.body.id as string);
+
+    // Deactivate the second admin via PATCH is_active=false — should succeed
+    const deact1 = await supertestFn(app.getHttpServer())
+      .patch(`/api/v1/users/${secondAdmin.body.id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ is_active: false });
+    expect(deact1.status).toBe(200);
+    expect(deact1.body.is_active).toBe(false);
+
+    // Now only one admin remains — trying to deactivate via PATCH must fail
+    const soleAdmin = await prisma.user.findFirst({ where: { role: "ADMIN", is_active: true } });
+    expect(soleAdmin).not.toBeNull();
+
+    const deact2 = await supertestFn(app.getHttpServer())
+      .patch(`/api/v1/users/${soleAdmin!.id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ is_active: false });
+    expect(deact2.status).toBe(409);
+    expect(deact2.body.error?.code).toBe("LAST_ADMIN_PROTECTED");
+
+    // Re-activate secondAdmin so cleanup doesn't leave a dangling inactive user
+    await prisma.user.update({ where: { id: secondAdmin.body.id }, data: { is_active: true } });
+  });
+
+  // H-01 regression: role-change path still protected (prior behavior preserved)
+  it("H-01 regression: role demotion guard still fires after is_active fix", async () => {
+    const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
+    if (admins.length > 1) return; // Only meaningful with one admin
+
+    const res = await supertestFn(app.getHttpServer())
+      .patch(`/api/v1/users/${admins[0]!.id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ role: "MAINTENANCE" });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error?.code).toBe("LAST_ADMIN_PROTECTED");
+  });
+
+  // H-01: POST /users/:id/deactivate also uses serializable guard
+  it("H-01: POST /deactivate on last Admin → 409 (separate code path, serializable tx)", async () => {
     const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
     if (admins.length > 1) return;
 
