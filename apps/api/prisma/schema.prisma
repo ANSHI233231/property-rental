@@ -1,7 +1,6 @@
-// GharSetu — Prisma schema (Phase 0)
-// Phase 0 ships ONLY a stub HealthCheck model so that `prisma migrate dev`
-// runs cleanly and the /health endpoint can perform a real DB round-trip.
-// Real domain models land in Phases 1+.
+// GharSetu — Prisma schema (Phase 1)
+// Phase 1 introduces the full auth/RBAC models: User, RefreshToken, PasswordResetToken.
+// The Phase 0 HealthCheck stub is removed; the health endpoint uses $queryRaw (no model).
 
 generator client {
   provider = "prisma-client-js"
@@ -12,11 +11,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Stub model used solely by the Phase 0 health endpoint to prove the
-/// API can reach Postgres. Will be removed/replaced once real models land.
-model HealthCheck {
-  id        Int      @id @default(autoincrement())
-  checkedAt DateTime @default(now())
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
-  @@map("health_check")
+enum Role {
+  ADMIN
+  PROPERTY_MANAGER
+  MAINTENANCE
+  TENANT
+}
+
+// ---------------------------------------------------------------------------
+// User
+// ---------------------------------------------------------------------------
+
+/// All human actors in the system. No public sign-up (BL-public-signup).
+/// Passwords stored as Argon2id hashes (SRS §11.1 supersedes API-spec bcrypt mention).
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  phone            String?   @unique
+  name             String
+  password_hash    String
+  role             Role
+  is_active        Boolean   @default(true)
+  /// Nullable for the bootstrap Admin (no creator).
+  created_by_user_id String?
+
+  /// Account lockout support (BL-lockout, enforced in AuthService).
+  failed_login_count Int       @default(0)
+  locked_until       DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  created_by      User?          @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
+  created_users   User[]         @relation("CreatedByUser")
+  refresh_tokens  RefreshToken[]
+  password_reset_tokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// RefreshToken
+// ---------------------------------------------------------------------------
+
+/// Server-stored refresh tokens. Enables revocation.
+/// Plain token is NEVER stored — only sha256(token) is stored here.
+model RefreshToken {
+  id         String    @id @default(cuid())
+  user_id    String
+  token_hash String    @unique
+  expires_at DateTime
+  revoked_at DateTime?
+  created_at DateTime  @default(now())
+  user_agent String?
+  ip         String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, revoked_at])
+  @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// PasswordResetToken
+// ---------------------------------------------------------------------------
+
+/// Single-use, 30-minute TTL password reset tokens.
+/// Plain token is NEVER stored — only sha256(token) is stored here.
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  user_id    String
+  token_hash String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([token_hash])
+  @@map("password_reset_tokens")
 }
