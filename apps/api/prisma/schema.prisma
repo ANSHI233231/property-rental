@@ -1,0 +1,22 @@
+// GharSetu — Prisma schema (Phase 0)
+// Phase 0 ships ONLY a stub HealthCheck model so that `prisma migrate dev`
+// runs cleanly and the /health endpoint can perform a real DB round-trip.
+// Real domain models land in Phases 1+.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Stub model used solely by the Phase 0 health endpoint to prove the
+/// API can reach Postgres. Will be removed/replaced once real models land.
+model HealthCheck {
+  id        Int      @id @default(autoincrement())
+  checkedAt DateTime @default(now())
+
+  @@map("health_check")
+}

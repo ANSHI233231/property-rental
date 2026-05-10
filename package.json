@@ -1,0 +1,22 @@
+{
+  "name": "gharsetu",
+  "private": true,
+  "version": "0.0.0",
+  "description": "GharSetu — Delhi-first property rental management platform (monorepo root).",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/**\" build && pnpm -r --filter \"./apps/**\" build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "dev:db": "docker compose up -d postgres redis",
+    "dev:db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3"
+  }
+}

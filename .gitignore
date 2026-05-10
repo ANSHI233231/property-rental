@@ -12,16 +12,29 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment
+# Environment (never commit real secrets — see .env.example for the template)
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
 
 # Build outputs
 dist/
 build/
 .next/
 out/
+coverage/
+*.tsbuildinfo
+
+# Prisma generated client (regenerated on install)
+apps/api/src/generated/
+apps/api/prisma/migrations/dev.db*
+
+# Turbo / Next.js / pnpm caches
+.turbo/
+.pnpm-store/
 
 # OS files
 .DS_Store
