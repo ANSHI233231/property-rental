@@ -8,7 +8,7 @@ import {
   HttpStatus,
   UseGuards,
 } from "@nestjs/common";
-import { Throttle } from "@nestjs/throttler";
+import { Throttle, SkipThrottle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
@@ -44,6 +44,10 @@ export class AuthController {
   // Limit enforced via ThrottlerModule.forRoot (app.module.ts) — not hardcoded here
   // so the test environment (NODE_ENV=test) can raise the limit to 100 000/min.
   @Throttle({ login: {} })
+  // NestJS Throttler applies *every* named throttler to *every* route unless
+  // told otherwise. Exclude the password-reset / change-pwd buckets here so
+  // a normal user can sign in more than 5 times per hour.
+  @SkipThrottle({ "auth-slow": true, "change-pwd": true })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
@@ -67,6 +71,7 @@ export class AuthController {
   // ---------------------------------------------------------------------------
 
   @Post("refresh")
+  @SkipThrottle({ "auth-slow": true, "change-pwd": true })
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Req() req: Request,
@@ -100,6 +105,7 @@ export class AuthController {
 
   @Post("logout")
   @UseGuards(JwtAuthGuard)
+  @SkipThrottle({ "auth-slow": true, "change-pwd": true })
   @HttpCode(HttpStatus.OK)
   async logout(
     @Req() req: Request,

@@ -4,6 +4,22 @@ import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { CodeErrorFilter } from "./common/filters/code-error.filter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import type { ExecutionContext } from "@nestjs/common";
+import type { Request } from "express";
+
+// The auth-slow / change-pwd buckets are intended for very specific routes
+// (password reset, change password). NestJS Throttler applies every named
+// throttler to every route unless told otherwise, so without these skipIf
+// guards the 5/hour and 5/min limits would lock the whole API after a handful
+// of normal requests.
+const isPasswordResetRoute = (ctx: ExecutionContext): boolean => {
+  const url = ctx.switchToHttp().getRequest<Request>().url;
+  return /\/auth\/(forgot-password|reset-password)(\?|$|\/)/.test(url);
+};
+const isChangePasswordRoute = (ctx: ExecutionContext): boolean => {
+  const url = ctx.switchToHttp().getRequest<Request>().url;
+  return /\/users\/me\/change-password(\?|$|\/)/.test(url);
+};
 import { LoggerModule } from "nestjs-pino";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -67,14 +83,14 @@ import { AuditLogModule } from "./audit-log/audit-log.module";
         ? [
             { name: "default",    ttl: 60000,   limit: 100000 },
             { name: "login",      ttl: 60000,   limit: 100000 },
-            { name: "auth-slow",  ttl: 3600000, limit: 100000 },
-            { name: "change-pwd", ttl: 60000,   limit: 100000 },
+            { name: "auth-slow",  ttl: 3600000, limit: 100000, skipIf: (ctx) => !isPasswordResetRoute(ctx) },
+            { name: "change-pwd", ttl: 60000,   limit: 100000, skipIf: (ctx) => !isChangePasswordRoute(ctx) },
           ]
         : [
             { name: "default",    ttl: 60000,   limit: 100   },
             { name: "login",      ttl: 60000,   limit: 10    },
-            { name: "auth-slow",  ttl: 3600000, limit: 5     },
-            { name: "change-pwd", ttl: 60000,   limit: 5     },
+            { name: "auth-slow",  ttl: 3600000, limit: 5,     skipIf: (ctx) => !isPasswordResetRoute(ctx) },
+            { name: "change-pwd", ttl: 60000,   limit: 5,     skipIf: (ctx) => !isChangePasswordRoute(ctx) },
           ],
     ),
     PrismaModule,
