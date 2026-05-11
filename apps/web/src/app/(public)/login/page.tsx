@@ -9,10 +9,12 @@
  *   - Error cleared on input (mode: onBlur), re-checked on blur
  *   - Submit button disabled + shows loading state while pending
  *
- * useSearchParams must be inside a Suspense boundary — isolated in LoginForm.
+ * BUG-002 fix: useSearchParams() is isolated in <SearchParamsReader> which is
+ * wrapped in its own Suspense with a null fallback. The outer <form class="auth-card">
+ * renders eagerly on the server so `form.auth-card` is always in the SSR HTML.
  */
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -23,18 +25,33 @@ import { useAuth, dashboardPathForRole } from "@/lib/auth/context";
 import { Field } from "@/components/ui/Field";
 import { ApiError } from "@/lib/api/client";
 
+/**
+ * Tiny component that owns useSearchParams() — must live inside a Suspense boundary.
+ * Reports the `next` search param to the parent via a callback.
+ */
+function SearchParamsReader({ onNext }: { onNext: (next: string | null) => void }) {
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
+
+  useEffect(() => {
+    onNext(next);
+  }, [next, onNext]);
+
+  return null;
+}
+
 function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { login, user, loading } = useAuth();
+  const [nextParam, setNextParam] = useState<string | null>(null);
 
   // Redirect already-logged-in users
   useEffect(() => {
     if (!loading && user) {
-      const next = searchParams.get("next") ?? dashboardPathForRole(user.role);
-      router.replace(next);
+      const dest = nextParam ?? dashboardPathForRole(user.role);
+      router.replace(dest);
     }
-  }, [loading, user, router, searchParams]);
+  }, [loading, user, router, nextParam]);
 
   const {
     register,
@@ -51,7 +68,6 @@ function LoginForm() {
       await login(data.email, data.password);
       // login() sets user in context; the useEffect above handles redirect.
       // If a ?next= param exists, push there immediately.
-      const nextParam = searchParams.get("next");
       if (nextParam) {
         router.replace(nextParam);
       }
@@ -66,111 +82,110 @@ function LoginForm() {
   }
 
   return (
-    <form className="auth-card" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Link href="/" className="auth-brand">
-        Ghar<span>Setu</span>
-      </Link>
-      <div className="auth-tagline">Property Rental Management</div>
+    <>
+      {/* SearchParamsReader is isolated in Suspense so the form renders eagerly on the server */}
+      <Suspense fallback={null}>
+        <SearchParamsReader onNext={setNextParam} />
+      </Suspense>
 
-      <div className="text-center mb-6">
-        <Link href="/" className="text-royal-blue font-poppins font-semibold text-sm">
-          ← Back to home
+      <form className="auth-card" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Link href="/" className="auth-brand">
+          Ghar<span>Setu</span>
         </Link>
-      </div>
+        <div className="auth-tagline">Property Rental Management</div>
 
-      <Field id="email" label="Email or Phone" error={errors.email?.message}>
-        <input
-          {...register("email")}
-          className="input"
-          type="text"
-          placeholder="raj@gharsetu.in or 98xxxxxxxx"
-          autoComplete="username"
-        />
-      </Field>
+        <div className="text-center mb-6">
+          <Link href="/" className="text-royal-blue font-poppins font-semibold text-sm">
+            ← Back to home
+          </Link>
+        </div>
 
-      <div className="mt-4">
-        <Field id="password" label="Password" error={errors.password?.message}>
+        <Field id="email" label="Email or Phone" error={errors.email?.message}>
           <input
-            {...register("password")}
+            {...register("email")}
             className="input"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="current-password"
+            type="text"
+            placeholder="raj@gharsetu.in or 98xxxxxxxx"
+            autoComplete="username"
           />
         </Field>
-      </div>
 
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" />{" "}
-          <span className="muted">Remember me</span>
-        </label>
-        <Link
-          href="/forgot-password"
-          className="text-royal-blue font-poppins font-semibold"
-        >
-          Forgot password?
-        </Link>
-      </div>
-
-      {errors.root && (
-        <div
-          role="alert"
-          className="mt-4 p-3 rounded bg-bg-overdue text-status-overdue text-sm flex items-start gap-1.5"
-        >
-          <span className="flex-shrink-0">⚠</span>
-          {errors.root.message}
+        <div className="mt-4">
+          <Field id="password" label="Password" error={errors.password?.message}>
+            <input
+              {...register("password")}
+              className="input"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+          </Field>
         </div>
-      )}
 
-      <button
-        type="submit"
-        className="btn btn-primary w-full mt-6"
-        disabled={isSubmitting}
-        aria-busy={isSubmitting}
-      >
-        {isSubmitting ? "Signing in…" : "Login"}
-      </button>
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" />{" "}
+            <span className="muted">Remember me</span>
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-royal-blue font-poppins font-semibold"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
-      <div className="mt-6 text-center text-xs muted">
-        No public sign-up. Accounts are created by your Admin or Property
-        Manager.
-      </div>
+        {errors.root && (
+          <div
+            role="alert"
+            className="mt-4 p-3 rounded bg-bg-overdue text-status-overdue text-sm flex items-start gap-1.5"
+          >
+            <span className="flex-shrink-0">⚠</span>
+            {errors.root.message}
+          </div>
+        )}
 
-      <hr className="divider mt-6" />
-      <div className="text-xs muted text-center font-poppins font-semibold uppercase tracking-wider mb-3">
-        Demo — jump to a role
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Link href="/admin/dashboard" className="btn btn-secondary auth-role-btn">
-          Admin
-        </Link>
-        <Link href="/pm/dashboard" className="btn btn-secondary auth-role-btn">
-          Property Manager
-        </Link>
-        <Link href="/maintenance/dashboard" className="btn btn-secondary auth-role-btn">
-          Maintenance
-        </Link>
-        <Link href="/tenant/dashboard" className="btn btn-secondary auth-role-btn">
-          Tenant
-        </Link>
-      </div>
-    </form>
+        <button
+          type="submit"
+          className="btn btn-primary w-full mt-6"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+        >
+          {isSubmitting ? "Signing in…" : "Login"}
+        </button>
+
+        <div className="mt-6 text-center text-xs muted">
+          No public sign-up. Accounts are created by your Admin or Property
+          Manager.
+        </div>
+
+        <hr className="divider mt-6" />
+        <div className="text-xs muted text-center font-poppins font-semibold uppercase tracking-wider mb-3">
+          Demo — jump to a role
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/admin/dashboard" className="btn btn-secondary auth-role-btn">
+            Admin
+          </Link>
+          <Link href="/pm/dashboard" className="btn btn-secondary auth-role-btn">
+            Property Manager
+          </Link>
+          <Link href="/maintenance/dashboard" className="btn btn-secondary auth-role-btn">
+            Maintenance
+          </Link>
+          <Link href="/tenant/dashboard" className="btn btn-secondary auth-role-btn">
+            Tenant
+          </Link>
+        </div>
+      </form>
+    </>
   );
 }
 
 export default function LoginPage() {
   return (
     <main className="auth-shell">
-      <Suspense
-        fallback={
-          <div className="auth-card text-center text-slate font-poppins">
-            Loading…
-          </div>
-        }
-      >
-        <LoginForm />
-      </Suspense>
+      <LoginForm />
     </main>
   );
 }
