@@ -70,13 +70,15 @@ test.describe("auth-login-happy-path", () => {
   });
 
   test("TC-AUTH-001 (UI): submit button becomes re-enabled after failed login", async ({ page }) => {
-    // BUG-001: CORS blocks the actual API call, resulting in a quick network error.
-    // The test verifies the button state machine: enabled → (submit) → re-enabled after error.
+    // Uses deliberately wrong password so the API returns 401 and the root error
+    // alert renders. Previous version relied on BUG-001 (CORS block) to force an
+    // error — CORS is now properly configured, so valid credentials would succeed
+    // and redirect instead of showing an error. Fix: use invalid password.
     await page.goto("/login");
     await page.waitForSelector("form.auth-card", { timeout: 10_000 });
 
     await page.fill('input[autocomplete="username"]', "admin@gharsetu.local");
-    await page.fill('input[autocomplete="current-password"]', "Admin@gharsetu2026!");
+    await page.fill('input[autocomplete="current-password"]', "WrongPassword_BUG002");
 
     // Verify button is enabled before submit
     const btnBefore = page.locator('button[type="submit"]');
@@ -84,7 +86,7 @@ test.describe("auth-login-happy-path", () => {
 
     await page.click('button[type="submit"]');
 
-    // Wait for the error to appear (CORS or 401 network response)
+    // Wait for the error alert (API returns 401 → onSubmit catch → setError("root") → renders)
     await page.waitForSelector('.bg-bg-overdue[role="alert"]', { timeout: 10_000 });
 
     // After error is shown, button should be re-enabled (isSubmitting = false)
