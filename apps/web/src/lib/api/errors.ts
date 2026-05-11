@@ -27,6 +27,14 @@ const ERROR_MAP: Record<string, string> = {
     "Refund can only be issued after the lease is terminated.",
   REFUND_ALREADY_ISSUED:
     "A deposit refund has already been recorded for this lease.",
+  // Phase 4 — Rent / Payments
+  BL_10_TENANT_CANNOT_RECORD_PAYMENT:
+    "Only the Property Manager can record payments.",
+  PAYMENT_VOID_CASCADE_BLOCKED:
+    "This payment can't be voided because a later payment used its credit.",
+  RENT_PERIOD_NOT_FOUND: "Rent period not found.",
+  INVALID_PAYMENT_AMOUNT: "Enter a payment amount greater than zero.",
+  PERIOD_ALREADY_PAID: "This period is already fully paid.",
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";
