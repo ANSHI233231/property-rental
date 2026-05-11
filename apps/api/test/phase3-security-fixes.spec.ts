@@ -90,6 +90,17 @@ afterEach(async () => {
         where: { entity_type: "LeaseTenant", entity_id: { startsWith: lid } },
       });
     }
+    // Phase 4: delete prepaid_credits and payments before leases (FK cascade guard)
+    await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: cleanLeaseIds } } });
+    await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_no_delete`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_restrict_update`);
+    try {
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, cleanLeaseIds);
+    } finally {
+      await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_restrict_update`);
+    }
+    await prisma.rentPeriod.deleteMany({ where: { lease_id: { in: cleanLeaseIds } } });
     await prisma.lease.deleteMany({ where: { id: { in: cleanLeaseIds } } });
     cleanLeaseIds = [];
   }

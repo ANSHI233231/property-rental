@@ -105,6 +105,14 @@ afterEach(async () => {
         where: { entity_type: "LeaseTenant", entity_id: { startsWith: lid } },
       });
     }
+    // Phase 4: delete payments (bypass trigger) and rent_periods before leases
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM payments WHERE lease_id = ANY($1::text[])`,
+      createdLeaseIds,
+    );
+    await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: createdLeaseIds } } });
+    await prisma.rentPeriod.deleteMany({ where: { lease_id: { in: createdLeaseIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "RentPeriod" } });
     await prisma.lease.deleteMany({ where: { id: { in: createdLeaseIds } } });
     createdLeaseIds = [];
   }

@@ -1,7 +1,8 @@
-// GharSetu — Prisma schema (Phase 3)
+// GharSetu — Prisma schema (Phase 4)
 // Phase 1: User, RefreshToken, PasswordResetToken.
 // Phase 2: Property, Unit, PropertyTransferLog, AuditLog.
 // Phase 3: Tenant, Lease, LeaseTenant, LeaseTermination, LeaseTerminationApproval, DepositRefund.
+// Phase 4: RentPeriod, Payment, PrepaidCredit, RentAccrualLog.
 
 generator client {
   provider = "prisma-client-js"
@@ -41,6 +42,23 @@ enum TerminationApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum RentPeriodStatus {
+  UPCOMING
+  DUE
+  PARTIAL
+  PAID
+  OVERDUE
+  PREPAID
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  UPI
+  CHEQUE
+  OTHER
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +104,10 @@ model User {
   tenant            Tenant?
   signed_leases     Lease[]     @relation("LeaseSignedByPM")
   deposit_refunds_processed DepositRefund[] @relation("DepositRefundProcessedBy")
+
+  // Phase 4 relations
+  payments_recorded Payment[]   @relation("PaymentRecordedBy")
+  payments_voided   Payment[]   @relation("PaymentVoidedBy")
 
   @@map("users")
 }
@@ -320,6 +342,11 @@ model Lease {
   terminations    LeaseTermination[]
   deposit_refund  DepositRefund?
 
+  // Phase 4 relations
+  rent_periods    RentPeriod[]
+  payments        Payment[]         @relation("PaymentLease")
+  prepaid_credits PrepaidCredit[]   @relation("PrepaidCreditLease")
+
   @@index([unit_id, status])
   @@index([end_date])
   @@map("leases")
@@ -417,4 +444,129 @@ model DepositRefund {
   processed_by   User   @relation("DepositRefundProcessedBy", fields: [processed_by_pm_id], references: [id])
 
   @@map("deposit_refunds")
+}
+
+// ---------------------------------------------------------------------------
+// RentPeriod  (Phase 4)
+// ---------------------------------------------------------------------------
+
+/// One calendar-month billing period for a lease.
+/// BL-12: status flips to OVERDUE exactly 5 calendar days past due_date (BullMQ worker).
+/// BL-13: late_fee_paise accrues weekly at 2% × amount_due_paise × floor_weeks_overdue.
+/// outstanding_paise is service-computed (amount_due + late_fee - paid) and stored for
+/// efficient queries; updated transactionally whenever paid_paise or late_fee_paise changes.
+/// Unique (lease_id, period_start): prevents duplicate periods.
+model RentPeriod {
+  id               String           @id @default(cuid())
+  lease_id         String
+  period_start     DateTime         @db.Date
+  period_end       DateTime         @db.Date
+  due_date         DateTime         @db.Date
+  /// Snapshotted from lease.monthly_rent_paise at period creation time.
+  amount_due_paise BigInt
+  late_fee_paise   BigInt           @default(0)
+  paid_paise       BigInt           @default(0)
+  /// Service-recomputed: amount_due_paise + late_fee_paise - paid_paise.
+  outstanding_paise BigInt          @default(0)
+  status           RentPeriodStatus @default(DUE)
+  /// BL-13 idempotency: timestamp of last late-fee accrual run for this period.
+  last_accrued_at  DateTime?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  // Relations
+  lease    Lease     @relation(fields: [lease_id], references: [id])
+  payments Payment[] @relation("PaymentPeriod")
+
+  @@unique([lease_id, period_start])
+  @@index([status, due_date])
+  @@index([lease_id, period_start(sort: Desc)])
+  @@map("rent_periods")
+}
+
+// ---------------------------------------------------------------------------
+// Payment  (Phase 4)
+// ---------------------------------------------------------------------------
+
+/// Append-only payment records. BL-10: only PM/Admin may create.
+/// DB-level BEFORE DELETE and BEFORE UPDATE triggers enforce immutability
+/// (only is_voided / voided_by / voided_at / void_reason columns may change).
+model Payment {
+  id                  String        @id @default(cuid())
+  rent_period_id      String
+  /// Denormalized for fast lookups without joining through RentPeriod.
+  lease_id            String
+  amount_paise        BigInt
+  method              PaymentMethod
+  reference           String?
+  /// The date the tenant physically paid (may be before recorded_at).
+  paid_on             DateTime      @db.Date
+  recorded_by_user_id String
+  recorded_at         DateTime      @default(now())
+  is_voided           Boolean       @default(false)
+  voided_by_user_id   String?
+  voided_at           DateTime?
+  void_reason         String?
+  created_at          DateTime      @default(now())
+
+  // Relations
+  rent_period      RentPeriod       @relation("PaymentPeriod", fields: [rent_period_id], references: [id])
+  lease            Lease            @relation("PaymentLease", fields: [lease_id], references: [id])
+  recorded_by      User             @relation("PaymentRecordedBy", fields: [recorded_by_user_id], references: [id])
+  voided_by        User?            @relation("PaymentVoidedBy", fields: [voided_by_user_id], references: [id])
+  /// Credit produced by this payment's excess (spillover).
+  prepaid_credit_sourced PrepaidCredit? @relation("SourcePayment")
+  /// Credit consumed by this payment (when prepaid balance was applied).
+  prepaid_credit_consumed PrepaidCredit? @relation("ConsumedByPayment")
+
+  @@index([lease_id, recorded_at])
+  @@index([rent_period_id])
+  @@map("payments")
+}
+
+// ---------------------------------------------------------------------------
+// PrepaidCredit  (Phase 4)
+// ---------------------------------------------------------------------------
+
+/// Excess payment spillover applied to future periods.
+/// Per §11.4: PrepaidCredit is a separate table, not a column on RentPeriod.
+/// FIFO consumption: earliest created_at is consumed first.
+/// Multiple unconsumed credits may coexist for the same lease.
+model PrepaidCredit {
+  id                     String    @id @default(cuid())
+  lease_id               String
+  source_payment_id      String    @unique
+  amount_paise           BigInt
+  consumed_at            DateTime?
+  consumed_by_payment_id String?   @unique
+  created_at             DateTime  @default(now())
+
+  // Relations
+  lease              Lease    @relation("PrepaidCreditLease", fields: [lease_id], references: [id])
+  source_payment     Payment  @relation("SourcePayment", fields: [source_payment_id], references: [id])
+  consumed_by_payment Payment? @relation("ConsumedByPayment", fields: [consumed_by_payment_id], references: [id])
+
+  @@index([lease_id, created_at])
+  @@map("prepaid_credits")
+}
+
+// ---------------------------------------------------------------------------
+// RentAccrualLog  (Phase 4)
+// ---------------------------------------------------------------------------
+
+/// BullMQ worker run log. One row per calendar date (IST).
+/// BL-13 idempotency: if finished_at IS NOT NULL for today, worker skips.
+model RentAccrualLog {
+  id                     String    @id @default(cuid())
+  run_date               DateTime  @db.Date @unique
+  started_at             DateTime  @default(now())
+  finished_at            DateTime?
+  periods_examined       Int       @default(0)
+  periods_overdue_flipped Int      @default(0)
+  late_fees_added_paise  BigInt    @default(0)
+  next_periods_generated Int       @default(0)
+  error                  String?
+  created_at             DateTime  @default(now())
+
+  @@map("rent_accrual_log")
 }

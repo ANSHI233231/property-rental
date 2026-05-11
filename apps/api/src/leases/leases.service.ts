@@ -16,6 +16,7 @@ import type { RenewLeaseDto } from "./dto/renew-lease.dto";
 import type { TerminationRequestDto } from "./dto/termination-request.dto";
 import type { TerminationApprovalDto } from "./dto/termination-approval.dto";
 import type { DepositRefundDto } from "./dto/deposit-refund.dto";
+import { RentService } from "../rent/rent.service";
 
 /** Generate a temporary password for auto-created tenant accounts. */
 function generateTempPassword(): string {
@@ -69,6 +70,7 @@ export class LeasesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly hashing: HashingService,
+    private readonly rentService: RentService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -318,6 +320,16 @@ export class LeasesService {
             before: { state: prevState },
             after: { state: "OCCUPIED" },
           });
+
+          // Phase 4: generate the first rent period inside the same transaction (BL-12/BL-13).
+          // period_start = lease.start_date, grace_days = 0, status = DUE.
+          await this.rentService.generateFirstPeriod(
+            tx,
+            lease.id,
+            lease.start_date,
+            lease.monthly_rent_paise,
+            actorId,
+          );
 
           return {
             lease: serializeLease(lease),

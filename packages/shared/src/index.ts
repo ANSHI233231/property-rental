@@ -6,7 +6,7 @@
  */
 
 export const APP_NAME = "GharSetu" as const;
-export const SHARED_PACKAGE_VERSION = "0.3.0" as const;
+export const SHARED_PACKAGE_VERSION = "0.4.0" as const;
 
 export { Role, ROLES, isRole } from "./role.js";
 export type { RoleValue } from "./role.js";
@@ -89,3 +89,20 @@ export type {
   TerminationApproval,
   DepositRefundInput,
 } from "./schemas/leases.js";
+
+// Rent, Payments, Late-fee schemas + helpers (Phase 4)
+export {
+  RentStatusEnum,
+  PaymentMethodEnum,
+  RecordPaymentSchema,
+  VoidPaymentSchema,
+  RentPeriodFilterSchema,
+  computeLateFeePaise,
+} from "./schemas/rent.js";
+export type {
+  RentStatusValue,
+  PaymentMethodValue,
+  RecordPaymentInput,
+  VoidPaymentInput,
+  RentPeriodFilter,
+} from "./schemas/rent.js";

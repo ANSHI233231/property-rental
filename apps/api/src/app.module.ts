@@ -12,6 +12,8 @@ import { PropertiesModule } from "./properties/properties.module";
 import { UnitsModule } from "./units/units.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { LeasesModule } from "./leases/leases.module";
+import { RentModule } from "./rent/rent.module";
+import { JobsModule } from "./jobs/jobs.module";
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { LeasesModule } from "./leases/leases.module";
     UnitsModule,
     TenantsModule,
     LeasesModule,
+    RentModule,
+    JobsModule,
   ],
   providers: [
     {
