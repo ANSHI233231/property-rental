@@ -27,6 +27,29 @@ export interface SafeUser {
   updated_at: Date;
 }
 
+/**
+ * Profile select — used by self-service endpoints (GET /users/me, PATCH /users/me).
+ * Does NOT include created_by_user_id (internal admin field, not needed in
+ * self-service profile and not part of the SafeUser contract).
+ * Does NOT include password_hash, failed_login_count, locked_until — these are
+ * never selected anywhere outside of auth-internal queries.
+ */
+const USER_PROFILE_SELECT = {
+  id: true,
+  email: true,
+  phone: true,
+  name: true,
+  role: true,
+  is_active: true,
+  created_at: true,
+  updated_at: true,
+} as const;
+
+/**
+ * Admin select — used by admin list/get endpoints.
+ * Includes created_by_user_id for audit/admin purposes.
+ * Still never includes password_hash, failed_login_count, or locked_until.
+ */
 const USER_SAFE_SELECT = {
   id: true,
   email: true,
@@ -59,7 +82,7 @@ export class UsersService {
   async findById(userId: string): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: USER_SAFE_SELECT,
+      select: USER_PROFILE_SELECT,
     });
 
     if (!user || !user.is_active) {
@@ -85,7 +108,7 @@ export class UsersService {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.phone !== undefined ? { phone: dto.phone } : {}),
       },
-      select: USER_SAFE_SELECT,
+      select: USER_PROFILE_SELECT,
     });
 
     return updated;
