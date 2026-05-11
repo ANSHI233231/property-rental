@@ -205,37 +205,55 @@ export class PropertiesService {
       await this.validatePmAvailability(dto.toPmId, id);
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      // Write PropertyTransferLog (append-only, BL-20)
-      await tx.propertyTransferLog.create({
-        data: {
-          property_id: id,
-          from_pm_id: property.active_pm_id ?? null,
-          to_pm_id: dto.toPmId,
-          actor_id: actorId,
-          note: dto.note ?? null,
-        },
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // Write PropertyTransferLog (append-only, BL-20)
+        await tx.propertyTransferLog.create({
+          data: {
+            property_id: id,
+            from_pm_id: property.active_pm_id ?? null,
+            to_pm_id: dto.toPmId,
+            actor_id: actorId,
+            note: dto.note ?? null,
+          },
+        });
+
+        const before = property;
+
+        const updated = await tx.property.update({
+          where: { id },
+          data: { active_pm_id: dto.toPmId },
+          select: PROPERTY_SELECT,
+        });
+
+        await this.audit.writeLog(tx, {
+          actorId,
+          action: "property.transfer_pm",
+          entityType: "Property",
+          entityId: id,
+          before: { active_pm_id: before.active_pm_id },
+          after: { active_pm_id: updated.active_pm_id },
+        });
+
+        return updated;
       });
-
-      const before = property;
-
-      const updated = await tx.property.update({
-        where: { id },
-        data: { active_pm_id: dto.toPmId },
-        select: PROPERTY_SELECT,
-      });
-
-      await this.audit.writeLog(tx, {
-        actorId,
-        action: "property.transfer_pm",
-        entityType: "Property",
-        entityId: id,
-        before: { active_pm_id: before.active_pm_id },
-        after: { active_pm_id: updated.active_pm_id },
-      });
-
-      return updated;
-    });
+    } catch (err: unknown) {
+      // Unique constraint on active_pm_id — two concurrent transfers for the same PM
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: string }).code === "P2002"
+      ) {
+        throw new ConflictException({
+          error: {
+            code: "PM_ALREADY_ASSIGNED",
+            message: `PROPERTY_MANAGER ${dto.toPmId ?? "null"} is already assigned to another property. Transfer them first.`,
+          },
+        });
+      }
+      throw err;
+    }
   }
 
   // ---------------------------------------------------------------------------

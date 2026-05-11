@@ -10,6 +10,8 @@ import { UsersModule } from "./users/users.module";
 import { AuditModule } from "./audit/audit.module";
 import { PropertiesModule } from "./properties/properties.module";
 import { UnitsModule } from "./units/units.module";
+import { TenantsModule } from "./tenants/tenants.module";
+import { LeasesModule } from "./leases/leases.module";
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { UnitsModule } from "./units/units.module";
     UsersModule,
     PropertiesModule,
     UnitsModule,
+    TenantsModule,
+    LeasesModule,
   ],
   providers: [
     {
