@@ -224,6 +224,9 @@
   .badge-renewed  { background: #E3F2FD; color: #0277BD; }
   .badge-closed   { background: #ECEFF1; color: #546E7A; }
   .badge-emergency { background: #C62828; color: #fff; }
+  /* Phase 4 — rent period statuses */
+  .badge-due      { background: #E3F2FD; color: #1565C0; }
+  .badge-upcoming { background: #ECEFF1; color: #546E7A; }
 
   /* Card */
   .card {
