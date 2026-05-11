@@ -69,12 +69,16 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+  /*
+   * BUG-003 fix: tighten matcher to protected prefixes only.
+   * The broad negative-lookahead regex was correct but fragile across
+   * Next.js versions. Explicitly listing prefixes is simpler and guarantees
+   * the middleware fires for every protected route.
+   */
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     *   - _next (Next.js internals)
-     *   - static files (images, fonts, etc.)
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/admin/:path*",
+    "/pm/:path*",
+    "/maintenance/:path*",
+    "/tenant/:path*",
   ],
 };
