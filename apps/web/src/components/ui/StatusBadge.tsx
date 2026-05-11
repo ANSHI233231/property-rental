@@ -40,9 +40,13 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
+  const label = STATUS_LABEL[status];
   return (
-    <span className={[STATUS_CLASS[status], className].filter(Boolean).join(" ")}>
-      {STATUS_LABEL[status]}
+    <span
+      className={[STATUS_CLASS[status], className].filter(Boolean).join(" ")}
+      aria-label={label}
+    >
+      {label}
     </span>
   );
 }

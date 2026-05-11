@@ -38,11 +38,13 @@ export function MaintenanceStatusBadge({
   status,
   className = "",
 }: MaintenanceStatusBadgeProps) {
+  const label = STATUS_LABEL[status];
   return (
     <span
       className={[STATUS_CLASS[status], className].filter(Boolean).join(" ")}
+      aria-label={label}
     >
-      {STATUS_LABEL[status]}
+      {label}
     </span>
   );
 }

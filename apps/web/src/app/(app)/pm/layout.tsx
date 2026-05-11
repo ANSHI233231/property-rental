@@ -42,10 +42,17 @@ export default function PmLayout({ children }: { children: ReactNode }) {
 
   return (
     <ToastProvider>
+      {/* Skip-to-main for keyboard users — visible only on focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:bg-saffron focus:text-white focus:px-4 focus:py-2 focus:rounded focus:font-poppins focus:font-semibold focus:text-sm"
+      >
+        Skip to main content
+      </a>
       <PmPropertyProvider>
         <div className="app-shell">
           <PmSidebar />
-          <main className="app-main">
+          <main id="main-content" className="app-main">
             {children}
           </main>
         </div>

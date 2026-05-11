@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Skeleton loaders — Phase 2.
+ * Skeleton loaders — Phase 2 (updated Phase 6: aria-busy + SkeletonCard).
  * Used in tables and KPI cards while data is fetching.
  */
 
@@ -13,8 +13,24 @@ export function Skeleton({ className = "" }: SkeletonProps) {
   return (
     <div
       className={`animate-pulse bg-light-gray rounded ${className}`}
+      aria-busy="true"
       aria-hidden="true"
     />
+  );
+}
+
+/** Skeleton for a generic content card. */
+export function SkeletonCard() {
+  return (
+    <div className="card animate-pulse" aria-busy="true" aria-label="Loading content">
+      <Skeleton className="h-5 w-1/3 mb-4" />
+      <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-3/4" />
+      </div>
+    </div>
   );
 }
 

@@ -1,23 +1,23 @@
 "use client";
 
 /**
- * Tenant Profile — Phase 6.
- * 1:1 with prototype/tenant/profile.html.
+ * Maintenance Staff Profile — Phase 6.
+ * 1:1 with prototype/maintenance/profile.html.
  *
  * Sections:
- *   - Account: name, email (read-only), phone (editable), member-since (DD/MM/YYYY).
- *   - Lease quick-view: unit address, lease period, rent (formatINR).
+ *   - Account: name, email, phone (editable), role, permissions, member-since, status.
+ *   - Work stats: total assigned, active (IN_PROGRESS), resolved this month,
+ *     avg resolution time. Computed from last 100 assignments.
  *   - Security / Password change (POST /users/me/change-password).
- *   - No "Active sessions" / "Sign out everywhere" UI (SRS §11.3).
- * 2FA: hidden per prototype.
+ *
+ * BL-16: no rent/lease data, no financial data shown here.
  */
 
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
-import { format, parseISO } from "date-fns";
-import { formatINR } from "@gharsetu/shared";
+import { format, parseISO, differenceInHours, startOfMonth } from "date-fns";
 import { PasswordChangeForm } from "@/components/ui/PasswordChangeForm";
-import { SkeletonCard } from "@/components/ui/Skeleton";
+import { SkeletonCard, SkeletonKpi } from "@/components/ui/Skeleton";
 import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,20 +39,19 @@ interface UserProfile {
   created_at?: string | null;
 }
 
-interface LeaseInfo {
+interface MaintenanceRequest {
   id: string;
-  start_date: string;
-  end_date: string;
-  monthly_rent_paise: string | number;
-  security_deposit_paise: string | number;
-  unit?: { name?: string };
-  property?: { name?: string; address?: string };
-  tenants?: { id: string; name: string; email: string; is_primary: boolean }[];
+  status: string;
+  priority: string;
+  assigned_at?: string | null;
+  in_progress_at?: string | null;
+  resolved_at?: string | null;
+  created_at: string;
 }
 
-interface LeasesResponse {
-  data?: LeaseInfo[];
-  items?: LeaseInfo[];
+interface MaintenanceListResponse {
+  data?: MaintenanceRequest[];
+  items?: MaintenanceRequest[];
 }
 
 // ---------------------------------------------------------------------------
@@ -64,25 +63,82 @@ function formatDate(iso: string | null | undefined): string {
   try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso ?? "—"; }
 }
 
-function formatPaise(paise: string | number | null | undefined): string {
-  if (paise === null || paise === undefined) return "—";
-  const val = typeof paise === "string" ? parseInt(paise, 10) : paise;
-  return isNaN(val) ? "—" : formatINR(val);
-}
-
 function initials(name: string): string {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+}
+
+// ---------------------------------------------------------------------------
+// Work stats computation
+// ---------------------------------------------------------------------------
+
+interface WorkStats {
+  totalAssigned: number;
+  activeCount: number;
+  resolvedThisMonth: number;
+  avgResolutionHours: number | null;
+}
+
+function computeWorkStats(requests: MaintenanceRequest[]): WorkStats {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+
+  const totalAssigned = requests.length;
+
+  const activeCount = requests.filter((r) =>
+    ["ASSIGNED", "IN_PROGRESS"].includes(r.status),
+  ).length;
+
+  const resolvedThisMonth = requests.filter((r) => {
+    if (r.status !== "RESOLVED" && r.status !== "CLOSED") return false;
+    if (!r.resolved_at) return false;
+    try {
+      const resolvedDate = parseISO(r.resolved_at);
+      return resolvedDate >= monthStart;
+    } catch {
+      return false;
+    }
+  }).length;
+
+  // Average resolution time in hours (from assigned_at → resolved_at)
+  const resolvedWithTimes = requests.filter((r) =>
+    (r.status === "RESOLVED" || r.status === "CLOSED") &&
+    r.assigned_at &&
+    r.resolved_at,
+  );
+
+  let avgResolutionHours: number | null = null;
+  if (resolvedWithTimes.length > 0) {
+    const totalHours = resolvedWithTimes.reduce((sum, r) => {
+      try {
+        const start = parseISO(r.assigned_at!);
+        const end = parseISO(r.resolved_at!);
+        return sum + Math.max(0, differenceInHours(end, start));
+      } catch {
+        return sum;
+      }
+    }, 0);
+    avgResolutionHours = Math.round((totalHours / resolvedWithTimes.length) * 10) / 10;
+  }
+
+  return { totalAssigned, activeCount, resolvedThisMonth, avgResolutionHours };
+}
+
+function formatAvgResolution(hours: number | null): string {
+  if (hours === null) return "—";
+  if (hours < 24) return `${hours}h`;
+  const days = (hours / 24).toFixed(1);
+  return `${days}d`;
 }
 
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
-export default function TenantProfilePage() {
+export default function MaintenanceProfilePage() {
   const { user, apiFetch } = useAuth();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [lease, setLease] = useState<LeaseInfo | null>(null);
+  const [workStats, setWorkStats] = useState<WorkStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingPhone, setEditingPhone] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
@@ -103,13 +159,15 @@ export default function TenantProfilePage() {
       const me = await apiFetch<UserProfile>("/users/me");
       setProfile(me);
 
-      // Fetch active lease for quick-view
+      // Fetch last 100 assignments for work stats
       try {
-        const leasesRes = await apiFetch<LeasesResponse>(`/leases?tenantId=${me.id}&status=ACTIVE&limit=1`);
-        const leases = leasesRes.data ?? leasesRes.items ?? [];
-        setLease(leases[0] ?? null);
+        const res = await apiFetch<MaintenanceListResponse>(
+          `/maintenance-requests?assignedToUserId=${me.id}&limit=100`,
+        );
+        const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
+        setWorkStats(computeWorkStats(items));
       } catch {
-        setLease(null);
+        setWorkStats({ totalAssigned: 0, activeCount: 0, resolvedThisMonth: 0, avgResolutionHours: null });
       }
     } catch {
       setProfile(null);
@@ -163,12 +221,20 @@ export default function TenantProfilePage() {
           <SkeletonCard />
           <SkeletonCard />
         </div>
+        <section className="section mt-8">
+          <div className="kpi-grid">
+            <SkeletonKpi />
+            <SkeletonKpi />
+            <SkeletonKpi />
+            <SkeletonKpi />
+          </div>
+        </section>
       </>
     );
   }
 
   const memberSince = profile?.createdAt ?? profile?.created_at;
-  const avatarBg = "#FF6F00"; // Saffron for tenant per prototype
+  const avatarBg = "#546E7A"; // Slate for maintenance per prototype
 
   return (
     <>
@@ -187,30 +253,26 @@ export default function TenantProfilePage() {
 
       <div className="profile-grid">
         {/* Account card */}
-        <section className="profile-card" aria-labelledby="account-heading">
+        <section className="profile-card" aria-labelledby="maint-account-heading">
           <div className="profile-header">
             <div className="profile-avatar-lg" style={{ background: avatarBg }} aria-hidden="true">
               {profile?.name ? initials(profile.name) : "—"}
             </div>
             <div className="profile-name">{profile?.name ?? "—"}</div>
-            <span className="profile-role">Tenant</span>
+            <span className="profile-role">Maintenance Staff</span>
           </div>
 
-          <h3 id="account-heading">Account</h3>
+          <h3 id="maint-account-heading">Account</h3>
           <div className="profile-row">
             <span className="field">Name</span>
             <span className="value">{profile?.name ?? "—"}</span>
-          </div>
-          <div className="profile-row">
-            <span className="field">Email</span>
-            <span className="value">{profile?.email ?? user?.email ?? "—"}</span>
           </div>
           <div className="profile-row">
             <span className="field">Phone</span>
             <span className="value">
               {editingPhone ? (
                 <form onSubmit={(e) => void handleProfileSubmit(handlePhoneSubmit)(e)} className="flex flex-col gap-1" noValidate>
-                  <Field id="phone" label="" error={profileErrors.phone?.message}>
+                  <Field id="maint-phone" label="" error={profileErrors.phone?.message}>
                     <input
                       type="tel"
                       className="input"
@@ -245,24 +307,18 @@ export default function TenantProfilePage() {
               )}
             </span>
           </div>
-          {lease && (
-            <>
-              <div className="profile-row">
-                <span className="field">Unit</span>
-                <span className="value">
-                  {lease.unit?.name ? `${lease.unit.name}` : "—"}
-                  {lease.property?.name ? ` · ${lease.property.name}` : ""}
-                  {lease.property?.address ? `, ${lease.property.address}` : ""}
-                </span>
-              </div>
-              {lease.tenants && lease.tenants.filter((t) => t.email !== (profile?.email ?? user?.email)).map((t) => (
-                <div key={t.id} className="profile-row">
-                  <span className="field">Co-tenant</span>
-                  <span className="value">{t.name}</span>
-                </div>
-              ))}
-            </>
-          )}
+          <div className="profile-row">
+            <span className="field">Email</span>
+            <span className="value">{profile?.email ?? user?.email ?? "—"}</span>
+          </div>
+          <div className="profile-row">
+            <span className="field">Role</span>
+            <span className="value">Maintenance Staff</span>
+          </div>
+          <div className="profile-row">
+            <span className="field">Permissions</span>
+            <span className="value">Read &amp; update only</span>
+          </div>
           <div className="profile-row">
             <span className="field">Member since</span>
             <span className="value">{formatDate(memberSince)}</span>
@@ -280,44 +336,54 @@ export default function TenantProfilePage() {
             </p>
           )}
 
-          <p className="text-xs muted mt-3">
-            Unit, lease and co-tenant details are managed by your Property Manager.
+          <p className="text-xs muted mt-4">
+            You can read and update existing maintenance requests. You cannot create new requests,
+            see rent / lease information, or view tenant financial data.
           </p>
         </section>
 
         {/* Security card */}
-        <section className="profile-card" aria-labelledby="security-heading">
-          <h3 id="security-heading">Security</h3>
+        <section className="profile-card" aria-labelledby="maint-security-heading">
+          <h3 id="maint-security-heading">Security</h3>
           <PasswordChangeForm onSubmit={handlePasswordChange} />
         </section>
       </div>
 
-      {/* Lease quick-view */}
-      {lease && (
-        <section className="section mt-8" aria-labelledby="lease-quickview-heading">
-          <h3 className="section-title" id="lease-quickview-heading">My Lease — Quick view</h3>
-          <div className="card">
-            <div className="grid sm:grid-cols-4 gap-6">
-              <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease starts</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatDate(lease.start_date)}</div>
-              </div>
-              <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease ends</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatDate(lease.end_date)}</div>
-              </div>
-              <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Monthly rent</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatPaise(lease.monthly_rent_paise)}</div>
-              </div>
-              <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Security deposit</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatPaise(lease.security_deposit_paise)}</div>
+      {/* Work stats — v1 note: computed from last 100 assignments */}
+      <section className="section mt-8" aria-labelledby="work-stats-heading">
+        <h3 className="section-title" id="work-stats-heading">Your Work</h3>
+        {workStats ? (
+          <div className="kpi-grid">
+            <div className="kpi">
+              <div className="kpi-label">Active assignments</div>
+              <div className="kpi-value">{workStats.activeCount}</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-label">Resolved this month</div>
+              <div className="kpi-value" style={{ color: "var(--color-status-paid)" }}>
+                {workStats.resolvedThisMonth}
               </div>
             </div>
+            <div className="kpi">
+              <div className="kpi-label">Avg. resolution time</div>
+              <div className="kpi-value">{formatAvgResolution(workStats.avgResolutionHours)}</div>
+              <div className="kpi-meta">From last {workStats.totalAssigned} assignments</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-label">Total assigned</div>
+              <div className="kpi-value">{workStats.totalAssigned}</div>
+              <div className="kpi-meta">Last 100 shown</div>
+            </div>
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="kpi-grid">
+            <SkeletonKpi />
+            <SkeletonKpi />
+            <SkeletonKpi />
+            <SkeletonKpi />
+          </div>
+        )}
+      </section>
     </>
   );
 }

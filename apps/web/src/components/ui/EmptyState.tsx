@@ -13,7 +13,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ heading, body, cta }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+    <div role="status" className="flex flex-col items-center justify-center py-16 px-6 text-center">
       <svg
         className="w-12 h-12 text-mid-gray mb-4"
         viewBox="0 0 24 24"

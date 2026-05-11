@@ -153,6 +153,16 @@ const TAB_ITEMS: NavItem[] = [
       </svg>
     ),
   },
+  {
+    href: "/tenant/profile",
+    label: "Profile",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="7" r="4" />
+        <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
+      </svg>
+    ),
+  },
 ];
 
 export function TenantTabBar() {
