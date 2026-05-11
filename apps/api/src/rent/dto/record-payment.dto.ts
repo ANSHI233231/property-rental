@@ -7,6 +7,7 @@ import {
   IsOptional,
   MaxLength,
   Matches,
+  Max,
 } from "class-validator";
 
 export enum PaymentMethodDto {
@@ -27,11 +28,13 @@ export class RecordPaymentDto {
   rentPeriodId!: string;
 
   /**
-   * Amount in paise. Must be a positive integer.
+   * Amount in paise. Must be a positive integer, capped at ₹10 crore (1,000,000,000 paise).
    * BL-11: compared to outstanding_paise inside a Serializable transaction.
+   * M-02: upper bound guards against misclick or financial-report corruption.
    */
   @IsInt({ message: "amountPaise must be an integer" })
   @IsPositive({ message: "amountPaise must be positive" })
+  @Max(1_000_000_000, { message: "amountPaise must not exceed ₹10 crore (1,000,000,000 paise)" })
   amountPaise!: number;
 
   @IsEnum(PaymentMethodDto)

@@ -47,7 +47,10 @@ export class RentController {
   async listPeriods(
     @Query("leaseId") leaseId?: string,
     @Query("unitId") unitId?: string,
+    @Query("propertyId") propertyId?: string,
     @Query("status") status?: string,
+    @Query("periodStart_gte") periodStart_gte?: string,
+    @Query("periodStart_lte") periodStart_lte?: string,
     @Query("cursor") cursor?: string,
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit?: number,
     @CurrentUser() actor?: JwtPayload,
@@ -55,7 +58,10 @@ export class RentController {
     return this.rentService.listPeriods({
       leaseId,
       unitId,
+      propertyId,
       status,
+      periodStart_gte,
+      periodStart_lte,
       cursor,
       limit,
       actorId: actor!.sub,
@@ -73,15 +79,27 @@ export class RentController {
   async findPeriod(@Param("id") id: string, @CurrentUser() actor?: JwtPayload) {
     const period = await this.rentService.findPeriodById(id);
 
-    // Tenant can only view periods for their own leases
+    // H-01: TENANT ownership check
     if (actor?.role === "TENANT") {
-      // Service will return data — we validate ownership here
       const hasAccess = await this.rentService.tenantHasAccessToPeriod(id, actor.sub);
       if (!hasAccess) {
         throw new ForbiddenException({
           error: {
             code: "PERIOD_ACCESS_DENIED",
             message: "You do not have access to this rent period",
+          },
+        });
+      }
+    }
+
+    // H-01: PROPERTY_MANAGER scope check — inline pattern matching recordPayment/voidPayment
+    if (actor?.role === "PROPERTY_MANAGER") {
+      const hasAccess = await this.rentService.pmHasAccessToPeriod(id, actor.sub);
+      if (!hasAccess) {
+        throw new ForbiddenException({
+          error: {
+            code: "PROPERTY_ACCESS_DENIED",
+            message: "You are not the assigned manager for this property",
           },
         });
       }

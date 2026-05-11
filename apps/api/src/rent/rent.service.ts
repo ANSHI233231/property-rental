@@ -120,13 +120,24 @@ export class RentService {
 
   // ---------------------------------------------------------------------------
   // List rent periods
-  // GET /rent-periods?leaseId=&unitId=&status=&cursor=&limit=20
+  // GET /rent-periods?leaseId=&unitId=&propertyId=&status=
+  //                  &periodStart_gte=YYYY-MM-DD&periodStart_lte=YYYY-MM-DD
+  //                  &cursor=&limit=20
+  //
+  // FC-1: propertyId filter — PMs auto-scoped to their property; explicit
+  //        propertyId must fall within that scope or returns empty.
+  // FC-2: response includes lease.unit.property for admin overdue table.
+  // FC-3: periodStart_gte / periodStart_lte date range filters.
+  // H-01: PROPERTY_MANAGER list is already scoped to their property here.
   // ---------------------------------------------------------------------------
 
   async listPeriods(filters: {
     leaseId?: string;
     unitId?: string;
+    propertyId?: string;
     status?: string;
+    periodStart_gte?: string;
+    periodStart_lte?: string;
     cursor?: string;
     limit?: number;
     actorId: string;
@@ -146,10 +157,38 @@ export class RentService {
       };
     }
 
+    // FC-3: period_start date range filter
+    if (filters.periodStart_gte || filters.periodStart_lte) {
+      where = {
+        ...where,
+        period_start: {
+          ...(filters.periodStart_gte ? { gte: new Date(filters.periodStart_gte) } : {}),
+          ...(filters.periodStart_lte ? { lte: new Date(filters.periodStart_lte) } : {}),
+        },
+      };
+    }
+
     if (filters.unitId) {
       where = {
         ...where,
-        lease: { unit_id: filters.unitId },
+        lease: {
+          ...(where.lease as Prisma.LeaseWhereInput ?? {}),
+          unit_id: filters.unitId,
+        },
+      };
+    }
+
+    // FC-1: explicit propertyId filter (Admin can supply any; PM must own it)
+    if (filters.propertyId) {
+      where = {
+        ...where,
+        lease: {
+          ...(where.lease as Prisma.LeaseWhereInput ?? {}),
+          unit: {
+            ...((where.lease as Prisma.LeaseWhereInput)?.unit as Prisma.UnitWhereInput ?? {}),
+            property_id: filters.propertyId,
+          },
+        },
       };
     }
 
@@ -173,7 +212,8 @@ export class RentService {
       };
     }
 
-    // PROPERTY_MANAGER: scope to their property
+    // H-01 / PROPERTY_MANAGER: scope to their property.
+    // If an explicit propertyId was supplied, it must match; if it doesn't, return empty.
     if (filters.actorRole === "PROPERTY_MANAGER") {
       const managedProperty = await this.prisma.property.findFirst({
         where: { active_pm_id: filters.actorId, deleted_at: null },
@@ -182,19 +222,48 @@ export class RentService {
       if (!managedProperty) {
         return { data: [], meta: { next_cursor: null, has_more: false } };
       }
+      // If PM supplied a propertyId that differs from their assigned one → empty
+      if (filters.propertyId && filters.propertyId !== managedProperty.id) {
+        return { data: [], meta: { next_cursor: null, has_more: false } };
+      }
+      // Override/enforce the property filter with the PM's actual property
       where = {
         ...where,
         lease: {
           ...(where.lease as Prisma.LeaseWhereInput ?? {}),
-          unit: { property_id: managedProperty.id },
+          unit: {
+            ...((where.lease as Prisma.LeaseWhereInput)?.unit as Prisma.UnitWhereInput ?? {}),
+            property_id: managedProperty.id,
+          },
         },
       };
     }
 
+    // FC-2: include lease → unit → property for admin overdue table
     const items = await this.prisma.rentPeriod.findMany({
       where,
       orderBy: { period_start: "desc" },
       take: take + 1,
+      include: {
+        lease: {
+          select: {
+            id: true,
+            unit: {
+              select: {
+                id: true,
+                unit_number: true,
+                property: {
+                  select: {
+                    id: true,
+                    name: true,
+                    city: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       ...(filters.cursor ? { cursor: { id: filters.cursor }, skip: 1 } : {}),
     });
 
@@ -203,7 +272,10 @@ export class RentService {
     const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
 
     return {
-      data: data.map((p) => serializePeriod(p as unknown as Record<string, unknown>)),
+      data: data.map((p) => ({
+        ...serializePeriod(p as unknown as Record<string, unknown>),
+        lease: p.lease,
+      })),
       meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
     };
   }
@@ -654,6 +726,32 @@ export class RentService {
       where: { lease_id: period.lease_id, tenant_id: tenant.id, removed_at: null },
     });
     return !!lt;
+  }
+
+  // ---------------------------------------------------------------------------
+  // pmHasAccessToPeriod — H-01: ownership check for PROPERTY_MANAGER role
+  // Resolves rent_period → lease → unit → property and verifies active_pm_id.
+  // This mirrors the inline pattern used in recordPayment and voidPayment.
+  // ---------------------------------------------------------------------------
+
+  async pmHasAccessToPeriod(periodId: string, pmUserId: string): Promise<boolean> {
+    const period = await this.prisma.rentPeriod.findUnique({
+      where: { id: periodId },
+      select: { lease_id: true },
+    });
+    if (!period) return false;
+
+    const lease = await this.prisma.lease.findUnique({
+      where: { id: period.lease_id },
+      select: { unit: { select: { property_id: true } } },
+    });
+    if (!lease) return false;
+
+    const property = await this.prisma.property.findFirst({
+      where: { id: lease.unit.property_id, active_pm_id: pmUserId, deleted_at: null },
+      select: { id: true },
+    });
+    return !!property;
   }
 
   // ---------------------------------------------------------------------------
