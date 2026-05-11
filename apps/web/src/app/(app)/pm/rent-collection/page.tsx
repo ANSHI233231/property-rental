@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, parse, parseISO } from "date-fns";
+import { formatDateOnlyIST, todayIST } from "@/lib/locale";
 import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useToast } from "@/components/ui/Toast";
@@ -25,7 +26,6 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { paiseStringToINR, parseBigPaise, daysOverdue } from "@/lib/rent/format";
 import {
-  RecordPaymentSchema,
   VoidPaymentSchema,
   PaymentMethodEnum,
   type RentStatusValue,
@@ -122,11 +122,7 @@ function formatPeriodLabel(periodStart: string): string {
 }
 
 function formatDate(iso: string): string {
-  try {
-    return format(parseISO(iso), "dd/MM/yyyy");
-  } catch {
-    return iso;
-  }
+  return formatDateOnlyIST(iso);
 }
 
 function methodPlaceholder(method: string): string {
@@ -171,7 +167,7 @@ function RecordPaymentModal({ open, period, onClose, onSuccess }: RecordPaymentM
     resolver: zodResolver(RecordPaymentUISchema),
     defaultValues: {
       method: "UPI",
-      paidOn: format(new Date(), "dd/MM/yyyy"),
+      paidOn: todayIST(),
     },
   });
 
@@ -181,7 +177,7 @@ function RecordPaymentModal({ open, period, onClose, onSuccess }: RecordPaymentM
     if (open) {
       reset({
         method: "UPI",
-        paidOn: format(new Date(), "dd/MM/yyyy"),
+        paidOn: todayIST(),
         reference: "",
         amountRupees: undefined,
       });
@@ -208,9 +204,14 @@ function RecordPaymentModal({ open, period, onClose, onSuccess }: RecordPaymentM
         paidOn: paidOnISO,
       };
 
+      // Phase 7: Idempotency-Key header — one UUID per submit attempt.
+      // Backend deduplicates concurrent/retried submits using this key.
+      const idempotencyKey = crypto.randomUUID();
+
       await apiFetch<{ rentPeriod: RentPeriod }>("/payments", {
         method: "POST",
         body: JSON.stringify(body),
+        headers: { "Idempotency-Key": idempotencyKey },
       });
 
       // Re-fetch the period to get updated status

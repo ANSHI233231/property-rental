@@ -35,6 +35,9 @@ const ERROR_MAP: Record<string, string> = {
   RENT_PERIOD_NOT_FOUND: "Rent period not found.",
   INVALID_PAYMENT_AMOUNT: "Enter a payment amount greater than zero.",
   PERIOD_ALREADY_PAID: "This period is already fully paid.",
+  // Phase 7 — Rate limiting (HTTP 429)
+  HTTP_429: "Too many attempts. Try again shortly.",
+  RATE_LIMIT_EXCEEDED: "Too many attempts. Try again shortly.",
   // Phase 5 — Maintenance
   BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE:
     "Only tenants can raise maintenance requests.",

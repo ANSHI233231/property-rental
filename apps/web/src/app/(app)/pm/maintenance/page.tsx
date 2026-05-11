@@ -11,7 +11,7 @@
 import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useCallback, useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { formatDateOnlyIST, formatDateIST } from "@/lib/locale";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { MaintenanceStatusBadge } from "@/components/maintenance/MaintenanceStatusBadge";
@@ -66,13 +66,11 @@ interface UsersResponse {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso; }
+  return formatDateOnlyIST(iso);
 }
 
 function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy HH:mm"); } catch { return iso; }
+  return formatDateIST(iso);
 }
 
 const PRIORITY_ORDER: Record<MaintenancePriorityValue, number> = {

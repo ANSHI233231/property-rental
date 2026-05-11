@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR } from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -126,9 +126,7 @@ export default function PmTenantsPage() {
     }
   }, [fetchTenants, propertyLoading, propertyId]);
 
-  const formatDate = (iso: string) => {
-    try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso; }
-  };
+  const formatDate = (iso: string) => formatDateOnlyIST(iso);
 
   const formatRent = (paise: string | number) => {
     const val = typeof paise === "string" ? parseInt(paise, 10) : paise;

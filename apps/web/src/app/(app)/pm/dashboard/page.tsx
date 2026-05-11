@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useEffect, useState } from "react";
 import { format, parseISO, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
+import { todayIST, formatDateOnlyIST } from "@/lib/locale";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { paiseStringToINR, parseBigPaise } from "@/lib/rent/format";
 import Link from "next/link";
@@ -78,7 +79,7 @@ export default function PmDashboardPage() {
   const { user, apiFetch } = useAuth();
   const { property, propertyId, loading: propertyLoading } = usePmProperty();
 
-  const today = format(new Date(), "dd/MM/yyyy");
+  const today = todayIST();
 
   const [tenantsTotal, setTenantsTotal] = useState<number | null>(null);
   const [activeLeasesTotal, setActiveLeasesTotal] = useState<number | null>(null);
@@ -285,7 +286,7 @@ export default function PmDashboardPage() {
             {endingSoonLeases.slice(0, 3).map((l, i) => (
               <span key={l.id}>
                 {i > 0 && " · "}
-                {l.unit?.name ?? "Unit"} ends {format(parseISO(l.end_date), "dd/MM/yyyy")}
+                {l.unit?.name ?? "Unit"} ends {formatDateOnlyIST(l.end_date)}
               </span>
             ))}
             {endingSoonLeases.length > 3 && ` · and ${endingSoonLeases.length - 3} more`}

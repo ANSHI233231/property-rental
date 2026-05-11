@@ -10,7 +10,8 @@ import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR, rupeesToPaise, LeaseInputSchema, type LeaseInput, type TenantInput } from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -572,9 +573,7 @@ export default function PmLeasesPage() {
     }
   }
 
-  const formatDate = (iso: string) => {
-    try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso; }
-  };
+  const formatDate = (iso: string) => formatDateOnlyIST(iso);
 
   const formatRent = (paise: string | number) => {
     const val = typeof paise === "string" ? parseInt(paise, 10) : paise;

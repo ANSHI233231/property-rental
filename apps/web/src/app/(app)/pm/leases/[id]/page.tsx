@@ -9,7 +9,7 @@
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR, rupeesToPaise } from "@gharsetu/shared";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
@@ -71,8 +71,7 @@ interface LeaseDetail {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso ?? "—"; }
+  return formatDateOnlyIST(iso);
 }
 
 function formatPaise(paise: string | number | null | undefined): string {

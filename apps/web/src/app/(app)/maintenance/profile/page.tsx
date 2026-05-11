@@ -15,7 +15,8 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
-import { format, parseISO, differenceInHours, startOfMonth } from "date-fns";
+import { differenceInHours, parseISO, startOfMonth } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { PasswordChangeForm } from "@/components/ui/PasswordChangeForm";
 import { SkeletonCard, SkeletonKpi } from "@/components/ui/Skeleton";
 import { Field } from "@/components/ui/Field";
@@ -59,8 +60,7 @@ interface MaintenanceListResponse {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso ?? "—"; }
+  return formatDateOnlyIST(iso);
 }
 
 function initials(name: string): string {

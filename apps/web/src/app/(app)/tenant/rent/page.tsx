@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from "react";
 import { parseISO, format } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { useAuth } from "@/lib/auth/context";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
@@ -72,11 +73,7 @@ interface LeasesResponse {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string): string {
-  try {
-    return format(parseISO(iso), "dd/MM/yyyy");
-  } catch {
-    return iso;
-  }
+  return formatDateOnlyIST(iso);
 }
 
 function formatPeriodLabel(periodStart: string): string {

@@ -8,7 +8,7 @@
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR } from "@gharsetu/shared";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,10 +108,7 @@ export default function PmTenantDetailPage() {
     }
   }
 
-  const formatDate = (iso: string | null | undefined) => {
-    if (!iso) return "—";
-    try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso; }
-  };
+  const formatDate = (iso: string | null | undefined) => formatDateOnlyIST(iso);
 
   const formatRent = (paise: string | number | undefined) => {
     if (paise === undefined || paise === null) return "—";

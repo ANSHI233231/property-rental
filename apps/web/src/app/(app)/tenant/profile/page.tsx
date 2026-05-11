@@ -14,7 +14,7 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
-import { format, parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR } from "@gharsetu/shared";
 import { PasswordChangeForm } from "@/components/ui/PasswordChangeForm";
 import { SkeletonCard } from "@/components/ui/Skeleton";
@@ -61,7 +61,7 @@ interface LeasesResponse {
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso ?? "—"; }
+  return formatDateOnlyIST(iso ?? undefined);
 }
 
 function formatPaise(paise: string | number | null | undefined): string {

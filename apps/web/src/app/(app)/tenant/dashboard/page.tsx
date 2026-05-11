@@ -18,7 +18,8 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
-import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR, computeLateFeePaise } from "@gharsetu/shared";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
@@ -114,8 +115,7 @@ interface MaintenanceListResponse {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy"); } catch { return iso ?? "—"; }
+  return formatDateOnlyIST(iso);
 }
 
 function formatPaise(paise: string | number | null | undefined): string {
