@@ -332,7 +332,8 @@ describe("TC-LEASE-004 — LEASE_NEEDS_TENANT guard (belt-and-suspenders)", () =
     // Accept either structured error body or validation pipe error
     const hasCode =
       res.body.error?.code === "LEASE_NEEDS_TENANT" ||
-      (res.body.message && typeof res.body.message !== "undefined");
+      res.body.error?.code === "VALIDATION_FAILED" ||
+      (res.body.error?.message && typeof res.body.error.message !== "undefined");
     expect(hasCode).toBe(true);
   }, 30000);
 });

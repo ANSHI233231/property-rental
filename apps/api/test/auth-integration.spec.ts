@@ -172,7 +172,7 @@ describe("Phase 1 Auth Integration", () => {
         .post("/api/v1/auth/login")
         .send({ email: "ghost@nowhere.local", password: "anyPassword123" });
 
-      const msg: string = (res.body?.message as string) ?? "";
+      const msg: string = (res.body?.error?.message as string) ?? "";
       // Must not expose whether email or password was wrong
       expect(msg.toLowerCase()).not.toMatch(/not found|no account|user.*exist/);
       expect(msg.toLowerCase()).not.toContain("email does not");
@@ -353,7 +353,7 @@ describe("Phase 1 Auth Integration", () => {
         .send({ email: LOCKOUT_TEST_EMAIL, password: TEST_PASSWORD })
         .expect(401);
 
-      expect((res.body?.message as string) ?? "").toMatch(/lock|temporarily/i);
+      expect((res.body?.error?.message as string) ?? "").toMatch(/lock|temporarily/i);
     });
   });
 
@@ -398,7 +398,7 @@ describe("Phase 1 Auth Integration", () => {
         .send({ token: "definitelynotatoken", newPassword: "NewPassword1" })
         .expect(400);
 
-      expect((res.body?.message as string) ?? "").toMatch(/invalid|expired/i);
+      expect((res.body?.error?.message as string) ?? "").toMatch(/invalid|expired/i);
     });
   });
 
@@ -428,7 +428,7 @@ describe("Phase 1 Auth Integration", () => {
         .send({ token: rawToken, newPassword: "ValidPass1" })
         .expect(400);
 
-      expect((res.body?.message as string) ?? "").toMatch(/invalid|expired/i);
+      expect((res.body?.error?.message as string) ?? "").toMatch(/invalid|expired/i);
 
       await prisma.passwordResetToken.deleteMany({
         where: { token_hash: tokenHash },
