@@ -80,3 +80,57 @@ None.
 ## Verdict
 
 **PASS-WITH-NOTES.** API + FE Vitest fully green and lock in every Phase 3 business rule and security fix. Playwright specs committed but pending a live run; recommend executing once before declaring Phase 3 fully closed at the UI layer. Cleared to proceed to Phase 4 in parallel with that run unless the user wants the Playwright pass first.
+
+---
+
+## Playwright live execution — 2026-05-11
+
+### Pre-flight notes
+
+A stale Next.js server (PID 15531, started at 07:22 from a previous session) was serving the OLD build against port 3000. This caused 3 Phase 3 page-navigation tests (`pm-sign-lease.spec.ts:33`, `pm-renew-lease.spec.ts:131`, `pm-finalize-termination.spec.ts:26`) to return 404 in the first run. After killing the stale process and starting a fresh `next start` against the current build, all three resolved to 200 — same class of artifact as BUG-001 from Phase 2. No production bug.
+
+The `auth-login-invalid.spec.ts` failures (3 tests) in the first parallel run were also stale-server artifacts — all pass once the fresh server was in place.
+
+### Results (authoritative: serial run `--workers=1`, fresh server)
+
+| Suite | Tests | Pass | Fail | Skipped |
+|---|---|---|---|---|
+| Phase 1 carry-over | 24 | 22 | 2 | 0 |
+| Phase 2 carry-over | 25 | 22 | 3 | 0 |
+| Phase 3 new (8 specs, 23 tests) | 23 | 23 | 0 | 0 |
+| **Total** | **72** | **67** | **5** | **0** |
+
+Runtime: ~38s (serial)
+
+### Failures — all pre-existing carry-overs, none are Phase 3 regressions
+
+| ID | Spec:line | Classification | Description |
+|---|---|---|---|
+| BUG-003 | `admin-cross-role-redirect.spec.ts:52` | BUG (FE, pre-existing) | PM visiting /admin/dashboard returns 200 instead of 307 — middleware cross-role guard not firing in live runtime |
+| BUG-003 | `admin-cross-role-redirect.spec.ts:84` | BUG (FE, pre-existing) | Admin visiting /pm/dashboard returns 200 instead of 307 |
+| BUG-003 | `admin-cross-role-redirect.spec.ts:105` | BUG (FE, pre-existing) | Maintenance visiting /admin/dashboard returns 200 instead of 307 |
+| BUG-002 | `auth-login-happy-path.spec.ts:72` | BUG (FE, pre-existing) | Login form renders as Loading skeleton; `.bg-bg-overdue[role="alert"]` never appears — client-side hydration timing |
+| TEST-FLAW-PH1 | `auth-role-redirect.spec.ts:31` (1-3 of 4 loop iterations) | TEST-FLAW (pre-existing) | `waitForURL(/login/)` resolves immediately because the page is already at /login before the click redirect completes; flaky across runs |
+
+All 3 BUG-003 tests are **intentionally failing** regression anchors authored in Phase 2 to document the bug. They are expected to fail until FE fixes the middleware cross-role guard.
+
+BUG-002 and TEST-FLAW-PH1 were documented in the Phase 2 report as pre-existing Phase 1 failures.
+
+### Phase 3 spec results (23/23 pass)
+
+| Spec | Tests | Result | BL/Security coverage |
+|---|---|---|---|
+| `pm-sign-lease.spec.ts` | 4 | PASS | BL-01, BL-04, BL-07 |
+| `pm-renew-lease.spec.ts` | 3 | PASS | BL-01, BL-02 |
+| `pm-finalize-termination.spec.ts` | 3 | PASS | BL-04, BL-08, BL-09 |
+| `tenant-approve-termination.spec.ts` | 3 | PASS | BL-08, BL-09 |
+| `tenant-impersonation-blocked.spec.ts` | 3 | PASS | H-01, BL-09 |
+| `cross-property-blocked.spec.ts` | 3 | PASS | H-02, BL-19 |
+| `bl-18-turnover-gap.spec.ts` | 2 | PASS | BL-18 |
+| `deposit-refund.spec.ts` | 2 | PASS | BL-19, TC-REFUND-001/002 |
+
+### Verdict update
+
+**PASS.** All 23 Phase 3 tests pass. All 5 failures are pre-existing carry-overs (BUG-003 × 3, BUG-002 × 1, TEST-FLAW-PH1 × variable) documented in prior phase reports. No new failures introduced by Phase 3 code. Phase 3 is fully closed at all three layers (API Jest, FE Vitest, Playwright E2E).
+
+The single most important thing to fix before Phase 4: **BUG-003** — the Next.js middleware cross-role guard does not fire in the live `next start` runtime. The middleware logic at `apps/web/src/middleware.ts:60` is correct in code but does not execute as expected. This is a security-in-depth concern (the API enforces RBAC via JWT, so it is not an auth bypass) but it does allow logged-in users to visit other roles' dashboards in the browser.
