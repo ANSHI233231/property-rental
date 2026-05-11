@@ -1,6 +1,7 @@
-// GharSetu — Prisma schema (Phase 2)
+// GharSetu — Prisma schema (Phase 3)
 // Phase 1: User, RefreshToken, PasswordResetToken.
 // Phase 2: Property, Unit, PropertyTransferLog, AuditLog.
+// Phase 3: Tenant, Lease, LeaseTenant, LeaseTermination, LeaseTerminationApproval, DepositRefund.
 
 generator client {
   provider = "prisma-client-js"
@@ -27,6 +28,19 @@ enum UnitState {
   LISTED
   OCCUPIED
   MAINTENANCE
+}
+
+enum LeaseStatus {
+  ACTIVE
+  EXPIRED
+  RENEWED
+  TERMINATED
+}
+
+enum TerminationApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ---------------------------------------------------------------------------
@@ -67,6 +81,11 @@ model User {
   audit_logs        AuditLog[]  @relation("AuditActor")
   retired_units     Unit[]      @relation("RetiredByUser")
   created_properties Property[] @relation("PropertyCreatedBy")
+
+  // Phase 3 relations
+  tenant            Tenant?
+  signed_leases     Lease[]     @relation("LeaseSignedByPM")
+  deposit_refunds_processed DepositRefund[] @relation("DepositRefundProcessedBy")
 
   @@map("users")
 }
@@ -182,6 +201,7 @@ model Unit {
   // Relations
   property    Property  @relation(fields: [property_id], references: [id])
   retired_by  User?     @relation("RetiredByUser", fields: [retired_by_user_id], references: [id])
+  leases      Lease[]
 
   /// Unique unit number per property (e.g. can have "3B" in two different properties).
   @@unique([property_id, unit_number])
@@ -239,4 +259,162 @@ model AuditLog {
   @@index([actor_id, created_at])
   @@index([entity_type, entity_id])
   @@map("audit_log")
+}
+
+// ---------------------------------------------------------------------------
+// Tenant  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// Personal-info extension for User accounts with role=TENANT.
+/// 1:1 with User. Created inside the same transaction as Lease signing.
+model Tenant {
+  id                      String    @id @default(cuid())
+  user_id                 String    @unique
+  dob                     DateTime? @db.Date
+  id_proof_type           String?
+  id_proof_number         String?
+  emergency_contact_name  String?
+  emergency_contact_phone String?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+
+  // Relations
+  user                        User                         @relation(fields: [user_id], references: [id])
+  lease_tenants               LeaseTenant[]
+  termination_requests        LeaseTermination[]           @relation("TerminationRequester")
+  termination_approvals       LeaseTerminationApproval[]
+  deposit_refunds_received    DepositRefund[]              @relation("DepositRefundPaidTo")
+
+  @@map("tenants")
+}
+
+// ---------------------------------------------------------------------------
+// Lease  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// A rental agreement between a property manager and one or more tenants.
+/// BL-01: at most one ACTIVE lease per unit (partial unique index in migration).
+/// BL-02: monthly_rent_paise and security_deposit_paise are immutable (DB trigger).
+model Lease {
+  id                       String      @id @default(cuid())
+  unit_id                  String
+  start_date               DateTime    @db.Date
+  end_date                 DateTime    @db.Date
+  /// Stored in paise (BigInt). BL-02: immutable after creation.
+  monthly_rent_paise       BigInt
+  /// Stored in paise (BigInt). BL-02: immutable after creation.
+  security_deposit_paise   BigInt
+  /// Placeholder for Phase 4. Default 0 means no daily late fee configured yet.
+  late_fee_per_day_paise   BigInt      @default(0)
+  status                   LeaseStatus @default(ACTIVE)
+  signed_by_pm_id          String
+  signed_at                DateTime    @default(now())
+  terminated_at            DateTime?
+  created_at               DateTime    @default(now())
+  updated_at               DateTime    @updatedAt
+
+  // Relations
+  unit            Unit              @relation(fields: [unit_id], references: [id])
+  signed_by_pm    User              @relation("LeaseSignedByPM", fields: [signed_by_pm_id], references: [id])
+  lease_tenants   LeaseTenant[]
+  terminations    LeaseTermination[]
+  deposit_refund  DepositRefund?
+
+  @@index([unit_id, status])
+  @@index([end_date])
+  @@map("leases")
+}
+
+// ---------------------------------------------------------------------------
+// LeaseTenant  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// Join table: which Tenants are on which Lease, and which is the primary.
+/// BL-07: at least one tenant required (enforced at service layer).
+model LeaseTenant {
+  id          String    @id @default(cuid())
+  lease_id    String
+  tenant_id   String
+  is_primary  Boolean   @default(false)
+  joined_at   DateTime  @default(now())
+  removed_at  DateTime?
+
+  lease  Lease  @relation(fields: [lease_id], references: [id])
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+
+  @@unique([lease_id, tenant_id])
+  @@map("lease_tenants")
+}
+
+// ---------------------------------------------------------------------------
+// LeaseTermination  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// A termination request for a lease. Only one open request per lease at a time.
+/// "Open" = finalized_at IS NULL AND withdrawn_at IS NULL.
+/// The partial unique index is in the raw migration SQL (Prisma cannot express it).
+model LeaseTermination {
+  id                    String    @id @default(cuid())
+  lease_id              String
+  requested_by_tenant_id String
+  requested_at          DateTime  @default(now())
+  reason                String?
+  withdrawn_at          DateTime?
+  finalized_at          DateTime?
+  /// The calendar date on which the lease actually ends.
+  effective_date        DateTime  @db.Date
+
+  // Relations
+  lease              Lease                      @relation(fields: [lease_id], references: [id])
+  requested_by       Tenant                     @relation("TerminationRequester", fields: [requested_by_tenant_id], references: [id])
+  approvals          LeaseTerminationApproval[]
+
+  @@index([lease_id])
+  @@map("lease_terminations")
+}
+
+// ---------------------------------------------------------------------------
+// LeaseTerminationApproval  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// Per-co-tenant approval row for a termination request.
+/// BL-08 / BL-09: all co-tenants must APPROVE before finalize is allowed.
+model LeaseTerminationApproval {
+  id              String                    @id @default(cuid())
+  termination_id  String
+  tenant_id       String
+  status          TerminationApprovalStatus @default(PENDING)
+  responded_at    DateTime?
+  note            String?
+
+  termination LeaseTermination @relation(fields: [termination_id], references: [id])
+  tenant      Tenant           @relation(fields: [tenant_id], references: [id])
+
+  @@unique([termination_id, tenant_id])
+  @@index([termination_id])
+  @@map("lease_termination_approvals")
+}
+
+// ---------------------------------------------------------------------------
+// DepositRefund  (Phase 3)
+// ---------------------------------------------------------------------------
+
+/// Security deposit refund record. At most one per lease (unique on lease_id in migration).
+/// Lease must be TERMINATED before a refund can be processed.
+model DepositRefund {
+  id                  String   @id @default(cuid())
+  lease_id            String   @unique
+  amount_paise        BigInt
+  deductions_paise    BigInt   @default(0)
+  deduction_reason    String?
+  paid_to_tenant_id   String
+  processed_by_pm_id  String
+  processed_at        DateTime
+  created_at          DateTime @default(now())
+
+  lease          Lease  @relation(fields: [lease_id], references: [id])
+  paid_to_tenant Tenant @relation("DepositRefundPaidTo", fields: [paid_to_tenant_id], references: [id])
+  processed_by   User   @relation("DepositRefundProcessedBy", fields: [processed_by_pm_id], references: [id])
+
+  @@map("deposit_refunds")
 }
