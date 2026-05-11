@@ -10,6 +10,7 @@ import type { Request } from "express";
 import type { JwtPayload } from "../jwt.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { PROPERTY_SCOPE_KEY, type PropertyScopeType } from "../decorators/property-scope.decorator";
+import { PROPERTY_SCOPE_BODY_KEY, type PropertyScopeBodyField } from "../decorators/property-scope-body.decorator";
 
 /**
  * PropertyScopeGuard — Phase 3 real implementation.
@@ -46,8 +47,13 @@ export class PropertyScopeGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    // No @PropertyScope decorator — this guard is a no-op.
-    if (!scopeType) return true;
+    const bodyScopeField = this.reflector.getAllAndOverride<PropertyScopeBodyField | undefined>(
+      PROPERTY_SCOPE_BODY_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    // No scope decorator of any kind — this guard is a no-op.
+    if (!scopeType && !bodyScopeField) return true;
 
     const request = context.switchToHttp().getRequest<Request & { user: JwtPayload }>();
     const user = request.user;
@@ -55,7 +61,11 @@ export class PropertyScopeGuard implements CanActivate {
     // ADMIN bypasses all property scoping.
     if (user?.role === "ADMIN") return true;
 
-    const propertyId = await this.resolvePropertyId(scopeType, request);
+    // Resolve property ID from params or body depending on which decorator was used.
+    const propertyId = bodyScopeField
+      ? await this.resolvePropertyIdFromBody(bodyScopeField, request)
+      : await this.resolvePropertyId(scopeType!, request);
+
     if (!propertyId) {
       throw new NotFoundException({ error: { code: "RESOURCE_NOT_FOUND", message: "Resource not found" } });
     }
@@ -85,12 +95,9 @@ export class PropertyScopeGuard implements CanActivate {
       return true;
     }
 
-    // TENANT: allowed on lease-scoped reads only — the specific handler must
-    // add its own tenant ownership check in the service layer.
-    // The guard here just ensures at least some property resolution occurred.
+    // TENANT: ownership is enforced at the service layer (H-01 fix).
+    // The guard passes so the service can perform the check with full context.
     if (user?.role === "TENANT") {
-      // Tenant scope is validated at the service layer per endpoint.
-      // The guard passes; the service checks tenant ownership.
       return true;
     }
 
@@ -156,5 +163,28 @@ export class PropertyScopeGuard implements CanActivate {
       default:
         return null;
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private: resolve property ID from request body (H-02 — deposit-refunds)
+  // ---------------------------------------------------------------------------
+
+  private async resolvePropertyIdFromBody(
+    bodyField: PropertyScopeBodyField,
+    request: Request & { user: JwtPayload },
+  ): Promise<string | null> {
+    const body = request.body as Record<string, unknown>;
+
+    if (bodyField === "leaseId") {
+      const leaseId = body["leaseId"];
+      if (typeof leaseId !== "string" || !leaseId) return null;
+      const lease = await this.prisma.lease.findUnique({
+        where: { id: leaseId },
+        select: { unit: { select: { property_id: true } } },
+      });
+      return lease?.unit.property_id ?? null;
+    }
+
+    return null;
   }
 }

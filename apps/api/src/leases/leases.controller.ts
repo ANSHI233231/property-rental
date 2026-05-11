@@ -14,12 +14,14 @@ import { CreateLeaseDto } from "./dto/create-lease.dto";
 import { RenewLeaseDto } from "./dto/renew-lease.dto";
 import { TerminationRequestDto } from "./dto/termination-request.dto";
 import { TerminationApprovalDto } from "./dto/termination-approval.dto";
+import { TerminationWithdrawDto } from "./dto/termination-withdraw.dto";
 import { DepositRefundDto } from "./dto/deposit-refund.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { PropertyScopeGuard } from "../auth/guards/property-scope.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { PropertyScope } from "../auth/decorators/property-scope.decorator";
+import { PropertyScopeBody } from "../auth/decorators/property-scope-body.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
 
@@ -129,16 +131,16 @@ export class LeasesController {
     @Body() dto: TerminationRequestDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.leasesService.requestTermination(id, dto, actor.sub);
+    return this.leasesService.requestTermination(id, dto, actor.sub, actor.role);
   }
 
   // ---------------------------------------------------------------------------
   // POST /leases/:id/terminate-approve
-  // Co-tenant casts their vote.
+  // Co-tenant casts their own vote. PMs cannot approve on behalf of tenants (H-01).
   // ---------------------------------------------------------------------------
 
   @Post("leases/:id/terminate-approve")
-  @Roles("ADMIN", "PROPERTY_MANAGER", "TENANT")
+  @Roles("ADMIN", "TENANT")
   @PropertyScope("lease")
   @HttpCode(HttpStatus.OK)
   async terminateApprove(
@@ -146,12 +148,12 @@ export class LeasesController {
     @Body() dto: TerminationApprovalDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.leasesService.approveTermination(id, dto, actor.sub);
+    return this.leasesService.approveTermination(id, dto, actor.sub, actor.role);
   }
 
   // ---------------------------------------------------------------------------
   // POST /leases/:id/terminate-withdraw
-  // Only the requester can withdraw.
+  // Only the requester can withdraw. Body is a typed DTO (M-04).
   // ---------------------------------------------------------------------------
 
   @Post("leases/:id/terminate-withdraw")
@@ -160,10 +162,10 @@ export class LeasesController {
   @HttpCode(HttpStatus.OK)
   async terminateWithdraw(
     @Param("id") id: string,
-    @Body() dto: { requestedByTenantId: string },
+    @Body() dto: TerminationWithdrawDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.leasesService.withdrawTermination(id, dto.requestedByTenantId, actor.sub);
+    return this.leasesService.withdrawTermination(id, dto.requestedByTenantId, actor.sub, actor.role);
   }
 
   // ---------------------------------------------------------------------------
@@ -185,15 +187,18 @@ export class LeasesController {
   // ---------------------------------------------------------------------------
   // POST /deposit-refunds
   // PM-only. One refund per lease.
+  // H-02: @PropertyScopeBody('leaseId') tells PropertyScopeGuard to derive the
+  // property from req.body.leaseId so a PM cannot refund a cross-property lease.
   // ---------------------------------------------------------------------------
 
   @Post("deposit-refunds")
   @Roles("ADMIN", "PROPERTY_MANAGER")
+  @PropertyScopeBody("leaseId")
   @HttpCode(HttpStatus.CREATED)
   async createDepositRefund(
     @Body() dto: DepositRefundDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.leasesService.createDepositRefund(dto, actor.sub);
+    return this.leasesService.createDepositRefund(dto, actor.sub, actor.role);
   }
 }
