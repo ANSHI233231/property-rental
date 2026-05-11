@@ -496,3 +496,4 @@ After M-03 fix:
 **FAIL** — Phase 3 testing is blocked by H-01 (tenant impersonation on termination), H-02 (cross-property deposit refund), and H-03 (file-type DoS CVEs). All three have static repros and are present in the as-shipped code at commit `a4a8f48`. Dynamic curl checks are NOT RUN (API unavailable in audit environment). Dynamic confirmation of H-01 and H-02 should be the first action after the environment is stood up — both are trivially reproducible with a seeded multi-tenant lease. The DB-level invariants (BL-01 index, BL-02 trigger, deposit-refund unique, open-termination partial unique) are all correctly implemented and would serve as backstops for several edge cases even without the service-layer fixes.
 
 **gharsetu-security · 2026-05-11**
+

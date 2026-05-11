@@ -5,6 +5,7 @@
  */
 
 const ERROR_MAP: Record<string, string> = {
+  // Phase 2
   PM_ALREADY_ASSIGNED:
     "This Property Manager is already assigned to another property.",
   UNIT_RENT_LOCKED:
@@ -14,6 +15,18 @@ const ERROR_MAP: Record<string, string> = {
   PM_HAS_PROPERTY:
     "This PM is currently assigned to a property. Transfer the property first.",
   INVALID_PM_ROLE: "Selected user is not a Property Manager.",
+  // Phase 3 — Leases + Tenants + Termination
+  UNIT_HAS_ACTIVE_LEASE: "This unit already has an active lease.",
+  USER_NOT_TENANT: "An account with this email exists but isn't a Tenant.",
+  LEASE_NEEDS_TENANT: "A lease must have at least one tenant.",
+  TERMINATION_OPEN:
+    "There is already an open termination request for this lease.",
+  TURNOVER_GAP_REQUIRED:
+    "A 24-hour turnover period is required between tenants.",
+  LEASE_NOT_TERMINATED:
+    "Refund can only be issued after the lease is terminated.",
+  REFUND_ALREADY_ISSUED:
+    "A deposit refund has already been recorded for this lease.",
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";
