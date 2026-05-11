@@ -433,6 +433,10 @@ All other advisories (path-to-regexp, lodash ×3, postcss) remain RESOLVED via p
 
 ## Production Deployment Checklist
 
+### Password Length Policy (F-01 Deviation)
+
+Password minimum length is 10 characters with a number + letter requirement (SRS §10.2). OWASP ASVS L2 recommends 12; for v1 the SRS-defined policy is authoritative. Revisit in a post-v1 hardening pass if compliance requirements change.
+
 ### Environment Variable Matrix
 
 | Variable | Where set | Who sets it | Notes |
