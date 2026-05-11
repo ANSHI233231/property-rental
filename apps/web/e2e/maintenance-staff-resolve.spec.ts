@@ -154,29 +154,15 @@ test.describe("Maintenance staff resolve flow (BL-14, BL-21)", () => {
     expect(response?.status()).toBe(200);
   });
 
-  test.skip("Maintenance /maintenance/all-open route exists in build (TC-NAV-008) [BUG-004: open]", async ({ page, context }) => {
+  test("Maintenance /maintenance/all-open route exists in build (TC-NAV-008)", async ({ page, context }) => {
     /**
-     * BUG-004 (P1, FE): /maintenance/all-open returns HTTP 404 even when
-     * authenticated via __loggedIn + __role cookies. The route exists in source
-     * at apps/web/src/app/(app)/maintenance/all-open/page.tsx and in the Next.js
-     * build output at .next/server/app/(app)/maintenance/all-open/page.js, but
-     * the running server returns 404 for the path regardless of auth state.
+     * BUG-004 fixed: added `export const dynamic = "force-dynamic"` to
+     * apps/web/src/app/(app)/maintenance/all-open/page.tsx.
      *
-     * Reproduction:
-     *   curl --cookie "__loggedIn=1; __role=MAINTENANCE" http://localhost:3000/maintenance/all-open
-     *   → HTTP/1.1 404 Not Found
-     *
-     *   curl http://localhost:3000/maintenance/all-open  (no cookies)
-     *   → HTTP/1.1 307 Temporary Redirect → /login   (correct)
-     *
-     * By contrast, /maintenance/dashboard returns 200 correctly with cookies.
-     * This is a server-side route resolution bug: when logged in, the middleware
-     * passes the request but Next.js cannot serve the page (returns the pre-built
-     * 404 page instead of the all-open page).
-     *
-     * Severity: P1 — feature inaccessible to MAINTENANCE users.
-     * Assigned to: FE team.
-     * Skipped until BUG-004 is resolved. Un-skip and remove test.skip() on fix.
+     * Root cause: Next.js statically pre-rendered the page during build;
+     * useAuth() returns null at build time, producing a corrupt static asset
+     * that the running server served as 404. force-dynamic opts the route out
+     * of static generation so it is always rendered on-demand.
      */
     const expires = Math.floor(Date.now() / 1000) + 3600;
     await context.clearCookies();
