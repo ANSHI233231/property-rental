@@ -35,6 +35,12 @@ export const UserAdminUpdateSchema = z.object({
     .optional(),
   is_active: z.boolean().optional(),
   role: AdminRoleSchema.optional(),
+  email: z
+    .string()
+    .email("Must be a valid email address")
+    .max(254)
+    .toLowerCase()
+    .optional(),
 });
 
 export type UserCreateInput = z.infer<typeof UserCreateSchema>;

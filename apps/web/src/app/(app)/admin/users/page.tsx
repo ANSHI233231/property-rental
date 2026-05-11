@@ -291,7 +291,7 @@ function EditUserModal({
 
   useEffect(() => {
     if (user) {
-      reset({ name: user.name, phone: user.phone ?? undefined });
+      reset({ name: user.name, phone: user.phone ?? undefined, email: user.email });
     }
   }, [user, reset]);
 
@@ -326,6 +326,16 @@ function EditUserModal({
 
         <Field id="edit-phone" label="Phone" error={errors.phone?.message}>
           <input className="input" placeholder="98xxxxxxxx" maxLength={10} {...register("phone")} />
+        </Field>
+
+        <Field id="edit-email" label="Email" error={errors.email?.message}>
+          <input
+            type="email"
+            className="input"
+            placeholder="name@example.com"
+            autoComplete="email"
+            {...register("email")}
+          />
         </Field>
 
         {serverError && (

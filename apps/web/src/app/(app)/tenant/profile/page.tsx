@@ -1,22 +1,26 @@
 "use client";
 
 /**
- * Tenant Profile — Phase 6.
+ * Tenant Profile — Phase 6 (refactored: unified two-card layout).
  * 1:1 with prototype/tenant/profile.html.
  *
- * Sections:
- *   - Account: name, email (read-only), phone (editable), member-since (DD/MM/YYYY).
- *   - Lease quick-view: unit address, lease period, rent (formatINR).
- *   - Security / Password change (POST /users/me/change-password).
- *   - No "Active sessions" / "Sign out everywhere" UI (SRS §11.3).
- * 2FA: hidden per prototype.
+ * Left card — "Account":
+ *   Name / Email / Phone (editable) / Member since / Account status
+ *   Plus lease co-tenant rows if a lease is active.
+ *   Footer hint: "Unit, lease and co-tenant details are managed by your PM."
+ *
+ * Right card — "Security" (ProfileSecurityCard):
+ *   Change password (modal) / Sign out everywhere (disabled-BE) / Sign out
+ *
+ * BL-16: no financial data in this view.
  */
 
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR } from "@gharsetu/shared";
-import { PasswordChangeForm } from "@/components/ui/PasswordChangeForm";
+import { ProfileSecurityCard } from "@/components/profile/ProfileSecurityCard";
+import { EditDetailsModal } from "@/components/profile/EditDetailsModal";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
@@ -71,7 +75,12 @@ function formatPaise(paise: string | number | null | undefined): string {
 }
 
 function initials(name: string): string {
-  return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -87,6 +96,7 @@ export default function TenantProfilePage() {
   const [editingPhone, setEditingPhone] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
 
   const {
     register: registerProfile,
@@ -103,9 +113,10 @@ export default function TenantProfilePage() {
       const me = await apiFetch<UserProfile>("/users/me");
       setProfile(me);
 
-      // Fetch active lease for quick-view
       try {
-        const leasesRes = await apiFetch<LeasesResponse>(`/leases?tenantId=${me.id}&status=ACTIVE&limit=1`);
+        const leasesRes = await apiFetch<LeasesResponse>(
+          `/leases?tenantId=${me.id}&status=ACTIVE&limit=1`,
+        );
         const leases = leasesRes.data ?? leasesRes.items ?? [];
         setLease(leases[0] ?? null);
       } catch {
@@ -118,14 +129,9 @@ export default function TenantProfilePage() {
     }
   }, [apiFetch]);
 
-  useEffect(() => { void fetchData(); }, [fetchData]);
-
-  async function handlePasswordChange(currentPassword: string, newPassword: string) {
-    await apiFetch("/users/me/change-password", {
-      method: "POST",
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-  }
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   async function handlePhoneSubmit(data: UpdateProfileInput) {
     setProfileSaveError(null);
@@ -180,23 +186,34 @@ export default function TenantProfilePage() {
         <div className="topbar-user">
           <span className="hidden md:inline">{profile?.name ?? user?.name}</span>
           <span className="avatar" aria-hidden="true">
-            {profile?.name ? initials(profile.name) : (user?.name ? initials(user.name) : "—")}
+            {profile?.name
+              ? initials(profile.name)
+              : user?.name
+                ? initials(user.name)
+                : "—"}
           </span>
         </div>
       </header>
 
       <div className="profile-grid">
-        {/* Account card */}
-        <section className="profile-card" aria-labelledby="account-heading">
+        {/* ------------------------------------------------------------------ */}
+        {/* Left card — Account                                                  */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="profile-card">
+          {/* Avatar + name + role badge */}
           <div className="profile-header">
-            <div className="profile-avatar-lg" style={{ background: avatarBg }} aria-hidden="true">
+            <div
+              className="profile-avatar-lg"
+              style={{ background: avatarBg }}
+              aria-hidden="true"
+            >
               {profile?.name ? initials(profile.name) : "—"}
             </div>
             <div className="profile-name">{profile?.name ?? "—"}</div>
             <span className="profile-role">Tenant</span>
           </div>
 
-          <h3 id="account-heading">Account</h3>
+          {/* Rows */}
           <div className="profile-row">
             <span className="field">Name</span>
             <span className="value">{profile?.name ?? "—"}</span>
@@ -209,8 +226,12 @@ export default function TenantProfilePage() {
             <span className="field">Phone</span>
             <span className="value">
               {editingPhone ? (
-                <form onSubmit={(e) => void handleProfileSubmit(handlePhoneSubmit)(e)} className="flex flex-col gap-1" noValidate>
-                  <Field id="phone" label="" error={profileErrors.phone?.message}>
+                <form
+                  onSubmit={(e) => void handleProfileSubmit(handlePhoneSubmit)(e)}
+                  className="flex flex-col gap-1 w-full"
+                  noValidate
+                >
+                  <Field id="tenant-phone" label="" error={profileErrors.phone?.message}>
                     <input
                       type="tel"
                       className="input"
@@ -219,13 +240,24 @@ export default function TenantProfilePage() {
                     />
                   </Field>
                   {profileSaveError && (
-                    <div className="field-error show" role="alert">{profileSaveError}</div>
+                    <div className="field-error show" role="alert">
+                      {profileSaveError}
+                    </div>
                   )}
                   <div className="flex gap-2 mt-1">
-                    <button type="submit" className="btn btn-primary !py-1 !text-xs" disabled={isProfileSubmitting} aria-busy={isProfileSubmitting}>
+                    <button
+                      type="submit"
+                      className="btn btn-primary !py-1 !text-xs"
+                      disabled={isProfileSubmitting}
+                      aria-busy={isProfileSubmitting}
+                    >
                       {isProfileSubmitting ? "Saving…" : "Save"}
                     </button>
-                    <button type="button" className="btn btn-secondary !py-1 !text-xs" onClick={() => setEditingPhone(false)}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary !py-1 !text-xs"
+                      onClick={() => setEditingPhone(false)}
+                    >
                       Cancel
                     </button>
                   </div>
@@ -245,24 +277,17 @@ export default function TenantProfilePage() {
               )}
             </span>
           </div>
-          {lease && (
-            <>
-              <div className="profile-row">
-                <span className="field">Unit</span>
-                <span className="value">
-                  {lease.unit?.name ? `${lease.unit.name}` : "—"}
-                  {lease.property?.name ? ` · ${lease.property.name}` : ""}
-                  {lease.property?.address ? `, ${lease.property.address}` : ""}
-                </span>
+
+          {/* Co-tenant rows (when lease active) */}
+          {lease?.tenants
+            ?.filter((t) => t.email !== (profile?.email ?? user?.email))
+            .map((t) => (
+              <div key={t.id} className="profile-row">
+                <span className="field">Co-tenant</span>
+                <span className="value">{t.name}</span>
               </div>
-              {lease.tenants && lease.tenants.filter((t) => t.email !== (profile?.email ?? user?.email)).map((t) => (
-                <div key={t.id} className="profile-row">
-                  <span className="field">Co-tenant</span>
-                  <span className="value">{t.name}</span>
-                </div>
-              ))}
-            </>
-          )}
+            ))}
+
           <div className="profile-row">
             <span className="field">Member since</span>
             <span className="value">{formatDate(memberSince)}</span>
@@ -270,54 +295,99 @@ export default function TenantProfilePage() {
           <div className="profile-row">
             <span className="field">Account status</span>
             <span className="value">
-              <span className="badge badge-active" aria-label="Active">Active</span>
+              <span className="badge badge-active" aria-label="Active">
+                Active
+              </span>
             </span>
           </div>
 
           {profileSaveSuccess && (
-            <p className="text-xs mt-3" style={{ color: "var(--color-status-paid)" }} role="status">
+            <p
+              className="text-xs mt-3"
+              style={{ color: "var(--color-status-paid)" }}
+              role="status"
+            >
               Profile updated successfully.
             </p>
           )}
 
+          {/* Edit details button — opens modal */}
+          <button
+            type="button"
+            className="btn btn-secondary w-full mt-5"
+            onClick={() => setEditDetailsOpen(true)}
+            aria-label="Edit account details"
+          >
+            Edit details
+          </button>
+
+          {/* Tenant-specific footer hint */}
           <p className="text-xs muted mt-3">
-            Unit, lease and co-tenant details are managed by your Property Manager.
+            Unit, lease and co-tenant details are managed by your Property
+            Manager.
           </p>
         </section>
 
-        {/* Security card */}
-        <section className="profile-card" aria-labelledby="security-heading">
-          <h3 id="security-heading">Security</h3>
-          <PasswordChangeForm onSubmit={handlePasswordChange} />
-        </section>
+        {/* ------------------------------------------------------------------ */}
+        {/* Right card — Security (shared component)                            */}
+        {/* ------------------------------------------------------------------ */}
+        <ProfileSecurityCard />
       </div>
 
       {/* Lease quick-view */}
       {lease && (
         <section className="section mt-8" aria-labelledby="lease-quickview-heading">
-          <h3 className="section-title" id="lease-quickview-heading">My Lease — Quick view</h3>
+          <h3 className="section-title" id="lease-quickview-heading">
+            My Lease — Quick view
+          </h3>
           <div className="card">
-            <div className="grid sm:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-4 gap-6 p-5">
               <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease starts</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatDate(lease.start_date)}</div>
+                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">
+                  Lease starts
+                </div>
+                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">
+                  {formatDate(lease.start_date)}
+                </div>
               </div>
               <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease ends</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatDate(lease.end_date)}</div>
+                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">
+                  Lease ends
+                </div>
+                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">
+                  {formatDate(lease.end_date)}
+                </div>
               </div>
               <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Monthly rent</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatPaise(lease.monthly_rent_paise)}</div>
+                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">
+                  Monthly rent
+                </div>
+                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">
+                  {formatPaise(lease.monthly_rent_paise)}
+                </div>
               </div>
               <div>
-                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">Security deposit</div>
-                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">{formatPaise(lease.security_deposit_paise)}</div>
+                <div className="text-xs muted font-poppins font-semibold uppercase tracking-wider">
+                  Security deposit
+                </div>
+                <div className="font-poppins font-semibold text-charcoal text-lg mt-1">
+                  {formatPaise(lease.security_deposit_paise)}
+                </div>
               </div>
             </div>
           </div>
         </section>
       )}
+
+      <EditDetailsModal
+        open={editDetailsOpen}
+        onClose={() => setEditDetailsOpen(false)}
+        profile={profile ? { name: profile.name, email: profile.email, phone: profile.phone ?? null } : null}
+        onSuccess={(u) => {
+          setProfile((prev) => (prev ? { ...prev, name: u.name, phone: u.phone } : prev));
+          setProfileSaveSuccess(true);
+        }}
+      />
     </>
   );
 }

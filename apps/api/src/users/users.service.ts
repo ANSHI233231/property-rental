@@ -332,6 +332,22 @@ export class UsersService {
           }
         }
 
+        // Email change: enforce uniqueness within the active user set.
+        if (dto.email !== undefined && dto.email !== before.email) {
+          const conflict = await tx.user.findUnique({
+            where: { email: dto.email },
+            select: { id: true },
+          });
+          if (conflict && conflict.id !== id) {
+            throw new ConflictException({
+              error: {
+                code: "EMAIL_TAKEN",
+                message: "Another account already uses this email address",
+              },
+            });
+          }
+        }
+
         const updated = await tx.user.update({
           where: { id },
           data: {
@@ -339,6 +355,7 @@ export class UsersService {
             ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
             ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
             ...(dto.role !== undefined ? { role: dto.role } : {}),
+            ...(dto.email !== undefined ? { email: dto.email } : {}),
           },
           select: USER_SAFE_SELECT,
         });

@@ -1,14 +1,17 @@
 "use client";
 
 /**
- * Maintenance Staff Profile — Phase 6.
+ * Maintenance Staff Profile — Phase 6 (refactored: unified two-card layout).
  * 1:1 with prototype/maintenance/profile.html.
  *
- * Sections:
- *   - Account: name, email, phone (editable), role, permissions, member-since, status.
- *   - Work stats: total assigned, active (IN_PROGRESS), resolved this month,
- *     avg resolution time. Computed from last 100 assignments.
- *   - Security / Password change (POST /users/me/change-password).
+ * Left card — "Account":
+ *   Name / Email / Phone (editable) / Role / Permissions / Member since / Status
+ *   Footer hint: role scope copy.
+ *
+ * Right card — "Security" (ProfileSecurityCard):
+ *   Change password (modal) / Sign out everywhere (disabled-BE) / Sign out
+ *
+ * Work stats KPI grid below cards.
  *
  * BL-16: no rent/lease data, no financial data shown here.
  */
@@ -17,7 +20,8 @@ import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { differenceInHours, parseISO, startOfMonth } from "date-fns";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { PasswordChangeForm } from "@/components/ui/PasswordChangeForm";
+import { ProfileSecurityCard } from "@/components/profile/ProfileSecurityCard";
+import { EditDetailsModal } from "@/components/profile/EditDetailsModal";
 import { SkeletonCard, SkeletonKpi } from "@/components/ui/Skeleton";
 import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
@@ -64,7 +68,12 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 function initials(name: string): string {
-  return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -92,18 +101,17 @@ function computeWorkStats(requests: MaintenanceRequest[]): WorkStats {
     if (r.status !== "RESOLVED" && r.status !== "CLOSED") return false;
     if (!r.resolved_at) return false;
     try {
-      const resolvedDate = parseISO(r.resolved_at);
-      return resolvedDate >= monthStart;
+      return parseISO(r.resolved_at) >= monthStart;
     } catch {
       return false;
     }
   }).length;
 
-  // Average resolution time in hours (from assigned_at → resolved_at)
-  const resolvedWithTimes = requests.filter((r) =>
-    (r.status === "RESOLVED" || r.status === "CLOSED") &&
-    r.assigned_at &&
-    r.resolved_at,
+  const resolvedWithTimes = requests.filter(
+    (r) =>
+      (r.status === "RESOLVED" || r.status === "CLOSED") &&
+      r.assigned_at &&
+      r.resolved_at,
   );
 
   let avgResolutionHours: number | null = null;
@@ -117,7 +125,8 @@ function computeWorkStats(requests: MaintenanceRequest[]): WorkStats {
         return sum;
       }
     }, 0);
-    avgResolutionHours = Math.round((totalHours / resolvedWithTimes.length) * 10) / 10;
+    avgResolutionHours =
+      Math.round((totalHours / resolvedWithTimes.length) * 10) / 10;
   }
 
   return { totalAssigned, activeCount, resolvedThisMonth, avgResolutionHours };
@@ -126,8 +135,7 @@ function computeWorkStats(requests: MaintenanceRequest[]): WorkStats {
 function formatAvgResolution(hours: number | null): string {
   if (hours === null) return "—";
   if (hours < 24) return `${hours}h`;
-  const days = (hours / 24).toFixed(1);
-  return `${days}d`;
+  return `${(hours / 24).toFixed(1)}d`;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,6 +151,7 @@ export default function MaintenanceProfilePage() {
   const [editingPhone, setEditingPhone] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
 
   const {
     register: registerProfile,
@@ -159,15 +168,22 @@ export default function MaintenanceProfilePage() {
       const me = await apiFetch<UserProfile>("/users/me");
       setProfile(me);
 
-      // Fetch last 100 assignments for work stats
       try {
         const res = await apiFetch<MaintenanceListResponse>(
           `/maintenance-requests?assignedToUserId=${me.id}&limit=100`,
         );
-        const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
+        const items =
+          res.data ??
+          res.items ??
+          (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
         setWorkStats(computeWorkStats(items));
       } catch {
-        setWorkStats({ totalAssigned: 0, activeCount: 0, resolvedThisMonth: 0, avgResolutionHours: null });
+        setWorkStats({
+          totalAssigned: 0,
+          activeCount: 0,
+          resolvedThisMonth: 0,
+          avgResolutionHours: null,
+        });
       }
     } catch {
       setProfile(null);
@@ -176,14 +192,9 @@ export default function MaintenanceProfilePage() {
     }
   }, [apiFetch]);
 
-  useEffect(() => { void fetchData(); }, [fetchData]);
-
-  async function handlePasswordChange(currentPassword: string, newPassword: string) {
-    await apiFetch("/users/me/change-password", {
-      method: "POST",
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-  }
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   async function handlePhoneSubmit(data: UpdateProfileInput) {
     setProfileSaveError(null);
@@ -246,32 +257,53 @@ export default function MaintenanceProfilePage() {
         <div className="topbar-user">
           <span className="hidden md:inline">{profile?.name ?? user?.name}</span>
           <span className="avatar" aria-hidden="true">
-            {profile?.name ? initials(profile.name) : (user?.name ? initials(user.name) : "—")}
+            {profile?.name
+              ? initials(profile.name)
+              : user?.name
+                ? initials(user.name)
+                : "—"}
           </span>
         </div>
       </header>
 
       <div className="profile-grid">
-        {/* Account card */}
-        <section className="profile-card" aria-labelledby="maint-account-heading">
+        {/* ------------------------------------------------------------------ */}
+        {/* Left card — Account                                                  */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="profile-card">
+          {/* Avatar + name + role badge */}
           <div className="profile-header">
-            <div className="profile-avatar-lg" style={{ background: avatarBg }} aria-hidden="true">
+            <div
+              className="profile-avatar-lg"
+              style={{ background: avatarBg }}
+              aria-hidden="true"
+            >
               {profile?.name ? initials(profile.name) : "—"}
             </div>
             <div className="profile-name">{profile?.name ?? "—"}</div>
             <span className="profile-role">Maintenance Staff</span>
           </div>
 
-          <h3 id="maint-account-heading">Account</h3>
+          {/* Rows */}
           <div className="profile-row">
             <span className="field">Name</span>
             <span className="value">{profile?.name ?? "—"}</span>
           </div>
           <div className="profile-row">
+            <span className="field">Email</span>
+            <span className="value">{profile?.email ?? user?.email ?? "—"}</span>
+          </div>
+          <div className="profile-row">
             <span className="field">Phone</span>
             <span className="value">
               {editingPhone ? (
-                <form onSubmit={(e) => void handleProfileSubmit(handlePhoneSubmit)(e)} className="flex flex-col gap-1" noValidate>
+                <form
+                  onSubmit={(e) =>
+                    void handleProfileSubmit(handlePhoneSubmit)(e)
+                  }
+                  className="flex flex-col gap-1 w-full"
+                  noValidate
+                >
                   <Field id="maint-phone" label="" error={profileErrors.phone?.message}>
                     <input
                       type="tel"
@@ -281,13 +313,24 @@ export default function MaintenanceProfilePage() {
                     />
                   </Field>
                   {profileSaveError && (
-                    <div className="field-error show" role="alert">{profileSaveError}</div>
+                    <div className="field-error show" role="alert">
+                      {profileSaveError}
+                    </div>
                   )}
                   <div className="flex gap-2 mt-1">
-                    <button type="submit" className="btn btn-primary !py-1 !text-xs" disabled={isProfileSubmitting} aria-busy={isProfileSubmitting}>
+                    <button
+                      type="submit"
+                      className="btn btn-primary !py-1 !text-xs"
+                      disabled={isProfileSubmitting}
+                      aria-busy={isProfileSubmitting}
+                    >
                       {isProfileSubmitting ? "Saving…" : "Save"}
                     </button>
-                    <button type="button" className="btn btn-secondary !py-1 !text-xs" onClick={() => setEditingPhone(false)}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary !py-1 !text-xs"
+                      onClick={() => setEditingPhone(false)}
+                    >
                       Cancel
                     </button>
                   </div>
@@ -308,10 +351,6 @@ export default function MaintenanceProfilePage() {
             </span>
           </div>
           <div className="profile-row">
-            <span className="field">Email</span>
-            <span className="value">{profile?.email ?? user?.email ?? "—"}</span>
-          </div>
-          <div className="profile-row">
             <span className="field">Role</span>
             <span className="value">Maintenance Staff</span>
           </div>
@@ -326,32 +365,51 @@ export default function MaintenanceProfilePage() {
           <div className="profile-row">
             <span className="field">Account status</span>
             <span className="value">
-              <span className="badge badge-active" aria-label="Active">Active</span>
+              <span className="badge badge-active" aria-label="Active">
+                Active
+              </span>
             </span>
           </div>
 
           {profileSaveSuccess && (
-            <p className="text-xs mt-3" style={{ color: "var(--color-status-paid)" }} role="status">
+            <p
+              className="text-xs mt-3"
+              style={{ color: "var(--color-status-paid)" }}
+              role="status"
+            >
               Profile updated successfully.
             </p>
           )}
 
-          <p className="text-xs muted mt-4">
-            You can read and update existing maintenance requests. You cannot create new requests,
-            see rent / lease information, or view tenant financial data.
+          {/* Edit details button — opens modal */}
+          <button
+            type="button"
+            className="btn btn-secondary w-full mt-5"
+            onClick={() => setEditDetailsOpen(true)}
+            aria-label="Edit account details"
+          >
+            Edit details
+          </button>
+
+          {/* Role-appropriate footer copy */}
+          <p className="text-xs muted mt-3">
+            You can read and update existing maintenance requests. You cannot
+            create new requests, see rent / lease information, or view tenant
+            financial data.
           </p>
         </section>
 
-        {/* Security card */}
-        <section className="profile-card" aria-labelledby="maint-security-heading">
-          <h3 id="maint-security-heading">Security</h3>
-          <PasswordChangeForm onSubmit={handlePasswordChange} />
-        </section>
+        {/* ------------------------------------------------------------------ */}
+        {/* Right card — Security (shared component)                            */}
+        {/* ------------------------------------------------------------------ */}
+        <ProfileSecurityCard />
       </div>
 
       {/* Work stats — v1 note: computed from last 100 assignments */}
       <section className="section mt-8" aria-labelledby="work-stats-heading">
-        <h3 className="section-title" id="work-stats-heading">Your Work</h3>
+        <h3 className="section-title" id="work-stats-heading">
+          Your Work
+        </h3>
         {workStats ? (
           <div className="kpi-grid">
             <div className="kpi">
@@ -360,14 +418,21 @@ export default function MaintenanceProfilePage() {
             </div>
             <div className="kpi">
               <div className="kpi-label">Resolved this month</div>
-              <div className="kpi-value" style={{ color: "var(--color-status-paid)" }}>
+              <div
+                className="kpi-value"
+                style={{ color: "var(--color-status-paid)" }}
+              >
                 {workStats.resolvedThisMonth}
               </div>
             </div>
             <div className="kpi">
               <div className="kpi-label">Avg. resolution time</div>
-              <div className="kpi-value">{formatAvgResolution(workStats.avgResolutionHours)}</div>
-              <div className="kpi-meta">From last {workStats.totalAssigned} assignments</div>
+              <div className="kpi-value">
+                {formatAvgResolution(workStats.avgResolutionHours)}
+              </div>
+              <div className="kpi-meta">
+                From last {workStats.totalAssigned} assignments
+              </div>
             </div>
             <div className="kpi">
               <div className="kpi-label">Total assigned</div>
@@ -384,6 +449,16 @@ export default function MaintenanceProfilePage() {
           </div>
         )}
       </section>
+
+      <EditDetailsModal
+        open={editDetailsOpen}
+        onClose={() => setEditDetailsOpen(false)}
+        profile={profile ? { name: profile.name, email: profile.email, phone: profile.phone ?? null } : null}
+        onSuccess={(u) => {
+          setProfile((prev) => (prev ? { ...prev, name: u.name, phone: u.phone } : prev));
+          setProfileSaveSuccess(true);
+        }}
+      />
     </>
   );
 }

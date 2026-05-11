@@ -6,7 +6,9 @@ import {
   Matches,
   IsEnum,
   IsBoolean,
+  IsEmail,
 } from "class-validator";
+import { Transform } from "class-transformer";
 
 export enum UserRoleEnum {
   ADMIN = "ADMIN",
@@ -40,4 +42,12 @@ export class AdminUpdateUserDto {
   @IsOptional()
   @IsEnum(UserRoleEnum, { message: "role must be one of: ADMIN, PROPERTY_MANAGER, MAINTENANCE, TENANT" })
   role?: UserRoleEnum;
+
+  @IsOptional()
+  @IsEmail({}, { message: "Must be a valid email address" })
+  @MaxLength(254)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  email?: string;
 }
