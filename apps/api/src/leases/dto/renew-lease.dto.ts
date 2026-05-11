@@ -5,6 +5,7 @@ import {
   IsPositive,
   IsOptional,
   IsArray,
+  ArrayMaxSize,
   Matches,
   Min,
 } from "class-validator";
@@ -31,9 +32,13 @@ export class RenewLeaseDto {
   @Min(0)
   securityDepositPaise?: number;
 
-  /** If provided, only these tenant IDs are carried over to the new lease. */
+  /**
+   * If provided, only these tenant IDs are carried over to the new lease.
+   * F-02: capped at 20 to prevent CPU-spike / array-bomb vector (VAPT phase-8).
+   */
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(20, { message: "A maximum of 20 tenant IDs are allowed per renewal" })
   @IsString({ each: true })
   tenantIds?: string[];
 }
