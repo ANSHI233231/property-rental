@@ -1,6 +1,7 @@
 import { Processor, WorkerHost, OnWorkerEvent } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import type { Job } from "bullmq";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import { computeLateFeePaise } from "@gharsetu/shared";
@@ -108,15 +109,39 @@ export class RentAccrualProcessor extends WorkerHost {
       };
     }
 
-    // Create or update the log row with started_at
-    const logEntry = existingLog
-      ? await this.prisma.rentAccrualLog.update({
-          where: { id: existingLog.id },
-          data: { started_at: now, finished_at: null, error: null },
-        })
-      : await this.prisma.rentAccrualLog.create({
-          data: { run_date: new Date(istNow), started_at: now },
-        });
+    // Create or update the log row with started_at.
+    // M-01: two concurrent calls on the same date race past the existingLog check.
+    // The second create will hit the unique index on run_date (P2002) — treat as skip.
+    let logEntry: Awaited<ReturnType<typeof this.prisma.rentAccrualLog.create>>;
+    try {
+      logEntry = existingLog
+        ? await this.prisma.rentAccrualLog.update({
+            where: { id: existingLog.id },
+            data: { started_at: now, finished_at: null, error: null },
+          })
+        : await this.prisma.rentAccrualLog.create({
+            data: { run_date: new Date(istNow), started_at: now },
+          });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002"
+      ) {
+        // Another concurrent call already created the log for this date.
+        this.logger.log(
+          `Accrual log P2002 — another run for ${istNow} is already in progress or finished. Skipping.`,
+        );
+        return {
+          date: istNow,
+          periodsExamined: 0,
+          periodsOverdueFlipped: 0,
+          lateFeesAddedPaise: "0",
+          nextPeriodsGenerated: 0,
+          skipped: true,
+        };
+      }
+      throw err;
+    }
 
     let periodsExamined = 0;
     let periodsOverdueFlipped = 0;
