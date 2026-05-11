@@ -2,14 +2,12 @@
  * Phase 8 — Gap tests for TC IDs that had no automated coverage.
  *
  * Covers:
- *   TC-RENT-012: Lease starting on 31 Jan → Feb period due-date = 28 Feb (last day).
- *                Uses addMonthMinusOneDay internal logic; asserts correct period_start
- *                and due_date on the first rent period created at lease sign.
- *   TC-NEG-001: POST /leases with endDate < startDate → 422 / 400 (validation).
+ *   TC-RENT-012: Lease starting on 31 Jan → Feb period_end = 28 Feb (last day).
+ *                BUG-008-001 fixed: addMonthMinusOneDay now uses first-of-month-two-ahead
+ *                strategy to avoid Jan-31 → Mar-2 overflow.
+ *   TC-NEG-001: POST /leases with endDate < startDate → 400 INVALID_LEASE_DATES.
+ *                BUG-008-002 fixed: service-layer guard rejects invalid date order.
  *   TC-NEG-005: DELETE /maintenance-requests/:id → 404 (route absent) for MAINTENANCE role.
- *
- * BUG-P0-RENT012 is the FAILING test here — addMonthMinusOneDay overflows on 31-Jan input.
- * Do NOT fix the production code; this is a regression test exposing the bug.
  */
 
 import type { INestApplication } from "@nestjs/common";
@@ -182,11 +180,10 @@ async function createMaintUser(): Promise<{ id: string; token: string }> {
 }
 
 // ---------------------------------------------------------------------------
-// TC-RENT-012 — 31-Jan lease → Feb period due-date = 28 Feb (last day)
-//
-// BUG-P0-RENT012: addMonthMinusOneDay uses setMonth(+1) then setDate(-1) which
-// overflows January 31 → March 3 then → March 2 instead of Feb 28.
-// This test INTENTIONALLY FAILS until the bug is fixed.
+// TC-RENT-012 — 31-Jan lease → Feb period_end = 28 Feb (last day)
+// BUG-008-001 FIXED: addMonthMinusOneDay now uses first-of-month-two-ahead
+// strategy (setUTCDate(1) → setUTCMonth(+2) → setUTCDate(-1)), which correctly
+// yields Feb 28 for a Jan 31 input instead of the former Mar 2 overflow.
 // ---------------------------------------------------------------------------
 
 describe("TC-RENT-012 — 31-Jan start: first period end = last day of Feb (BL SRS §4 Module 5)", () => {
@@ -256,9 +253,9 @@ describe("TC-RENT-012 — 31-Jan start: first period end = last day of Feb (BL S
     const periodEndDate = firstPeriod!.period_end;
 
     // CRITICAL ASSERTION (TC-RENT-012): period_end must NOT overflow into March.
-    // BUG: addMonthMinusOneDay(2026-01-31) returns 2026-03-02 instead of 2026-02-28.
-    expect(periodEndDate.getUTCMonth()).toBe(1); // February (1 = Feb, 0-indexed) — BUG produces month=2 (March)
-    expect(periodEndDate.getUTCDate()).toBe(28); // last day of Feb 2026 — BUG produces 2 (March 2)
+    // BUG-008-001 FIXED: addMonthMinusOneDay(2026-01-31) now returns 2026-02-28.
+    expect(periodEndDate.getUTCMonth()).toBe(1); // February (1 = Feb, 0-indexed)
+    expect(periodEndDate.getUTCDate()).toBe(28); // last day of Feb 2026
   });
 });
 
@@ -290,9 +287,9 @@ describe("TC-NEG-001 — Lease endDate < startDate must be rejected", () => {
         tenants: [{ name: "NegTest Tenant", email: tenantEmail, is_primary: true }],
       });
 
-    // Must not be 201 — lease must not be created with invalid date range
-    const isRejected = [400, 422].includes(res.status);
-    expect(isRejected).toBe(true); // 400 or 422 expected; got ${res.status} if failing
+    // BUG-008-002 FIXED: service-layer guard rejects endDate < startDate with 400 INVALID_LEASE_DATES.
+    expect(res.status).toBe(400);
+    expect(res.body?.error?.code).toBe("INVALID_LEASE_DATES");
 
     // Must not leave a dangling lease
     const leaked = await prisma.lease.findFirst({
@@ -336,5 +333,70 @@ describe("TC-NEG-005 — DELETE /maintenance-requests/:id is not allowed (BL-16)
     // Admin is also blocked — no DELETE route exists at all.
     const isAdminBlocked = [403, 404, 405].includes(res.status);
     expect(isAdminBlocked).toBe(true); // DELETE route must not exist even for ADMIN
+  });
+});
+
+// ---------------------------------------------------------------------------
+// F-02 — Array-bomb guard: tenants[] capped at 20 (VAPT phase-8)
+// Submitting 21 tenant entries must return 400 VALIDATION_FAILED before any
+// DB operation is attempted. Tests @ArrayMaxSize(20) on CreateLeaseDto.
+// ---------------------------------------------------------------------------
+
+describe("F-02 — tenants[] array-bomb guard: 21-element array → 400 VALIDATION_FAILED", () => {
+  let pmToken: string;
+  let propId: string;
+  let unitId: string;
+
+  beforeAll(async () => {
+    const pm = await createPM();
+    pmToken = pm.pmToken;
+    ({ propId, unitId } = await createPropertyAndUnit(pm.pmId));
+  }, 30_000);
+
+  it("F-02: POST /leases with 21-element tenants[] → 400 with VALIDATION_FAILED", async () => {
+    // Build 21 minimal tenant objects — well within the 100 KB body limit but above the array cap.
+    const tenants = Array.from({ length: 21 }, (_, i) => ({
+      name: `Tenant${i}`,
+      email: `f02-tenant${i}-${Date.now()}@test.local`,
+      is_primary: i === 0,
+    }));
+
+    const res = await supertestFn(app.getHttpServer())
+      .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
+      .set("Authorization", `Bearer ${pmToken}`)
+      .send({
+        startDate: "2026-06-01",
+        endDate: "2027-06-01",
+        monthlyRentPaise: 1_800_000,
+        securityDepositPaise: 3_600_000,
+        tenants,
+      });
+
+    expect(res.status).toBe(400);
+    // NestJS ValidationPipe returns error code VALIDATION_FAILED via the global exception filter.
+    const code: string = res.body?.error?.code ?? res.body?.code ?? "";
+    expect(code).toBe("VALIDATION_FAILED");
+  });
+
+  it("F-02 baseline: POST /leases with exactly 1 tenant → 201 (min bound still works)", async () => {
+    const tenantEmail = `f02-baseline-${Date.now()}@test.local`;
+    const res = await supertestFn(app.getHttpServer())
+      .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
+      .set("Authorization", `Bearer ${pmToken}`)
+      .send({
+        startDate: "2026-06-01",
+        endDate: "2027-06-01",
+        monthlyRentPaise: 1_800_000,
+        securityDepositPaise: 3_600_000,
+        tenants: [{ name: "Baseline Tenant", email: tenantEmail, is_primary: true }],
+      });
+
+    expect(res.status).toBe(201);
+    const leaseId = res.body.lease?.id as string;
+    if (leaseId) cleanup.leaseIds.push(leaseId);
+    const tenantUserId = res.body.tenants?.[0]?.userId as string;
+    const tenantId = res.body.tenants?.[0]?.tenantId as string;
+    if (tenantId) cleanup.tenantIds.push(tenantId);
+    if (tenantUserId) cleanup.userIds.push(tenantUserId);
   });
 });

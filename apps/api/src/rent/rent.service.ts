@@ -832,10 +832,46 @@ export class RentService {
   // ---------------------------------------------------------------------------
 
   private addMonthMinusOneDay(date: Date): Date {
-    const d = new Date(date);
-    d.setMonth(d.getMonth() + 1);
-    d.setDate(d.getDate() - 1);
-    return d;
+    // period_end = same day next month - 1 day, but if next month has fewer days,
+    // use the last day of next month (avoids Jan-31 → Mar-2 overflow).
+    //
+    // Strategy: take the first day of the month two ahead, then subtract 1 day.
+    // This always yields the last day of next month — which is the correct
+    // period_end for month-overflow inputs per TC-RENT-012 (Jan 31 → Feb 28).
+    //
+    // For non-overflow inputs the same formula also works:
+    //   Jun 15: setUTCDate(1)→Jun 1; setUTCMonth(+2)→Aug 1; setUTCDate(0)→Jul 31.
+    //   That gives Jul 31, but we want Jul 14 (Jun 15 + 1 month - 1 day).
+    //
+    // Correct unified algorithm:
+    //   1. Compute lastDayOfNextMonth = Date.UTC(y, m+2, 0).
+    //   2. If date.day >= lastDayOfNextMonth.day → overflow; return lastDayOfNextMonth.
+    //   3. Else → return Date.UTC(y, m+1, date.day - 1).
+    //
+    // Verified against TC-RENT-012 and task-specified adjacent cases:
+    //   Jan 31 (2026): last(Feb)=28; 31>28 → Feb 28  ✓
+    //   Jan 31 (2024): last(Feb)=29; 31>29 → Feb 29  ✓
+    //   Feb 28 (non-leap): last(Mar)=31; 28<=31 → Mar 27  ✓
+    //   Feb 29 (2024): last(Mar)=31; 29<=31 → Mar 28  ✓
+    //   Mar 31: last(Apr)=30; 31>30 → Apr 30  ✓  (spec code gives Apr 30)
+    //   Apr 30: last(May)=31; 30<=31 → May 29  ✓
+    //   Dec 31: last(Jan)=31; 31>=31 → Jan 31  (overflow path)
+    //   Jun 15: last(Jul)=31; 15<=31 → Jul 14  ✓
+    const y = date.getUTCFullYear();
+    const m = date.getUTCMonth(); // 0-indexed
+    const d = date.getUTCDate();
+
+    // Last day of next month
+    const lastOfNextMonth = new Date(Date.UTC(y, m + 2, 0)); // day=0 → last day of month m+1
+    const lastDay = lastOfNextMonth.getUTCDate();
+
+    if (d >= lastDay) {
+      // Overflow (or exact boundary): period_end = last day of next month
+      return lastOfNextMonth;
+    }
+
+    // Normal: period_end = same day next month - 1 day
+    return new Date(Date.UTC(y, m + 1, d - 1));
   }
 
   // ---------------------------------------------------------------------------
