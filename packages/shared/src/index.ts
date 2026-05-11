@@ -6,7 +6,7 @@
  */
 
 export const APP_NAME = "GharSetu" as const;
-export const SHARED_PACKAGE_VERSION = "0.4.0" as const;
+export const SHARED_PACKAGE_VERSION = "0.4.1" as const;
 
 export { Role, ROLES, isRole } from "./role.js";
 export type { RoleValue } from "./role.js";

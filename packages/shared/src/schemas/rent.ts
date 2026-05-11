@@ -34,11 +34,12 @@ export type PaymentMethodValue = z.infer<typeof PaymentMethodEnum>;
 export const RecordPaymentSchema = z.object({
   /** The rent period this payment applies to. */
   rentPeriodId: z.string().min(1, "rentPeriodId is required"),
-  /** Amount paid, in paise. Must be positive. */
+  /** Amount paid, in paise. Must be positive, capped at ₹10 crore (M-02). */
   amountPaise: z
     .number()
     .int("Amount must be an integer (paise)")
-    .positive("Amount must be positive"),
+    .positive("Amount must be positive")
+    .max(1_000_000_000, "amountPaise must not exceed ₹10 crore (1,000,000,000 paise)"),
   method: PaymentMethodEnum,
   /** Optional reference: UPI ID, cheque number, NEFT UTR, etc. */
   reference: z.string().max(500).optional(),
@@ -67,7 +68,21 @@ export type VoidPaymentInput = z.infer<typeof VoidPaymentSchema>;
 export const RentPeriodFilterSchema = z.object({
   leaseId: z.string().optional(),
   unitId: z.string().optional(),
+  /**
+   * FC-1: filter by property ID (PM automatically scoped to their own property
+   * regardless; explicit propertyId must match their scope or returns 403/empty).
+   */
+  propertyId: z.string().optional(),
   status: RentStatusEnum.optional(),
+  /**
+   * FC-3: ISO date string (YYYY-MM-DD) — inclusive lower bound for period_start.
+   * Used by the PM dashboard "Rent Collected This Month" query.
+   */
+  periodStart_gte: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
+  /**
+   * FC-3: ISO date string (YYYY-MM-DD) — inclusive upper bound for period_start.
+   */
+  periodStart_lte: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
   cursor: z.string().optional(),
   limit: z
     .string()
