@@ -36,6 +36,15 @@
     @apply border-2 border-status-overdue bg-bg-overdue px-[13px] py-[9px];
   }
 
+  /* Placeholder contrast — WCAG AA fix (BUG-008-003)
+     #546E7A (slate) yields ~4.84:1 against white input background, meeting the 4.5:1 threshold. */
+  .input::placeholder,
+  input::placeholder,
+  textarea::placeholder {
+    color: #546E7A;
+    opacity: 1;
+  }
+
   /* Buttons */
   .btn {
     @apply inline-flex items-center justify-center gap-2 font-poppins font-semibold text-[15px] rounded-[6px] px-6 py-[10px] cursor-pointer border-0 transition-all duration-200 no-underline;
