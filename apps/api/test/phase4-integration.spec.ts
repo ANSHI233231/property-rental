@@ -279,6 +279,9 @@ describe("BL-10: Only PM/Admin may record payments", () => {
       .send({ rentPeriodId: periodId, amountPaise: 100_000, method: "CASH", paidOn: "2026-01-01" });
 
     expect(res.status).toBe(403);
+    // Regression lock for BUG-PHASE-4-1: RolesGuard must surface the specific BL code.
+    expect(res.body.error?.code).toBe("BL_10_TENANT_CANNOT_RECORD_PAYMENT");
+    expect(typeof res.body.error?.message).toBe("string");
   });
 
   it("MAINTENANCE token → 403", async () => {

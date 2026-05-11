@@ -18,6 +18,7 @@ import { VoidPaymentDto } from "./dto/void-payment.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { RoleErrorCode } from "../auth/decorators/role-error-code.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
 
@@ -116,6 +117,7 @@ export class RentController {
 
   @Post("payments")
   @Roles("ADMIN", "PROPERTY_MANAGER")
+  @RoleErrorCode("BL_10_TENANT_CANNOT_RECORD_PAYMENT")
   @HttpCode(HttpStatus.CREATED)
   async recordPayment(
     @Body() dto: RecordPaymentDto,

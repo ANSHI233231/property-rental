@@ -9,7 +9,6 @@ import {
   ConflictException,
   ForbiddenException,
   HttpException,
-  HttpStatus,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
