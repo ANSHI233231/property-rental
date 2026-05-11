@@ -66,7 +66,7 @@ export class LeasesController {
   // ---------------------------------------------------------------------------
 
   @Get("leases")
-  @Roles("ADMIN", "PROPERTY_MANAGER")
+  @Roles("ADMIN", "PROPERTY_MANAGER", "TENANT")
   @HttpCode(HttpStatus.OK)
   async list(
     @Query("propertyId") propertyId?: string,
@@ -77,10 +77,16 @@ export class LeasesController {
     @Query("limit") limit?: string,
     @CurrentUser() actor?: JwtPayload,
   ) {
+    // A TENANT may only list leases scoped to themselves. The service treats
+    // the tenantId query as a User.id (see leases.service.ts §FC-2), so we
+    // force it to the caller's sub regardless of what they sent.
+    const effectiveTenantId =
+      actor!.role === "TENANT" ? actor!.sub : tenantId;
+
     return this.leasesService.list({
       propertyId,
       unitId,
-      tenantId,
+      tenantId: effectiveTenantId,
       status,
       cursor,
       limit: limit ? parseInt(limit, 10) : 20,

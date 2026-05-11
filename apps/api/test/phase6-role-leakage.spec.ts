@@ -351,11 +351,16 @@ describe("Role-leakage matrix — 10 cells", () => {
     expect(res.status).toBe(403);
   });
 
-  it("TENANT → GET /leases (list) → 403 (TENANT not in Roles)", async () => {
+  it("TENANT → GET /leases (list) → 200 with server-forced self-scope (Phase 8: tenant dashboard needs own lease)", async () => {
+    // Phase 8: TENANT is allowed on GET /leases but the controller force-rewrites
+    // tenantId to the caller's User.id regardless of query value. Tenant cannot
+    // see anyone else's leases — service-layer scope still enforces.
     const res = await supertestFn(app.getHttpServer())
-      .get("/api/v1/leases")
+      .get("/api/v1/leases?tenantId=00000000-0000-0000-0000-000000000000")
       .set("Authorization", `Bearer ${tenantToken}`);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
+    // Whatever the client passes, the response is the caller's own leases (or empty if none).
+    expect(Array.isArray(res.body.data)).toBe(true);
   });
 
   it("TENANT → GET /rent-periods?propertyId=other-id → 200 with empty data (scope-forced)", async () => {
