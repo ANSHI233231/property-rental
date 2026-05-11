@@ -6,9 +6,15 @@
  * redirected to /pm/dashboard, NOT allowed through.
  *
  * Uses cookie injection (context.addCookies) to simulate the logged-in state
- * without requiring a working browser → API login flow (BUG-001 CORS caveat).
+ * without requiring a working browser → API login flow.
  *
- * TC coverage: PHASE-1-GAP resolved (cross-role redirect now live).
+ * TC coverage: BUG-003 fixed. Cross-role redirect fires correctly in Next.js 15.5.
+ *
+ * NOTE on response?.status(): page.goto() follows redirects by default and
+ * returns the final response status (200). To assert the redirect happened we
+ * check the final URL instead of the HTTP status code. The middleware's 307 is
+ * confirmed by curl probes (see commit body); the Playwright tests assert the
+ * end-state URL which is the user-observable behaviour.
  */
 
 import { test, expect } from "@playwright/test";
@@ -42,36 +48,33 @@ test.describe("admin-cross-role-redirect", () => {
   }
 
   /**
-   * BUG-003: Cross-role redirect via __role cookie does NOT fire in the live Next.js middleware.
-   * curl confirms: `Cookie: __loggedIn=1; __role=PROPERTY_MANAGER` on `/admin/dashboard` → 200 OK
-   * Expected: 307 redirect to /pm/dashboard.
-   * This is a production bug in middleware.ts — the __role guard branch at line 60 is not
-   * evaluating correctly in the live runtime. Repro: curl -v -H "Cookie: __loggedIn=1; __role=PROPERTY_MANAGER" http://localhost:3000/admin/dashboard
-   * The test below is a FAILING REGRESSION TEST that documents BUG-003.
+   * BUG-003 (fixed): PM visiting /admin/dashboard must end up on /pm/dashboard.
+   * page.goto() follows the 307 redirect automatically; we assert the final URL.
+   * The raw 307 is verified by curl in the fix commit.
    */
-  test("BUG-003 REGRESSION: PM (__role=PROPERTY_MANAGER) visiting /admin/dashboard should redirect to /pm/dashboard — CURRENTLY FAILS", async ({ page, context }) => {
+  test("PM (__role=PROPERTY_MANAGER) visiting /admin/dashboard redirects to /pm/dashboard", async ({ page, context }) => {
     await context.clearCookies();
     await context.addCookies(injectRole("PROPERTY_MANAGER"));
 
-    const response = await page.goto("/admin/dashboard");
+    await page.goto("/admin/dashboard", { waitUntil: "commit" });
+    await page.waitForURL(/\/pm\/dashboard/, { timeout: 8_000 });
 
-    // Expected (after fix): 307 redirect to /pm/dashboard
-    // Actual (BUG-003): 200 OK — middleware cross-role guard not firing
-    // This test is intentionally left to FAIL until BUG-003 is fixed by FE team.
-    expect(response?.status()).toBe(307); // will fail — documents the bug
+    expect(page.url()).toContain("/pm/dashboard");
+    expect(page.url()).not.toContain("/admin");
   });
 
-  test("BUG-003 REGRESSION: Tenant (__role=TENANT) visiting /admin/dashboard should redirect — CURRENTLY FAILS", async ({ page, context }) => {
+  test("Tenant (__role=TENANT) visiting /admin/dashboard redirects away from /admin", async ({ page, context }) => {
     await context.clearCookies();
     await context.addCookies(injectRole("TENANT"));
 
-    const response = await page.goto("/admin/dashboard");
-    // Expected: redirect away from /admin
-    // Actual (BUG-003): 200 stays on /admin
-    expect(page.url()).not.toContain("/admin"); // will fail — documents the bug
+    await page.goto("/admin/dashboard", { waitUntil: "commit" });
+    await page.waitForURL(/\/tenant\/dashboard/, { timeout: 8_000 });
+
+    expect(page.url()).not.toContain("/admin");
+    expect(page.url()).toContain("/tenant/dashboard");
   });
 
-  test("Admin (__role=ADMIN) visiting /admin/dashboard → 200 allowed (no redirect)", async ({ page, context }) => {
+  test("Admin (__role=ADMIN) visiting /admin/dashboard is allowed (no redirect)", async ({ page, context }) => {
     await context.clearCookies();
     await context.addCookies(injectRole("ADMIN"));
 
@@ -81,14 +84,15 @@ test.describe("admin-cross-role-redirect", () => {
     expect(page.url()).toContain("/admin/dashboard");
   });
 
-  test("BUG-003 REGRESSION: Admin (__role=ADMIN) visiting /pm/dashboard should redirect — CURRENTLY FAILS", async ({ page, context }) => {
+  test("Admin (__role=ADMIN) visiting /pm/dashboard redirects to /admin/dashboard", async ({ page, context }) => {
     await context.clearCookies();
     await context.addCookies(injectRole("ADMIN"));
 
-    const response = await page.goto("/pm/dashboard");
-    // Expected: 307 to /admin/dashboard
-    // Actual (BUG-003): 200 — cross-role guard not firing
-    expect(response?.status()).toBe(307); // will fail — documents the bug
+    await page.goto("/pm/dashboard", { waitUntil: "commit" });
+    await page.waitForURL(/\/admin\/dashboard/, { timeout: 8_000 });
+
+    expect(page.url()).toContain("/admin/dashboard");
+    expect(page.url()).not.toContain("/pm");
   });
 
   test("Unauthenticated (no cookies) visiting /admin/dashboard → redirected to /login with next param", async ({ page, context }) => {
@@ -102,13 +106,14 @@ test.describe("admin-cross-role-redirect", () => {
     expect(page.url()).toContain("next=");
   });
 
-  test("BUG-003 REGRESSION: Maintenance visiting /admin/dashboard should redirect — CURRENTLY FAILS", async ({ page, context }) => {
+  test("Maintenance (__role=MAINTENANCE) visiting /admin/dashboard redirects to /maintenance/dashboard", async ({ page, context }) => {
     await context.clearCookies();
     await context.addCookies(injectRole("MAINTENANCE"));
 
-    const response = await page.goto("/admin/dashboard");
-    // Expected: redirect to /maintenance/dashboard
-    // Actual (BUG-003): 200
-    expect(response?.status()).toBe(307); // will fail — documents the bug
+    await page.goto("/admin/dashboard", { waitUntil: "commit" });
+    await page.waitForURL(/\/maintenance\/dashboard/, { timeout: 8_000 });
+
+    expect(page.url()).toContain("/maintenance/dashboard");
+    expect(page.url()).not.toContain("/admin");
   });
 });
