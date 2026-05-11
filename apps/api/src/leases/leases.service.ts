@@ -86,6 +86,16 @@ export class LeasesService {
     dto: CreateLeaseDto,
     actorId: string,
   ) {
+    // Date-order guard: endDate must be strictly after startDate (BUG-008-002)
+    if (new Date(dto.endDate) <= new Date(dto.startDate)) {
+      throw new BadRequestException({
+        error: {
+          code: "INVALID_LEASE_DATES",
+          message: "End date must be after start date.",
+        },
+      });
+    }
+
     // BL-07 guard (DTO-level validator also enforces, belt-and-suspenders)
     if (!dto.tenants || dto.tenants.length === 0) {
       throw new BadRequestException({
@@ -519,6 +529,16 @@ export class LeasesService {
         error: {
           code: "LEASE_NOT_ACTIVE",
           message: `Cannot renew a lease with status ${existing.status}`,
+        },
+      });
+    }
+
+    // Renewal end date must extend beyond the current lease's end date (BUG-008-002)
+    if (new Date(dto.newEndDate) <= new Date(existing.end_date)) {
+      throw new BadRequestException({
+        error: {
+          code: "INVALID_LEASE_DATES",
+          message: "Renewal newEndDate must be after the current lease end date.",
         },
       });
     }

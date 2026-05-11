@@ -94,10 +94,14 @@ export const LeaseInputSchema = z
       .number()
       .int("Deposit must be an integer (paise)")
       .nonnegative("Deposit cannot be negative"),
-    /** BL-07: at least one tenant required. */
+    /**
+     * BL-07: at least one tenant required.
+     * F-02: capped at 20 to prevent CPU-spike / array-bomb vector (VAPT phase-8).
+     */
     tenants: z
       .array(TenantInputSchema)
-      .min(1, "At least one tenant is required (BL-07)"),
+      .min(1, "At least one tenant is required (BL-07)")
+      .max(20, "A maximum of 20 tenants are allowed per lease"),
   })
   .refine((d) => d.startDate < d.endDate, {
     message: "endDate must be after startDate",
@@ -127,8 +131,11 @@ export const LeaseRenewSchema = z
       .int()
       .nonnegative()
       .optional(),
-    /** Optional: subset of tenant IDs to carry over. If omitted, all current active tenants are retained. */
-    tenantIds: z.array(z.string()).optional(),
+    /**
+     * Optional: subset of tenant IDs to carry over. If omitted, all current active tenants are retained.
+     * F-02: capped at 20 to prevent CPU-spike / array-bomb vector (VAPT phase-8).
+     */
+    tenantIds: z.array(z.string()).max(20, "A maximum of 20 tenant IDs are allowed per renewal").optional(),
   });
 
 export type LeaseRenew = z.infer<typeof LeaseRenewSchema>;
