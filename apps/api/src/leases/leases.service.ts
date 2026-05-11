@@ -322,6 +322,9 @@ export class LeasesService {
           return {
             lease: serializeLease(lease),
             tenants: tenantResults.map((tr) => ({
+              // FC-1: `id` is the canonical Tenant.id field expected by the frontend.
+              // `tenantId` is kept as an alias for backward compatibility.
+              id: tr.tenantId,
               tenantId: tr.tenantId,
               userId: tr.userId,
               name: tr.name,
@@ -349,6 +352,7 @@ export class LeasesService {
 
   // ---------------------------------------------------------------------------
   // List leases (GET /leases?propertyId=&unitId=&tenantId=&status=&cursor=&limit=)
+  // FC-2: tenantId filter accepts User.id and joins through tenant.user_id internally.
   // ---------------------------------------------------------------------------
 
   async list(filters: {
@@ -379,9 +383,16 @@ export class LeasesService {
     }
 
     if (filters.tenantId) {
+      // FC-2: tenantId param is treated as User.id (JWT sub claim).
+      // Join through tenant.user_id so the FE can use its auth context directly.
       where = {
         ...where,
-        lease_tenants: { some: { tenant_id: filters.tenantId, removed_at: null } },
+        lease_tenants: {
+          some: {
+            tenant: { user_id: filters.tenantId },
+            removed_at: null,
+          },
+        },
       };
     }
 
@@ -611,9 +622,16 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
   // Request termination (POST /leases/:id/terminate-request)
   // BL-08 / BL-09: creates approval rows for all co-tenants.
+  // H-01: TENANT caller must be the same person as requestedByTenantId.
+  // M-01: allLeaseTenants read moved inside the Serializable transaction.
   // ---------------------------------------------------------------------------
 
-  async requestTermination(leaseId: string, dto: TerminationRequestDto, actorId: string) {
+  async requestTermination(
+    leaseId: string,
+    dto: TerminationRequestDto,
+    actorId: string,
+    actorRole: string,
+  ) {
     const lease = await this.findById(leaseId);
 
     if (lease.status !== "ACTIVE") {
@@ -625,81 +643,102 @@ export class LeasesService {
       });
     }
 
-    // Verify the requesting tenant is on the lease
-    const requestingTenant = await this.prisma.tenant.findUnique({
-      where: { id: dto.requestedByTenantId },
-    });
-    if (!requestingTenant) {
-      throw new NotFoundException({
-        error: { code: "RESOURCE_NOT_FOUND", message: `Tenant ${dto.requestedByTenantId} not found` },
+    // H-01: if the caller is a TENANT, derive their Tenant.id from the JWT User.id
+    // and assert it equals dto.requestedByTenantId.  PMs may pass any requestedByTenantId
+    // on the lease (PM-initiated termination flow).
+    if (actorRole === "TENANT") {
+      const callerTenant = await this.prisma.tenant.findUnique({
+        where: { user_id: actorId },
+        select: { id: true },
       });
+      if (!callerTenant || callerTenant.id !== dto.requestedByTenantId) {
+        throw new ForbiddenException({
+          error: {
+            code: "FORBIDDEN_TENANT_ACTION",
+            message: "You can only request termination on your own behalf (H-01)",
+          },
+        });
+      }
     }
-
-    const requesterOnLease = await this.prisma.leaseTenant.findFirst({
-      where: { lease_id: leaseId, tenant_id: dto.requestedByTenantId, removed_at: null },
-    });
-    if (!requesterOnLease) {
-      throw new ForbiddenException({
-        error: {
-          code: "TENANT_NOT_ON_LEASE",
-          message: "The requesting tenant is not on this lease",
-        },
-      });
-    }
-
-    // Get all tenants on this lease
-    const allLeaseTenants = await this.prisma.leaseTenant.findMany({
-      where: { lease_id: leaseId, removed_at: null },
-      select: { tenant_id: true },
-    });
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        const termination = await tx.leaseTermination.create({
-          data: {
-            lease_id: leaseId,
-            requested_by_tenant_id: dto.requestedByTenantId,
-            reason: dto.reason ?? null,
-            effective_date: new Date(dto.effectiveDate),
-          },
-        });
+      return await this.prisma.$transaction(
+        async (tx) => {
+          // M-01: verify tenant and read all lease tenants INSIDE the Serializable tx
+          const requestingTenant = await tx.tenant.findUnique({
+            where: { id: dto.requestedByTenantId },
+          });
+          if (!requestingTenant) {
+            throw new NotFoundException({
+              error: { code: "RESOURCE_NOT_FOUND", message: `Tenant ${dto.requestedByTenantId} not found` },
+            });
+          }
 
-        await this.audit.writeLog(tx, {
-          actorId,
-          action: "lease_termination.request",
-          entityType: "LeaseTermination",
-          entityId: termination.id,
-          before: null,
-          after: { lease_id: leaseId, requested_by_tenant_id: dto.requestedByTenantId },
-        });
+          const requesterOnLease = await tx.leaseTenant.findFirst({
+            where: { lease_id: leaseId, tenant_id: dto.requestedByTenantId, removed_at: null },
+          });
+          if (!requesterOnLease) {
+            throw new ForbiddenException({
+              error: {
+                code: "TENANT_NOT_ON_LEASE",
+                message: "The requesting tenant is not on this lease",
+              },
+            });
+          }
 
-        // Requester is auto-APPROVED; all others are PENDING
-        for (const lt of allLeaseTenants) {
-          const isRequester = lt.tenant_id === dto.requestedByTenantId;
-          await tx.leaseTerminationApproval.create({
+          // M-01: read all tenants inside the transaction (TOCTOU fix)
+          const allLeaseTenants = await tx.leaseTenant.findMany({
+            where: { lease_id: leaseId, removed_at: null },
+            select: { tenant_id: true },
+          });
+
+          const termination = await tx.leaseTermination.create({
             data: {
-              termination_id: termination.id,
-              tenant_id: lt.tenant_id,
-              status: isRequester ? "APPROVED" : "PENDING",
-              responded_at: isRequester ? new Date() : null,
-              note: isRequester ? "Requester auto-approved" : null,
+              lease_id: leaseId,
+              requested_by_tenant_id: dto.requestedByTenantId,
+              reason: dto.reason ?? null,
+              effective_date: new Date(dto.effectiveDate),
             },
           });
-        }
 
-        return {
-          termination: {
-            id: termination.id,
-            lease_id: termination.lease_id,
-            requested_by_tenant_id: termination.requested_by_tenant_id,
-            requested_at: termination.requested_at,
-            effective_date: termination.effective_date,
-            reason: termination.reason,
-            tenant_count: allLeaseTenants.length,
-            pending_approvals: allLeaseTenants.length - 1,
-          },
-        };
-      });
+          await this.audit.writeLog(tx, {
+            actorId,
+            action: "lease_termination.request",
+            entityType: "LeaseTermination",
+            entityId: termination.id,
+            before: null,
+            after: { lease_id: leaseId, requested_by_tenant_id: dto.requestedByTenantId },
+          });
+
+          // Requester is auto-APPROVED; all others are PENDING
+          for (const lt of allLeaseTenants) {
+            const isRequester = lt.tenant_id === dto.requestedByTenantId;
+            await tx.leaseTerminationApproval.create({
+              data: {
+                termination_id: termination.id,
+                tenant_id: lt.tenant_id,
+                status: isRequester ? "APPROVED" : "PENDING",
+                responded_at: isRequester ? new Date() : null,
+                note: isRequester ? "Requester auto-approved" : null,
+              },
+            });
+          }
+
+          return {
+            termination: {
+              id: termination.id,
+              lease_id: termination.lease_id,
+              requested_by_tenant_id: termination.requested_by_tenant_id,
+              requested_at: termination.requested_at,
+              effective_date: termination.effective_date,
+              reason: termination.reason,
+              tenant_count: allLeaseTenants.length,
+              pending_approvals: allLeaseTenants.length - 1,
+            },
+          };
+        },
+        { isolationLevel: "Serializable" },
+      );
     } catch (err) {
       if (isPrismaUniqueError(err)) {
         throw new ConflictException({
@@ -715,102 +754,166 @@ export class LeasesService {
 
   // ---------------------------------------------------------------------------
   // Approve/reject termination (POST /leases/:id/terminate-approve)
+  // H-01: TENANT caller must be voting for themselves only.
+  // H-01: PROPERTY_MANAGER cannot approve on behalf of tenants.
+  // M-01: Serializable isolation.
   // ---------------------------------------------------------------------------
 
-  async approveTermination(leaseId: string, dto: TerminationApprovalDto, actorId: string) {
-    const termination = await this.prisma.leaseTermination.findFirst({
-      where: { lease_id: leaseId, finalized_at: null, withdrawn_at: null },
-    });
-
-    if (!termination) {
-      throw new NotFoundException({
+  async approveTermination(
+    leaseId: string,
+    dto: TerminationApprovalDto,
+    actorId: string,
+    actorRole: string,
+  ) {
+    // H-01: PMs and non-ADMIN roles cannot cast votes on behalf of tenants.
+    // Only TENANT self-vote and ADMIN are allowed.
+    if (actorRole === "PROPERTY_MANAGER") {
+      throw new ForbiddenException({
         error: {
-          code: "NO_OPEN_TERMINATION",
-          message: "No open termination request found for this lease",
+          code: "FORBIDDEN_TENANT_ACTION",
+          message: "Property managers cannot approve termination on behalf of a tenant (H-01). Only the tenant themselves or ADMIN may cast this vote.",
         },
       });
     }
 
-    const approval = await this.prisma.leaseTerminationApproval.findFirst({
-      where: { termination_id: termination.id, tenant_id: dto.tenantId },
-    });
-
-    if (!approval) {
-      throw new NotFoundException({
-        error: {
-          code: "APPROVAL_NOT_FOUND",
-          message: `No approval row found for tenant ${dto.tenantId} on this termination`,
-        },
+    // H-01: if the caller is a TENANT, they may only vote for their own approval row.
+    if (actorRole === "TENANT") {
+      const callerTenant = await this.prisma.tenant.findUnique({
+        where: { user_id: actorId },
+        select: { id: true },
       });
+      if (!callerTenant || callerTenant.id !== dto.tenantId) {
+        throw new ForbiddenException({
+          error: {
+            code: "FORBIDDEN_TENANT_ACTION",
+            message: "You can only vote on your own termination approval (H-01)",
+          },
+        });
+      }
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.leaseTerminationApproval.update({
-        where: { id: approval.id },
-        data: {
-          status: dto.decision,
-          responded_at: new Date(),
-          note: dto.note ?? null,
-        },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const termination = await tx.leaseTermination.findFirst({
+          where: { lease_id: leaseId, finalized_at: null, withdrawn_at: null },
+        });
 
-      await this.audit.writeLog(tx, {
-        actorId,
-        action: "lease_termination.approval",
-        entityType: "LeaseTerminationApproval",
-        entityId: approval.id,
-        before: { status: approval.status },
-        after: { status: dto.decision, note: dto.note },
-      });
+        if (!termination) {
+          throw new NotFoundException({
+            error: {
+              code: "NO_OPEN_TERMINATION",
+              message: "No open termination request found for this lease",
+            },
+          });
+        }
 
-      return { approval: updated };
-    });
+        const approval = await tx.leaseTerminationApproval.findFirst({
+          where: { termination_id: termination.id, tenant_id: dto.tenantId },
+        });
+
+        if (!approval) {
+          throw new NotFoundException({
+            error: {
+              code: "APPROVAL_NOT_FOUND",
+              message: `No approval row found for tenant ${dto.tenantId} on this termination`,
+            },
+          });
+        }
+
+        const updated = await tx.leaseTerminationApproval.update({
+          where: { id: approval.id },
+          data: {
+            status: dto.decision,
+            responded_at: new Date(),
+            note: dto.note ?? null,
+          },
+        });
+
+        await this.audit.writeLog(tx, {
+          actorId,
+          action: "lease_termination.approval",
+          entityType: "LeaseTerminationApproval",
+          entityId: approval.id,
+          before: { status: approval.status },
+          after: { status: dto.decision, note: dto.note },
+        });
+
+        return { approval: updated };
+      },
+      { isolationLevel: "Serializable" },
+    );
   }
 
   // ---------------------------------------------------------------------------
   // Withdraw termination (POST /leases/:id/terminate-withdraw)
+  // H-01: TENANT caller must be the requester themselves.
+  // M-01: Serializable isolation.
   // ---------------------------------------------------------------------------
 
-  async withdrawTermination(leaseId: string, requestingTenantId: string, actorId: string) {
-    const termination = await this.prisma.leaseTermination.findFirst({
-      where: { lease_id: leaseId, finalized_at: null, withdrawn_at: null },
-    });
-
-    if (!termination) {
-      throw new NotFoundException({
-        error: {
-          code: "NO_OPEN_TERMINATION",
-          message: "No open termination request found for this lease",
-        },
+  async withdrawTermination(
+    leaseId: string,
+    requestingTenantId: string,
+    actorId: string,
+    actorRole: string,
+  ) {
+    // H-01: TENANT caller must prove they ARE the requester before we even look up the termination.
+    if (actorRole === "TENANT") {
+      const callerTenant = await this.prisma.tenant.findUnique({
+        where: { user_id: actorId },
+        select: { id: true },
       });
+      if (!callerTenant || callerTenant.id !== requestingTenantId) {
+        throw new ForbiddenException({
+          error: {
+            code: "FORBIDDEN_TENANT_ACTION",
+            message: "You can only withdraw a termination request that you initiated (H-01)",
+          },
+        });
+      }
     }
 
-    if (termination.requested_by_tenant_id !== requestingTenantId) {
-      throw new ForbiddenException({
-        error: {
-          code: "ONLY_REQUESTER_CAN_WITHDRAW",
-          message: "Only the tenant who requested the termination can withdraw it",
-        },
-      });
-    }
+    return this.prisma.$transaction(
+      async (tx) => {
+        const termination = await tx.leaseTermination.findFirst({
+          where: { lease_id: leaseId, finalized_at: null, withdrawn_at: null },
+        });
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.leaseTermination.update({
-        where: { id: termination.id },
-        data: { withdrawn_at: new Date() },
-      });
+        if (!termination) {
+          throw new NotFoundException({
+            error: {
+              code: "NO_OPEN_TERMINATION",
+              message: "No open termination request found for this lease",
+            },
+          });
+        }
 
-      await this.audit.writeLog(tx, {
-        actorId,
-        action: "lease_termination.withdraw",
-        entityType: "LeaseTermination",
-        entityId: termination.id,
-        before: { withdrawn_at: null },
-        after: { withdrawn_at: updated.withdrawn_at },
-      });
+        if (termination.requested_by_tenant_id !== requestingTenantId) {
+          throw new ForbiddenException({
+            error: {
+              code: "ONLY_REQUESTER_CAN_WITHDRAW",
+              message: "Only the tenant who requested the termination can withdraw it",
+            },
+          });
+        }
 
-      return { termination: updated };
-    });
+        const updated = await tx.leaseTermination.update({
+          where: { id: termination.id },
+          data: { withdrawn_at: new Date() },
+        });
+
+        await this.audit.writeLog(tx, {
+          actorId,
+          action: "lease_termination.withdraw",
+          entityType: "LeaseTermination",
+          entityId: termination.id,
+          before: { withdrawn_at: null },
+          after: { withdrawn_at: updated.withdrawn_at },
+        });
+
+        return { termination: updated };
+      },
+      { isolationLevel: "Serializable" },
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -941,19 +1044,42 @@ export class LeasesService {
 
   // ---------------------------------------------------------------------------
   // Create deposit refund (POST /deposit-refunds)
+  // H-02: PM must own the property this lease belongs to.
   // Lease must be TERMINATED. One refund per lease (unique index).
   // ---------------------------------------------------------------------------
 
-  async createDepositRefund(dto: DepositRefundDto, actorId: string) {
+  async createDepositRefund(dto: DepositRefundDto, actorId: string, actorRole: string) {
     const lease = await this.prisma.lease.findUnique({
       where: { id: dto.leaseId },
-      select: { id: true, status: true, security_deposit_paise: true },
+      select: {
+        id: true,
+        status: true,
+        security_deposit_paise: true,
+        unit: { select: { property_id: true } },
+      },
     });
 
     if (!lease) {
       throw new NotFoundException({
         error: { code: "RESOURCE_NOT_FOUND", message: `Lease ${dto.leaseId} not found` },
       });
+    }
+
+    // H-02: belt-and-suspenders PM→property check (decorator alone is not enough if bodyKey
+    // resolution ever drifts). ADMIN bypasses this check.
+    if (actorRole === "PROPERTY_MANAGER") {
+      const property = await this.prisma.property.findFirst({
+        where: { id: lease.unit.property_id, active_pm_id: actorId, deleted_at: null },
+        select: { id: true },
+      });
+      if (!property) {
+        throw new ForbiddenException({
+          error: {
+            code: "PROPERTY_ACCESS_DENIED",
+            message: "You are not the assigned manager for the property this lease belongs to (H-02)",
+          },
+        });
+      }
     }
 
     if (lease.status !== "TERMINATED") {
