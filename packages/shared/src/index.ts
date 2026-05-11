@@ -6,7 +6,7 @@
  */
 
 export const APP_NAME = "GharSetu" as const;
-export const SHARED_PACKAGE_VERSION = "0.4.1" as const;
+export const SHARED_PACKAGE_VERSION = "0.5.0" as const;
 
 export { Role, ROLES, isRole } from "./role.js";
 export type { RoleValue } from "./role.js";
@@ -89,6 +89,26 @@ export type {
   TerminationApproval,
   DepositRefundInput,
 } from "./schemas/leases.js";
+
+// Maintenance schemas + enums (Phase 5)
+export {
+  MaintenancePriorityEnum,
+  MaintenanceStatusEnum,
+  CreateMaintenanceRequestSchema,
+  AssignMaintenanceSchema,
+  ResolveMaintenanceSchema,
+  DismissAlertSchema,
+  MaintenanceRequestFilterSchema,
+} from "./schemas/maintenance.js";
+export type {
+  MaintenancePriorityValue,
+  MaintenanceStatusValue,
+  CreateMaintenanceRequestInput,
+  AssignMaintenanceInput,
+  ResolveMaintenanceInput,
+  DismissAlertInput,
+  MaintenanceRequestFilter,
+} from "./schemas/maintenance.js";
 
 // Rent, Payments, Late-fee schemas + helpers (Phase 4)
 export {
