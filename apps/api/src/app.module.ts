@@ -14,6 +14,7 @@ import { UnitsModule } from "./units/units.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { LeasesModule } from "./leases/leases.module";
 import { RentModule } from "./rent/rent.module";
+import { MaintenanceModule } from "./maintenance/maintenance.module";
 import { JobsModule } from "./jobs/jobs.module";
 
 @Module({
@@ -39,6 +40,7 @@ import { JobsModule } from "./jobs/jobs.module";
     TenantsModule,
     LeasesModule,
     RentModule,
+    MaintenanceModule,
     JobsModule,
   ],
   providers: [
