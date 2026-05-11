@@ -6,7 +6,7 @@
  */
 
 export const APP_NAME = "GharSetu" as const;
-export const SHARED_PACKAGE_VERSION = "0.2.0" as const;
+export const SHARED_PACKAGE_VERSION = "0.3.0" as const;
 
 export { Role, ROLES, isRole } from "./role.js";
 export type { RoleValue } from "./role.js";
@@ -65,3 +65,27 @@ export {
   formatINR,
   formatINRFallback,
 } from "./utils/currency.js";
+
+// Lease, Tenant, Termination, Deposit schemas (Phase 3)
+export {
+  LeaseStatusSchema,
+  TerminationApprovalStatusSchema,
+  TenantInputSchema,
+  TenantUpdateSchema,
+  LeaseInputSchema,
+  LeaseRenewSchema,
+  TerminationRequestSchema,
+  TerminationApprovalSchema,
+  DepositRefundSchema,
+} from "./schemas/leases.js";
+export type {
+  LeaseStatusValue,
+  TerminationApprovalStatusValue,
+  TenantInput,
+  TenantUpdate,
+  LeaseInput,
+  LeaseRenew,
+  TerminationRequest,
+  TerminationApproval,
+  DepositRefundInput,
+} from "./schemas/leases.js";
