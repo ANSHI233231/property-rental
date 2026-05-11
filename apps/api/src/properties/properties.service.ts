@@ -10,6 +10,7 @@ import { AuditService } from "../audit/audit.service";
 import type { CreatePropertyDto } from "./dto/create-property.dto";
 import type { UpdatePropertyDto } from "./dto/update-property.dto";
 import type { TransferPmDto } from "./dto/transfer-pm.dto";
+import type { JwtPayload } from "../auth/jwt.service";
 
 /** Fields that are safe to return in API responses. */
 const PROPERTY_SELECT = {
@@ -41,11 +42,18 @@ export class PropertiesService {
 
   // ---------------------------------------------------------------------------
   // List (cursor-based pagination)
+  // ADMIN: all non-deleted properties.
+  // PROPERTY_MANAGER: only the property assigned to them (BL-19).
   // ---------------------------------------------------------------------------
 
-  async list(cursor?: string, limit = 20) {
+  async list(cursor?: string, limit = 20, actor?: JwtPayload) {
     const take = Math.min(limit, 100);
-    const where = { deleted_at: null };
+
+    // Scope for PROPERTY_MANAGER: only their assigned property.
+    const where: { deleted_at: null; active_pm_id?: string } = { deleted_at: null };
+    if (actor?.role === "PROPERTY_MANAGER") {
+      where.active_pm_id = actor.sub;
+    }
 
     const items = await this.prisma.property.findMany({
       where,

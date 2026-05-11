@@ -45,6 +45,23 @@ import type { JwtPayload } from "../auth/jwt.service";
 export class UnitsController {
   constructor(private readonly unitsService: UnitsService) {}
 
+  /**
+   * GET /units — flat list, Admin-only. Used by the admin dashboard.
+   * Supports cursor + limit + status (UnitState) query params.
+   */
+  @Get()
+  async listAll(
+    @Query("cursor") cursor?: string,
+    @Query("limit") limit?: string,
+    @Query("status") status?: string,
+  ) {
+    return this.unitsService.listAll({
+      cursor,
+      limit: limit ? Math.min(parseInt(limit, 10), 200) : 20,
+      status,
+    });
+  }
+
   /** GET /units/:id */
   @Get(":id")
   async findOne(@Param("id") id: string) {

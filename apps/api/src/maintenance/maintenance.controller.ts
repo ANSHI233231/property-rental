@@ -64,6 +64,27 @@ export class MaintenanceController {
   }
 
   // ---------------------------------------------------------------------------
+  // GET /maintenance-requests/alerts
+  // MUST be declared BEFORE /:id to avoid Nest treating 'alerts' as an id.
+  // BL-17: Admin and PM only. Admin sees all; PM scoped to their property.
+  // ---------------------------------------------------------------------------
+
+  @Get("alerts")
+  @Roles("ADMIN", "PROPERTY_MANAGER")
+  async listAlerts(
+    @CurrentUser() actor: JwtPayload,
+    @Query("dismissed") dismissed?: string,
+    @Query("cursor") cursor?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return this.maintenanceService.listAlerts(actor, {
+      dismissed,
+      cursor,
+      limit: limit ? Math.min(parseInt(limit, 10), 100) : 20,
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // POST /maintenance-requests/dismiss-alert
   // MUST be declared BEFORE /:id to avoid Nest treating 'dismiss-alert' as an id.
   // BL-17: Admin or PM only.

@@ -20,6 +20,10 @@ const isChangePasswordRoute = (ctx: ExecutionContext): boolean => {
   const url = ctx.switchToHttp().getRequest<Request>().url;
   return /\/users\/me\/change-password(\?|$|\/)/.test(url);
 };
+const isLoginRoute = (ctx: ExecutionContext): boolean => {
+  const url = ctx.switchToHttp().getRequest<Request>().url;
+  return /\/auth\/login(\?|$|\/)/.test(url);
+};
 import { LoggerModule } from "nestjs-pino";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -82,13 +86,13 @@ import { AuditLogModule } from "./audit-log/audit-log.module";
       process.env["NODE_ENV"] === "test"
         ? [
             { name: "default",    ttl: 60000,   limit: 100000 },
-            { name: "login",      ttl: 60000,   limit: 100000 },
+            { name: "login",      ttl: 60000,   limit: 100000, skipIf: (ctx) => !isLoginRoute(ctx) },
             { name: "auth-slow",  ttl: 3600000, limit: 100000, skipIf: (ctx) => !isPasswordResetRoute(ctx) },
             { name: "change-pwd", ttl: 60000,   limit: 100000, skipIf: (ctx) => !isChangePasswordRoute(ctx) },
           ]
         : [
             { name: "default",    ttl: 60000,   limit: 100   },
-            { name: "login",      ttl: 60000,   limit: 10    },
+            { name: "login",      ttl: 60000,   limit: 10,     skipIf: (ctx) => !isLoginRoute(ctx) },
             { name: "auth-slow",  ttl: 3600000, limit: 5,     skipIf: (ctx) => !isPasswordResetRoute(ctx) },
             { name: "change-pwd", ttl: 60000,   limit: 5,     skipIf: (ctx) => !isChangePasswordRoute(ctx) },
           ],

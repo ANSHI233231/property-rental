@@ -54,6 +54,40 @@ export class UnitsService {
   ) {}
 
   // ---------------------------------------------------------------------------
+  // List all units — flat, cross-property (Admin only, for admin dashboard)
+  // ---------------------------------------------------------------------------
+
+  async listAll(query: {
+    cursor?: string;
+    limit?: number;
+    status?: string;
+  }) {
+    const take = Math.min(query.limit ?? 20, 200);
+    const where: { state?: UnitState } = {};
+
+    if (query.status) {
+      where.state = query.status as UnitState;
+    }
+
+    const items = await this.prisma.unit.findMany({
+      where,
+      select: UNIT_SELECT,
+      orderBy: { created_at: "asc" },
+      take: take + 1,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = items.length > take;
+    const data = hasMore ? items.slice(0, take) : items;
+    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+
+    return {
+      data,
+      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+    };
+  }
+
+  // ---------------------------------------------------------------------------
   // List units for a property (cursor-based)
   // ---------------------------------------------------------------------------
 

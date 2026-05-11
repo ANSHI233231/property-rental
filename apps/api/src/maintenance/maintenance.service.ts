@@ -6,6 +6,10 @@ import {
   BadRequestException,
   Logger,
 } from "@nestjs/common";
+
+// Valid MaintenanceStatus enum values (mirrors prisma/schema.prisma)
+const VALID_MAINTENANCE_STATUSES = ["OPEN", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
+type MaintenanceStatusValue = typeof VALID_MAINTENANCE_STATUSES[number];
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
@@ -133,6 +137,12 @@ export class MaintenanceService {
     }
 
     if (query.status) {
+      if (!VALID_MAINTENANCE_STATUSES.includes(query.status as MaintenanceStatusValue)) {
+        throw new BadRequestException({
+          code: "INVALID_STATUS",
+          message: `Invalid status value '${query.status}'. Valid values: ${VALID_MAINTENANCE_STATUSES.join(", ")}`,
+        });
+      }
       where.status = query.status as Prisma.EnumMaintenanceStatusFilter;
     }
 
@@ -484,6 +494,54 @@ export class MaintenanceService {
     });
 
     return updated;
+  }
+
+  // ---------------------------------------------------------------------------
+  // listAlerts — GET /maintenance-requests/alerts (Admin / PM)
+  // BL-17: Admin sees all active alerts; PM sees only their property's alerts.
+  // ---------------------------------------------------------------------------
+
+  async listAlerts(actor: JwtPayload, query: {
+    dismissed?: string;
+    cursor?: string;
+    limit?: number;
+  }) {
+    const take = Math.min(query.limit ?? 20, 100);
+
+    const where: Prisma.MaintenanceAlertWhereInput = {};
+
+    // Default: only active (not dismissed) alerts unless ?dismissed=true
+    if (query.dismissed !== "true") {
+      where.dismissed_at = null;
+    }
+
+    if (actor.role === "PROPERTY_MANAGER") {
+      // Scope: only alerts for units in the PM's assigned property
+      const pm = await this.prisma.property.findFirst({
+        where: { active_pm_id: actor.sub, deleted_at: null },
+        select: { id: true },
+      });
+      if (!pm) {
+        return { data: [], nextCursor: null };
+      }
+      where.unit = { property_id: pm.id };
+    }
+    // ADMIN: no additional scoping
+
+    const items = await this.prisma.maintenanceAlert.findMany({
+      where,
+      select: ALERT_SELECT,
+      orderBy: { triggered_at: "desc" },
+      take: take + 1,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = items.length > take;
+    const data = hasMore ? items.slice(0, take) : items;
+    const lastItem = data[data.length - 1];
+    const nextCursor = hasMore && lastItem ? lastItem.id : null;
+
+    return { data, nextCursor };
   }
 
   // ---------------------------------------------------------------------------

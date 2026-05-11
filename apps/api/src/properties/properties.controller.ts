@@ -39,13 +39,19 @@ import type { JwtPayload } from "../auth/jwt.service";
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
-  /** GET /properties?cursor=&limit=20 */
+  /**
+   * GET /properties?cursor=&limit=20
+   * ADMIN: sees all properties.
+   * PROPERTY_MANAGER: sees only the property they are assigned to (BL-19/BL-20).
+   */
   @Get()
+  @Roles("ADMIN", "PROPERTY_MANAGER")
   async list(
+    @CurrentUser() actor: JwtPayload,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
   ) {
-    return this.propertiesService.list(cursor, limit ? parseInt(limit, 10) : 20);
+    return this.propertiesService.list(cursor, limit ? parseInt(limit, 10) : 20, actor);
   }
 
   /** POST /properties */
