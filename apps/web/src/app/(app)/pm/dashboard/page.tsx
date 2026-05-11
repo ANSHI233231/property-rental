@@ -88,6 +88,9 @@ export default function PmDashboardPage() {
   // Phase 4 rent KPIs
   const [rentCollectedPaise, setRentCollectedPaise] = useState<number | null>(null);
   const [overdueCount, setOverdueCount] = useState<number | null>(null);
+  // Phase 5 maintenance KPIs
+  const [openMaintenanceCount, setOpenMaintenanceCount] = useState<number | null>(null);
+  const [emergencyMaintenanceCount, setEmergencyMaintenanceCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -100,7 +103,7 @@ export default function PmDashboardPage() {
         const periodStart = format(startOfMonth(now), "yyyy-MM-dd");
         const periodEnd = format(endOfMonth(now), "yyyy-MM-dd");
 
-        const [tenantsRes, leasesRes, paidPeriodsRes, overduePeriodsRes] = await Promise.allSettled([
+        const [tenantsRes, leasesRes, paidPeriodsRes, overduePeriodsRes, openMaintRes] = await Promise.allSettled([
           apiFetch<{ meta?: PaginatedMeta }>(`/properties/${propertyId}/tenants?limit=1`),
           apiFetch<{ meta?: PaginatedMeta; data?: Lease[] }>(
             `/leases?propertyId=${propertyId}&status=ACTIVE&limit=100`,
@@ -112,6 +115,10 @@ export default function PmDashboardPage() {
           // Phase 4: overdue count
           apiFetch<RentPeriodsResponse>(
             `/rent-periods?propertyId=${propertyId}&status=OVERDUE&limit=50`,
+          ),
+          // Phase 5: open maintenance requests
+          apiFetch<{ data?: { priority: string; status: string }[]; items?: { priority: string; status: string }[]; meta?: { total?: number } }>(
+            `/maintenance-requests?propertyId=${propertyId}&limit=100`,
           ),
         ]);
 
@@ -153,6 +160,16 @@ export default function PmDashboardPage() {
             setOverdueCount(items.length);
           } else {
             setOverdueCount(0);
+          }
+          // Phase 5 — maintenance KPIs
+          if (openMaintRes.status === "fulfilled") {
+            const items = openMaintRes.value.data ?? openMaintRes.value.items ?? [];
+            const openReqs = items.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status));
+            setOpenMaintenanceCount(openReqs.length);
+            setEmergencyMaintenanceCount(openReqs.filter((r) => r.priority === "EMERGENCY").length);
+          } else {
+            setOpenMaintenanceCount(0);
+            setEmergencyMaintenanceCount(0);
           }
         }
       } catch {
@@ -241,6 +258,18 @@ export default function PmDashboardPage() {
                 meta="5+ days past due"
                 color={overdueCount ? "var(--color-status-overdue)" : undefined}
               />
+              <KpiCard
+                label="Open Maintenance"
+                value={openMaintenanceCount ?? "—"}
+                meta="Open / Assigned / In-Progress"
+                color={openMaintenanceCount ? "var(--color-status-partial)" : undefined}
+              />
+              <KpiCard
+                label="Emergency Requests"
+                value={emergencyMaintenanceCount ?? "—"}
+                meta="Needs urgent attention"
+                color={emergencyMaintenanceCount ? "var(--color-status-overdue)" : undefined}
+              />
             </>
           )}
         </div>
@@ -270,16 +299,26 @@ export default function PmDashboardPage() {
 
       {/* Two column */}
       <section className="grid lg:grid-cols-2 gap-6 section">
-        {/* Maintenance queue stub */}
+        {/* Maintenance queue — Phase 5 live */}
         <div className="card">
           <h3 className="section-title">Maintenance Queue</h3>
-          <p className="text-sm muted">
-            Maintenance data available in Phase 5. Navigate to{" "}
-            <Link href="/pm/maintenance" className="text-royal-blue font-poppins font-semibold">
-              Maintenance
-            </Link>
-            .
-          </p>
+          {openMaintenanceCount !== null && openMaintenanceCount > 0 ? (
+            <>
+              <p className="text-sm muted mb-2">
+                <strong className="text-charcoal">{openMaintenanceCount}</strong> open request{openMaintenanceCount !== 1 ? "s" : ""}
+                {emergencyMaintenanceCount ? (
+                  <span style={{ color: "var(--color-status-overdue)" }}>
+                    {" "}— {emergencyMaintenanceCount} emergency
+                  </span>
+                ) : null}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm muted mb-2">No open requests.</p>
+          )}
+          <Link href="/pm/maintenance" className="btn btn-primary mt-3 !text-sm !py-2 inline-flex">
+            Open Maintenance →
+          </Link>
         </div>
 
         {/* Recent payments — link to rent collection */}

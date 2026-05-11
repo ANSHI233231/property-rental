@@ -35,6 +35,17 @@ const ERROR_MAP: Record<string, string> = {
   RENT_PERIOD_NOT_FOUND: "Rent period not found.",
   INVALID_PAYMENT_AMOUNT: "Enter a payment amount greater than zero.",
   PERIOD_ALREADY_PAID: "This period is already fully paid.",
+  // Phase 5 — Maintenance
+  BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE:
+    "Only tenants can raise maintenance requests.",
+  BL_21_ONLY_TENANT_CAN_CLOSE_MAINTENANCE:
+    "Only the tenant who raised this request can close it.",
+  NO_ACTIVE_LEASE_ON_UNIT:
+    "You don't have an active lease on this unit.",
+  INVALID_TRANSITION:
+    "This request can't transition from its current status.",
+  NOT_YOUR_ASSIGNMENT:
+    "You can only act on requests assigned to you.",
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";

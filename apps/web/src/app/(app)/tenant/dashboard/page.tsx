@@ -259,6 +259,8 @@ export default function TenantDashboardPage() {
 
   const [lease, setLease] = useState<ActiveLease | null>(null);
   const [loading, setLoading] = useState(true);
+  // Phase 5: open maintenance count
+  const [openMaintCount, setOpenMaintCount] = useState<number | null>(null);
 
   const [approvalModal, setApprovalModal] = useState<{
     open: boolean;
@@ -292,6 +294,20 @@ export default function TenantDashboardPage() {
   }, [user, apiFetch]);
 
   useEffect(() => { void fetchLease(); }, [fetchLease]);
+
+  // Phase 5: fetch open maintenance count
+  useEffect(() => {
+    if (!user) return;
+    apiFetch<{ data?: { status: string }[]; items?: { status: string }[] }>(
+      `/maintenance-requests?limit=50`,
+    )
+      .then((res) => {
+        const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as { status: string }[]) : []);
+        const open = items.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status));
+        setOpenMaintCount(open.length);
+      })
+      .catch(() => setOpenMaintCount(null));
+  }, [user, apiFetch]);
 
   async function handleWithdrawTermination() {
     if (!lease) return;
@@ -489,7 +505,11 @@ export default function TenantDashboardPage() {
             <Link href="/tenant/maintenance" className="card role-card flex items-center justify-between">
               <div>
                 <div className="font-poppins font-semibold text-charcoal">My maintenance requests</div>
-                <div className="text-sm muted mt-1">View open requests</div>
+                <div className="text-sm muted mt-1">
+                  {openMaintCount !== null && openMaintCount > 0
+                    ? `${openMaintCount} open request${openMaintCount !== 1 ? "s" : ""}`
+                    : "View open requests"}
+                </div>
               </div>
               <span className="text-saffron text-2xl">→</span>
             </Link>
