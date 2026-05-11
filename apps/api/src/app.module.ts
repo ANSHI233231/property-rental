@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
+import { CodeErrorFilter } from "./common/filters/code-error.filter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -41,6 +42,13 @@ import { JobsModule } from "./jobs/jobs.module";
     JobsModule,
   ],
   providers: [
+    // Global exception filter — normalises every error to { error: { code, message } }
+    // so the FE error-mapper (apps/web/src/lib/api/errors.ts) always receives a
+    // stable machine-readable `code` field (BUG-PHASE-4-1).
+    {
+      provide: APP_FILTER,
+      useClass: CodeErrorFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
