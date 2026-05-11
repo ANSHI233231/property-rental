@@ -44,9 +44,13 @@ test.describe("BL-13: Late fee accrual — admin recompute", () => {
     });
     // Must not be 500 — either 200 (ran) or the same 200 with skipped:true
     expect(res.status).toBe(200);
-    const body = await res.json() as { skipped?: boolean; periodsExamined?: number };
+    // TEST-FLAW-PH4-1 fix: the endpoint wraps the accrual summary under a `result` key.
+    // Actual shape: { message: string, result: { skipped: boolean, periodsExamined: number, ... } }
+    // The flat `body.skipped` was always `undefined` — always read `body.result.skipped`.
+    const body = await res.json() as { message: string; result: { skipped: boolean; periodsExamined?: number } };
+    const { result } = body;
     // skipped is a boolean — either true (already ran today) or false (ran now)
-    expect(typeof body.skipped).toBe("boolean");
+    expect(typeof result.skipped).toBe("boolean");
   });
 
   /**
@@ -67,14 +71,16 @@ test.describe("BL-13: Late fee accrual — admin recompute", () => {
     });
     expect(run2.status).toBe(200);
 
-    const body1 = await run1.json() as { skipped: boolean };
-    const body2 = await run2.json() as { skipped: boolean };
+    // TEST-FLAW-PH4-1 fix: endpoint shape is { message, result: { skipped, ... } }.
+    // `body.skipped` was always `undefined` (wrong path); must read `body.result.skipped`.
+    const body1 = await run1.json() as { message: string; result: { skipped: boolean } };
+    const body2 = await run2.json() as { message: string; result: { skipped: boolean } };
 
     // At least one of the two must be skipped (whichever ran second).
     // The first may or may not be skipped depending on whether a prior
     // test already ran today — but the second of these two must be.
     // We verify that they agree on skipped semantics (no 500).
-    const atLeastOneSkipped = body1.skipped === true || body2.skipped === true;
+    const atLeastOneSkipped = body1.result.skipped === true || body2.result.skipped === true;
     expect(atLeastOneSkipped).toBe(true);
   });
 

@@ -250,3 +250,39 @@ Notes on parallel-run vs isolation:
 All 15 previously environment-blocked Phase 4 E2E tests are unblocked; 10 now pass against the live binary. Five genuine failures remain, classified as 1 API bug (BUG-PHASE-4-1, P1) and 2 test-design flaws (TEST-FLAW-PH4-1 and TEST-FLAW-PH4-2, P1/P2). No P0 regressions. BUG-001 is fixed. Phase 3 carry-over is fully green (BUG-002, BUG-003 both closed). Pre-existing TEST-FLAW-PH1 (`auth-role-redirect`) unchanged.
 
 **gharsetu-tester · 2026-05-11 (re-run after BUG-001 fix)**
+
+---
+
+## Playwright final close-out — 2026-05-11
+
+| Suite | Tests | Pass | Fail |
+|---|---|---|---|
+| Phase 1 carry-over (auth, login, protected-route) | 25 | 25 | 0 |
+| Phase 2 carry-over (admin, props, units, users) | 22 | 22 | 0 |
+| Phase 3 carry-over (leases, terminations, cross-property) | 23 | 23 | 0 |
+| Phase 4 (rent, payments, late-fee, BL-10/13, H-01) | 26 | 24 | 2 |
+| **Total** | **96** | **94** | **2** |
+
+Single-worker run (eliminates parallel-mode DB pollution flakes): 94/96. The 2 remaining failures are the two BUG-PHASE-4-1 assertions — not test-design flaws.
+
+### Test-flaw fixes applied
+
+- **TEST-FLAW-PH4-1** (2 assertions in `bl-13-late-fee-breakdown.spec.ts:49` and `:78`): changed `body.skipped` / `body.result.skipped` — the endpoint wraps the accrual summary under a `result` key (`{ message, result: { skipped, ... } }`). Both assertions now destructure `body.result.skipped`. Added a comment documenting the actual response shape.
+- **TEST-FLAW-PH4-2** (`tenant-rent-readonly.spec.ts:66`, TC-ROLE-007): replaced the cookie-injection-only approach with Playwright `page.route()` intercepts for `/auth/refresh`, `/users/me`, and `/rent-periods`. The mock refresh returns a synthetic token, satisfying `useAuth()`'s `restoreSession()` without hitting the real API (avoids throttle exposure and cross-origin HttpOnly cookie limitations). All 5 tests in this spec now pass.
+- **TEST-FLAW-PH1** (`auth-role-redirect.spec.ts:31`, 4-iteration loop): changed `page.waitForURL(/login/)` to `page.waitForURL(/\/login\?next=/)`, which only resolves when both `/login` and `?next=` are present in the URL, eliminating the race where the assertion fired before the `?next=` param was appended. Added `waitForLoadState("networkidle")` to let the redirect chain settle. All 5 tests in this spec now pass.
+
+### BUG-PHASE-4-1 verification
+
+The two `bl-10-tenant-blocked` tests that previously failed against the legacy NestJS error shape still fail — and correctly so. The API returns `{"error":{"code":"FORBIDDEN",...}}` rather than the expected `BL_10_TENANT_CANNOT_RECORD_PAYMENT` code. This is the known BUG-PHASE-4-1 (API contract gap, P1), filed in the prior run. The 403 status is correct; only the error body code differs from the contract. The regression tests remain as written — they are the authoritative specification for the correct error shape. They will pass once the BE ships the `CodeErrorFilter`-wrapped BL-10 exception.
+
+Affected files:
+- `apps/web/e2e/bl-10-tenant-blocked.spec.ts:119` — `Tenant JWT on POST /payments → 403 BL_10_TENANT_CANNOT_RECORD_PAYMENT`
+- `apps/web/e2e/pm-record-payment.spec.ts:290` — `BL-10 (API): tenant token on POST /payments → 403 BL_10_TENANT_CANNOT_RECORD_PAYMENT`
+
+### Verdict
+
+PASS-WITH-NOTES
+
+All 4 test-design flaws (TEST-FLAW-PH4-1 x2, TEST-FLAW-PH4-2, TEST-FLAW-PH1 x4 loop iterations) are resolved. The 2 remaining Playwright failures are both instances of BUG-PHASE-4-1 (API error-body shape mismatch, P1) — not test-design issues. No P0 failures. No test.skip or test.fixme introduced.
+
+**gharsetu-tester · 2026-05-11 (phase-4 playwright final close-out)**

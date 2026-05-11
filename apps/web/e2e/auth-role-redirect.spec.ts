@@ -36,9 +36,16 @@ test.describe("auth-role-redirect (demo buttons)", () => {
       // The demo role buttons are plain <Link href="..."> — no API call needed
       await page.click(`a[href="${href}"]`);
 
-      // Middleware: no __loggedIn cookie → will redirect to /login?next=<href>
-      // This is correct middleware behavior
-      await page.waitForURL(/login/, { timeout: 10_000 });
+      // TEST-FLAW-PH1 fix: waitForURL(/login/) resolved at the bare /login URL
+      // before the ?next= query param was attached, causing a race where the
+      // assertion `page.url().toContain("next=...")` fired too early.
+      //
+      // Fix: use a regex that requires BOTH /login AND ?next= to be present in
+      // the URL. This only resolves once the full redirect chain has settled,
+      // eliminating the race. Also wait for networkidle to let the redirect
+      // chain complete fully before asserting.
+      await page.waitForURL(/\/login\?next=/, { timeout: 10_000 });
+      await page.waitForLoadState("networkidle");
       expect(page.url()).toContain("/login");
       expect(page.url()).toContain(`next=${encodeURIComponent(href)}`);
     });
