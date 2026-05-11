@@ -26,7 +26,7 @@ import { useToast } from "@/components/ui/Toast";
 import { friendlyError } from "@/lib/api/errors";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { format } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,12 +76,7 @@ function scopeLabel(user: UserRow): string {
 }
 
 function formatDate(iso?: string): string {
-  if (!iso) return "—";
-  try {
-    return format(new Date(iso), "dd/MM/yyyy");
-  } catch {
-    return "—";
-  }
+  return formatDateOnlyIST(iso);
 }
 
 // ---------------------------------------------------------------------------

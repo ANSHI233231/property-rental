@@ -13,7 +13,8 @@
  */
 
 import { useState, useEffect } from "react";
-import { parseISO, format, differenceInCalendarDays } from "date-fns";
+import { parseISO, differenceInCalendarDays } from "date-fns";
+// Note: date-fns format() removed — use formatDateOnlyIST / todayIST from @/lib/locale instead
 import { useAuth } from "@/lib/auth/context";
 import { useToast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
@@ -23,7 +24,10 @@ import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { paiseStringToINR, parseBigPaise } from "@/lib/rent/format";
 import { friendlyError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/client";
+import { formatDateOnlyIST, todayIST } from "@/lib/locale";
 import type { RentStatusValue } from "@gharsetu/shared";
+
+type StatusChip = "OVERDUE" | "PARTIAL" | "ALL";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,15 +70,16 @@ interface RentPeriodsResponse {
 // ---------------------------------------------------------------------------
 
 function formatDate(iso: string): string {
-  try {
-    return format(parseISO(iso), "dd/MM/yyyy");
-  } catch {
-    return iso;
-  }
+  return formatDateOnlyIST(iso);
 }
 
 function formatPeriodMonth(): string {
-  return format(new Date(), "MMM yyyy");
+  // Returns e.g. "May 2026" in en-IN locale
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    month: "short",
+    year: "numeric",
+  }).format(new Date());
 }
 
 function sumPaiseStrings(strs: string[]): number {
@@ -147,11 +152,13 @@ export default function AdminRentPage() {
   const { toast } = useToast();
 
   const [overduePeriods, setOverduePeriods] = useState<RentPeriod[]>([]);
+  const [partialPeriods, setPartialPeriods] = useState<RentPeriod[]>([]);
   const [allPeriods, setAllPeriods] = useState<RentPeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [recomputeOpen, setRecomputeOpen] = useState(false);
   const [recomputeRunning, setRecomputeRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
+  const [activeChip, setActiveChip] = useState<StatusChip>("OVERDUE");
 
   useEffect(() => {
     let cancelled = false;
@@ -186,6 +193,7 @@ export default function AdminRentPage() {
               : [];
 
           setOverduePeriods(overdue);
+          setPartialPeriods(partial);
           setAllPeriods([...overdue, ...partial, ...paid, ...prepaid]);
         }
       } catch {
@@ -203,7 +211,7 @@ export default function AdminRentPage() {
     setRecomputeRunning(true);
     try {
       await apiFetch("/jobs/rent-accrual/run", { method: "POST" });
-      const now = format(new Date(), "dd/MM/yyyy HH:mm");
+      const now = todayIST();
       setLastRun(now);
       toast("Accrual job completed. Statuses and late fees have been updated.", "success");
       setRecomputeOpen(false);
@@ -236,6 +244,14 @@ export default function AdminRentPage() {
   const tenantsInArrears = new Set(overduePeriods.map((p) => p.leaseId)).size;
 
   const today = new Date();
+
+  // Chip-filtered periods for the table
+  const displayPeriods =
+    activeChip === "OVERDUE"
+      ? overduePeriods
+      : activeChip === "PARTIAL"
+      ? partialPeriods
+      : allPeriods;
 
   return (
     <>
@@ -301,37 +317,61 @@ export default function AdminRentPage() {
         </div>
       </section>
 
-      {/* Overdue tenants table */}
+      {/* Filter chips + table */}
       <section className="section">
-        <h3 className="section-title">
-          Overdue Tenants — {formatPeriodMonth()}
-        </h3>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h3 className="section-title m-0">
+            Rent Periods — {formatPeriodMonth()}
+          </h3>
+          <div className="flex gap-2" role="group" aria-label="Filter rent periods by status">
+            {(["OVERDUE", "PARTIAL", "ALL"] as StatusChip[]).map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => setActiveChip(chip)}
+                aria-pressed={activeChip === chip}
+                className={`!py-1 !px-3 !text-sm rounded-full border font-poppins font-semibold transition-colors ${
+                  activeChip === chip
+                    ? "bg-navy text-white border-navy"
+                    : "bg-white text-slate border-mid-gray hover:border-navy"
+                }`}
+              >
+                {chip === "OVERDUE" ? `Overdue (${overduePeriods.length})` :
+                 chip === "PARTIAL" ? `Partial (${partialPeriods.length})` :
+                 `All (${allPeriods.length})`}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="card p-0 overflow-x-auto">
-          <table className="data-table">
+          <table className="data-table" aria-label="Rent periods list">
+            <caption className="sr-only">Rent periods filtered by {activeChip}</caption>
             <thead>
               <tr>
-                <th>Tenant</th>
-                <th>Unit</th>
-                <th>Property</th>
-                <th>Due Date</th>
-                <th>Outstanding</th>
-                <th>Late Fee</th>
-                <th>Days Late</th>
+                <th scope="col">Tenant</th>
+                <th scope="col">Unit</th>
+                <th scope="col">Property</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Outstanding</th>
+                <th scope="col">Late Fee</th>
+                <th scope="col">Days Late</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <SkeletonTableRows rows={3} cols={7} />}
+              {loading && <SkeletonTableRows rows={3} cols={8} />}
 
-              {!loading && overduePeriods.length === 0 && (
+              {!loading && displayPeriods.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center muted py-8">
-                    No overdue tenants.
+                  <td colSpan={8} className="text-center muted py-8">
+                    No {activeChip === "ALL" ? "" : activeChip.toLowerCase() + " "}
+                    rent periods found.
                   </td>
                 </tr>
               )}
 
               {!loading &&
-                overduePeriods.map((period) => {
+                displayPeriods.map((period) => {
                   const tenants =
                     period.lease?.tenants?.map((t) => t.name).join(" + ") ??
                     "—";
@@ -351,6 +391,9 @@ export default function AdminRentPage() {
                       <td>{unitName}</td>
                       <td>{propertyName}</td>
                       <td>{formatDate(period.dueDate)}</td>
+                      <td>
+                        <StatusBadge status={period.status} />
+                      </td>
                       <td>{paiseStringToINR(period.outstandingPaise)}</td>
                       <td style={{ color: "var(--color-status-overdue)" }}>
                         {parseBigPaise(period.lateFeePaise) > 0

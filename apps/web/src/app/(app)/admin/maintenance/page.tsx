@@ -13,7 +13,8 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { useCallback, useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
+import { formatDateIST } from "@/lib/locale";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { MaintenanceStatusBadge } from "@/components/maintenance/MaintenanceStatusBadge";
@@ -79,8 +80,7 @@ interface PropertiesResponse {
 // ---------------------------------------------------------------------------
 
 function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try { return format(parseISO(iso), "dd/MM/yyyy HH:mm"); } catch { return iso; }
+  return formatDateIST(iso);
 }
 
 type PriorityFilter = MaintenancePriorityValue | "ALL";

@@ -30,7 +30,7 @@ import { useToast } from "@/components/ui/Toast";
 import { friendlyError } from "@/lib/api/errors";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateOnlyIST } from "@/lib/locale";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,12 +107,7 @@ function stateLabel(state: UnitStateValue | "RETIRED"): string {
 }
 
 function formatDate(iso?: string): string {
-  if (!iso) return "—";
-  try {
-    return format(new Date(iso), "dd/MM/yyyy");
-  } catch {
-    return "—";
-  }
+  return formatDateOnlyIST(iso);
 }
 
 // ---------------------------------------------------------------------------
