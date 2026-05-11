@@ -1,8 +1,9 @@
-// GharSetu — Prisma schema (Phase 4)
+// GharSetu — Prisma schema (Phase 5)
 // Phase 1: User, RefreshToken, PasswordResetToken.
 // Phase 2: Property, Unit, PropertyTransferLog, AuditLog.
 // Phase 3: Tenant, Lease, LeaseTenant, LeaseTermination, LeaseTerminationApproval, DepositRefund.
 // Phase 4: RentPeriod, Payment, PrepaidCredit, RentAccrualLog.
+// Phase 5: MaintenanceRequest, MaintenanceAlert.
 
 generator client {
   provider = "prisma-client-js"
@@ -61,6 +62,21 @@ enum PaymentMethod {
   OTHER
 }
 
+enum MaintenancePriority {
+  LOW
+  NORMAL
+  HIGH
+  EMERGENCY
+}
+
+enum MaintenanceStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 // ---------------------------------------------------------------------------
 // User
 // ---------------------------------------------------------------------------
@@ -108,6 +124,13 @@ model User {
   // Phase 4 relations
   payments_recorded Payment[]   @relation("PaymentRecordedBy")
   payments_voided   Payment[]   @relation("PaymentVoidedBy")
+
+  // Phase 5 relations
+  maintenance_requests_raised      MaintenanceRequest[] @relation("MaintenanceRaisedBy")
+  maintenance_requests_assigned    MaintenanceRequest[] @relation("MaintenanceAssignedTo")
+  maintenance_requests_closed      MaintenanceRequest[] @relation("MaintenanceClosedBy")
+  maintenance_alerts_tenant        MaintenanceAlert[]   @relation("MaintenanceAlertTenant")
+  maintenance_alerts_dismissed_by  MaintenanceAlert[]   @relation("MaintenanceAlertDismissedBy")
 
   @@map("users")
 }
@@ -224,6 +247,10 @@ model Unit {
   property    Property  @relation(fields: [property_id], references: [id])
   retired_by  User?     @relation("RetiredByUser", fields: [retired_by_user_id], references: [id])
   leases      Lease[]
+
+  // Phase 5 relations
+  maintenance_requests MaintenanceRequest[]
+  maintenance_alerts   MaintenanceAlert[]
 
   /// Unique unit number per property (e.g. can have "3B" in two different properties).
   @@unique([property_id, unit_number])
@@ -346,6 +373,9 @@ model Lease {
   rent_periods    RentPeriod[]
   payments        Payment[]         @relation("PaymentLease")
   prepaid_credits PrepaidCredit[]   @relation("PrepaidCreditLease")
+
+  // Phase 5 relations
+  maintenance_requests MaintenanceRequest[]
 
   @@index([unit_id, status])
   @@index([end_date])
@@ -548,6 +578,85 @@ model PrepaidCredit {
 
   @@index([lease_id, created_at])
   @@map("prepaid_credits")
+}
+
+// ---------------------------------------------------------------------------
+// RentAccrualLog  (Phase 4)
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// MaintenanceRequest  (Phase 5)
+// ---------------------------------------------------------------------------
+
+/// A maintenance request raised by a tenant for their unit.
+/// BL-14: description >= 30 chars; resolution_notes >= 20 chars (both enforced by DB CHECK).
+/// BL-15: once closed_at is set the row is immutable (DB BEFORE UPDATE trigger).
+/// BL-16: MAINTENANCE role may not create requests (service-layer + @Roles guard).
+/// BL-21: only the original raising tenant may close a request (service-layer check).
+model MaintenanceRequest {
+  id                    String              @id @default(cuid())
+  unit_id               String
+  /// Denormalized from the unit's active lease at create time. Nullable for edge cases.
+  lease_id              String?
+  raised_by_user_id     String
+  assigned_to_user_id   String?
+  title                 String              @db.VarChar(120)
+  /// BL-14: minimum 30 characters (DB CHECK enforced in migration SQL).
+  description           String
+  priority              MaintenancePriority @default(NORMAL)
+  status                MaintenanceStatus   @default(OPEN)
+  /// BL-14: minimum 20 characters when set (DB CHECK enforced in migration SQL).
+  resolution_notes      String?
+  assigned_at           DateTime?
+  in_progress_at        DateTime?
+  resolved_at           DateTime?
+  closed_at             DateTime?
+  /// BL-21: only TENANT closes. Populated on close.
+  closed_by_user_id     String?
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @updatedAt
+
+  // Relations
+  unit          Unit   @relation(fields: [unit_id], references: [id])
+  lease         Lease? @relation(fields: [lease_id], references: [id])
+  raised_by     User   @relation("MaintenanceRaisedBy", fields: [raised_by_user_id], references: [id])
+  assigned_to   User?  @relation("MaintenanceAssignedTo", fields: [assigned_to_user_id], references: [id])
+  closed_by     User?  @relation("MaintenanceClosedBy", fields: [closed_by_user_id], references: [id])
+
+  @@index([unit_id, created_at(sort: Desc)])
+  @@index([lease_id, created_at])
+  @@map("maintenance_requests")
+}
+
+// ---------------------------------------------------------------------------
+// MaintenanceAlert  (Phase 5 — BL-17)
+// ---------------------------------------------------------------------------
+
+/// BL-17: triggered when a tenant has >= 5 maintenance requests for the same unit
+/// in a single calendar month (Asia/Kolkata). Unique per (tenant, unit, month_key).
+/// Dismissed by Admin or PM; dismissal does not delete the row.
+model MaintenanceAlert {
+  id                    String    @id @default(cuid())
+  tenant_user_id        String
+  unit_id               String
+  /// YYYY-MM in Asia/Kolkata timezone (e.g. '2026-05').
+  month_key             String
+  request_count         Int
+  triggered_at          DateTime
+  dismissed_at          DateTime?
+  dismissed_by_user_id  String?
+  dismiss_note          String?
+  created_at            DateTime  @default(now())
+
+  // Relations
+  tenant       User  @relation("MaintenanceAlertTenant", fields: [tenant_user_id], references: [id])
+  unit         Unit  @relation(fields: [unit_id], references: [id])
+  dismissed_by User? @relation("MaintenanceAlertDismissedBy", fields: [dismissed_by_user_id], references: [id])
+
+  /// One alert per tenant/unit/month — idempotent upsert.
+  @@unique([tenant_user_id, unit_id, month_key])
+  @@index([unit_id, month_key])
+  @@map("maintenance_alerts")
 }
 
 // ---------------------------------------------------------------------------
