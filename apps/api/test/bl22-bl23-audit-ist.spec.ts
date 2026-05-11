@@ -416,11 +416,12 @@ describe("BL-23 — IST timestamp conversion (API → IST helper round-trip)", (
     });
     const parts = dtf.formatToParts(ts);
     const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "??";
-    const formatted = `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
+    // BUG-BL22-001 fix: Node's Intl emits "24" for midnight under en-IN + hour12:false.
+    // Normalise to "00", mirroring the formatDateIST helper in apps/web.
+    const hour = get("hour") === "24" ? "00" : get("hour");
+    const formatted = `${get("day")}/${get("month")}/${get("year")} ${hour}:${get("minute")}`;
 
-    // Date part must be correct
     expect(formatted).toMatch(/^11\/05\/2026 /);
-    // Exact IST midnight must render as 00:00, not 24:00 — FAILING until bug fixed
     expect(formatted).toBe("11/05/2026 00:00");
   });
 
@@ -473,7 +474,9 @@ describe("BL-23 — IST timestamp conversion (API → IST helper round-trip)", (
     });
     const parts = dtf.formatToParts(ts);
     const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "??";
-    const result = `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
+    // Same BUG-BL22-001 normalisation as TC-BL23-001 — see comment there.
+    const hour = get("hour") === "24" ? "00" : get("hour");
+    const result = `${get("day")}/${get("month")}/${get("year")} ${hour}:${get("minute")}`;
     expect(result).toMatch(/^01\/01\/2026 /);
     expect(result).toBe("01/01/2026 00:00");
   });

@@ -33,11 +33,15 @@ export function formatDateIST(iso: string | null | undefined): string {
       hour12: false,
     });
 
-    // en-IN returns e.g. "11/05/2026, 13:00" — normalise
+    // en-IN returns e.g. "11/05/2026, 13:00" — normalise.
+    // Node 20's Intl.DateTimeFormat with hour12:false emits "24" for the midnight
+    // hour under some locales; coerce back to "00" so consumers see the canonical
+    // 24-hour wrap (BUG-BL22-001).
     const parts = dtf.formatToParts(date);
     const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+    const hour = get("hour") === "24" ? "00" : get("hour");
 
-    return `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
+    return `${get("day")}/${get("month")}/${get("year")} ${hour}:${get("minute")}`;
   } catch {
     return "—";
   }
