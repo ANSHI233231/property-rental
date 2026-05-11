@@ -43,10 +43,8 @@ export class RolesGuard implements CanActivate {
 
       if (blCode) {
         throw new ForbiddenException({
-          error: {
-            code: blCode,
-            message: "Your role is not permitted to perform this action.",
-          },
+          code: blCode,
+          message: "Your role is not permitted to perform this action.",
         });
       }
 

@@ -46,7 +46,7 @@ describe("RolesGuard", () => {
   }
 
   describe("Case A: @RoleErrorCode present, caller denied", () => {
-    it("throws ForbiddenException with the BL code in error.code", () => {
+    it("throws ForbiddenException carrying the BL code (filter wraps it as error.code on the wire)", () => {
       mockReflector(["ADMIN", "PROPERTY_MANAGER"], "BL_10_TENANT_CANNOT_RECORD_PAYMENT");
 
       const ctx = buildContext("TENANT");
@@ -57,11 +57,15 @@ describe("RolesGuard", () => {
         guard.canActivate(ctx);
       } catch (err) {
         expect(err).toBeInstanceOf(ForbiddenException);
+        // Guard throws with flat { code, message } so CodeErrorFilter (which
+        // reads body.code) preserves it and wraps to { error: { code, message } }
+        // on the wire.
         const body = (err as ForbiddenException).getResponse() as {
-          error: { code: string; message: string };
+          code: string;
+          message: string;
         };
-        expect(body.error.code).toBe("BL_10_TENANT_CANNOT_RECORD_PAYMENT");
-        expect(typeof body.error.message).toBe("string");
+        expect(body.code).toBe("BL_10_TENANT_CANNOT_RECORD_PAYMENT");
+        expect(typeof body.message).toBe("string");
       }
     });
   });
