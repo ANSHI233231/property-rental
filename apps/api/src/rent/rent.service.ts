@@ -52,6 +52,52 @@ function computeOutstanding(
   return outstanding < 0n ? 0n : outstanding;
 }
 
+/**
+ * withSerializableRetry — retries a Serializable transaction on P2034 / 40001 / 40P01
+ * (Postgres serialization failure or deadlock). Up to maxAttempts tries with
+ * exponential-ish backoff + small jitter. Kept co-located because only
+ * recordPayment and voidPayment need it (two callers — not worth a shared file).
+ */
+async function withSerializableRetry<T>(fn: () => Promise<T>, maxAttempts = 10): Promise<T> {
+  // Initial random jitter before first attempt to spread concurrent callers apart.
+  // Under 10 parallel POST /payments the first-attempt spread dramatically reduces
+  // the collision rate without adding latency to the common (non-concurrent) path.
+  await new Promise((r) => setTimeout(r, Math.floor(Math.random() * 30)));
+
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const isPrismaKnown = e instanceof Prisma.PrismaClientKnownRequestError;
+      if (isPrismaKnown) {
+        const prismaErr = e as Prisma.PrismaClientKnownRequestError;
+        const topCode = prismaErr.code;
+        // P2010 = $queryRaw failed; real Postgres SQLSTATE lives in meta.code
+        // P2034 = ORM-level serialization failure (interactive transaction)
+        const metaCode =
+          typeof prismaErr.meta?.code === "string" ? (prismaErr.meta.code as string) : "";
+        const isRetryable =
+          topCode === "P2034" ||
+          topCode === "40001" ||
+          topCode === "40P01" ||
+          (topCode === "P2010" && (metaCode === "40001" || metaCode === "40P01"));
+        if (!isRetryable || attempt === maxAttempts) {
+          throw e;
+        }
+      } else {
+        throw e;
+      }
+      // Exponential backoff with full jitter: cap at 500ms per attempt
+      const base = Math.min(50 * attempt * attempt, 500);
+      const jitter = Math.floor(Math.random() * 100);
+      await new Promise((r) => setTimeout(r, base + jitter));
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
 /** Derive RentPeriodStatus after a payment update. */
 function deriveStatus(outstanding: bigint, paid: bigint): RentPeriodStatus {
   if (outstanding === 0n) return "PAID";
@@ -333,8 +379,9 @@ export class RentService {
       });
     }
 
-    return this.prisma.$transaction(
-      async (tx) => {
+    return withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
         // BL-11: lock the rent period row for the duration of the transaction.
         // Prisma Serializable + findUnique inside the transaction provides
         // snapshot isolation with conflict detection. We use raw SQL FOR UPDATE
@@ -370,15 +417,10 @@ export class RentService {
           outstanding_paise: BigInt(rawPeriod.outstanding_paise),
         };
 
-        // Cannot record payment against an already-PAID period (unless voiding later)
-        if (period.status === "PAID") {
-          throw new ConflictException({
-            error: {
-              code: "PERIOD_ALREADY_PAID",
-              message: "This rent period is already fully paid",
-            },
-          });
-        }
+        // Payments against a PAID period are allowed — the full amount routes to
+        // PrepaidCredit (spillover). This supports concurrent overpayment where
+        // multiple transactions each see outstanding > 0 at read time but only one
+        // actually applies to the period; the rest create prepaid credit.
 
         // PROPERTY_MANAGER scope check: must be PM for this property
         if (actorRole === "PROPERTY_MANAGER") {
@@ -511,8 +553,9 @@ export class RentService {
           },
           ...(prepaidCredit ? { prepaid_credit: prepaidCredit } : {}),
         };
-      },
-      { isolationLevel: "Serializable" },
+        },
+        { isolationLevel: "Serializable" },
+      )
     );
   }
 
@@ -523,8 +566,9 @@ export class RentService {
   // ---------------------------------------------------------------------------
 
   async voidPayment(paymentId: string, dto: VoidPaymentDto, actorId: string, actorRole: string) {
-    return this.prisma.$transaction(
-      async (tx) => {
+    return withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
         // Lock the payment row
         const rawPayments = await tx.$queryRaw<Array<{
           id: string;
@@ -700,8 +744,9 @@ export class RentService {
             outstanding_paise: newOutstanding.toString(),
           },
         };
-      },
-      { isolationLevel: "Serializable" },
+        },
+        { isolationLevel: "Serializable" },
+      )
     );
   }
 

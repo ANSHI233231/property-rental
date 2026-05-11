@@ -331,21 +331,19 @@ describe("TC-RENT-005 (BL-11 concurrency): 10 parallel ₹100 payments, ₹500 o
     // outstanding must never go negative — BL-11 invariant
     expect(finalPeriod!.outstanding_paise).toBeGreaterThanOrEqual(0n);
 
-    // BUG ASSERTION: At least one 500 currently occurs. When the fix (retry on P2034)
-    // is applied, this expect should change to:
-    //   for (const r of results) expect(r.status).toBe(201);
+    // Post-fix: every request must return 201 (never 500).
     const has500 = (statusCounts[500] ?? 0) > 0;
-    // Document the current broken behavior — uncomment the correct assertion when fixed:
-    // expect(has500).toBe(false); // CORRECT post-fix
-    // For now — just ensure the invariant (no negative outstanding) holds:
-    if (has500) {
-      // Confirm financial integrity despite the 500 — this is the partial mitigation.
-      // The period must not be in an invalid state.
-      expect(["DUE", "PARTIAL", "PAID", "OVERDUE", "PREPAID"]).toContain(finalPeriod!.status);
-    }
-    // This test will fail the final assertion below when the bug is fixed and
-    // all 10 return 201:
-    expect(typeof statusCounts).toBe("object"); // always passes — placeholder
+    expect(has500).toBe(false);
+
+    // All 10 payments must succeed.
+    const successfulCount = statusCounts[201] ?? 0;
+    expect(successfulCount).toBe(PAYMENTS_COUNT);
+
+    // Financial invariant: paid + prepaid credits == total incoming paise
+    const expectedTotalPaid = BigInt(PAISE_PER_PAYMENT) * BigInt(PAYMENTS_COUNT);
+    const credits = await prisma.prepaidCredit.findMany({ where: { lease_id: finalPeriod!.lease_id } });
+    const totalCredits = credits.reduce((sum, c) => sum + c.amount_paise, 0n);
+    expect(finalPeriod!.paid_paise + totalCredits).toBe(expectedTotalPaid);
   }, 60_000);
 });
 
