@@ -139,6 +139,16 @@ export class UsersService {
         where: { user_id: userId, revoked_at: null },
         data: { revoked_at: new Date() },
       });
+
+      // Phase 7: audit password change event (W-04).
+      await this.audit.writeLog(tx, {
+        actorId: userId,
+        action: "auth.password_change",
+        entityType: "Auth",
+        entityId: userId,
+        before: null,
+        after: { changedAt: new Date() },
+      });
     });
   }
 

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Matches } from "class-validator";
+import { IsString, IsOptional, MaxLength, Matches } from "class-validator";
 
 /**
  * DTO for POST /leases/:id/terminate-request
@@ -14,5 +14,6 @@ export class TerminationRequestDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000, { message: "reason must not exceed 2000 characters" })
   reason?: string;
 }

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
+import type { PrismaService } from "../prisma/prisma.service";
 
 /**
  * AuditService — centralized audit log writer.
@@ -14,7 +15,7 @@ import type { PrismaClient } from "@prisma/client";
  */
 
 export interface AuditEntry {
-  actorId: string;
+  actorId: string | null;  // null for unauthenticated events (e.g., auth.login.failure)
   action: string;
   entityType: string;
   entityId: string;
@@ -39,7 +40,28 @@ export class AuditService {
   async writeLog(tx: TransactionClient, entry: AuditEntry): Promise<void> {
     await tx.auditLog.create({
       data: {
-        actor_id: entry.actorId,
+        actor_id: entry.actorId ?? null,
+        action: entry.action,
+        entity_type: entry.entityType,
+        entity_id: entry.entityId,
+        before: (entry.before as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+        after: (entry.after as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+      },
+    });
+  }
+
+  /**
+   * Write an audit log entry WITHOUT a transaction — for fire-and-forget events
+   * (auth failures, etc.) where there is no mutation transaction to join.
+   * Uses the root PrismaService directly.
+   *
+   * NOTE: Only use this for non-transactional audit writes. For mutation audits,
+   * always use writeLog() inside a $transaction for atomicity.
+   */
+  async writeLogDirect(prisma: PrismaService, entry: AuditEntry): Promise<void> {
+    await prisma.auditLog.create({
+      data: {
+        actor_id: entry.actorId ?? null,
         action: entry.action,
         entity_type: entry.entityType,
         entity_id: entry.entityId,

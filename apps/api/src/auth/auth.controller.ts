@@ -15,6 +15,8 @@ import { LoginDto } from "./dto/login.dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { CurrentUser } from "./decorators/current-user.decorator";
+import type { JwtPayload } from "./jwt.service";
 
 /** Refresh token cookie name. */
 const REFRESH_COOKIE = "refreshToken";
@@ -38,7 +40,10 @@ export class AuthController {
   // ---------------------------------------------------------------------------
 
   @Post("login")
-  @Throttle({ default: { limit: 100, ttl: 60000 } })
+  // Phase 7: Tightened — 10/min per IP (down from 100). Named throttler "login".
+  // Limit enforced via ThrottlerModule.forRoot (app.module.ts) — not hardcoded here
+  // so the test environment (NODE_ENV=test) can raise the limit to 100 000/min.
+  @Throttle({ login: {} })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
@@ -99,11 +104,13 @@ export class AuthController {
   async logout(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+    @CurrentUser() actor?: JwtPayload,
   ): Promise<{ message: string }> {
     const rawToken = (req.cookies as Record<string, string>)[REFRESH_COOKIE];
 
     if (rawToken) {
-      await this.authService.logout(rawToken);
+      // Phase 7: pass actorId so logout is audited.
+      await this.authService.logout(rawToken, actor?.sub);
     }
 
     res.clearCookie(REFRESH_COOKIE, { path: "/api/v1/auth" });
@@ -117,7 +124,9 @@ export class AuthController {
   // ---------------------------------------------------------------------------
 
   @Post("forgot-password")
-  @Throttle({ default: { limit: 100, ttl: 60000 } })
+  // Phase 7: 5/hour per IP — anti-enumeration + anti-abuse (W-03 / M-01).
+  // Limit enforced via ThrottlerModule.forRoot (app.module.ts) — not hardcoded here.
+  @Throttle({ "auth-slow": {} })
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
     // Always returns the same message regardless of whether account exists (TC-AUTH-015)
@@ -131,6 +140,9 @@ export class AuthController {
   // ---------------------------------------------------------------------------
 
   @Post("reset-password")
+  // Phase 7: 5/hour per IP — M-01 finding from Phase 6 security walkthrough.
+  // Limit enforced via ThrottlerModule.forRoot (app.module.ts) — not hardcoded here.
+  @Throttle({ "auth-slow": {} })
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
     await this.authService.resetPassword(dto);

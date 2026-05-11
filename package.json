@@ -22,7 +22,10 @@
   "pnpm": {
     "overrides": {
       "multer": ">=2.0.2",
-      "file-type": ">=21.3.2"
+      "file-type": ">=21.3.2",
+      "path-to-regexp": ">=0.1.13",
+      "lodash": ">=4.18.0",
+      "postcss": ">=8.5.10"
     }
   }
 }

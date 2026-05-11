@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   Query,
+  Headers,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -122,8 +123,9 @@ export class RentController {
   async recordPayment(
     @Body() dto: RecordPaymentDto,
     @CurrentUser() actor?: JwtPayload,
+    @Headers("idempotency-key") idempotencyKey?: string,
   ) {
-    return this.rentService.recordPayment(dto, actor!.sub, actor!.role);
+    return this.rentService.recordPayment(dto, actor!.sub, actor!.role, idempotencyKey);
   }
 
   // ---------------------------------------------------------------------------

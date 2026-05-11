@@ -246,33 +246,39 @@ describe("PATCH /users/me — immutable field protection", () => {
   });
 
   it("ignores email in body — email unchanged after attempt", async () => {
+    // Phase 7 (M-04): forbidNonWhitelisted=true rejects unknown fields with 400.
+    // `email` is not in UpdateProfileDto, so this attempt is actively rejected.
     const res = await supertestFn(app.getHttpServer())
       .patch("/api/v1/users/me")
       .set("Authorization", `Bearer ${userToken}`)
       .send({ email: "hacker@evil.com" });
-    expect(res.status).toBe(200);
-    // email must remain the original
-    expect(res.body.email).toBe(originalEmail);
+    // 400 = better protection than 200+silent-strip: request is actively rejected
+    expect(res.status).toBe(400);
   });
 
   it("ignores role in body — role remains TENANT", async () => {
+    // Phase 7 (M-04): `role` is not in UpdateProfileDto — actively rejected with 400.
     const res = await supertestFn(app.getHttpServer())
       .patch("/api/v1/users/me")
       .set("Authorization", `Bearer ${userToken}`)
       .send({ role: "ADMIN" });
-    expect(res.status).toBe(200);
-    expect(res.body.role).toBe("TENANT");
+    expect(res.status).toBe(400);
+    // Confirm role unchanged via GET /users/me
+    const meRes = await supertestFn(app.getHttpServer())
+      .get("/api/v1/users/me")
+      .set("Authorization", `Bearer ${userToken}`);
+    expect(meRes.body.role).toBe("TENANT");
   });
 
   it("ignores is_active in body — is_active remains true", async () => {
+    // Phase 7 (M-04): `is_active` is not in UpdateProfileDto — actively rejected with 400.
     const res = await supertestFn(app.getHttpServer())
       .patch("/api/v1/users/me")
       .set("Authorization", `Bearer ${userToken}`)
       .send({ is_active: false });
-    expect(res.status).toBe(200);
-    expect(res.body.is_active).toBe(true);
+    expect(res.status).toBe(400);
 
-    // Verify via re-fetch
+    // Verify via re-fetch that is_active is still true
     const verify = await supertestFn(app.getHttpServer())
       .get(`/api/v1/users/${userId}`)
       .set("Authorization", `Bearer ${adminToken}`);

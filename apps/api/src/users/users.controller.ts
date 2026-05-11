@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
@@ -20,6 +21,7 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import { AdminCreateUserDto } from "./dto/admin-create-user.dto";
 import { AdminUpdateUserDto } from "./dto/admin-update-user.dto";
+import { UserThrottlerGuard } from "../common/guards/user-throttler.guard";
 import type { JwtPayload } from "../auth/jwt.service";
 
 @Controller("users")
@@ -54,8 +56,12 @@ export class UsersController {
    * POST /users/me/change-password — verifies current password, sets new one,
    * revokes all refresh tokens.
    * TC-PROFILE-004, TC-PROFILE-005.
+   * Phase 7: rate-limited 5/min per user ID (not IP — UserThrottlerGuard).
    */
   @Post("me/change-password")
+  @UseGuards(UserThrottlerGuard)
+  // Limit enforced via ThrottlerModule.forRoot (app.module.ts) — not hardcoded here.
+  @Throttle({ "change-pwd": {} })
   @HttpCode(HttpStatus.OK)
   async changePassword(
     @CurrentUser() user: JwtPayload,

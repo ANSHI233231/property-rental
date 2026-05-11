@@ -6,6 +6,7 @@ import { AuthService } from "./auth.service";
 import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { AuditService } from "../audit/audit.service";
 
 // ---------------------------------------------------------------------------
 // Minimal Prisma mock for unit tests (no real DB)
@@ -41,6 +42,9 @@ const prismaMock = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+  auditLog: {
+    create: jest.fn().mockResolvedValue({}),
+  },
   $transaction: jest.fn().mockImplementation((fn: (tx: unknown) => unknown) => fn(prismaMock)),
 };
 
@@ -71,6 +75,13 @@ describe("AuthService", () => {
         HashingService,
         JwtTokenService,
         { provide: PrismaService, useValue: prismaMock },
+        {
+          provide: AuditService,
+          useValue: {
+            writeLog: jest.fn().mockResolvedValue(undefined),
+            writeLogDirect: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 

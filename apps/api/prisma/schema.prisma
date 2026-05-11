@@ -292,7 +292,9 @@ model PropertyTransferLog {
 /// No UPDATE or DELETE is ever issued on this table.
 model AuditLog {
   id          String   @id @default(cuid())
-  actor_id    String
+  /// Nullable — null for unauthenticated events such as auth.login.failure
+  /// where no valid user is identified. Phase 7 addition.
+  actor_id    String?
   /// Human-readable action key e.g. 'property.create', 'unit.state_change'.
   action      String
   entity_type String
@@ -303,10 +305,11 @@ model AuditLog {
   after       Json?
   created_at  DateTime @default(now())
 
-  actor User @relation("AuditActor", fields: [actor_id], references: [id])
+  actor User? @relation("AuditActor", fields: [actor_id], references: [id])
 
   @@index([actor_id, created_at])
   @@index([entity_type, entity_id])
+  @@index([action, created_at])
   @@map("audit_log")
 }
 
@@ -538,6 +541,10 @@ model Payment {
   voided_at           DateTime?
   void_reason         String?
   created_at          DateTime      @default(now())
+  /// Phase 7: Idempotency key supplied by the caller (Idempotency-Key HTTP header).
+  /// Unique partial index (WHERE idempotency_key IS NOT NULL) prevents duplicate
+  /// payments on network retry. Nullable — absent when caller does not supply header.
+  idempotency_key     String?
 
   // Relations
   rent_period      RentPeriod       @relation("PaymentPeriod", fields: [rent_period_id], references: [id])
@@ -551,6 +558,7 @@ model Payment {
 
   @@index([lease_id, recorded_at])
   @@index([rent_period_id])
+  @@index([idempotency_key])
   @@map("payments")
 }
 

@@ -155,6 +155,83 @@ export class UnitsService {
   // ---------------------------------------------------------------------------
 
   async update(id: string, dto: UpdateUnitDto, actorId: string) {
+    const isRentChange = dto.monthly_rent_paise !== undefined;
+
+    // Phase 7 / BL-03 / M-05: if changing rent, run the state check AND the write
+    // inside a Serializable transaction with FOR UPDATE to prevent a race where
+    // a concurrent state-change (→ OCCUPIED) sneaks through between the check and
+    // the write.
+    if (isRentChange) {
+      return this.prisma.$transaction(
+        async (tx) => {
+          // Re-read unit inside the transaction (Serializable snapshot).
+          const lockedRows = await tx.$queryRaw<Array<{
+            id: string;
+            state: string;
+            is_retired: boolean;
+          }>>`
+            SELECT id, state, is_retired FROM units WHERE id = ${id} FOR UPDATE
+          `;
+
+          if (lockedRows.length === 0) {
+            throw new NotFoundException({
+              error: { code: "RESOURCE_NOT_FOUND", message: `Unit ${id} not found` },
+            });
+          }
+
+          const locked = lockedRows[0]!;
+
+          if (locked.is_retired) {
+            throw new ConflictException({
+              error: {
+                code: "UNIT_RETIRED",
+                message: "Cannot update a retired unit. Create a new unit instead.",
+              },
+            });
+          }
+
+          const lockingStates: UnitState[] = ["OCCUPIED", "MAINTENANCE"];
+          if (lockingStates.includes(locked.state as UnitState)) {
+            throw new ConflictException({
+              error: {
+                code: "UNIT_RENT_LOCKED",
+                message: `Rent cannot be changed when unit state is ${locked.state}. Only AVAILABLE or LISTED units may have rent updated. (BL-03)`,
+                details: { current_state: locked.state },
+              },
+            });
+          }
+
+          const before = await this.findById(id); // for audit snapshot (no extra lock needed)
+
+          const updated = await tx.unit.update({
+            where: { id },
+            data: {
+              ...(dto.unit_number !== undefined ? { unit_number: dto.unit_number } : {}),
+              ...(dto.floor !== undefined ? { floor: dto.floor } : {}),
+              ...(dto.bedrooms !== undefined ? { bedrooms: dto.bedrooms } : {}),
+              ...(dto.bathrooms !== undefined ? { bathrooms: dto.bathrooms } : {}),
+              ...(dto.area_sqft !== undefined ? { area_sqft: dto.area_sqft } : {}),
+              monthly_rent_paise: dto.monthly_rent_paise,
+            },
+            select: UNIT_SELECT,
+          });
+
+          await this.audit.writeLog(tx, {
+            actorId,
+            action: "unit.update",
+            entityType: "Unit",
+            entityId: id,
+            before,
+            after: updated,
+          });
+
+          return updated;
+        },
+        { isolationLevel: "Serializable" },
+      );
+    }
+
+    // Non-rent update: no race concern — standard transaction.
     const before = await this.findById(id);
 
     if (before.is_retired) {
@@ -166,20 +243,6 @@ export class UnitsService {
       });
     }
 
-    // BL-03 enforcement
-    if (dto.monthly_rent_paise !== undefined) {
-      const lockingStates: UnitState[] = ["OCCUPIED", "MAINTENANCE"];
-      if (lockingStates.includes(before.state as UnitState)) {
-        throw new ConflictException({
-          error: {
-            code: "UNIT_RENT_LOCKED",
-            message: `Rent cannot be changed when unit state is ${before.state}. Only AVAILABLE or LISTED units may have rent updated.`,
-            details: { current_state: before.state },
-          },
-        });
-      }
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.unit.update({
         where: { id },
@@ -189,7 +252,6 @@ export class UnitsService {
           ...(dto.bedrooms !== undefined ? { bedrooms: dto.bedrooms } : {}),
           ...(dto.bathrooms !== undefined ? { bathrooms: dto.bathrooms } : {}),
           ...(dto.area_sqft !== undefined ? { area_sqft: dto.area_sqft } : {}),
-          ...(dto.monthly_rent_paise !== undefined ? { monthly_rent_paise: dto.monthly_rent_paise } : {}),
         },
         select: UNIT_SELECT,
       });

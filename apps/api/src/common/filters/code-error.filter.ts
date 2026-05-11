@@ -93,11 +93,20 @@ export class CodeErrorFilter implements ExceptionFilter {
         }
       }
     } else if (exception instanceof Error) {
-      this.logger.error(exception.message, exception.stack);
-      message =
-        process.env.NODE_ENV === "production"
-          ? "An unexpected error occurred."
-          : exception.message;
+      // Handle Express body-parser PayloadTooLargeError (not an HttpException).
+      // These have a `type` property of 'entity.too.large'.
+      const errWithType = exception as Error & { type?: string; status?: number };
+      if (errWithType.type === "entity.too.large" || errWithType.status === 413) {
+        status = 413;
+        code = "PAYLOAD_TOO_LARGE";
+        message = "Request body exceeds the 100 KB limit.";
+      } else {
+        this.logger.error(exception.message, exception.stack);
+        message =
+          process.env.NODE_ENV === "production"
+            ? "An unexpected error occurred."
+            : exception.message;
+      }
     }
 
     res

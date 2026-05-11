@@ -9,6 +9,7 @@ import { createHash, randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
+import { AuditService } from "../audit/audit.service";
 import type { LoginDto } from "./dto/login.dto";
 import type { ResetPasswordDto } from "./dto/reset-password.dto";
 
@@ -47,6 +48,7 @@ export class AuthService {
     private readonly hashing: HashingService,
     private readonly jwtService: JwtTokenService,
     private readonly configService: ConfigService,
+    private readonly audit: AuditService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -65,11 +67,34 @@ export class AuthService {
     const invalidCreds = new UnauthorizedException("Invalid credentials");
 
     if (!user || !user.is_active) {
+      // Phase 7: audit failed login (no user found / inactive). actor_id = null (anonymous).
+      // Do NOT log the attempted password — only the email attempt and reason.
+      await this.audit.writeLogDirect(this.prisma, {
+        actorId: null,
+        action: "auth.login.failure",
+        entityType: "Auth",
+        entityId: "login",
+        before: null,
+        after: {
+          emailAttempt: dto.email.toLowerCase(),
+          ip: meta.ip ?? null,
+          userAgent: meta.userAgent ?? null,
+          reason: user ? "account_inactive" : "user_not_found",
+        },
+      }).catch(() => { /* never throw on audit write failure */ });
       throw invalidCreds;
     }
 
     // Check account lockout
     if (user.locked_until && user.locked_until > new Date()) {
+      await this.audit.writeLogDirect(this.prisma, {
+        actorId: user.id,
+        action: "auth.login.failure",
+        entityType: "Auth",
+        entityId: user.id,
+        before: null,
+        after: { ip: meta.ip ?? null, userAgent: meta.userAgent ?? null, reason: "account_locked" },
+      }).catch(() => { /* never throw */ });
       throw new UnauthorizedException("Account temporarily locked. Try again later.");
     }
 
@@ -89,6 +114,22 @@ export class AuthService {
         },
       });
 
+      // Phase 7: audit failed login — wrong password. NEVER log the attempted password.
+      await this.audit.writeLogDirect(this.prisma, {
+        actorId: user.id,
+        action: "auth.login.failure",
+        entityType: "Auth",
+        entityId: user.id,
+        before: null,
+        after: {
+          ip: meta.ip ?? null,
+          userAgent: meta.userAgent ?? null,
+          reason: "wrong_password",
+          failedAttempts: newCount,
+          lockedUntil: shouldLock ? new Date(Date.now() + LOCKOUT_MINUTES * 60 * 1000) : null,
+        },
+      }).catch(() => { /* never throw */ });
+
       throw invalidCreds;
     }
 
@@ -102,6 +143,16 @@ export class AuthService {
     });
 
     const { accessToken, refreshToken } = await this.issueTokens(user.id, user.role, meta);
+
+    // Phase 7: audit successful login.
+    await this.audit.writeLogDirect(this.prisma, {
+      actorId: user.id,
+      action: "auth.login.success",
+      entityType: "Auth",
+      entityId: user.id,
+      before: null,
+      after: { ip: meta.ip ?? null, userAgent: meta.userAgent ?? null },
+    }).catch(() => { /* never throw */ });
 
     return {
       accessToken,
@@ -157,13 +208,25 @@ export class AuthService {
   // Logout
   // ---------------------------------------------------------------------------
 
-  async logout(rawToken: string): Promise<void> {
+  async logout(rawToken: string, actorId?: string): Promise<void> {
     const tokenHash = sha256hex(rawToken);
 
     await this.prisma.refreshToken.updateMany({
       where: { token_hash: tokenHash, revoked_at: null },
       data: { revoked_at: new Date() },
     });
+
+    // Phase 7: audit logout event.
+    if (actorId) {
+      await this.audit.writeLogDirect(this.prisma, {
+        actorId,
+        action: "auth.logout",
+        entityType: "Auth",
+        entityId: actorId,
+        before: null,
+        after: { revokedAt: new Date() },
+      }).catch(() => { /* never throw */ });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -253,6 +316,16 @@ export class AuthService {
       await tx.refreshToken.updateMany({
         where: { user_id: record.user_id, revoked_at: null },
         data: { revoked_at: new Date() },
+      });
+
+      // Phase 7: audit password reset success.
+      await this.audit.writeLog(tx, {
+        actorId: record.user_id,
+        action: "auth.password_reset_success",
+        entityType: "Auth",
+        entityId: record.user_id,
+        before: null,
+        after: { resetAt: new Date() },
       });
     });
   }

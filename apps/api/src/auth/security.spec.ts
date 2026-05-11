@@ -21,6 +21,7 @@ import { AuthService } from "./auth.service";
 import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { AuditService } from "../audit/audit.service";
 
 // ---------------------------------------------------------------------------
 // Minimal Prisma mock (no real DB needed for these tests)
@@ -55,6 +56,9 @@ const prismaMock = {
     create: jest.fn().mockResolvedValue({}),
     findUnique: jest.fn(),
     update: jest.fn(),
+  },
+  auditLog: {
+    create: jest.fn().mockResolvedValue({}),
   },
   $transaction: jest.fn().mockImplementation((fn: (tx: unknown) => unknown) => fn(prismaMock)),
 };
@@ -136,6 +140,13 @@ describe("H-02 — Reset token not logged in production", () => {
         HashingService,
         JwtTokenService,
         { provide: PrismaService, useValue: prismaMock },
+        {
+          provide: AuditService,
+          useValue: {
+            writeLog: jest.fn().mockResolvedValue(undefined),
+            writeLogDirect: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -204,6 +215,13 @@ describe("H-02 — Reset token not logged in production", () => {
         HashingService,
         JwtTokenService,
         { provide: PrismaService, useValue: prismaMock },
+        {
+          provide: AuditService,
+          useValue: {
+            writeLog: jest.fn().mockResolvedValue(undefined),
+            writeLogDirect: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 

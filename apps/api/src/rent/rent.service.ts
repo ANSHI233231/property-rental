@@ -368,7 +368,12 @@ export class RentService {
   // BL-11: Serializable transaction with SELECT FOR UPDATE semantics.
   // ---------------------------------------------------------------------------
 
-  async recordPayment(dto: RecordPaymentDto, actorId: string, actorRole: string) {
+  async recordPayment(
+    dto: RecordPaymentDto,
+    actorId: string,
+    actorRole: string,
+    idempotencyKey?: string,
+  ) {
     // BL-10: belt-and-suspenders role check (decorator is primary enforcement)
     if (actorRole !== "PROPERTY_MANAGER" && actorRole !== "ADMIN") {
       throw new ForbiddenException({
@@ -377,6 +382,27 @@ export class RentService {
           message: "Only Property Managers and Admins may record payments (BL-10)",
         },
       });
+    }
+
+    // Phase 7: Idempotency-Key check — if a Payment already exists for this key,
+    // return it directly (200 semantics; controller sets 201 on first call).
+    if (idempotencyKey) {
+      const existing = await this.prisma.payment.findFirst({
+        where: { idempotency_key: idempotencyKey },
+      });
+      if (existing) {
+        this.logger.debug(
+          `[idempotency] returning existing payment ${existing.id} for key ${idempotencyKey}`,
+        );
+        return {
+          payment: {
+            ...serializePayment(existing as unknown as Record<string, unknown>),
+            amount_paise: existing.amount_paise.toString(),
+          },
+          period: { id: existing.rent_period_id },
+          idempotent: true,
+        };
+      }
     }
 
     return withSerializableRetry(() =>
@@ -491,6 +517,8 @@ export class RentService {
             reference: dto.reference ?? null,
             paid_on: new Date(dto.paidOn),
             recorded_by_user_id: actorId,
+            // Phase 7: persist idempotency key if provided.
+            idempotency_key: idempotencyKey ?? null,
           },
         });
 
