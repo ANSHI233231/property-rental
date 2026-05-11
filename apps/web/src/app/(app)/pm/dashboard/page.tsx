@@ -9,8 +9,9 @@
 import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useEffect, useState } from "react";
-import { format, parseISO, isWithinInterval, addDays } from "date-fns";
+import { format, parseISO, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
+import { paiseStringToINR, parseBigPaise } from "@/lib/rent/format";
 import Link from "next/link";
 
 // ---------------------------------------------------------------------------
@@ -28,6 +29,19 @@ interface Lease {
   end_date: string;
   unit?: { name?: string };
   tenants?: { name: string }[];
+}
+
+interface RentPeriod {
+  id: string;
+  leaseId: string;
+  status: string;
+  paidPaise: string;
+  outstandingPaise: string;
+}
+
+interface RentPeriodsResponse {
+  data?: RentPeriod[];
+  items?: RentPeriod[];
 }
 
 // ---------------------------------------------------------------------------
@@ -71,6 +85,9 @@ export default function PmDashboardPage() {
   const [endingSoonCount, setEndingSoonCount] = useState<number | null>(null);
   const [endingSoonLeases, setEndingSoonLeases] = useState<Lease[]>([]);
   const [loading, setLoading] = useState(true);
+  // Phase 4 rent KPIs
+  const [rentCollectedPaise, setRentCollectedPaise] = useState<number | null>(null);
+  const [overdueCount, setOverdueCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -79,10 +96,22 @@ export default function PmDashboardPage() {
     async function fetchKpis() {
       setLoading(true);
       try {
-        const [tenantsRes, leasesRes] = await Promise.allSettled([
+        const now = new Date();
+        const periodStart = format(startOfMonth(now), "yyyy-MM-dd");
+        const periodEnd = format(endOfMonth(now), "yyyy-MM-dd");
+
+        const [tenantsRes, leasesRes, paidPeriodsRes, overduePeriodsRes] = await Promise.allSettled([
           apiFetch<{ meta?: PaginatedMeta }>(`/properties/${propertyId}/tenants?limit=1`),
           apiFetch<{ meta?: PaginatedMeta; data?: Lease[] }>(
             `/leases?propertyId=${propertyId}&status=ACTIVE&limit=100`,
+          ),
+          // Phase 4: rent collected this month (PAID periods)
+          apiFetch<RentPeriodsResponse>(
+            `/rent-periods?propertyId=${propertyId}&status=PAID&periodStart=${periodStart}&limit=50`,
+          ),
+          // Phase 4: overdue count
+          apiFetch<RentPeriodsResponse>(
+            `/rent-periods?propertyId=${propertyId}&status=OVERDUE&limit=50`,
           ),
         ]);
 
@@ -99,7 +128,6 @@ export default function PmDashboardPage() {
 
             // Filter ending within 30 days client-side
             const leases = leasesRes.value?.data ?? [];
-            const now = new Date();
             const cutoff = addDays(now, 30);
             const ending = leases.filter((l) => {
               try {
@@ -111,6 +139,20 @@ export default function PmDashboardPage() {
             });
             setEndingSoonLeases(ending);
             setEndingSoonCount(ending.length);
+          }
+          // Phase 4 — rent KPIs
+          if (paidPeriodsRes.status === "fulfilled") {
+            const items = paidPeriodsRes.value.data ?? paidPeriodsRes.value.items ?? [];
+            const total = items.reduce((acc, p) => acc + parseBigPaise(p.paidPaise), 0);
+            setRentCollectedPaise(total);
+          } else {
+            setRentCollectedPaise(0);
+          }
+          if (overduePeriodsRes.status === "fulfilled") {
+            const items = overduePeriodsRes.value.data ?? overduePeriodsRes.value.items ?? [];
+            setOverdueCount(items.length);
+          } else {
+            setOverdueCount(0);
           }
         }
       } catch {
@@ -162,6 +204,7 @@ export default function PmDashboardPage() {
               <SkeletonKpi />
               <SkeletonKpi />
               <SkeletonKpi />
+              <SkeletonKpi />
             </>
           ) : (
             <>
@@ -183,9 +226,20 @@ export default function PmDashboardPage() {
                 color={endingSoonCount ? "var(--color-status-partial)" : undefined}
               />
               <KpiCard
-                label="Rent Overview"
-                value="—"
-                meta="Fills in Phase 4"
+                label="Rent Collected"
+                value={
+                  rentCollectedPaise !== null
+                    ? paiseStringToINR(String(rentCollectedPaise))
+                    : "—"
+                }
+                meta="This month (PAID)"
+                color="var(--color-status-paid)"
+              />
+              <KpiCard
+                label="Overdue Tenants"
+                value={overdueCount ?? "—"}
+                meta="5+ days past due"
+                color={overdueCount ? "var(--color-status-overdue)" : undefined}
               />
             </>
           )}
@@ -228,16 +282,23 @@ export default function PmDashboardPage() {
           </p>
         </div>
 
-        {/* Recent payments stub */}
+        {/* Recent payments — link to rent collection */}
         <div className="card">
-          <h3 className="section-title">Recent Payments</h3>
-          <p className="text-sm muted">
-            Payment tracking available in Phase 4. Navigate to{" "}
-            <Link href="/pm/rent-collection" className="text-royal-blue font-poppins font-semibold">
-              Rent Collection
-            </Link>
-            .
+          <h3 className="section-title">Rent Collection</h3>
+          <p className="text-sm muted mb-3">
+            Record payments, view payment history, and track late fees.
           </p>
+          {overdueCount !== null && overdueCount > 0 && (
+            <p className="text-sm" style={{ color: "var(--color-status-overdue)" }}>
+              <strong>{overdueCount}</strong> overdue period{overdueCount !== 1 ? "s" : ""} require{overdueCount === 1 ? "s" : ""} attention.
+            </p>
+          )}
+          <Link
+            href="/pm/rent-collection"
+            className="btn btn-primary mt-3 !text-sm !py-2 inline-flex"
+          >
+            Open Rent Collection →
+          </Link>
         </div>
       </section>
     </>
