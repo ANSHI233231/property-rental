@@ -145,9 +145,14 @@ export class MaintenanceService {
     });
 
     const hasMore = items.length > limit;
-    const data = hasMore ? items.slice(0, limit) : items;
+    let data = hasMore ? items.slice(0, limit) : items;
     const lastItem = data[data.length - 1];
     const nextCursor = hasMore && lastItem ? lastItem.id : null;
+
+    // M-01: strip lease_id from MAINTENANCE all-open scope — no PII linkage needed
+    if (actor.role === "MAINTENANCE" && query.scope === "all-open") {
+      data = data.map((item) => ({ ...item, lease_id: null }));
+    }
 
     return { data, nextCursor };
   }
@@ -166,7 +171,7 @@ export class MaintenanceService {
     });
     if (!req) throw new NotFoundException("Maintenance request not found");
 
-    this.assertReadAccess(req, actor);
+    await this.assertReadAccess(req, actor);
 
     // Strip the joined unit field from the response
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -665,10 +670,10 @@ export class MaintenanceService {
    * Read access check — TENANT can only see their own, MAINTENANCE can see their
    * own assigned (or all-open scope, handled in list()), PM sees their property.
    */
-  private assertReadAccess(
+  private async assertReadAccess(
     req: { raised_by_user_id: string; assigned_to_user_id: string | null; unit: { property_id: string } },
     actor: JwtPayload,
-  ) {
+  ): Promise<void> {
     if (actor.role === "ADMIN") return;
 
     if (actor.role === "TENANT") {
@@ -691,8 +696,24 @@ export class MaintenanceService {
       return;
     }
 
-    // PROPERTY_MANAGER: check scope (async check done in service, placeholder here)
-    // Full scope enforcement is in assertWriteAccess and list()
+    if (actor.role === "PROPERTY_MANAGER") {
+      // H-01 fix: verify PM is the active PM for this request's property
+      const pm = await this.prisma.property.findFirst({
+        where: {
+          id: req.unit.property_id,
+          active_pm_id: actor.sub,
+          deleted_at: null,
+        },
+        select: { id: true },
+      });
+      if (!pm) {
+        throw new ForbiddenException({
+          code: "PROPERTY_ACCESS_DENIED",
+          message: "This maintenance request belongs to a property not assigned to you.",
+        });
+      }
+      return;
+    }
   }
 
   /**
