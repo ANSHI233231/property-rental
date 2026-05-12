@@ -274,7 +274,7 @@ Add `WEB_ORIGINS` to `.env.example` with a comment explaining comma-separated fo
 
 #### SSRF: CLEARED
 
-No outbound HTTP calls from user-controlled input found. The only outbound networking in the API is Prisma's database connection (fixed DSN) and BullMQ's Redis connection (fixed DSN). No `fetch()`, `axios`, or `got` calls to user-supplied URLs. CLEARED.
+No outbound HTTP calls from user-controlled input found. The only outbound networking in the API is Prisma's database connection (fixed DSN). No `fetch()`, `axios`, or `got` calls to user-supplied URLs. CLEARED.
 
 #### SQLi: CLEARED
 
@@ -445,7 +445,7 @@ Password minimum length is 10 characters with a number + letter requirement (SRS
 | `API_PORT` | `apps/api/.env` | DevOps | Default 3001; may differ behind proxy |
 | `API_HOST` | `apps/api/.env` | DevOps | `0.0.0.0` unless binding to loopback |
 | `DATABASE_URL` | `apps/api/.env` | DevOps/DBA | Postgres 18 connection string; use a dedicated DB user with least-privilege |
-| `REDIS_URL` | `apps/api/.env` | DevOps | Redis 7 connection string (BullMQ) |
+| `RUN_SCHEDULER` | `apps/api/.env` | DevOps | `true` (default) on the single scheduler replica; `false` on additional replicas to suppress duplicate cron runs. Background jobs run in-process via `@nestjs/schedule`. |
 | `JWT_SECRET` | `apps/api/.env` | DevOps/Security | Generate: `openssl rand -hex 32`. **Minimum 32 chars. Never reuse across environments.** |
 | `JWT_ACCESS_TTL` | `apps/api/.env` | DevOps | `15m` recommended |
 | `JWT_REFRESH_TTL` | `apps/api/.env` | DevOps | `7d` recommended |
@@ -479,6 +479,8 @@ pnpm prisma migrate status
 # 3. Run seed (admin account only — SEED_TEST_PASSWORD must NOT be set)
 pnpm prisma db seed
 ```
+
+> **Note (in-process scheduler):** Background jobs now run in-process via `@nestjs/schedule`. No Redis service to provision or health-check. For multi-instance deployments, designate exactly one replica as the scheduler by leaving `RUN_SCHEDULER` unset (or `true`); set `RUN_SCHEDULER=false` on all other replicas to avoid duplicate cron runs.
 
 ### Rollback Plan
 
