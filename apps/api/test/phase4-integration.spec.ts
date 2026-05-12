@@ -23,7 +23,7 @@ import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { RentAccrualProcessor } from "../src/jobs/rent-accrual.processor";
+import { RentAccrualService } from "../src/jobs/rent-accrual.service";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const supertestFn = require("supertest") as (app: unknown) => import("supertest").SuperTest<import("supertest").Test>;
@@ -35,7 +35,7 @@ const ADMIN_PASSWORD = "Admin@gharsetu2026!";
 
 let app: INestApplication;
 let prisma: PrismaService;
-let processor: RentAccrualProcessor;
+let processor: RentAccrualService;
 let adminToken: string;
 
 // Test data tracking
@@ -62,7 +62,7 @@ beforeAll(async () => {
   await app.init();
 
   prisma = moduleRef.get<PrismaService>(PrismaService);
-  processor = moduleRef.get<RentAccrualProcessor>(RentAccrualProcessor);
+  processor = moduleRef.get<RentAccrualService>(RentAccrualService);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")

@@ -28,7 +28,7 @@ import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { MaintenanceAlertProcessor } from "../src/jobs/maintenance-alert.processor";
+import { MaintenanceAlertService } from "../src/jobs/maintenance-alert.service";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const supertestFn = require("supertest") as (app: unknown) => import("supertest").SuperTest<import("supertest").Test>;
@@ -45,7 +45,7 @@ const VALID_NOTES = "This resolution note is valid and meets the minimum length 
 
 let app: INestApplication;
 let prisma: PrismaService;
-let alertProcessor: MaintenanceAlertProcessor;
+let alertProcessor: MaintenanceAlertService;
 let adminToken: string;
 
 // Shared cleanup registry
@@ -72,7 +72,7 @@ beforeAll(async () => {
   await app.init();
 
   prisma = moduleRef.get<PrismaService>(PrismaService);
-  alertProcessor = moduleRef.get<MaintenanceAlertProcessor>(MaintenanceAlertProcessor);
+  alertProcessor = moduleRef.get<MaintenanceAlertService>(MaintenanceAlertService);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
@@ -714,7 +714,7 @@ describe("EMERGENCY priority request → 201 (log stub)", () => {
 // BL-17: maintenance-alert worker
 // ---------------------------------------------------------------------------
 
-describe("BL-17: maintenance-alert BullMQ worker", () => {
+describe("BL-17: maintenance-alert cron service", () => {
   let tenantUserId: string;
   let unitId: string;
   const localRequestIds: string[] = [];

@@ -27,7 +27,7 @@ import { Logger } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { MaintenanceAlertProcessor } from "../src/jobs/maintenance-alert.processor";
+import { MaintenanceAlertService } from "../src/jobs/maintenance-alert.service";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const supertestFn = require("supertest") as (app: unknown) => import("supertest").SuperTest<import("supertest").Test>;
@@ -42,7 +42,7 @@ const VALID_NOTES = "Resolution note meets the twenty char minimum for tests.";
 
 let app: INestApplication;
 let prisma: PrismaService;
-let alertProcessor: MaintenanceAlertProcessor;
+let alertProcessor: MaintenanceAlertService;
 let adminToken: string;
 
 const cleanup = {
@@ -70,7 +70,7 @@ beforeAll(async () => {
   await app.init();
 
   prisma = moduleRef.get<PrismaService>(PrismaService);
-  alertProcessor = moduleRef.get<MaintenanceAlertProcessor>(MaintenanceAlertProcessor);
+  alertProcessor = moduleRef.get<MaintenanceAlertService>(MaintenanceAlertService);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")

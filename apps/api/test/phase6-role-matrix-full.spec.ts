@@ -787,26 +787,26 @@ describe("Section H — Jobs endpoints: non-Admin roles → 403", () => {
     expect(res.status).toBe(403);
   });
 
-  // POST /jobs/rent-accrual/schedule
-  it("PM → POST /jobs/rent-accrual/schedule → 403", async () => {
+  // POST /jobs/rent-accrual/schedule — removed: BullMQ async enqueue dropped; endpoint no longer exists
+  it("PM → POST /jobs/rent-accrual/schedule → 404 (endpoint removed with BullMQ)", async () => {
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/jobs/rent-accrual/schedule")
       .set("Authorization", `Bearer ${pmToken}`);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
   });
 
-  it("TENANT → POST /jobs/rent-accrual/schedule → 403", async () => {
+  it("TENANT → POST /jobs/rent-accrual/schedule → 404 (endpoint removed with BullMQ)", async () => {
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/jobs/rent-accrual/schedule")
       .set("Authorization", `Bearer ${tenantToken}`);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
   });
 
-  it("MAINTENANCE → POST /jobs/rent-accrual/schedule → 403", async () => {
+  it("MAINTENANCE → POST /jobs/rent-accrual/schedule → 404 (endpoint removed with BullMQ)", async () => {
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/jobs/rent-accrual/schedule")
       .set("Authorization", `Bearer ${maintToken}`);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
   });
 
   // POST /jobs/maintenance-alert/run
