@@ -304,7 +304,7 @@ The stack below is **fixed**. Any deviation requires explicit user approval.
 | Validation | **class-validator + class-transformer** | DTO-level validation; mirrors zod schemas where shared |
 | Auth | **JWT** (access 15 min) + httpOnly refresh cookie | `SameSite=Strict`, `Secure`, opaque refresh tokens stored server-side for revocation |
 | Password hashing | **Argon2id** | Never bcrypt+legacy; never MD5/SHA1 anywhere |
-| Background jobs | **BullMQ** (Redis-backed) | For the daily overdue check (BL-12), late-fee accrual (BL-13), and the 5+ maintenance alert (BL-17) |
+| Background jobs | **`@nestjs/schedule`** (in-process cron) | Daily overdue check (BL-12), late-fee accrual (BL-13), 5+ maintenance alert (BL-17). Single-instance deployment — for horizontal scaling, revisit by introducing a Redis-backed queue. |
 | Test runner | **Jest** + **Supertest** | Unit + integration |
 
 ### 10.3 Database
