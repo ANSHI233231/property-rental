@@ -607,7 +607,7 @@ export class MaintenanceService {
   }
 
   // ---------------------------------------------------------------------------
-  // BL-17 alert runner — called by the BullMQ processor
+  // BL-17 alert runner — called by the @nestjs/schedule cron service
   // ---------------------------------------------------------------------------
 
   async runAlertCheck(nowOverride?: Date): Promise<{

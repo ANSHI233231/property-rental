@@ -875,7 +875,7 @@ export class RentService {
   }
 
   // ---------------------------------------------------------------------------
-  // generateNextPeriod — called by BullMQ worker
+  // generateNextPeriod — called by @nestjs/schedule cron service
   // Creates the next rent period for a lease if none exists for the coming month.
   // ---------------------------------------------------------------------------
 

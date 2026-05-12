@@ -27,7 +27,7 @@ import type { JwtPayload } from "../auth/jwt.service";
  * BL-14: description >= 30 chars; resolution_notes >= 20 chars (DTO + DB CHECK).
  * BL-15: closed requests immutable (DB trigger; service returns 409 on stale read).
  * BL-16: MAINTENANCE role blocked from POST /maintenance-requests.
- * BL-17: 5+ requests/month alert via BullMQ worker; dismiss-alert endpoint here.
+ * BL-17: 5+ requests/month alert via @nestjs/schedule cron; dismiss-alert endpoint here.
  * BL-21: /close is TENANT-only.
  */
 @Controller("maintenance-requests")

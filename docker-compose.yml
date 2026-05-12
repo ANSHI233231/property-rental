@@ -1,10 +1,11 @@
-# GharSetu — local dev infrastructure (Phase 0).
-# Brings up Postgres 18 (per SRS §10) and Redis 7 (BullMQ from Phase 4 onward).
+# GharSetu — local dev infrastructure.
+# Brings up Postgres 18 (per SRS §10). Background jobs run in-process via
+# @nestjs/schedule — no Redis required.
 # Production deployment uses managed services — this file is dev-only.
 #
-# Ports are intentionally NON-DEFAULT (5433 / 6380) so the dev stack does not
-# clash with any host-installed Postgres / Redis on the developer's machine.
-# Update DATABASE_URL / REDIS_URL in `.env` to match.
+# Ports are intentionally NON-DEFAULT (5433) so the dev stack does not
+# clash with any host-installed Postgres on the developer's machine.
+# Update DATABASE_URL in `.env` to match.
 #
 # Postgres 18 note: per the official postgres:18-alpine image, the volume
 # is mounted at /var/lib/postgresql (NOT /var/lib/postgresql/data) so that
@@ -30,18 +31,6 @@ services:
       test: ["CMD-SHELL", "pg_isready -U gharsetu -d gharsetu"]
       interval: 5s
       timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7-alpine
-    container_name: gharsetu-redis
-    restart: unless-stopped
-    ports:
-      - "6380:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
       retries: 10
 
 volumes:

@@ -5,7 +5,7 @@
  *   BL-14: description >= 30 chars, resolution_notes >= 20 chars (also enforced at DB level).
  *   BL-15: closed requests immutable (enforced at DB trigger + service layer).
  *   BL-16: MAINTENANCE role cannot create requests (enforced at endpoint @Roles guard).
- *   BL-17: 5+ requests in a calendar month triggers an alert (BullMQ worker).
+ *   BL-17: 5+ requests in a calendar month triggers an alert (@nestjs/schedule cron).
  *   BL-21: only TENANT may close a request (enforced at endpoint @Roles guard).
  */
 
