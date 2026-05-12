@@ -158,25 +158,6 @@ function LoginForm() {
           No public sign-up. Accounts are created by your Admin or Property
           Manager.
         </div>
-
-        <hr className="divider mt-6" />
-        <div className="text-xs muted text-center font-poppins font-semibold uppercase tracking-wider mb-3">
-          Demo — jump to a role
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Link href="/admin/dashboard" className="btn btn-secondary auth-role-btn">
-            Admin
-          </Link>
-          <Link href="/pm/dashboard" className="btn btn-secondary auth-role-btn">
-            Property Manager
-          </Link>
-          <Link href="/maintenance/dashboard" className="btn btn-secondary auth-role-btn">
-            Maintenance
-          </Link>
-          <Link href="/tenant/dashboard" className="btn btn-secondary auth-role-btn">
-            Tenant
-          </Link>
-        </div>
       </form>
     </>
   );
