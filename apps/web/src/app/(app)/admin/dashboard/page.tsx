@@ -30,7 +30,9 @@ import Link from "next/link";
 
 interface UnitItem {
   id: string;
-  state: string; // "occupied" | "available" | "listed" | "in_maintenance" | "retired"
+  // Postgres enum values: OCCUPIED | AVAILABLE | LISTED | IN_MAINTENANCE | RETIRED
+  state: "OCCUPIED" | "AVAILABLE" | "LISTED" | "IN_MAINTENANCE" | "RETIRED" | string;
+  property_id?: string;
   property?: { id: string; name: string } | null;
 }
 
@@ -201,19 +203,22 @@ export default function AdminDashboardPage() {
           unitRes.status === "fulfilled"
             ? unitRes.value.data ?? unitRes.value.items ?? []
             : [];
-        const nonRetiredUnits = units.filter((u) => u.state !== "retired");
-        const occupiedUnits = nonRetiredUnits.filter((u) => u.state === "occupied").length;
+        // Postgres enums are UPPERCASE; the API returns them as-is.
+        const nonRetiredUnits = units.filter((u) => u.state !== "RETIRED");
+        const occupiedUnits = nonRetiredUnits.filter((u) => u.state === "OCCUPIED").length;
 
-        // Per-property breakdown
+        // Per-property breakdown — units carry property_id directly (snake_case
+        // from the API). The optional nested `property` object isn't present
+        // on the list endpoint, so fall back to property_id.
         const propMap = new Map<string, { name: string; occupied: number; total: number }>();
         properties.forEach((p) => propMap.set(p.id, { name: p.name, occupied: 0, total: 0 }));
         nonRetiredUnits.forEach((u) => {
-          const propId = u.property?.id;
+          const propId = u.property?.id ?? u.property_id;
           if (!propId) return;
           const entry = propMap.get(propId);
           if (!entry) return;
           entry.total++;
-          if (u.state === "occupied") entry.occupied++;
+          if (u.state === "OCCUPIED") entry.occupied++;
         });
         const propertyOccupancy = Array.from(propMap.values()).filter((p) => p.total > 0);
 
