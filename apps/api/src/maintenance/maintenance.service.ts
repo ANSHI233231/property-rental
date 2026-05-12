@@ -7,9 +7,6 @@ import {
   Logger,
 } from "@nestjs/common";
 
-// Valid MaintenanceStatus enum values (mirrors prisma/schema.prisma)
-const VALID_MAINTENANCE_STATUSES = ["OPEN", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
-type MaintenanceStatusValue = typeof VALID_MAINTENANCE_STATUSES[number];
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
@@ -18,6 +15,46 @@ import type { AssignMaintenanceDto } from "./dto/assign-maintenance.dto";
 import type { ResolveMaintenanceDto } from "./dto/resolve-maintenance.dto";
 import type { DismissAlertDto } from "./dto/dismiss-alert.dto";
 import type { JwtPayload } from "../auth/jwt.service";
+
+// ---------------------------------------------------------------------------
+// Maintenance status int codes (mirror DB CASE WHEN convention)
+// ---------------------------------------------------------------------------
+
+export const MAINTENANCE_STATUS = {
+  OPEN: 0,
+  ASSIGNED: 1,
+  IN_PROGRESS: 2,
+  RESOLVED: 3,
+  CLOSED: 4,
+} as const;
+
+export const MAINTENANCE_PRIORITY = {
+  LOW: 0,
+  NORMAL: 1,
+  HIGH: 2,
+  EMERGENCY: 3,
+} as const;
+
+/** Status name → code lookup (for query param filtering) */
+const STATUS_NAME_TO_CODE: Record<string, number> = {
+  OPEN: MAINTENANCE_STATUS.OPEN,
+  ASSIGNED: MAINTENANCE_STATUS.ASSIGNED,
+  IN_PROGRESS: MAINTENANCE_STATUS.IN_PROGRESS,
+  RESOLVED: MAINTENANCE_STATUS.RESOLVED,
+  CLOSED: MAINTENANCE_STATUS.CLOSED,
+};
+
+/** Role int codes */
+const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
+
+/** Lease status ACTIVE int code */
+const LEASE_ACTIVE = 0;
+
+/** MAINTENANCE role code (for user.role check) */
+const MAINTENANCE_ROLE_CODE = 2;
+
+// Valid status name strings for request validation
+const VALID_STATUS_NAMES = Object.keys(STATUS_NAME_TO_CODE);
 
 // ---------------------------------------------------------------------------
 // Safe select shape — no internal fields leaked
@@ -90,30 +127,30 @@ export class MaintenanceService {
   async list(
     actor: JwtPayload,
     query: {
-      unitId?: string;
-      propertyId?: string;
+      unitId?: number;
+      propertyId?: number;
       status?: string;
-      assignedToUserId?: string;
+      assignedToUserId?: number;
       scope?: string;
-      cursor?: string;
+      cursor?: number;
       limit?: number;
     },
   ) {
     const limit = Math.min(query.limit ?? 20, 100);
     const where: Prisma.MaintenanceRequestWhereInput = {};
 
-    if (actor.role === "TENANT") {
+    if (actor.role === ROLE.TENANT) {
       // Tenant sees only their own requests
       where.raised_by_user_id = actor.sub;
-    } else if (actor.role === "MAINTENANCE") {
+    } else if (actor.role === ROLE.MAINTENANCE) {
       if (query.scope === "all-open") {
         // All open/assigned/in-progress across all properties
-        where.status = { in: ["OPEN", "ASSIGNED", "IN_PROGRESS"] };
+        where.status = { in: [MAINTENANCE_STATUS.OPEN, MAINTENANCE_STATUS.ASSIGNED, MAINTENANCE_STATUS.IN_PROGRESS] };
       } else {
         // Only their own assigned requests
         where.assigned_to_user_id = actor.sub;
       }
-    } else if (actor.role === "PROPERTY_MANAGER") {
+    } else if (actor.role === ROLE.PROPERTY_MANAGER) {
       // Scoped to their property's units
       const pm = await this.prisma.property.findFirst({
         where: { active_pm_id: actor.sub, deleted_at: null },
@@ -123,27 +160,28 @@ export class MaintenanceService {
         return { data: [], nextCursor: null };
       }
       where.unit = { property_id: pm.id };
-      if (query.unitId) where.unit_id = query.unitId;
+      if (query.unitId !== undefined) where.unit_id = query.unitId;
     }
     // ADMIN sees all — no extra filter
 
-    if (actor.role === "ADMIN" || actor.role === "PROPERTY_MANAGER") {
-      if (query.unitId) where.unit_id = query.unitId;
-      if (query.assignedToUserId) where.assigned_to_user_id = query.assignedToUserId;
+    if (actor.role === ROLE.ADMIN || actor.role === ROLE.PROPERTY_MANAGER) {
+      if (query.unitId !== undefined) where.unit_id = query.unitId;
+      if (query.assignedToUserId !== undefined) where.assigned_to_user_id = query.assignedToUserId;
     }
 
-    if (query.propertyId && actor.role === "ADMIN") {
+    if (query.propertyId !== undefined && actor.role === ROLE.ADMIN) {
       where.unit = { property_id: query.propertyId };
     }
 
     if (query.status) {
-      if (!VALID_MAINTENANCE_STATUSES.includes(query.status as MaintenanceStatusValue)) {
+      const upperStatus = query.status.toUpperCase();
+      if (!VALID_STATUS_NAMES.includes(upperStatus)) {
         throw new BadRequestException({
           code: "INVALID_STATUS",
-          message: `Invalid status value '${query.status}'. Valid values: ${VALID_MAINTENANCE_STATUSES.join(", ")}`,
+          message: `Invalid status value '${query.status}'. Valid values: ${VALID_STATUS_NAMES.join(", ")}`,
         });
       }
-      where.status = query.status as Prisma.EnumMaintenanceStatusFilter;
+      where.status = STATUS_NAME_TO_CODE[upperStatus];
     }
 
     const items = await this.prisma.maintenanceRequest.findMany({
@@ -160,7 +198,7 @@ export class MaintenanceService {
     const nextCursor = hasMore && lastItem ? lastItem.id : null;
 
     // M-01: strip lease_id from MAINTENANCE all-open scope — no PII linkage needed
-    if (actor.role === "MAINTENANCE" && query.scope === "all-open") {
+    if (actor.role === ROLE.MAINTENANCE && query.scope === "all-open") {
       data = data.map((item) => ({ ...item, lease_id: null }));
     }
 
@@ -171,7 +209,7 @@ export class MaintenanceService {
   // findOne — scoped by role
   // ---------------------------------------------------------------------------
 
-  async findOne(id: string, actor: JwtPayload) {
+  async findOne(id: number, actor: JwtPayload) {
     const req = await this.prisma.maintenanceRequest.findUnique({
       where: { id },
       select: {
@@ -194,18 +232,17 @@ export class MaintenanceService {
   // ---------------------------------------------------------------------------
 
   async create(dto: CreateMaintenanceRequestDto, actor: JwtPayload) {
-    // Verify tenant has an active lease on the specified unit
+    // Verify unit exists
     const unit = await this.prisma.unit.findUnique({
       where: { id: dto.unitId },
       select: { id: true, property_id: true },
     });
     if (!unit) throw new NotFoundException("Unit not found");
 
-    let leaseId: string | null = null;
+    let leaseId: number | null = null;
 
-    if (actor.role === "TENANT") {
+    if (actor.role === ROLE.TENANT) {
       // Tenant must have an active lease on this unit.
-      // Two-step: find Tenant record for this user, then check LeaseTenant → Lease.
       const tenantRecord = await this.prisma.tenant.findUnique({
         where: { user_id: actor.sub },
         select: { id: true },
@@ -222,7 +259,7 @@ export class MaintenanceService {
           removed_at: null,
           lease: {
             unit_id: dto.unitId,
-            status: "ACTIVE",
+            status: LEASE_ACTIVE,
           },
         },
         select: { lease_id: true },
@@ -234,16 +271,27 @@ export class MaintenanceService {
         });
       }
       leaseId = leaseTenant.lease_id;
-    } else if (actor.role === "ADMIN") {
+    } else if (actor.role === ROLE.ADMIN) {
       // Admin acts on behalf — find active lease if any
       const lease = await this.prisma.lease.findFirst({
-        where: { unit_id: dto.unitId, status: "ACTIVE" },
+        where: { unit_id: dto.unitId, status: LEASE_ACTIVE },
         select: { id: true },
       });
       leaseId = lease?.id ?? null;
     }
 
     const now = new Date();
+
+    // Map priority string to int code
+    const PRIORITY_CODE: Record<string, number> = {
+      LOW: MAINTENANCE_PRIORITY.LOW,
+      NORMAL: MAINTENANCE_PRIORITY.NORMAL,
+      HIGH: MAINTENANCE_PRIORITY.HIGH,
+      EMERGENCY: MAINTENANCE_PRIORITY.EMERGENCY,
+    };
+    const priorityCode = typeof dto.priority === "string"
+      ? (PRIORITY_CODE[dto.priority.toUpperCase()] ?? MAINTENANCE_PRIORITY.NORMAL)
+      : (dto.priority as number);
 
     const request = await this.prisma.$transaction(async (tx) => {
       const created = await tx.maintenanceRequest.create({
@@ -253,8 +301,8 @@ export class MaintenanceService {
           raised_by_user_id: actor.sub,
           title: dto.title,
           description: dto.description,
-          priority: dto.priority,
-          status: "OPEN",
+          priority: priorityCode,
+          status: MAINTENANCE_STATUS.OPEN,
         },
         select: REQUEST_SELECT,
       });
@@ -276,8 +324,8 @@ export class MaintenanceService {
       return created;
     });
 
-    // EMERGENCY priority: structured log (Phase 7 can wire SMS/email)
-    if (dto.priority === "EMERGENCY") {
+    // EMERGENCY priority: structured log
+    if (priorityCode === MAINTENANCE_PRIORITY.EMERGENCY) {
       this.logger.warn({
         event: "EMERGENCY_MAINTENANCE_REQUEST",
         requestId: request.id,
@@ -295,14 +343,14 @@ export class MaintenanceService {
   // assign — OPEN → ASSIGNED (PM/Admin only)
   // ---------------------------------------------------------------------------
 
-  async assign(id: string, dto: AssignMaintenanceDto, actor: JwtPayload) {
+  async assign(id: number, dto: AssignMaintenanceDto, actor: JwtPayload) {
     const req = await this.getRequestOrThrow(id);
     await this.assertWriteAccess(req, actor);
 
-    if (req.status !== "OPEN") {
+    if (req.status !== MAINTENANCE_STATUS.OPEN) {
       throw new ConflictException({
         code: "INVALID_TRANSITION",
-        message: `Cannot assign a request with status '${req.status}'. Expected OPEN.`,
+        message: `Cannot assign a request with status '${req.status}'. Expected OPEN (0).`,
       });
     }
 
@@ -312,7 +360,7 @@ export class MaintenanceService {
       select: { id: true, role: true, is_active: true },
     });
     if (!assignee) throw new NotFoundException("Assignee user not found");
-    if (assignee.role !== "MAINTENANCE") {
+    if (assignee.role !== MAINTENANCE_ROLE_CODE) {
       throw new BadRequestException({
         code: "ASSIGNEE_NOT_MAINTENANCE_ROLE",
         message: "Assignee must have the MAINTENANCE role.",
@@ -329,7 +377,7 @@ export class MaintenanceService {
       const result = await tx.maintenanceRequest.update({
         where: { id },
         data: {
-          status: "ASSIGNED",
+          status: MAINTENANCE_STATUS.ASSIGNED,
           assigned_to_user_id: dto.assigneeUserId,
           assigned_at: new Date(),
         },
@@ -342,7 +390,7 @@ export class MaintenanceService {
         entityType: "MaintenanceRequest",
         entityId: id,
         before: { status: req.status, assigned_to_user_id: req.assigned_to_user_id },
-        after: { status: "ASSIGNED", assigned_to_user_id: dto.assigneeUserId },
+        after: { status: MAINTENANCE_STATUS.ASSIGNED, assigned_to_user_id: dto.assigneeUserId },
       });
 
       return result;
@@ -355,19 +403,19 @@ export class MaintenanceService {
   // inProgress — ASSIGNED → IN_PROGRESS
   // ---------------------------------------------------------------------------
 
-  async inProgress(id: string, actor: JwtPayload) {
+  async inProgress(id: number, actor: JwtPayload) {
     const req = await this.getRequestOrThrow(id);
     await this.assertWriteAccess(req, actor);
 
-    if (req.status !== "ASSIGNED") {
+    if (req.status !== MAINTENANCE_STATUS.ASSIGNED) {
       throw new ConflictException({
         code: "INVALID_TRANSITION",
-        message: `Cannot mark in-progress a request with status '${req.status}'. Expected ASSIGNED.`,
+        message: `Cannot mark in-progress a request with status '${req.status}'. Expected ASSIGNED (1).`,
       });
     }
 
     // MAINTENANCE can only act on their own assigned requests
-    if (actor.role === "MAINTENANCE" && req.assigned_to_user_id !== actor.sub) {
+    if (actor.role === ROLE.MAINTENANCE && req.assigned_to_user_id !== actor.sub) {
       throw new ForbiddenException({
         code: "NOT_YOUR_ASSIGNMENT",
         message: "This maintenance request is not assigned to you.",
@@ -378,7 +426,7 @@ export class MaintenanceService {
       const result = await tx.maintenanceRequest.update({
         where: { id },
         data: {
-          status: "IN_PROGRESS",
+          status: MAINTENANCE_STATUS.IN_PROGRESS,
           in_progress_at: new Date(),
         },
         select: REQUEST_SELECT,
@@ -390,7 +438,7 @@ export class MaintenanceService {
         entityType: "MaintenanceRequest",
         entityId: id,
         before: { status: req.status },
-        after: { status: "IN_PROGRESS" },
+        after: { status: MAINTENANCE_STATUS.IN_PROGRESS },
       });
 
       return result;
@@ -403,19 +451,19 @@ export class MaintenanceService {
   // resolve — IN_PROGRESS → RESOLVED
   // ---------------------------------------------------------------------------
 
-  async resolve(id: string, dto: ResolveMaintenanceDto, actor: JwtPayload) {
+  async resolve(id: number, dto: ResolveMaintenanceDto, actor: JwtPayload) {
     const req = await this.getRequestOrThrow(id);
     await this.assertWriteAccess(req, actor);
 
-    if (req.status !== "IN_PROGRESS") {
+    if (req.status !== MAINTENANCE_STATUS.IN_PROGRESS) {
       throw new ConflictException({
         code: "INVALID_TRANSITION",
-        message: `Cannot resolve a request with status '${req.status}'. Expected IN_PROGRESS.`,
+        message: `Cannot resolve a request with status '${req.status}'. Expected IN_PROGRESS (2).`,
       });
     }
 
     // MAINTENANCE can only act on their own requests
-    if (actor.role === "MAINTENANCE" && req.assigned_to_user_id !== actor.sub) {
+    if (actor.role === ROLE.MAINTENANCE && req.assigned_to_user_id !== actor.sub) {
       throw new ForbiddenException({
         code: "NOT_YOUR_ASSIGNMENT",
         message: "This maintenance request is not assigned to you.",
@@ -426,7 +474,7 @@ export class MaintenanceService {
       const result = await tx.maintenanceRequest.update({
         where: { id },
         data: {
-          status: "RESOLVED",
+          status: MAINTENANCE_STATUS.RESOLVED,
           resolution_notes: dto.resolutionNotes,
           resolved_at: new Date(),
         },
@@ -439,7 +487,7 @@ export class MaintenanceService {
         entityType: "MaintenanceRequest",
         entityId: id,
         before: { status: req.status },
-        after: { status: "RESOLVED", resolution_notes: dto.resolutionNotes },
+        after: { status: MAINTENANCE_STATUS.RESOLVED, resolution_notes: dto.resolutionNotes },
       });
 
       return result;
@@ -452,13 +500,13 @@ export class MaintenanceService {
   // close — RESOLVED → CLOSED (TENANT only — BL-21)
   // ---------------------------------------------------------------------------
 
-  async close(id: string, actor: JwtPayload) {
+  async close(id: number, actor: JwtPayload) {
     const req = await this.getRequestOrThrow(id);
 
-    if (req.status !== "RESOLVED") {
+    if (req.status !== MAINTENANCE_STATUS.RESOLVED) {
       throw new ConflictException({
         code: "INVALID_TRANSITION",
-        message: `Cannot close a request with status '${req.status}'. Expected RESOLVED.`,
+        message: `Cannot close a request with status '${req.status}'. Expected RESOLVED (3).`,
       });
     }
 
@@ -474,7 +522,7 @@ export class MaintenanceService {
       const result = await tx.maintenanceRequest.update({
         where: { id },
         data: {
-          status: "CLOSED",
+          status: MAINTENANCE_STATUS.CLOSED,
           closed_at: new Date(),
           closed_by_user_id: actor.sub,
         },
@@ -487,7 +535,7 @@ export class MaintenanceService {
         entityType: "MaintenanceRequest",
         entityId: id,
         before: { status: req.status },
-        after: { status: "CLOSED", closed_by_user_id: actor.sub },
+        after: { status: MAINTENANCE_STATUS.CLOSED, closed_by_user_id: actor.sub },
       });
 
       return result;
@@ -503,7 +551,7 @@ export class MaintenanceService {
 
   async listAlerts(actor: JwtPayload, query: {
     dismissed?: string;
-    cursor?: string;
+    cursor?: number;
     limit?: number;
   }) {
     const take = Math.min(query.limit ?? 20, 100);
@@ -515,7 +563,7 @@ export class MaintenanceService {
       where.dismissed_at = null;
     }
 
-    if (actor.role === "PROPERTY_MANAGER") {
+    if (actor.role === ROLE.PROPERTY_MANAGER) {
       // Scope: only alerts for units in the PM's assigned property
       const pm = await this.prisma.property.findFirst({
         where: { active_pm_id: actor.sub, deleted_at: null },
@@ -559,7 +607,7 @@ export class MaintenanceService {
     if (!alert) throw new NotFoundException("Maintenance alert not found");
 
     // PM scope: verify alert's unit is in their property
-    if (actor.role === "PROPERTY_MANAGER") {
+    if (actor.role === ROLE.PROPERTY_MANAGER) {
       const pm = await this.prisma.property.findFirst({
         where: { active_pm_id: actor.sub, deleted_at: null },
         select: { id: true },
@@ -619,16 +667,12 @@ export class MaintenanceService {
     const now = nowOverride ?? new Date();
     const monthKey = toISTMonthKey(now);
 
-    // Start and end of current calendar month in IST (as UTC moments)
     const [year, month] = monthKey.split("-").map(Number) as [number, number];
 
-    // IST offset: 5h30m = 330 min = 19800 sec = 19800000 ms
     const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
 
-    // Start of month in IST = 1st 00:00:00 IST → UTC = 1st 00:00:00 IST minus 5:30
     const monthStartIST = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0) - IST_OFFSET_MS);
-    // End of month in IST = last day 23:59:59.999 IST
-    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate(); // last day of month
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
     const monthEndIST = new Date(
       Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999) - IST_OFFSET_MS,
     );
@@ -712,7 +756,7 @@ export class MaintenanceService {
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  private async getRequestOrThrow(id: string) {
+  private async getRequestOrThrow(id: number) {
     const req = await this.prisma.maintenanceRequest.findUnique({
       where: { id },
       select: {
@@ -729,12 +773,12 @@ export class MaintenanceService {
    * own assigned (or all-open scope, handled in list()), PM sees their property.
    */
   private async assertReadAccess(
-    req: { raised_by_user_id: string; assigned_to_user_id: string | null; unit: { property_id: string } },
+    req: { raised_by_user_id: number; assigned_to_user_id: number | null; unit: { property_id: number } },
     actor: JwtPayload,
   ): Promise<void> {
-    if (actor.role === "ADMIN") return;
+    if (actor.role === ROLE.ADMIN) return;
 
-    if (actor.role === "TENANT") {
+    if (actor.role === ROLE.TENANT) {
       if (req.raised_by_user_id !== actor.sub) {
         throw new ForbiddenException({
           code: "NOT_YOUR_REQUEST",
@@ -744,7 +788,7 @@ export class MaintenanceService {
       return;
     }
 
-    if (actor.role === "MAINTENANCE") {
+    if (actor.role === ROLE.MAINTENANCE) {
       if (req.assigned_to_user_id !== actor.sub) {
         throw new ForbiddenException({
           code: "NOT_YOUR_ASSIGNMENT",
@@ -754,8 +798,7 @@ export class MaintenanceService {
       return;
     }
 
-    if (actor.role === "PROPERTY_MANAGER") {
-      // H-01 fix: verify PM is the active PM for this request's property
+    if (actor.role === ROLE.PROPERTY_MANAGER) {
       const pm = await this.prisma.property.findFirst({
         where: {
           id: req.unit.property_id,
@@ -778,12 +821,12 @@ export class MaintenanceService {
    * Write access check — PM must be active PM for the request's property.
    */
   private async assertWriteAccess(
-    req: { unit: { property_id: string } },
+    req: { unit: { property_id: number } },
     actor: JwtPayload,
   ) {
-    if (actor.role === "ADMIN") return;
+    if (actor.role === ROLE.ADMIN) return;
 
-    if (actor.role === "PROPERTY_MANAGER") {
+    if (actor.role === ROLE.PROPERTY_MANAGER) {
       const pm = await this.prisma.property.findFirst({
         where: {
           id: req.unit.property_id,

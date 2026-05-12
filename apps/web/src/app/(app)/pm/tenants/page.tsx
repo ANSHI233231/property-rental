@@ -12,7 +12,7 @@ import { usePmProperty } from "@/lib/pm/context";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR } from "@gharsetu/shared";
+import { formatINR, LeaseStatusEnum } from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -21,17 +21,17 @@ import { EmptyState } from "@/components/ui/EmptyState";
 // ---------------------------------------------------------------------------
 
 interface TenantRow {
-  id: string;
+  id: number | string;
   name: string;
   phone?: string;
   co_tenants?: { name: string }[];
-  unit?: { id: string; name: string };
+  unit?: { id: number | string; name: string };
   lease?: {
-    id: string;
+    id: number | string;
     start_date: string;
     end_date: string;
     monthly_rent_paise: string | number;
-    status: string;
+    status: number | string;
   };
 }
 
@@ -50,7 +50,23 @@ interface PaginatedResponse {
 // Status badge
 // ---------------------------------------------------------------------------
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: { status: number | string }) {
+  // Lease status badge — handles numeric LeaseStatusEnum codes and legacy strings
+  if (typeof status === "number") {
+    const NUM_CLASS: Record<number, string> = {
+      [LeaseStatusEnum.ACTIVE]: "badge-paid",
+      [LeaseStatusEnum.EXPIRED]: "badge-open",
+      [LeaseStatusEnum.RENEWED]: "badge-renewed",
+      [LeaseStatusEnum.TERMINATED]: "badge-terminated",
+    };
+    const NUM_LABEL: Record<number, string> = {
+      [LeaseStatusEnum.ACTIVE]: "Active",
+      [LeaseStatusEnum.EXPIRED]: "Expired",
+      [LeaseStatusEnum.RENEWED]: "Renewed",
+      [LeaseStatusEnum.TERMINATED]: "Terminated",
+    };
+    return <span className={`badge ${NUM_CLASS[status] ?? "badge-open"}`}>{NUM_LABEL[status] ?? String(status)}</span>;
+  }
   const normalised = status.toLowerCase();
   const badgeClass =
     normalised === "active"
@@ -62,12 +78,7 @@ function StatusBadge({ status }: { status: string }) {
           : normalised === "prepaid"
             ? "badge-prepaid"
             : "badge-open";
-
-  const label =
-    normalised === "active"
-      ? "Active"
-      : normalised.charAt(0).toUpperCase() + normalised.slice(1);
-
+  const label = normalised.charAt(0).toUpperCase() + normalised.slice(1);
   return <span className={`badge ${badgeClass}`}>{label}</span>;
 }
 

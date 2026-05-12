@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { TenantsService } from "./tenants.service";
 import { UpdateTenantDto } from "./dto/update-tenant.dto";
@@ -41,11 +42,15 @@ export class TenantsController {
   @PropertyScope("property")
   @HttpCode(HttpStatus.OK)
   async listByProperty(
-    @Param("propertyId") propertyId: string,
+    @Param("propertyId", ParseIntPipe) propertyId: number,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
   ) {
-    return this.tenantsService.listByProperty(propertyId, cursor, limit ? parseInt(limit, 10) : 20);
+    return this.tenantsService.listByProperty(
+      propertyId,
+      cursor ? parseInt(cursor, 10) : undefined,
+      limit ? parseInt(limit, 10) : 20,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -56,7 +61,7 @@ export class TenantsController {
   @Roles("ADMIN", "PROPERTY_MANAGER")
   @PropertyScope("tenant")
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.tenantsService.findById(id);
   }
 
@@ -69,7 +74,7 @@ export class TenantsController {
   @PropertyScope("tenant")
   @HttpCode(HttpStatus.OK)
   async update(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdateTenantDto,
     @CurrentUser() actor: JwtPayload,
   ) {

@@ -9,6 +9,7 @@ import {
   Matches,
   Min,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * DTO for POST /leases/:id/renew
@@ -24,21 +25,24 @@ export class RenewLeaseDto {
   @IsNumber()
   @IsInt()
   @IsPositive()
+  @Type(() => Number)
   monthlyRentPaise?: number;
 
   @IsOptional()
   @IsNumber()
   @IsInt()
   @Min(0)
+  @Type(() => Number)
   securityDepositPaise?: number;
 
   /**
-   * If provided, only these tenant IDs are carried over to the new lease.
+   * If provided, only these tenant IDs (Tenant.id numbers) are carried over to the new lease.
    * F-02: capped at 20 to prevent CPU-spike / array-bomb vector (VAPT phase-8).
    */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(20, { message: "A maximum of 20 tenant IDs are allowed per renewal" })
-  @IsString({ each: true })
-  tenantIds?: string[];
+  @IsInt({ each: true })
+  @Type(() => Number)
+  tenantIds?: number[];
 }

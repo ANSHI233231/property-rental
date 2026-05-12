@@ -23,15 +23,15 @@ describe("JwtTokenService", () => {
   });
 
   it("signAccessToken returns a non-empty JWT string", () => {
-    const token = service.signAccessToken({ sub: "user-123", role: "ADMIN" });
+    const token = service.signAccessToken({ sub: 1, role: 0 }); // ADMIN=0
     expect(token).toMatch(/^[\w-]+\.[\w-]+\.[\w-]+$/);
   });
 
   it("verifyAccessToken returns the correct payload", () => {
-    const token = service.signAccessToken({ sub: "user-abc", role: "TENANT" });
+    const token = service.signAccessToken({ sub: 5, role: 3 }); // TENANT=3
     const payload = service.verifyAccessToken(token);
-    expect(payload.sub).toBe("user-abc");
-    expect(payload.role).toBe("TENANT");
+    expect(payload.sub).toBe(5);
+    expect(payload.role).toBe(3);
   });
 
   it("verifyAccessToken throws UnauthorizedException for invalid token", () => {
@@ -39,7 +39,7 @@ describe("JwtTokenService", () => {
   });
 
   it("verifyAccessToken throws UnauthorizedException for tampered token", () => {
-    const token = service.signAccessToken({ sub: "user-xyz", role: "ADMIN" });
+    const token = service.signAccessToken({ sub: 99, role: 0 }); // ADMIN=0
     const tampered = token.slice(0, -5) + "xxxxx";
     expect(() => service.verifyAccessToken(tampered)).toThrow(UnauthorizedException);
   });

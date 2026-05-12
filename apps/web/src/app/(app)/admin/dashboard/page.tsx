@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { todayIST } from "@/lib/locale";
-import { formatINR } from "@gharsetu/shared";
+import { formatINR, UnitStateEnum, MaintenanceStatusCodes } from "@gharsetu/shared";
 import { parseBigPaise } from "@/lib/rent/format";
 import Link from "next/link";
 
@@ -30,10 +30,11 @@ import Link from "next/link";
 
 interface UnitItem {
   id: string;
-  // Postgres enum values: OCCUPIED | AVAILABLE | LISTED | IN_MAINTENANCE | RETIRED
-  state: "OCCUPIED" | "AVAILABLE" | "LISTED" | "IN_MAINTENANCE" | "RETIRED" | string;
-  property_id?: string;
-  property?: { id: string; name: string } | null;
+  // API returns state as SMALLINT: 0=AVAILABLE, 1=LISTED, 2=OCCUPIED, 3=MAINTENANCE
+  // Legacy: may also return string values during transition.
+  state: number | string;
+  property_id?: string | number;
+  property?: { id: string | number; name: string } | null;
 }
 
 interface UnitsResponse {
@@ -43,11 +44,11 @@ interface UnitsResponse {
 }
 
 interface RentPeriodItem {
-  id: string;
+  id: number | string;
   periodStart: string;
-  outstandingPaise: string;
-  paidPaise: string;
-  status: string;
+  outstandingPaise: string | number;
+  paidPaise: string | number;
+  status: number | string;
 }
 
 interface RentPeriodsResponse {
@@ -58,7 +59,8 @@ interface RentPeriodsResponse {
 
 interface MaintenanceItem {
   id: string;
-  status: string;
+  // API returns status as SMALLINT (0–4) after Step 1 migration; accept string for legacy
+  status: number | string;
 }
 
 interface MaintenanceResponse {
@@ -203,22 +205,29 @@ export default function AdminDashboardPage() {
           unitRes.status === "fulfilled"
             ? unitRes.value.data ?? unitRes.value.items ?? []
             : [];
-        // Postgres enums are UPPERCASE; the API returns them as-is.
-        const nonRetiredUnits = units.filter((u) => u.state !== "RETIRED");
-        const occupiedUnits = nonRetiredUnits.filter((u) => u.state === "OCCUPIED").length;
+        // API returns state as numeric SMALLINT (0=AVAILABLE,1=LISTED,2=OCCUPIED,3=MAINTENANCE).
+        // There is no "RETIRED" state in the numeric model; retired units are filtered by is_retired flag.
+        // Accept both numeric and legacy string for robustness.
+        function isOccupied(state: number | string): boolean {
+          return state === UnitStateEnum.OCCUPIED || state === "OCCUPIED";
+        }
+        const nonRetiredUnits = units.filter(
+          (u) => u.state !== "RETIRED" // legacy guard; numeric model has no RETIRED state
+        );
+        const occupiedUnits = nonRetiredUnits.filter((u) => isOccupied(u.state)).length;
 
         // Per-property breakdown — units carry property_id directly (snake_case
         // from the API). The optional nested `property` object isn't present
         // on the list endpoint, so fall back to property_id.
         const propMap = new Map<string, { name: string; occupied: number; total: number }>();
-        properties.forEach((p) => propMap.set(p.id, { name: p.name, occupied: 0, total: 0 }));
+        properties.forEach((p) => propMap.set(String(p.id), { name: p.name, occupied: 0, total: 0 }));
         nonRetiredUnits.forEach((u) => {
           const propId = u.property?.id ?? u.property_id;
           if (!propId) return;
-          const entry = propMap.get(propId);
+          const entry = propMap.get(String(propId));
           if (!entry) return;
           entry.total++;
-          if (u.state === "OCCUPIED") entry.occupied++;
+          if (isOccupied(u.state)) entry.occupied++;
         });
         const propertyOccupancy = Array.from(propMap.values()).filter((p) => p.total > 0);
 
@@ -239,7 +248,7 @@ export default function AdminDashboardPage() {
         // Outstanding = overdue + partial + due outstanding
         const outstandingPeriods = [...overduePeriods, ...partialPeriods, ...duePeriods];
         const outstandingPaise = outstandingPeriods.reduce(
-          (sum, p) => sum + parseBigPaise(p.outstandingPaise),
+          (sum, p) => sum + parseBigPaise(String(p.outstandingPaise)),
           0,
         );
 
@@ -255,8 +264,18 @@ export default function AdminDashboardPage() {
           maintRes.status === "fulfilled"
             ? maintRes.value.data ?? maintRes.value.items ?? []
             : [];
-        const OPEN_STATUSES = ["OPEN", "ASSIGNED", "IN_PROGRESS"];
-        const openMaintenanceCount = maintItems.filter((m) => OPEN_STATUSES.includes(m.status)).length;
+        // Accept both numeric codes and legacy strings
+        const OPEN_STATUSES_NUMERIC = new Set<number>([
+          MaintenanceStatusCodes.OPEN,
+          MaintenanceStatusCodes.ASSIGNED,
+          MaintenanceStatusCodes.IN_PROGRESS,
+        ]);
+        const OPEN_STATUSES_STRING = new Set(["OPEN", "ASSIGNED", "IN_PROGRESS"]);
+        const openMaintenanceCount = maintItems.filter((m) =>
+          typeof m.status === "number"
+            ? OPEN_STATUSES_NUMERIC.has(m.status)
+            : OPEN_STATUSES_STRING.has(String(m.status))
+        ).length;
         const emergencyOpenCount = 0; // Would need priority filter — Phase 8 aggregate
 
         // Alerts — BL-17

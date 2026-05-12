@@ -17,11 +17,12 @@ import type { AdminUpdateUserDto } from "./dto/admin-update-user.dto";
 
 /** Safe user shape — never includes password_hash. */
 export interface SafeUser {
-  id: string;
+  id: number;
   email: string;
   phone: string | null;
   name: string;
-  role: string;
+  /** Smallint role code: 0=ADMIN 1=PROPERTY_MANAGER 2=MAINTENANCE 3=TENANT */
+  role: number;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
@@ -79,7 +80,7 @@ export class UsersService {
   // Self-service endpoints (Phase 1, unchanged)
   // ---------------------------------------------------------------------------
 
-  async findById(userId: string): Promise<SafeUser> {
+  async findById(userId: number): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: USER_PROFILE_SELECT,
@@ -92,7 +93,7 @@ export class UsersService {
     return user;
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<SafeUser> {
+  async updateProfile(userId: number, dto: UpdateProfileDto): Promise<SafeUser> {
     if (dto.phone) {
       const existing = await this.prisma.user.findFirst({
         where: { phone: dto.phone, id: { not: userId } },
@@ -114,7 +115,7 @@ export class UsersService {
     return updated;
   }
 
-  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
 
     if (!user || !user.is_active) {
@@ -156,12 +157,26 @@ export class UsersService {
   // Admin CRUD — Phase 2
   // ---------------------------------------------------------------------------
 
-  /** GET /users — Admin paginated list. */
-  async listUsers(role?: string, cursor?: string, limit = 20) {
+  /**
+   * GET /users — Admin paginated list.
+   * role query param accepts int code (0-3) or role-name string for backward compat.
+   */
+  async listUsers(role?: string, cursor?: number, limit = 20) {
     const take = Math.min(limit, 100);
-    const where = {
-      ...(role ? { role: role as "ADMIN" | "PROPERTY_MANAGER" | "MAINTENANCE" | "TENANT" } : {}),
+    // Build role filter — accept either int code string ("0") or name ("ADMIN")
+    const ROLE_NAME_TO_CODE: Record<string, number> = {
+      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
     };
+    const where: { role?: number } = {};
+    if (role !== undefined) {
+      const asInt = parseInt(role, 10);
+      if (!isNaN(asInt)) {
+        where.role = asInt;
+      } else {
+        const code = ROLE_NAME_TO_CODE[role.toUpperCase()];
+        if (code !== undefined) where.role = code;
+      }
+    }
 
     const items = await this.prisma.user.findMany({
       where,
@@ -184,7 +199,7 @@ export class UsersService {
   /** POST /users — Admin creates a user. Returns tempPassword if auto-generated. */
   async adminCreateUser(
     dto: AdminCreateUserDto,
-    actorId: string,
+    actorId: number,
   ): Promise<SafeUser & { temp_password?: string }> {
     // Check email uniqueness
     const emailExists = await this.prisma.user.findUnique({ where: { email: dto.email } });
@@ -208,13 +223,18 @@ export class UsersService {
     const plainPassword = dto.password ?? generateTempPassword();
     const passwordHash = await this.hashing.hashPassword(plainPassword);
 
+    const ROLE_CODE: Record<string, number> = {
+      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
+    };
+    const roleCode = ROLE_CODE[dto.role] ?? 3;
+
     const user = await this.prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
           email: dto.email,
           phone: dto.phone ?? null,
           name: dto.name,
-          role: dto.role,
+          role: roleCode,
           password_hash: passwordHash,
           created_by_user_id: actorId,
         },
@@ -240,7 +260,7 @@ export class UsersService {
   }
 
   /** GET /users/:id — Admin fetch. Returns inactive users too. */
-  async adminFindById(id: string): Promise<SafeUser> {
+  async adminFindById(id: number): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: USER_SAFE_SELECT,
@@ -266,10 +286,17 @@ export class UsersService {
    * concurrent requests cannot each observe "2 admins" and both succeed.
    */
   async adminUpdateUser(
-    id: string,
+    id: number,
     dto: AdminUpdateUserDto,
-    actorId: string,
+    actorId: number,
   ): Promise<SafeUser> {
+    const ROLE_CODE: Record<string, number> = {
+      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
+    };
+    // ADMIN=0 PROPERTY_MANAGER=1
+    const ADMIN_CODE = 0;
+    const PM_CODE = 1;
+
     return this.prisma.$transaction(
       async (tx) => {
         // Re-fetch inside the transaction so we read the committed snapshot.
@@ -285,9 +312,9 @@ export class UsersService {
         }
 
         // Guard: cannot deactivate the last Admin via is_active=false
-        if (dto.is_active === false && before.role === "ADMIN" && before.is_active === true) {
+        if (dto.is_active === false && before.role === ADMIN_CODE && before.is_active === true) {
           const adminCount = await tx.user.count({
-            where: { role: "ADMIN", is_active: true },
+            where: { role: ADMIN_CODE, is_active: true },
           });
           if (adminCount <= 1) {
             throw new ConflictException({
@@ -299,11 +326,13 @@ export class UsersService {
           }
         }
 
-        if (dto.role !== undefined && dto.role !== before.role) {
+        const newRoleCode = dto.role !== undefined ? (ROLE_CODE[dto.role] ?? before.role) : undefined;
+
+        if (newRoleCode !== undefined && newRoleCode !== before.role) {
           // Guard: cannot demote the last Admin via role change
-          if (before.role === "ADMIN") {
+          if (before.role === ADMIN_CODE) {
             const adminCount = await tx.user.count({
-              where: { role: "ADMIN", is_active: true },
+              where: { role: ADMIN_CODE, is_active: true },
             });
             if (adminCount <= 1) {
               throw new ConflictException({
@@ -316,7 +345,7 @@ export class UsersService {
           }
 
           // Guard: cannot change role of a PM currently assigned to a property
-          if (before.role === "PROPERTY_MANAGER") {
+          if (before.role === PM_CODE) {
             const assignedProperty = await tx.property.findFirst({
               where: { active_pm_id: id, deleted_at: null },
             });
@@ -354,7 +383,7 @@ export class UsersService {
             ...(dto.name !== undefined ? { name: dto.name } : {}),
             ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
             ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
-            ...(dto.role !== undefined ? { role: dto.role } : {}),
+            ...(newRoleCode !== undefined ? { role: newRoleCode } : {}),
             ...(dto.email !== undefined ? { email: dto.email } : {}),
           },
           select: USER_SAFE_SELECT,
@@ -384,7 +413,9 @@ export class UsersService {
    * Runs in a Serializable transaction so concurrent deactivations cannot
    * both observe N>1 admins and both succeed (H-01 fix).
    */
-  async adminDeactivateUser(id: string, actorId: string): Promise<SafeUser> {
+  async adminDeactivateUser(id: number, actorId: number): Promise<SafeUser> {
+    const ADMIN_CODE = 0;
+    const PM_CODE = 1;
     return this.prisma.$transaction(
       async (tx) => {
         // Re-fetch inside the transaction.
@@ -406,7 +437,7 @@ export class UsersService {
         }
 
         // Guard: PM with active property
-        if (user.role === "PROPERTY_MANAGER") {
+        if (user.role === PM_CODE) {
           const assignedProperty = await tx.property.findFirst({
             where: { active_pm_id: id, deleted_at: null },
           });
@@ -422,9 +453,9 @@ export class UsersService {
         }
 
         // Guard: cannot deactivate the last Admin
-        if (user.role === "ADMIN") {
+        if (user.role === ADMIN_CODE) {
           const adminCount = await tx.user.count({
-            where: { role: "ADMIN", is_active: true },
+            where: { role: ADMIN_CODE, is_active: true },
           });
           if (adminCount <= 1) {
             throw new ConflictException({
@@ -458,7 +489,7 @@ export class UsersService {
   }
 
   /** POST /users/:id/activate — Admin reactivates a user. */
-  async adminActivateUser(id: string, actorId: string): Promise<SafeUser> {
+  async adminActivateUser(id: number, actorId: number): Promise<SafeUser> {
     const user = await this.adminFindById(id);
 
     if (user.is_active) {

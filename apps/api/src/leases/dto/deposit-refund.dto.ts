@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsInt, Min, IsOptional } from "class-validator";
+import { IsInt, IsPositive, IsNumber, Min, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * DTO for POST /deposit-refunds
@@ -6,24 +7,30 @@ import { IsString, IsNumber, IsInt, Min, IsOptional } from "class-validator";
  * Lease must be TERMINATED.
  */
 export class DepositRefundDto {
-  @IsString()
-  leaseId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  leaseId!: number;
 
   @IsNumber()
   @IsInt()
   @Min(0)
+  @Type(() => Number)
   amountPaise!: number;
 
   @IsOptional()
   @IsNumber()
   @IsInt()
   @Min(0)
+  @Type(() => Number)
   deductionsPaise?: number;
 
   @IsOptional()
   @IsString()
   deductionReason?: string;
 
-  @IsString()
-  paidToTenantId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  paidToTenantId!: number;
 }

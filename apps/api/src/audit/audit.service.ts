@@ -15,10 +15,16 @@ import type { PrismaService } from "../prisma/prisma.service";
  */
 
 export interface AuditEntry {
-  actorId: string | null;  // null for unauthenticated events (e.g., auth.login.failure)
+  /**
+   * null for unauthenticated events (e.g. auth.login.failure).
+   * Accepts number (new int ID) or string (legacy CUID) — normalised to number
+   * at the DB boundary. entity_id always stored as text (polymorphic column).
+   */
+  actorId: number | string | null;
   action: string;
   entityType: string;
-  entityId: string;
+  /** Always stored as text — pass number or string; stringified internally. */
+  entityId: number | string;
   before?: object | null;
   after?: object | null;
 }
@@ -38,12 +44,17 @@ export class AuditService {
    * @param entry - Audit entry data.
    */
   async writeLog(tx: TransactionClient, entry: AuditEntry): Promise<void> {
+    const actorId = entry.actorId === null
+      ? null
+      : typeof entry.actorId === "number"
+        ? entry.actorId
+        : Number(entry.actorId) || null;
     await tx.auditLog.create({
       data: {
-        actor_id: entry.actorId ?? null,
+        actor_id: actorId,
         action: entry.action,
         entity_type: entry.entityType,
-        entity_id: entry.entityId,
+        entity_id: String(entry.entityId),
         before: (entry.before as Prisma.InputJsonValue) ?? Prisma.JsonNull,
         after: (entry.after as Prisma.InputJsonValue) ?? Prisma.JsonNull,
       },
@@ -59,12 +70,17 @@ export class AuditService {
    * always use writeLog() inside a $transaction for atomicity.
    */
   async writeLogDirect(prisma: PrismaService, entry: AuditEntry): Promise<void> {
+    const actorId = entry.actorId === null
+      ? null
+      : typeof entry.actorId === "number"
+        ? entry.actorId
+        : Number(entry.actorId) || null;
     await prisma.auditLog.create({
       data: {
-        actor_id: entry.actorId ?? null,
+        actor_id: actorId,
         action: entry.action,
         entity_type: entry.entityType,
-        entity_id: entry.entityId,
+        entity_id: String(entry.entityId),
         before: (entry.before as Prisma.InputJsonValue) ?? Prisma.JsonNull,
         after: (entry.after as Prisma.InputJsonValue) ?? Prisma.JsonNull,
       },

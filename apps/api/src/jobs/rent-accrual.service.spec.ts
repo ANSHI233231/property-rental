@@ -103,10 +103,10 @@ describe("RentAccrualService", () => {
       rentAccrualLog: {
         findUnique: jest.fn().mockResolvedValue(null),
         create: jest.fn().mockImplementation((args: { data: Record<string, unknown> }) =>
-          Promise.resolve({ id: "log-1", ...args.data, periods_examined: 0, periods_overdue_flipped: 0, late_fees_added_paise: 0n, next_periods_generated: 0 }),
+          Promise.resolve({ id: 1, ...args.data, periods_examined: 0, periods_overdue_flipped: 0, late_fees_added_paise: 0n, next_periods_generated: 0 }),
         ),
         update: jest.fn().mockImplementation((args: { data: Record<string, unknown> }) =>
-          Promise.resolve({ id: "log-1", ...args.data }),
+          Promise.resolve({ id: 1, ...args.data }),
         ),
       } as unknown as PrismaService["rentAccrualLog"],
       rentPeriod: {
@@ -120,9 +120,9 @@ describe("RentAccrualService", () => {
       auditLog: {
         create: jest.fn().mockResolvedValue({}),
       } as unknown as PrismaService["auditLog"],
-      // resolveSystemActorId() needs prisma.user.findFirst
+      // resolveSystemActorId() needs prisma.user.findFirst — returns int id (BL int-id refactor)
       user: {
-        findFirst: jest.fn().mockResolvedValue({ id: "system-admin-id" }),
+        findFirst: jest.fn().mockResolvedValue({ id: 1 }),
       } as unknown as PrismaService["user"],
     } as unknown as jest.Mocked<Partial<PrismaService>>;
 
@@ -146,7 +146,7 @@ describe("RentAccrualService", () => {
 
   it("BL-13 idempotency: second run on same IST date is skipped", async () => {
     (prismaMock.rentAccrualLog!.findUnique as jest.Mock).mockResolvedValue({
-      id: "log-1",
+      id: 1,
       run_date: new Date(TODAY_IST),
       finished_at: new Date(), // already finished
       periods_examined: 5,
@@ -169,14 +169,14 @@ describe("RentAccrualService", () => {
 
   it("BL-12: period 5 days past due_date is flipped to OVERDUE", async () => {
     const period = {
-      id: "period-1",
-      lease_id: "lease-1",
+      id: 1,
+      lease_id: 1,
       due_date: DUE_5_DAYS_AGO,
       amount_due_paise: 1_800_000n,
       late_fee_paise: 0n,
       paid_paise: 0n,
       outstanding_paise: 1_800_000n,
-      status: "DUE",
+      status: 1, // DUE=1
     };
 
     (prismaMock.rentPeriod!.findMany as jest.Mock).mockResolvedValue([period]);
@@ -212,14 +212,14 @@ describe("RentAccrualService", () => {
   it("BL-13 worked example: 17 days overdue → late_fee = 72,000 paise (₹720)", async () => {
     const AMOUNT_DUE = 1_800_000n;
     const period = {
-      id: "period-2",
-      lease_id: "lease-2",
+      id: 2,
+      lease_id: 2,
       due_date: DUE_17_DAYS_AGO, // 2026-04-24
       amount_due_paise: AMOUNT_DUE,
       late_fee_paise: 0n,
       paid_paise: 0n,
       outstanding_paise: AMOUNT_DUE,
-      status: "DUE",
+      status: 1, // DUE=1
     };
 
     (prismaMock.rentPeriod!.findMany as jest.Mock).mockResolvedValue([period]);
@@ -237,10 +237,11 @@ describe("RentAccrualService", () => {
     expect(result.lateFeesAddedPaise).toBe("72000");
 
     // Verify the update was called with the correct late_fee_paise
+    // status: 4 = OVERDUE (smallint int code after BL int-id refactor)
     expect(updateSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          status: "OVERDUE",
+          status: 4, // OVERDUE=4
           late_fee_paise: 72_000n,
           outstanding_paise: 1_872_000n, // 1,800,000 + 72,000
         }),
@@ -257,14 +258,14 @@ describe("RentAccrualService", () => {
     const DUE_13_DAYS_AGO = new Date("2026-04-28T00:00:00Z");
     const AMOUNT_DUE = 1_800_000n;
     const period = {
-      id: "period-3",
-      lease_id: "lease-3",
+      id: 3,
+      lease_id: 3,
       due_date: DUE_13_DAYS_AGO,
       amount_due_paise: AMOUNT_DUE,
       late_fee_paise: 0n,
       paid_paise: 0n,
       outstanding_paise: AMOUNT_DUE,
-      status: "DUE",
+      status: 1, // DUE=1
     };
 
     (prismaMock.rentPeriod!.findMany as jest.Mock).mockResolvedValue([period]);

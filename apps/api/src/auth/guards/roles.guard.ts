@@ -34,7 +34,13 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request & { user: JwtPayload }>();
     const user = request.user;
 
-    if (!user || !requiredRoles.includes(user.role)) {
+    // Map role name strings to int codes for comparison against the JWT payload.
+    const ROLE_NAME_TO_CODE: Record<string, number> = {
+      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
+    };
+    const requiredCodes = requiredRoles.map((r) => ROLE_NAME_TO_CODE[r] ?? -1);
+
+    if (!user || !requiredCodes.includes(user.role)) {
       // Check for a BL-specific error code on the handler (wins) then the class.
       const blCode = this.reflector.getAllAndOverride<string | undefined>(ROLE_ERROR_CODE_KEY, [
         context.getHandler(),

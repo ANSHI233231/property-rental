@@ -20,8 +20,8 @@ import { EmergencyBanner } from "@/components/maintenance/EmergencyBanner";
 import { friendlyError } from "@/lib/api/errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AssignMaintenanceSchema } from "@gharsetu/shared";
-import type { AssignMaintenanceInput, MaintenancePriorityValue, MaintenanceStatusValue } from "@gharsetu/shared";
+import { AssignMaintenanceSchema, MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName, maintenancePriorityName } from "@gharsetu/shared";
+import type { AssignMaintenanceInput } from "@gharsetu/shared";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 // ---------------------------------------------------------------------------
@@ -29,14 +29,15 @@ import { EmptyState } from "@/components/ui/EmptyState";
 // ---------------------------------------------------------------------------
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
   description: string;
-  priority: MaintenancePriorityValue;
-  status: MaintenanceStatusValue;
+  // API returns SMALLINT codes after Step 1 migration; accept string for legacy
+  priority: number | string;
+  status: number | string;
   unit?: { name?: string } | null;
   raised_by?: { name?: string } | null;
-  assigned_to?: { id?: string; name?: string } | null;
+  assigned_to?: { id?: number | string; name?: string } | null;
   assigned_at?: string | null;
   in_progress_at?: string | null;
   resolved_at?: string | null;
@@ -73,12 +74,40 @@ function formatDateTime(iso: string | null | undefined): string {
   return formatDateIST(iso);
 }
 
-const PRIORITY_ORDER: Record<MaintenancePriorityValue, number> = {
-  EMERGENCY: 0, HIGH: 1, NORMAL: 2, LOW: 3,
-};
+// Sort priority: EMERGENCY(3) first → LOW(0) last
+// Numeric: higher code = higher priority (EMERGENCY=3) → invert for sort ascending
+function prioritySortKey(p: number | string): number {
+  if (typeof p === "number") return 3 - p; // EMERGENCY=3 → 0, LOW=0 → 3
+  const m: Record<string, number> = { EMERGENCY: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
+  return m[p as string] ?? 99;
+}
 
-type PriorityFilter = MaintenancePriorityValue | "ALL";
-type StatusFilter = MaintenanceStatusValue | "ALL";
+type PriorityFilter = "ALL" | "EMERGENCY" | "HIGH" | "NORMAL" | "LOW";
+type StatusFilter = "ALL" | "OPEN" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+
+// Helper to match a request's priority against a string filter value
+function matchesPriority(p: number | string, filter: PriorityFilter): boolean {
+  if (filter === "ALL") return true;
+  if (typeof p === "number") {
+    const map: Record<PriorityFilter, number | undefined> = {
+      ALL: undefined, EMERGENCY: MaintenancePriorityCodes.EMERGENCY, HIGH: MaintenancePriorityCodes.HIGH, NORMAL: MaintenancePriorityCodes.NORMAL, LOW: MaintenancePriorityCodes.LOW,
+    };
+    return p === map[filter];
+  }
+  return p === filter;
+}
+
+// Helper to match a request's status against a string filter value
+function matchesStatus(s: number | string, filter: StatusFilter): boolean {
+  if (filter === "ALL") return true;
+  if (typeof s === "number") {
+    const map: Record<StatusFilter, number | undefined> = {
+      ALL: undefined, OPEN: MaintenanceStatusCodes.OPEN, ASSIGNED: MaintenanceStatusCodes.ASSIGNED, IN_PROGRESS: MaintenanceStatusCodes.IN_PROGRESS, RESOLVED: MaintenanceStatusCodes.RESOLVED, CLOSED: MaintenanceStatusCodes.CLOSED,
+    };
+    return s === map[filter];
+  }
+  return s === filter;
+}
 
 // ---------------------------------------------------------------------------
 // Assign Modal
@@ -265,7 +294,7 @@ function RequestDetail({
           </dl>
 
           {/* Actions */}
-          {request.status === "OPEN" && (
+          {matchesStatus(request.status, "OPEN") && (
             <div className="mt-6">
               <button
                 type="button"
@@ -277,7 +306,7 @@ function RequestDetail({
             </div>
           )}
           {/* No Close button — BL-21 */}
-          {request.status === "RESOLVED" && (
+          {matchesStatus(request.status, "RESOLVED") && (
             <p className="text-xs muted mt-6">
               Tenant closes the request. PMs cannot auto-close. Closed requests cannot be reopened.
             </p>
@@ -313,7 +342,7 @@ export default function PmMaintenancePage() {
         `/maintenance-requests?propertyId=${propertyId}&limit=100`,
       );
       const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
-      items.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99));
+      items.sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
       setRequests(items);
     } catch (err) {
       setError(friendlyError(err));
@@ -325,17 +354,17 @@ export default function PmMaintenancePage() {
   useEffect(() => { void fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
-    if (priorityFilter !== "ALL" && r.priority !== priorityFilter) return false;
-    if (statusFilter !== "ALL" && r.status !== statusFilter) return false;
+    if (!matchesPriority(r.priority, priorityFilter)) return false;
+    if (!matchesStatus(r.status, statusFilter)) return false;
     return true;
   });
 
   const counts: Record<PriorityFilter, number> = {
     ALL: requests.length,
-    EMERGENCY: requests.filter((r) => r.priority === "EMERGENCY").length,
-    HIGH: requests.filter((r) => r.priority === "HIGH").length,
-    NORMAL: requests.filter((r) => r.priority === "NORMAL").length,
-    LOW: requests.filter((r) => r.priority === "LOW").length,
+    EMERGENCY: requests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
+    HIGH: requests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
+    NORMAL: requests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
+    LOW: requests.filter((r) => matchesPriority(r.priority, "LOW")).length,
   };
 
   const priorityChips: { label: string; value: PriorityFilter }[] = [
@@ -346,7 +375,9 @@ export default function PmMaintenancePage() {
     { label: `Low · ${counts.LOW}`, value: "LOW" },
   ];
 
-  const openCount = requests.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status)).length;
+  const openCount = requests.filter((r) =>
+    matchesStatus(r.status, "OPEN") || matchesStatus(r.status, "ASSIGNED") || matchesStatus(r.status, "IN_PROGRESS")
+  ).length;
 
   return (
     <>
@@ -415,7 +446,7 @@ export default function PmMaintenancePage() {
       ) : (
         <section className="grid lg:grid-cols-2 gap-4">
           {filtered.map((req) => {
-            const isEmergency = req.priority === "EMERGENCY";
+            const isEmergency = matchesPriority(req.priority, "EMERGENCY");
 
             return (
               <div
@@ -453,33 +484,33 @@ export default function PmMaintenancePage() {
                 <p className="text-sm">{req.description.slice(0, 120)}{req.description.length > 120 ? "…" : ""}</p>
 
                 <div className="flex gap-2 mt-4 flex-wrap">
-                  {req.status === "OPEN" && (
+                  {matchesStatus(req.status, "OPEN") && (
                     <button
                       type="button"
                       className="btn btn-primary !py-2 !text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setAssignModal({ requestId: req.id, requestTitle: req.title });
+                        setAssignModal({ requestId: String(req.id), requestTitle: req.title });
                       }}
                       aria-label={`Assign staff to "${req.title}"`}
                     >
                       Assign Staff
                     </button>
                   )}
-                  {(req.status === "ASSIGNED" || req.status === "IN_PROGRESS") && (
+                  {(matchesStatus(req.status, "ASSIGNED") || matchesStatus(req.status, "IN_PROGRESS")) && (
                     <button
                       type="button"
                       className="btn btn-secondary !py-2 !text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setAssignModal({ requestId: req.id, requestTitle: req.title });
+                        setAssignModal({ requestId: String(req.id), requestTitle: req.title });
                       }}
                       aria-label={`Reassign "${req.title}"`}
                     >
                       Reassign
                     </button>
                   )}
-                  {req.status === "RESOLVED" && (
+                  {matchesStatus(req.status, "RESOLVED") && (
                     <p className="text-xs muted self-center">
                       Awaiting tenant to close · PMs cannot close
                     </p>
@@ -498,7 +529,7 @@ export default function PmMaintenancePage() {
           request={selectedRequest}
           onClose={() => setSelectedRequest(null)}
           onAssign={() => {
-            setAssignModal({ requestId: selectedRequest.id, requestTitle: selectedRequest.title });
+            setAssignModal({ requestId: String(selectedRequest.id), requestTitle: selectedRequest.title });
             setSelectedRequest(null);
           }}
         />

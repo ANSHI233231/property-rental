@@ -23,6 +23,9 @@ import { RoleErrorCode } from "../auth/decorators/role-error-code.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
 
+/** Role int codes */
+const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
+
 /**
  * RentController — Phase 4.
  *
@@ -39,9 +42,6 @@ export class RentController {
 
   // ---------------------------------------------------------------------------
   // GET /rent-periods
-  // PM/Admin: full access (scoped to their property at service layer).
-  // Tenant: only their own lease's periods.
-  // MAINTENANCE: 403.
   // ---------------------------------------------------------------------------
 
   @Get("rent-periods")
@@ -58,13 +58,13 @@ export class RentController {
     @CurrentUser() actor?: JwtPayload,
   ) {
     return this.rentService.listPeriods({
-      leaseId,
-      unitId,
-      propertyId,
+      leaseId: leaseId ? parseInt(leaseId, 10) : undefined,
+      unitId: unitId ? parseInt(unitId, 10) : undefined,
+      propertyId: propertyId ? parseInt(propertyId, 10) : undefined,
       status,
       periodStart_gte,
       periodStart_lte,
-      cursor,
+      cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit,
       actorId: actor!.sub,
       actorRole: actor!.role,
@@ -73,16 +73,15 @@ export class RentController {
 
   // ---------------------------------------------------------------------------
   // GET /rent-periods/:id
-  // PM/Admin/Tenant with access to the lease.
   // ---------------------------------------------------------------------------
 
   @Get("rent-periods/:id")
   @Roles("ADMIN", "PROPERTY_MANAGER", "TENANT")
-  async findPeriod(@Param("id") id: string, @CurrentUser() actor?: JwtPayload) {
+  async findPeriod(@Param("id", ParseIntPipe) id: number, @CurrentUser() actor?: JwtPayload) {
     const period = await this.rentService.findPeriodById(id);
 
-    // H-01: TENANT ownership check
-    if (actor?.role === "TENANT") {
+    // H-01: TENANT ownership check (role code 3)
+    if (actor?.role === ROLE.TENANT) {
       const hasAccess = await this.rentService.tenantHasAccessToPeriod(id, actor.sub);
       if (!hasAccess) {
         throw new ForbiddenException({
@@ -94,8 +93,8 @@ export class RentController {
       }
     }
 
-    // H-01: PROPERTY_MANAGER scope check — inline pattern matching recordPayment/voidPayment
-    if (actor?.role === "PROPERTY_MANAGER") {
+    // H-01: PROPERTY_MANAGER scope check (role code 1)
+    if (actor?.role === ROLE.PROPERTY_MANAGER) {
       const hasAccess = await this.rentService.pmHasAccessToPeriod(id, actor.sub);
       if (!hasAccess) {
         throw new ForbiddenException({
@@ -113,7 +112,6 @@ export class RentController {
   // ---------------------------------------------------------------------------
   // POST /payments
   // BL-10: PROPERTY_MANAGER + ADMIN only.
-  // Returns 403 BL_10_TENANT_CANNOT_RECORD_PAYMENT for any other role.
   // ---------------------------------------------------------------------------
 
   @Post("payments")
@@ -130,14 +128,13 @@ export class RentController {
 
   // ---------------------------------------------------------------------------
   // POST /payments/:id/void
-  // PROPERTY_MANAGER + ADMIN only.
   // ---------------------------------------------------------------------------
 
   @Post("payments/:id/void")
   @Roles("ADMIN", "PROPERTY_MANAGER")
   @HttpCode(HttpStatus.OK)
   async voidPayment(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: VoidPaymentDto,
     @CurrentUser() actor?: JwtPayload,
   ) {

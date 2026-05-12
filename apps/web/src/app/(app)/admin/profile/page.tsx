@@ -25,11 +25,12 @@ import { friendlyError } from "@/lib/api/errors";
 // ---------------------------------------------------------------------------
 
 interface UserProfile {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   phone?: string | null;
-  role: string;
+  // API returns role as SMALLINT (0–3) after Step 1 migration
+  role: number | string;
   createdAt?: string | null;
   created_at?: string | null;
 }

@@ -17,7 +17,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { paiseStringToINR, parseBigPaise, daysOverdue, weeksOverdue } from "@/lib/rent/format";
-import { computeLateFeePaise } from "@gharsetu/shared";
+import { computeLateFeePaise, RentPeriodStatusEnum } from "@gharsetu/shared";
 import type { RentStatusValue } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
@@ -35,16 +35,17 @@ interface Payment {
 }
 
 interface RentPeriod {
-  id: string;
-  leaseId: string;
+  id: number | string;
+  leaseId: number | string;
   periodStart: string;
   periodEnd: string;
   dueDate: string;
-  amountDuePaise: string;
-  lateFeePaise: string;
-  paidPaise: string;
-  outstandingPaise: string;
-  status: RentStatusValue;
+  amountDuePaise: string | number;
+  lateFeePaise: string | number;
+  paidPaise: string | number;
+  outstandingPaise: string | number;
+  // API returns SMALLINT after Step 1 migration; accept string for legacy
+  status: number | string;
   lastAccruedAt: string | null;
   payments?: Payment[];
 }
@@ -95,10 +96,12 @@ function LateFeeBreakdown({
   lateFeePaise,
   dueDate,
 }: {
-  amountDuePaise: string;
-  lateFeePaise: string;
+  amountDuePaise: string | number;
+  lateFeePaise: string | number;
   dueDate: string;
 }) {
+  const amountDuePaiseStr = String(amountDuePaise);
+  const lateFeePaiseStr = String(lateFeePaise);
   const today = new Date();
   const dueDateObj = parseISO(dueDate);
   const days = daysOverdue(dueDateObj, today);
@@ -106,8 +109,8 @@ function LateFeeBreakdown({
 
   if (weeks === 0) return null;
 
-  const amountDue = parseBigPaise(amountDuePaise);
-  const lateFeeAPI = parseBigPaise(lateFeePaise);
+  const amountDue = parseBigPaise(amountDuePaiseStr);
+  const lateFeeAPI = parseBigPaise(lateFeePaiseStr);
 
   // Defensive check — compute expected and compare
   const expected = computeLateFeePaise(BigInt(amountDue), days);
@@ -120,7 +123,7 @@ function LateFeeBreakdown({
 
   return (
     <p className="text-sm mt-2" style={{ color: "var(--color-status-overdue)" }}>
-      Late fee = 2% × {paiseStringToINR(amountDuePaise)} × {weeks} week{weeks !== 1 ? "s" : ""} overdue = {paiseStringToINR(lateFeePaise)}
+      Late fee = 2% × {paiseStringToINR(amountDuePaiseStr)} × {weeks} week{weeks !== 1 ? "s" : ""} overdue = {paiseStringToINR(lateFeePaiseStr)}
     </p>
   );
 }
@@ -129,19 +132,25 @@ function LateFeeBreakdown({
 // Status border colour helper
 // ---------------------------------------------------------------------------
 
-function statusBorderColor(status: RentStatusValue): string {
+function statusBorderColor(status: number | string): string {
+  // Accept both numeric codes (new API) and legacy strings
+  if (typeof status === "number") {
+    switch (status) {
+      case RentPeriodStatusEnum.OVERDUE: return "var(--color-status-overdue)";
+      case RentPeriodStatusEnum.DUE: return "var(--color-status-prepaid)";
+      case RentPeriodStatusEnum.PARTIAL: return "var(--color-status-partial)";
+      case RentPeriodStatusEnum.PAID:
+      case RentPeriodStatusEnum.PREPAID: return "var(--color-status-paid)";
+      default: return "var(--color-mid-gray)";
+    }
+  }
   switch (status) {
-    case "OVERDUE":
-      return "var(--color-status-overdue)";
-    case "DUE":
-      return "var(--color-status-prepaid)";
-    case "PARTIAL":
-      return "var(--color-status-partial)";
+    case "OVERDUE": return "var(--color-status-overdue)";
+    case "DUE": return "var(--color-status-prepaid)";
+    case "PARTIAL": return "var(--color-status-partial)";
     case "PAID":
-    case "PREPAID":
-      return "var(--color-status-paid)";
-    default:
-      return "var(--color-mid-gray)";
+    case "PREPAID": return "var(--color-status-paid)";
+    default: return "var(--color-mid-gray)";
   }
 }
 
@@ -219,20 +228,30 @@ export default function TenantRentPage() {
     return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
   }
 
+  // Helpers for status comparison (numeric or string)
+  function isStatus(s: number | string, ...names: string[]): boolean {
+    if (typeof s === "number") {
+      const codeMap: Record<string, number> = {
+        OVERDUE: RentPeriodStatusEnum.OVERDUE, PARTIAL: RentPeriodStatusEnum.PARTIAL,
+        DUE: RentPeriodStatusEnum.DUE, PAID: RentPeriodStatusEnum.PAID,
+        PREPAID: RentPeriodStatusEnum.PREPAID, UPCOMING: RentPeriodStatusEnum.UPCOMING,
+      };
+      return names.some((n) => s === codeMap[n]);
+    }
+    return names.includes(s as string);
+  }
+
   // Identify the current (most recent open) period
   const currentPeriod = periods.find(
-    (p) =>
-      p.status === "OVERDUE" ||
-      p.status === "PARTIAL" ||
-      p.status === "DUE",
+    (p) => isStatus(p.status, "OVERDUE", "PARTIAL", "DUE"),
   ) ?? periods[0] ?? null;
 
   // Aggregate KPIs
   const paidTotal = periods
-    .filter((p) => p.status === "PAID" || p.status === "PREPAID")
-    .reduce((acc, p) => acc + parseBigPaise(p.paidPaise), 0);
+    .filter((p) => isStatus(p.status, "PAID", "PREPAID"))
+    .reduce((acc, p) => acc + parseBigPaise(String(p.paidPaise)), 0);
   const paidPeriods = periods.filter(
-    (p) => p.status === "PAID" || p.status === "PREPAID",
+    (p) => isStatus(p.status, "PAID", "PREPAID"),
   ).length;
   const monthlyRent = lease?.monthly_rent_paise
     ? parseBigPaise(lease.monthly_rent_paise)
@@ -240,7 +259,7 @@ export default function TenantRentPage() {
   const secDeposit = lease?.security_deposit_paise
     ? parseBigPaise(lease.security_deposit_paise)
     : null;
-  const outstanding = currentPeriod ? parseBigPaise(currentPeriod.outstandingPaise) : 0;
+  const outstanding = currentPeriod ? parseBigPaise(String(currentPeriod.outstandingPaise)) : 0;
 
   const today = new Date();
 
@@ -311,17 +330,17 @@ export default function TenantRentPage() {
                   </span>
                 </div>
                 <div className="font-poppins font-bold text-2xl text-charcoal">
-                  {paiseStringToINR(currentPeriod.outstandingPaise)} due
+                  {paiseStringToINR(String(currentPeriod.outstandingPaise))} due
                 </div>
 
-                {currentPeriod.status === "OVERDUE" && (
+                {isStatus(currentPeriod.status, "OVERDUE") && (
                   <>
                     <p className="text-sm mt-1" style={{ color: "var(--color-status-overdue)" }}>
-                      Includes {paiseStringToINR(currentPeriod.lateFeePaise)} late fee
+                      Includes {paiseStringToINR(String(currentPeriod.lateFeePaise))} late fee
                       {" · "}
                       {daysOverdue(parseISO(currentPeriod.dueDate), today)} calendar days past due date
                     </p>
-                    {parseBigPaise(currentPeriod.lateFeePaise) > 0 && (
+                    {parseBigPaise(String(currentPeriod.lateFeePaise)) > 0 && (
                       <LateFeeBreakdown
                         amountDuePaise={currentPeriod.amountDuePaise}
                         lateFeePaise={currentPeriod.lateFeePaise}
@@ -411,7 +430,7 @@ export default function TenantRentPage() {
                 const latestPay = activePays[activePays.length - 1];
 
                 const showLateFee =
-                  parseBigPaise(period.lateFeePaise) > 0 && period.status === "OVERDUE";
+                  parseBigPaise(String(period.lateFeePaise)) > 0 && isStatus(period.status, "OVERDUE");
 
                 return (
                   <tr key={period.id}>
@@ -423,16 +442,16 @@ export default function TenantRentPage() {
                     </td>
                     <td>{formatDate(period.dueDate)}</td>
                     <td>
-                      {parseBigPaise(period.paidPaise) > 0 ? (
+                      {parseBigPaise(String(period.paidPaise)) > 0 ? (
                         <>
-                          {paiseStringToINR(period.paidPaise)}
+                          {paiseStringToINR(String(period.paidPaise))}
                           {showLateFee && (
                             <span className="text-xs muted ml-1">(+ late fee)</span>
                           )}
                         </>
-                      ) : period.status === "OVERDUE" ? (
+                      ) : isStatus(period.status, "OVERDUE") ? (
                         <>
-                          {paiseStringToINR(period.outstandingPaise)}{" "}
+                          {paiseStringToINR(String(period.outstandingPaise))}{" "}
                           <span className="text-xs muted">(+ late fee)</span>
                         </>
                       ) : (
@@ -442,7 +461,7 @@ export default function TenantRentPage() {
                     <td>
                       {latestPay ? (
                         formatDate(latestPay.paidOn)
-                      ) : period.status === "PAID" && period.payments?.length === 0 ? (
+                      ) : isStatus(period.status, "PAID") && period.payments?.length === 0 ? (
                         <span className="muted">applied from prepay</span>
                       ) : (
                         <span className="muted">—</span>

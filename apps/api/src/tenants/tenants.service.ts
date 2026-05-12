@@ -8,6 +8,9 @@ import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import type { UpdateTenantDto } from "./dto/update-tenant.dto";
 
+/** Lease status ACTIVE int code */
+const LEASE_ACTIVE = 0;
+
 /** Safe tenant shape returned in API responses. */
 const TENANT_SELECT = {
   id: true,
@@ -44,7 +47,7 @@ export class TenantsService {
   // List tenants on active leases for a property (cursor-based)
   // ---------------------------------------------------------------------------
 
-  async listByProperty(propertyId: string, cursor?: string, limit = 20) {
+  async listByProperty(propertyId: number, cursor?: number, limit = 20) {
     // Verify property exists
     const property = await this.prisma.property.findFirst({
       where: { id: propertyId, deleted_at: null },
@@ -62,14 +65,15 @@ export class TenantsService {
       where: {
         removed_at: null,
         lease: {
-          status: "ACTIVE",
+          status: LEASE_ACTIVE,
           unit: { property_id: propertyId },
         },
       },
       select: {
-        tenant: { select: TENANT_SELECT },
+        id: true,
         is_primary: true,
         lease_id: true,
+        tenant_id: true,
       },
       orderBy: { joined_at: "asc" },
       take: take + 1,
@@ -79,10 +83,22 @@ export class TenantsService {
     const hasMore = leaseTenants.length > take;
     const data = hasMore ? leaseTenants.slice(0, take) : leaseTenants;
 
+    // Load tenant details separately to avoid the nested select typing issue
+    const tenantIds = data.map((lt) => lt.tenant_id);
+    const tenants = await this.prisma.tenant.findMany({
+      where: { id: { in: tenantIds } },
+      select: TENANT_SELECT,
+    });
+    const tenantMap = new Map(tenants.map((t) => [t.id, t]));
+
     return {
-      data: data.map((lt) => ({ ...lt.tenant, is_primary: lt.is_primary, lease_id: lt.lease_id })),
+      data: data.map((lt) => ({
+        ...tenantMap.get(lt.tenant_id),
+        is_primary: lt.is_primary,
+        lease_id: lt.lease_id,
+      })),
       meta: {
-        next_cursor: hasMore ? (data[data.length - 1]?.tenant.id ?? null) : null,
+        next_cursor: hasMore ? (data[data.length - 1]?.id ?? null) : null,
         has_more: hasMore,
       },
     };
@@ -92,7 +108,7 @@ export class TenantsService {
   // Find single tenant by ID
   // ---------------------------------------------------------------------------
 
-  async findById(id: string) {
+  async findById(id: number) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id },
       select: TENANT_SELECT,
@@ -111,7 +127,7 @@ export class TenantsService {
   // Find tenant by user_id
   // ---------------------------------------------------------------------------
 
-  async findByUserId(userId: string) {
+  async findByUserId(userId: number) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { user_id: userId },
       select: TENANT_SELECT,
@@ -131,7 +147,7 @@ export class TenantsService {
   // BL-16 note: MAINTENANCE role should not hit this route; the controller enforces roles.
   // ---------------------------------------------------------------------------
 
-  async update(id: string, dto: UpdateTenantDto, actorId: string) {
+  async update(id: number, dto: UpdateTenantDto, actorId: number) {
     const before = await this.findById(id);
 
     return this.prisma.$transaction(async (tx) => {
@@ -168,7 +184,7 @@ export class TenantsService {
   // Verify a tenant belongs to a specific lease (for tenant auth checks)
   // ---------------------------------------------------------------------------
 
-  async assertTenantOnLease(tenantId: string, leaseId: string): Promise<void> {
+  async assertTenantOnLease(tenantId: number, leaseId: number): Promise<void> {
     const lt = await this.prisma.leaseTenant.findFirst({
       where: { tenant_id: tenantId, lease_id: leaseId, removed_at: null },
     });

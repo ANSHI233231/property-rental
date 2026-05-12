@@ -23,8 +23,8 @@ import { EmergencyBanner } from "@/components/maintenance/EmergencyBanner";
 import { friendlyError } from "@/lib/api/errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DismissAlertSchema } from "@gharsetu/shared";
-import type { DismissAlertInput, MaintenancePriorityValue, MaintenanceStatusValue } from "@gharsetu/shared";
+import { DismissAlertSchema, MaintenanceStatusCodes, MaintenancePriorityCodes } from "@gharsetu/shared";
+import type { DismissAlertInput } from "@gharsetu/shared";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 
 // ---------------------------------------------------------------------------
@@ -32,11 +32,12 @@ import { SkeletonKpi } from "@/components/ui/Skeleton";
 // ---------------------------------------------------------------------------
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
   description: string;
-  priority: MaintenancePriorityValue;
-  status: MaintenanceStatusValue;
+  // API returns SMALLINT codes after Step 1 migration; accept string for legacy
+  priority: number | string;
+  status: number | string;
   unit?: { name?: string } | null;
   property?: { name?: string } | null;
   raised_by?: { name?: string } | null;
@@ -83,8 +84,32 @@ function formatDateTime(iso: string | null | undefined): string {
   return formatDateIST(iso);
 }
 
-type PriorityFilter = MaintenancePriorityValue | "ALL";
-type StatusFilter = MaintenanceStatusValue | "ALL";
+type PriorityFilter = "ALL" | "EMERGENCY" | "HIGH" | "NORMAL" | "LOW";
+type StatusFilter = "ALL" | "OPEN" | "ASSIGNED" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+
+function isActiveOpenStatus(s: number | string): boolean {
+  return typeof s === "number"
+    ? s === MaintenanceStatusCodes.OPEN || s === MaintenanceStatusCodes.ASSIGNED || s === MaintenanceStatusCodes.IN_PROGRESS
+    : s === "OPEN" || s === "ASSIGNED" || s === "IN_PROGRESS";
+}
+
+function matchesPriorityAdmin(p: number | string, f: PriorityFilter): boolean {
+  if (f === "ALL") return true;
+  if (typeof p === "number") {
+    const map: Record<string, number> = { EMERGENCY: MaintenancePriorityCodes.EMERGENCY, HIGH: MaintenancePriorityCodes.HIGH, NORMAL: MaintenancePriorityCodes.NORMAL, LOW: MaintenancePriorityCodes.LOW };
+    return p === map[f];
+  }
+  return p === f;
+}
+
+function matchesStatusAdmin(s: number | string, f: StatusFilter): boolean {
+  if (f === "ALL") return true;
+  if (typeof s === "number") {
+    const map: Record<string, number> = { OPEN: MaintenanceStatusCodes.OPEN, ASSIGNED: MaintenanceStatusCodes.ASSIGNED, IN_PROGRESS: MaintenanceStatusCodes.IN_PROGRESS, RESOLVED: MaintenanceStatusCodes.RESOLVED, CLOSED: MaintenanceStatusCodes.CLOSED };
+    return s === map[f];
+  }
+  return s === f;
+}
 
 // ---------------------------------------------------------------------------
 // Dismiss Alert Modal
@@ -215,18 +240,18 @@ export default function AdminMaintenancePage() {
   useEffect(() => { void fetchData(); }, [fetchData]);
 
   const filtered = requests.filter((r) => {
-    if (priorityFilter !== "ALL" && r.priority !== priorityFilter) return false;
-    if (statusFilter !== "ALL" && r.status !== statusFilter) return false;
+    if (!matchesPriorityAdmin(r.priority, priorityFilter)) return false;
+    if (!matchesStatusAdmin(r.status, statusFilter)) return false;
     if (propertyFilter !== "ALL" && r.property?.name !== propertyFilter) return false;
     return true;
   });
 
   // KPI counts
-  const emergencyCount = requests.filter((r) => r.priority === "EMERGENCY" && ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status)).length;
-  const highCount = requests.filter((r) => r.priority === "HIGH" && ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status)).length;
-  const openTotal = requests.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status)).length;
+  const emergencyCount = requests.filter((r) => matchesPriorityAdmin(r.priority, "EMERGENCY") && isActiveOpenStatus(r.status)).length;
+  const highCount = requests.filter((r) => matchesPriorityAdmin(r.priority, "HIGH") && isActiveOpenStatus(r.status)).length;
+  const openTotal = requests.filter((r) => isActiveOpenStatus(r.status)).length;
   const resolved7d = requests.filter((r) => {
-    if (r.status !== "RESOLVED") return false;
+    if (!matchesStatusAdmin(r.status, "RESOLVED")) return false;
     try {
       const d = parseISO(r.created_at);
       const diff = (Date.now() - d.getTime()) / 86400000;

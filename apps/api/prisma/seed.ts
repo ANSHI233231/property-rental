@@ -13,7 +13,7 @@
  *   SEED_TEST_PASSWORD  (used for PM / Maintenance / Tenant test accounts)
  */
 
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { hash, Algorithm } from "@node-rs/argon2";
 import * as dotenv from "dotenv";
 import * as path from "path";
@@ -29,6 +29,14 @@ const ARGON2_OPTIONS = {
   parallelism: 1,
   algorithm: Algorithm.Argon2id,
 };
+
+/** Role int codes — mirrors DB CASE WHEN convention in migration SQL */
+const ROLE = {
+  ADMIN: 0,
+  PROPERTY_MANAGER: 1,
+  MAINTENANCE: 2,
+  TENANT: 3,
+} as const;
 
 async function hashPassword(plain: string): Promise<string> {
   return hash(plain, ARGON2_OPTIONS);
@@ -56,7 +64,7 @@ async function main(): Promise<void> {
       email: adminEmail.toLowerCase(),
       name: "Admin",
       password_hash: adminHash,
-      role: Role.ADMIN,
+      role: ROLE.ADMIN,
       is_active: true,
     },
   });
@@ -75,17 +83,17 @@ async function main(): Promise<void> {
     {
       email: "pm.test@gharsetu.local",
       name: "Test Property Manager",
-      role: Role.PROPERTY_MANAGER,
+      role: ROLE.PROPERTY_MANAGER,
     },
     {
       email: "maintenance.test@gharsetu.local",
       name: "Test Maintenance Staff",
-      role: Role.MAINTENANCE,
+      role: ROLE.MAINTENANCE,
     },
     {
       email: "tenant.test@gharsetu.local",
       name: "Test Tenant",
-      role: Role.TENANT,
+      role: ROLE.TENANT,
     },
   ];
 
@@ -102,7 +110,7 @@ async function main(): Promise<void> {
         created_by_user_id: admin.id,
       },
     });
-    console.log(`[seed] ${u.role}: ${created.email} (id: ${created.id})`);
+    console.log(`[seed] Role ${u.role}: ${created.email} (id: ${created.id})`);
   }
 
   console.log("[seed] Done.");

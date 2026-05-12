@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { MaintenanceService } from "./maintenance.service";
 import { CreateMaintenanceRequestDto } from "./dto/create-maintenance-request.dto";
@@ -53,12 +54,12 @@ export class MaintenanceController {
     @Query("limit") limit?: string,
   ) {
     return this.maintenanceService.list(actor, {
-      unitId,
-      propertyId,
+      unitId: unitId ? parseInt(unitId, 10) : undefined,
+      propertyId: propertyId ? parseInt(propertyId, 10) : undefined,
       status,
-      assignedToUserId,
+      assignedToUserId: assignedToUserId ? parseInt(assignedToUserId, 10) : undefined,
       scope,
-      cursor,
+      cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 100) : 20,
     });
   }
@@ -79,7 +80,7 @@ export class MaintenanceController {
   ) {
     return this.maintenanceService.listAlerts(actor, {
       dismissed,
-      cursor,
+      cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 100) : 20,
     });
   }
@@ -107,7 +108,7 @@ export class MaintenanceController {
   @Get(":id")
   @Roles("ADMIN", "PROPERTY_MANAGER", "MAINTENANCE", "TENANT")
   async findOne(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.maintenanceService.findOne(id, actor);
@@ -139,7 +140,7 @@ export class MaintenanceController {
   @Roles("PROPERTY_MANAGER", "ADMIN")
   @HttpCode(HttpStatus.OK)
   async assign(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: AssignMaintenanceDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -155,7 +156,7 @@ export class MaintenanceController {
   @Roles("MAINTENANCE", "PROPERTY_MANAGER", "ADMIN")
   @HttpCode(HttpStatus.OK)
   async inProgress(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.maintenanceService.inProgress(id, actor);
@@ -171,7 +172,7 @@ export class MaintenanceController {
   @Roles("MAINTENANCE", "PROPERTY_MANAGER", "ADMIN")
   @HttpCode(HttpStatus.OK)
   async resolve(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: ResolveMaintenanceDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -189,7 +190,7 @@ export class MaintenanceController {
   @RoleErrorCode("BL_21_ONLY_TENANT_CAN_CLOSE_MAINTENANCE")
   @HttpCode(HttpStatus.OK)
   async close(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.maintenanceService.close(id, actor);

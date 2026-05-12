@@ -5,7 +5,9 @@ import {
   IsOptional,
   Matches,
   IsIn,
+  IsInt,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * DTO for POST /properties.
@@ -44,6 +46,7 @@ export class CreatePropertyDto {
 
   /** Optional: assign a PROPERTY_MANAGER at creation time. Validated in service. */
   @IsOptional()
-  @IsString()
-  active_pm_id?: string;
+  @IsInt()
+  @Type(() => Number)
+  active_pm_id?: number;
 }

@@ -73,7 +73,7 @@ export class AuthService {
         actorId: null,
         action: "auth.login.failure",
         entityType: "Auth",
-        entityId: "login",
+        entityId: String("login"),
         before: null,
         after: {
           emailAttempt: dto.email.toLowerCase(),
@@ -208,7 +208,7 @@ export class AuthService {
   // Logout
   // ---------------------------------------------------------------------------
 
-  async logout(rawToken: string, actorId?: string): Promise<void> {
+  async logout(rawToken: string, actorId?: number): Promise<void> {
     const tokenHash = sha256hex(rawToken);
 
     await this.prisma.refreshToken.updateMany({
@@ -335,8 +335,8 @@ export class AuthService {
   // ---------------------------------------------------------------------------
 
   private async issueTokens(
-    userId: string,
-    role: string,
+    userId: number,
+    role: number,
     meta: { userAgent?: string; ip?: string },
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.jwtService.signAccessToken({ sub: userId, role });

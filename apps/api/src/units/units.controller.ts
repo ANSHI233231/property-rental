@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { UnitsService } from "./units.service";
 import { CreateUnitDto } from "./dto/create-unit.dto";
@@ -56,7 +57,7 @@ export class UnitsController {
     @Query("status") status?: string,
   ) {
     return this.unitsService.listAll({
-      cursor,
+      cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 200) : 20,
       status,
     });
@@ -64,7 +65,7 @@ export class UnitsController {
 
   /** GET /units/:id */
   @Get(":id")
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.unitsService.findById(id);
   }
 
@@ -74,7 +75,7 @@ export class UnitsController {
    */
   @Patch(":id")
   async update(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdateUnitDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -87,7 +88,7 @@ export class UnitsController {
    */
   @Patch(":id/state")
   async changeState(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: UnitStateChangeDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -102,7 +103,7 @@ export class UnitsController {
   @Post(":id/retire")
   @HttpCode(HttpStatus.OK)
   async retire(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.unitsService.retire(id, actor.sub);
@@ -131,18 +132,18 @@ export class PropertyUnitsController {
   /** GET /properties/:propertyId/units?cursor=&limit=20 */
   @Get()
   async list(
-    @Param("propertyId") propertyId: string,
+    @Param("propertyId", ParseIntPipe) propertyId: number,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
   ) {
-    return this.unitsService.list(propertyId, cursor, limit ? parseInt(limit, 10) : 20);
+    return this.unitsService.list(propertyId, cursor ? parseInt(cursor, 10) : undefined, limit ? parseInt(limit, 10) : 20);
   }
 
   /** POST /properties/:propertyId/units */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Param("propertyId") propertyId: string,
+    @Param("propertyId", ParseIntPipe) propertyId: number,
     @Body() dto: CreateUnitDto,
     @CurrentUser() actor: JwtPayload,
   ) {

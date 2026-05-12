@@ -6,10 +6,40 @@
  */
 
 export const APP_NAME = "GharSetu" as const;
-export const SHARED_PACKAGE_VERSION = "0.5.0" as const;
+export const SHARED_PACKAGE_VERSION = "0.6.0" as const;
 
 export { Role, ROLES, isRole } from "./role.js";
 export type { RoleValue } from "./role.js";
+
+// Numeric enums + label helpers (Step 3 — post SMALLINT migration)
+export {
+  RoleEnum,
+  ROLE_LABEL,
+  roleName,
+  UnitStateEnum,
+  UNIT_STATE_LABEL,
+  unitStateName,
+  LeaseStatusEnum,
+  LEASE_STATUS_LABEL,
+  leaseStatusName,
+  RentPeriodStatusEnum,
+  RENT_PERIOD_STATUS_LABEL,
+  rentPeriodStatusName,
+  // Note: MaintenanceStatusCodes / MaintenancePriorityCodes / PaymentMethodCodes
+  // avoid name-collision with the existing zod schemas.
+  MaintenanceStatusCodes,
+  MAINTENANCE_STATUS_LABEL,
+  maintenanceStatusName,
+  MaintenancePriorityCodes,
+  MAINTENANCE_PRIORITY_LABEL,
+  maintenancePriorityName,
+  PaymentMethodCodes,
+  PAYMENT_METHOD_LABEL,
+  paymentMethodName,
+  TerminationApprovalStatusEnum,
+  TERMINATION_APPROVAL_STATUS_LABEL,
+  terminationApprovalStatusName,
+} from "./enums.js";
 export { BusinessRules } from "./business-rules.js";
 
 // Auth schemas (Phase 1)

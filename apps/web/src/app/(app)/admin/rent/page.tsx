@@ -26,6 +26,7 @@ import { friendlyError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/client";
 import { formatDateOnlyIST, todayIST } from "@/lib/locale";
 import type { RentStatusValue } from "@gharsetu/shared";
+import { RentPeriodStatusEnum } from "@gharsetu/shared";
 
 type StatusChip = "OVERDUE" | "PARTIAL" | "ALL";
 
@@ -40,22 +41,23 @@ interface Payment {
 }
 
 interface RentPeriod {
-  id: string;
-  leaseId: string;
+  id: number | string;
+  leaseId: number | string;
   periodStart: string;
   periodEnd: string;
   dueDate: string;
-  amountDuePaise: string;
-  lateFeePaise: string;
-  paidPaise: string;
-  outstandingPaise: string;
-  status: RentStatusValue;
+  amountDuePaise: string | number;
+  lateFeePaise: string | number;
+  paidPaise: string | number;
+  outstandingPaise: string | number;
+  // API returns SMALLINT after Step 1 migration; accept string for legacy
+  status: number | string;
   lastAccruedAt: string | null;
   payments?: Payment[];
   lease?: {
-    id: string;
-    unit?: { id: string; name: string; property?: { id: string; name: string } };
-    tenants?: { id: string; name: string }[];
+    id: number | string;
+    unit?: { id: number | string; name: string; property?: { id: number | string; name: string } };
+    tenants?: { id: number | string; name: string }[];
   };
 }
 
@@ -229,16 +231,29 @@ export default function AdminRentPage() {
   }
 
   // Aggregate computation (client-side, Phase 4 — no aggregate endpoint)
+  // Status comparison helper (numeric or string)
+  function isRentStatus(s: number | string, ...names: string[]): boolean {
+    if (typeof s === "number") {
+      const codeMap: Record<string, number> = {
+        OVERDUE: RentPeriodStatusEnum.OVERDUE, PARTIAL: RentPeriodStatusEnum.PARTIAL,
+        DUE: RentPeriodStatusEnum.DUE, PAID: RentPeriodStatusEnum.PAID,
+        PREPAID: RentPeriodStatusEnum.PREPAID, UPCOMING: RentPeriodStatusEnum.UPCOMING,
+      };
+      return names.some((n) => s === codeMap[n]);
+    }
+    return names.includes(s as string);
+  }
+
   const collectedPaise = sumPaiseStrings(
     allPeriods
-      .filter((p) => p.status === "PAID" || p.status === "PREPAID")
-      .map((p) => p.paidPaise),
+      .filter((p) => isRentStatus(p.status, "PAID", "PREPAID"))
+      .map((p) => String(p.paidPaise)),
   );
   const overdueTotalPaise = sumPaiseStrings(
-    overduePeriods.map((p) => p.outstandingPaise),
+    overduePeriods.map((p) => String(p.outstandingPaise)),
   );
-  const partialCount = allPeriods.filter((p) => p.status === "PARTIAL").length;
-  const prepaidCount = allPeriods.filter((p) => p.status === "PREPAID").length;
+  const partialCount = allPeriods.filter((p) => isRentStatus(p.status, "PARTIAL")).length;
+  const prepaidCount = allPeriods.filter((p) => isRentStatus(p.status, "PREPAID")).length;
 
   // Unique tenant count from overdue (by leaseId)
   const tenantsInArrears = new Set(overduePeriods.map((p) => p.leaseId)).size;
@@ -394,10 +409,10 @@ export default function AdminRentPage() {
                       <td>
                         <StatusBadge status={period.status} />
                       </td>
-                      <td>{paiseStringToINR(period.outstandingPaise)}</td>
+                      <td>{paiseStringToINR(String(period.outstandingPaise))}</td>
                       <td style={{ color: "var(--color-status-overdue)" }}>
-                        {parseBigPaise(period.lateFeePaise) > 0
-                          ? paiseStringToINR(period.lateFeePaise)
+                        {parseBigPaise(String(period.lateFeePaise)) > 0
+                          ? paiseStringToINR(String(period.lateFeePaise))
                           : "—"}
                       </td>
                       <td>{daysLate > 0 ? daysLate : "—"}</td>

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AdminSidebar, AdminTabBar } from "@/components/admin/AdminSidebar";
 import { ToastProvider } from "@/components/ui/Toast";
+import { RoleEnum } from "@gharsetu/shared";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,9 +23,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       router.replace("/login");
       return;
     }
-    if (user.role !== "ADMIN") {
-      if (user.role === "PROPERTY_MANAGER") router.replace("/pm/dashboard");
-      else if (user.role === "MAINTENANCE") router.replace("/maintenance/dashboard");
+    if (user.role !== RoleEnum.ADMIN) {
+      if (user.role === RoleEnum.PROPERTY_MANAGER) router.replace("/pm/dashboard");
+      else if (user.role === RoleEnum.MAINTENANCE) router.replace("/maintenance/dashboard");
       else router.replace("/tenant/dashboard");
     }
   }, [user, loading, router]);
@@ -37,7 +38,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || user.role !== "ADMIN") return null;
+  if (!user || user.role !== RoleEnum.ADMIN) return null;
 
   return (
     <ToastProvider>

@@ -36,7 +36,7 @@ const ModalSchema = z.object({
 type ModalValues = z.infer<typeof ModalSchema>;
 
 export interface ProfileShape {
-  id?: string;
+  id?: number | string;
   name: string;
   email: string;
   phone: string | null;

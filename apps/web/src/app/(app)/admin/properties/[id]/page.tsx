@@ -23,6 +23,8 @@ import {
   formatINR,
   rupeesToPaise,
   paiseToRupees,
+  UnitStateEnum,
+  unitStateName,
 } from "@gharsetu/shared";
 import { Field } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
@@ -37,26 +39,27 @@ import { formatDateOnlyIST } from "@/lib/locale";
 // ---------------------------------------------------------------------------
 
 interface PropertyDetail {
-  id: string;
+  id: number | string;
   name: string;
   address: string;
   city: string;
   state: string;
   pincode: string;
   timezone: string;
-  active_pm?: { id: string; name: string; email: string } | null;
+  active_pm?: { id: number | string; name: string; email: string } | null;
   created_at?: string;
 }
 
 interface UnitRow {
-  id: string;
+  id: number | string;
   unit_number: string;
   floor?: number | null;
   bedrooms: number;
   bathrooms: number;
   area_sqft?: number | null;
-  monthly_rent_paise: number;
-  state: UnitStateValue;
+  monthly_rent_paise: number | string;
+  // API returns state as SMALLINT (0–3) after Step 1 migration; accept string for legacy
+  state: number | string;
   is_retired: boolean;
   created_at?: string;
 }
@@ -84,7 +87,17 @@ interface UsersResponse {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stateBadgeClass(state: UnitStateValue | "RETIRED"): string {
+function stateBadgeClass(state: number | string): string {
+  // Support both numeric codes (new API) and legacy strings
+  if (typeof state === "number") {
+    switch (state) {
+      case UnitStateEnum.AVAILABLE: return "badge badge-paid";
+      case UnitStateEnum.OCCUPIED: return "badge badge-prepaid";
+      case UnitStateEnum.MAINTENANCE: return "badge badge-partial";
+      case UnitStateEnum.LISTED: return "badge badge-renewed";
+      default: return "badge badge-closed";
+    }
+  }
   switch (state) {
     case "AVAILABLE": return "badge badge-paid";
     case "OCCUPIED": return "badge badge-prepaid";
@@ -95,14 +108,17 @@ function stateBadgeClass(state: UnitStateValue | "RETIRED"): string {
   }
 }
 
-function stateLabel(state: UnitStateValue | "RETIRED"): string {
+function stateLabel(state: number | string): string {
+  if (typeof state === "number") {
+    return unitStateName(state as UnitStateEnum) ?? "Unknown";
+  }
   switch (state) {
     case "AVAILABLE": return "Available";
     case "OCCUPIED": return "Occupied";
     case "MAINTENANCE": return "In-Maintenance";
     case "LISTED": return "Listed";
     case "RETIRED": return "Retired";
-    default: return state;
+    default: return state as string;
   }
 }
 
@@ -124,7 +140,7 @@ function TransferPmModal({
   open: boolean;
   onClose: () => void;
   propertyId: string;
-  currentPmId?: string | null;
+  currentPmId?: number | string | null;
   onTransferred: () => void;
 }) {
   const { apiFetch } = useAuth();
@@ -197,7 +213,7 @@ function TransferPmModal({
             >
               <option value="">— Unassign (no PM) —</option>
               {pms
-                .filter((pm) => pm.id !== currentPmId)
+                .filter((pm) => String(pm.id) !== String(currentPmId))
                 .map((pm) => (
                   <option key={pm.id} value={pm.id}>
                     {pm.name} ({pm.email})
@@ -396,7 +412,15 @@ function ChangeStateModal({
   const [serverError, setServerError] = useState("");
 
   useEffect(() => {
-    if (unit) setSelected(unit.state);
+    if (unit) {
+      // Normalize numeric state code to string name for the dropdown
+      if (typeof unit.state === "number") {
+        const names: Record<number, UnitStateValue> = { 0: "AVAILABLE", 1: "LISTED", 2: "OCCUPIED", 3: "MAINTENANCE" };
+        setSelected(names[unit.state] ?? "AVAILABLE");
+      } else {
+        setSelected(unit.state as UnitStateValue);
+      }
+    }
   }, [unit]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -759,7 +783,7 @@ export default function PropertyDetailPage() {
                     </td>
                     <td>{unit.area_sqft ? `${unit.area_sqft} sq ft` : "—"}</td>
                     <td className="font-poppins font-semibold">
-                      {formatINR(unit.monthly_rent_paise)}
+                      {formatINR(typeof unit.monthly_rent_paise === "string" ? parseInt(unit.monthly_rent_paise, 10) : unit.monthly_rent_paise)}
                     </td>
                     <td>
                       <span

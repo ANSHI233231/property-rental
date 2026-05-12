@@ -52,13 +52,14 @@ export class AuditLogController {
     @Query("limit") limitStr?: string,
   ) {
     const limit = limitStr ? Math.min(parseInt(limitStr, 10) || 50, 100) : 50;
+    const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
     return this.auditLogService.findMany({
       actorId,
       action,
       entityType,
       from,
       to,
-      cursor,
+      cursor: cursorNum,
       limit,
     });
   }

@@ -1,5 +1,5 @@
-import { IsString, IsOptional, MaxLength, Allow } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsInt, IsString, IsOptional, MaxLength, Allow } from "class-validator";
+import { Transform, Type } from "class-transformer";
 
 /**
  * DTO for POST /properties/:id/transfer-pm.
@@ -9,13 +9,17 @@ import { Transform } from "class-transformer";
  */
 export class TransferPmDto {
   /**
-   * New PM user ID. Pass null to unassign the property (leave unmanaged).
+   * New PM user ID (integer). Pass null to unassign the property (leave unmanaged).
    * The service validates: toPmId must be a PROPERTY_MANAGER role + is_active.
    * @Allow() permits any value (including null) — service enforces business logic.
    */
-  @Transform(({ value }: { value: unknown }) => value === undefined ? null : value)
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === null || value === undefined) return null;
+    const n = Number(value);
+    return isNaN(n) ? null : n;
+  })
   @Allow()
-  toPmId!: string | null;
+  toPmId!: number | null;
 
   @IsOptional()
   @IsString()

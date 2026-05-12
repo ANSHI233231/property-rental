@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { TenantSidebar, TenantTabBar } from "@/components/tenant/TenantSidebar";
 import { ToastProvider } from "@/components/ui/Toast";
+import { RoleEnum } from "@gharsetu/shared";
 
 export default function TenantLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,9 +23,9 @@ export default function TenantLayout({ children }: { children: ReactNode }) {
       router.replace("/login");
       return;
     }
-    if (user.role !== "TENANT") {
-      if (user.role === "ADMIN") router.replace("/admin/dashboard");
-      else if (user.role === "PROPERTY_MANAGER") router.replace("/pm/dashboard");
+    if (user.role !== RoleEnum.TENANT) {
+      if (user.role === RoleEnum.ADMIN) router.replace("/admin/dashboard");
+      else if (user.role === RoleEnum.PROPERTY_MANAGER) router.replace("/pm/dashboard");
       else router.replace("/maintenance/dashboard");
     }
   }, [user, loading, router]);
@@ -37,7 +38,7 @@ export default function TenantLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || user.role !== "TENANT") return null;
+  if (!user || user.role !== RoleEnum.TENANT) return null;
 
   return (
     <ToastProvider>

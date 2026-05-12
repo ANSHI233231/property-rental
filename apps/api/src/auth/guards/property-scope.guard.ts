@@ -12,6 +12,12 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { PROPERTY_SCOPE_KEY, type PropertyScopeType } from "../decorators/property-scope.decorator";
 import { PROPERTY_SCOPE_BODY_KEY, type PropertyScopeBodyField } from "../decorators/property-scope-body.decorator";
 
+/** Role int codes matching the DB smallint values */
+const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
+
+/** Lease status int code for ACTIVE */
+const LEASE_ACTIVE = 0;
+
 /**
  * PropertyScopeGuard — Phase 3 real implementation.
  *
@@ -58,20 +64,20 @@ export class PropertyScopeGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request & { user: JwtPayload }>();
     const user = request.user;
 
-    // ADMIN bypasses all property scoping.
-    if (user?.role === "ADMIN") return true;
+    // ADMIN bypasses all property scoping (role code 0).
+    if (user?.role === ROLE.ADMIN) return true;
 
     // Resolve property ID from params or body depending on which decorator was used.
     const propertyId = bodyScopeField
       ? await this.resolvePropertyIdFromBody(bodyScopeField, request)
       : await this.resolvePropertyId(scopeType!, request);
 
-    if (!propertyId) {
+    if (propertyId === null) {
       throw new NotFoundException({ error: { code: "RESOURCE_NOT_FOUND", message: "Resource not found" } });
     }
 
-    // PROPERTY_MANAGER: must be the active PM for this property.
-    if (user?.role === "PROPERTY_MANAGER") {
+    // PROPERTY_MANAGER: must be the active PM for this property (role code 1).
+    if (user?.role === ROLE.PROPERTY_MANAGER) {
       const property = await this.prisma.property.findFirst({
         where: { id: propertyId, deleted_at: null },
         select: { active_pm_id: true },
@@ -97,7 +103,7 @@ export class PropertyScopeGuard implements CanActivate {
 
     // TENANT: ownership is enforced at the service layer (H-01 fix).
     // The guard passes so the service can perform the check with full context.
-    if (user?.role === "TENANT") {
+    if (user?.role === ROLE.TENANT) {
       return true;
     }
 
@@ -111,23 +117,25 @@ export class PropertyScopeGuard implements CanActivate {
   }
 
   // ---------------------------------------------------------------------------
-  // Private: resolve the property ID from route params
+  // Private: resolve the property ID from route params (returns number | null)
   // ---------------------------------------------------------------------------
 
   private async resolvePropertyId(
     scopeType: PropertyScopeType,
     request: Request & { user: JwtPayload },
-  ): Promise<string | null> {
+  ): Promise<number | null> {
     const params = request.params as Record<string, string>;
 
     switch (scopeType) {
       case "property": {
-        return params["propertyId"] ?? params["id"] ?? null;
+        const raw = params["propertyId"] ?? params["id"];
+        return raw ? parseInt(raw, 10) : null;
       }
 
       case "unit": {
-        const unitId = params["unitId"] ?? params["id"];
-        if (!unitId) return null;
+        const raw = params["unitId"] ?? params["id"];
+        if (!raw) return null;
+        const unitId = parseInt(raw, 10);
         const unit = await this.prisma.unit.findUnique({
           where: { id: unitId },
           select: { property_id: true },
@@ -136,28 +144,45 @@ export class PropertyScopeGuard implements CanActivate {
       }
 
       case "lease": {
-        const leaseId = params["leaseId"] ?? params["id"];
-        if (!leaseId) return null;
+        const raw = params["leaseId"] ?? params["id"];
+        if (!raw) return null;
+        const leaseId = parseInt(raw, 10);
         const lease = await this.prisma.lease.findUnique({
           where: { id: leaseId },
-          select: { unit: { select: { property_id: true } } },
+          select: { unit_id: true },
         });
-        return lease?.unit.property_id ?? null;
+        if (!lease) return null;
+        const unit = await this.prisma.unit.findUnique({
+          where: { id: lease.unit_id },
+          select: { property_id: true },
+        });
+        return unit?.property_id ?? null;
       }
 
       case "tenant": {
-        const tenantId = params["tenantId"] ?? params["id"];
-        if (!tenantId) return null;
+        const raw = params["tenantId"] ?? params["id"];
+        if (!raw) return null;
+        const tenantId = parseInt(raw, 10);
         // Find property via the tenant's most recent active (or any) lease
         const leaseTenant = await this.prisma.leaseTenant.findFirst({
           where: {
             tenant_id: tenantId,
-            lease: { status: "ACTIVE" },
+            lease: { status: LEASE_ACTIVE },
             removed_at: null,
           },
-          select: { lease: { select: { unit: { select: { property_id: true } } } } },
+          select: { lease_id: true },
         });
-        return leaseTenant?.lease.unit.property_id ?? null;
+        if (!leaseTenant) return null;
+        const lease = await this.prisma.lease.findUnique({
+          where: { id: leaseTenant.lease_id },
+          select: { unit_id: true },
+        });
+        if (!lease) return null;
+        const unit = await this.prisma.unit.findUnique({
+          where: { id: lease.unit_id },
+          select: { property_id: true },
+        });
+        return unit?.property_id ?? null;
       }
 
       default:
@@ -172,17 +197,24 @@ export class PropertyScopeGuard implements CanActivate {
   private async resolvePropertyIdFromBody(
     bodyField: PropertyScopeBodyField,
     request: Request & { user: JwtPayload },
-  ): Promise<string | null> {
+  ): Promise<number | null> {
     const body = request.body as Record<string, unknown>;
 
     if (bodyField === "leaseId") {
-      const leaseId = body["leaseId"];
-      if (typeof leaseId !== "string" || !leaseId) return null;
+      const rawLeaseId = body["leaseId"];
+      if (!rawLeaseId) return null;
+      const leaseId = typeof rawLeaseId === "number" ? rawLeaseId : parseInt(String(rawLeaseId), 10);
+      if (isNaN(leaseId)) return null;
       const lease = await this.prisma.lease.findUnique({
         where: { id: leaseId },
-        select: { unit: { select: { property_id: true } } },
+        select: { unit_id: true },
       });
-      return lease?.unit.property_id ?? null;
+      if (!lease) return null;
+      const unit = await this.prisma.unit.findUnique({
+        where: { id: lease.unit_id },
+        select: { property_id: true },
+      });
+      return unit?.property_id ?? null;
     }
 
     return null;

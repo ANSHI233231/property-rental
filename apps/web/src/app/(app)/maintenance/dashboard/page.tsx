@@ -21,18 +21,20 @@ import { friendlyError } from "@/lib/api/errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ResolveMaintenanceSchema } from "@gharsetu/shared";
-import type { ResolveMaintenanceInput, MaintenanceStatusValue } from "@gharsetu/shared";
+import type { ResolveMaintenanceInput } from "@gharsetu/shared";
+import { MaintenanceStatusCodes, MaintenancePriorityCodes } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
   description: string;
-  priority: "LOW" | "NORMAL" | "HIGH" | "EMERGENCY";
-  status: MaintenanceStatusValue;
+  // API returns numeric codes after Step 1 migration; accept string for legacy
+  priority: number | string;
+  status: number | string;
   unit?: { name?: string } | null;
   property?: { name?: string; address?: string } | null;
   raised_by?: { name?: string } | null;
@@ -168,9 +170,24 @@ export default function MaintenanceDashboardPage() {
       );
       const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
       // Show non-closed requests sorted by priority
-      const active = items.filter((r) => r.status !== "CLOSED");
-      const PRIORITY_ORDER = { EMERGENCY: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
-      active.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99));
+      // Accept both numeric (new API) and string (legacy) status values
+      const active = items.filter((r) => {
+        const s = r.status;
+        return typeof s === "number" ? s !== MaintenanceStatusCodes.CLOSED : s !== "CLOSED";
+      });
+      // Priority sort: EMERGENCY(3/high) first → LOW(0/low) last
+      // Numeric: EMERGENCY=3, HIGH=2, NORMAL=1, LOW=0 — sort descending for urgency
+      // String legacy: map to sort order
+      const PRIORITY_SORT_STRING: Record<string, number> = { EMERGENCY: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
+      active.sort((a, b) => {
+        const pa = typeof a.priority === "number"
+          ? (3 - a.priority)  // EMERGENCY=3 → 0, LOW=0 → 3 (inverted for sort asc)
+          : (PRIORITY_SORT_STRING[a.priority as string] ?? 99);
+        const pb = typeof b.priority === "number"
+          ? (3 - b.priority)
+          : (PRIORITY_SORT_STRING[b.priority as string] ?? 99);
+        return pa - pb;
+      });
       setRequests(active);
     } catch (err) {
       setError(friendlyError(err));
@@ -251,7 +268,7 @@ export default function MaintenanceDashboardPage() {
       ) : (
         <div className="grid gap-4">
           {requests.map((req) => {
-            const isEmergency = req.priority === "EMERGENCY";
+            const isEmergency = req.priority === MaintenancePriorityCodes.EMERGENCY || req.priority === "EMERGENCY";
             const property = req.property?.name
               ? `${req.property.name}${req.property.address ? ", " + req.property.address : ""}`
               : null;
@@ -276,9 +293,9 @@ export default function MaintenanceDashboardPage() {
                     )}
                     <p className="text-sm mt-3">{req.description}</p>
                     <p className="text-xs muted mt-3">
-                      {req.status === "ASSIGNED" && req.assigned_at
+                      {(req.status === MaintenanceStatusCodes.ASSIGNED || req.status === "ASSIGNED") && req.assigned_at
                         ? `Assigned ${formatDate(req.assigned_at)}`
-                        : req.status === "IN_PROGRESS" && req.in_progress_at
+                        : (req.status === MaintenanceStatusCodes.IN_PROGRESS || req.status === "IN_PROGRESS") && req.in_progress_at
                         ? `In progress since ${formatDate(req.in_progress_at)}`
                         : `Raised ${formatDate(req.created_at)}`}
                     </p>
@@ -288,24 +305,24 @@ export default function MaintenanceDashboardPage() {
                 <hr className="divider" />
 
                 {/* Actions per status */}
-                {req.status === "ASSIGNED" && (
+                {(req.status === MaintenanceStatusCodes.ASSIGNED || req.status === "ASSIGNED") && (
                   <button
                     type="button"
                     className="btn btn-primary !py-2 !text-sm"
-                    onClick={() => void handleStartRequest(req.id)}
-                    disabled={actionLoading === req.id}
+                    onClick={() => void handleStartRequest(String(req.id))}
+                    disabled={actionLoading === String(req.id)}
                     aria-label={`Move request "${req.title}" to In-Progress`}
                   >
-                    {actionLoading === req.id ? "Updating…" : "Move to In-Progress"}
+                    {actionLoading === String(req.id) ? "Updating…" : "Move to In-Progress"}
                   </button>
                 )}
 
-                {req.status === "IN_PROGRESS" && (
+                {(req.status === MaintenanceStatusCodes.IN_PROGRESS || req.status === "IN_PROGRESS") && (
                   <div className="space-y-3">
                     <button
                       type="button"
                       className="btn btn-primary !py-2 !text-sm"
-                      onClick={() => setResolveModal({ requestId: req.id, requestTitle: req.title })}
+                      onClick={() => setResolveModal({ requestId: String(req.id), requestTitle: req.title })}
                       aria-label={`Resolve request "${req.title}"`}
                     >
                       Mark Resolved
@@ -313,7 +330,7 @@ export default function MaintenanceDashboardPage() {
                   </div>
                 )}
 
-                {req.status === "RESOLVED" && (
+                {(req.status === MaintenanceStatusCodes.RESOLVED || req.status === "RESOLVED") && (
                   <p className="text-sm muted">
                     Resolved {req.resolved_at ? formatDate(req.resolved_at) : ""} · Awaiting tenant to close.
                   </p>

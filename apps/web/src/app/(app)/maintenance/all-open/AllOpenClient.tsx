@@ -18,21 +18,21 @@ import { formatDateIST } from "@/lib/locale";
 import { MaintenanceStatusBadge } from "@/components/maintenance/MaintenanceStatusBadge";
 import { PriorityBadge } from "@/components/maintenance/PriorityBadge";
 import { friendlyError } from "@/lib/api/errors";
-import type { MaintenancePriorityValue, MaintenanceStatusValue } from "@gharsetu/shared";
+import { MaintenancePriorityCodes, MaintenanceStatusCodes } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
   description: string;
-  priority: MaintenancePriorityValue;
-  status: MaintenanceStatusValue;
+  priority: number | string;
+  status: number | string;
   unit?: { name?: string } | null;
   property?: { name?: string; address?: string } | null;
-  assigned_to?: { id?: string; name?: string } | null;
+  assigned_to?: { id?: number | string; name?: string } | null;
   created_at: string;
 }
 
@@ -53,14 +53,49 @@ function initials(name: string): string {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
 
-const PRIORITY_ORDER: Record<MaintenancePriorityValue, number> = {
+// Numeric priority sort order (lower = higher priority)
+const PRIORITY_ORDER_NUM: Record<number, number> = {
+  [MaintenancePriorityCodes.EMERGENCY]: 0,
+  [MaintenancePriorityCodes.HIGH]: 1,
+  [MaintenancePriorityCodes.NORMAL]: 2,
+  [MaintenancePriorityCodes.LOW]: 3,
+};
+const PRIORITY_ORDER_STR: Record<string, number> = {
   EMERGENCY: 0,
   HIGH: 1,
   NORMAL: 2,
   LOW: 3,
 };
 
-type PriorityFilter = MaintenancePriorityValue | "ALL";
+function prioritySortKey(p: number | string): number {
+  if (typeof p === "number") return PRIORITY_ORDER_NUM[p] ?? 99;
+  return PRIORITY_ORDER_STR[p] ?? 99;
+}
+
+type PriorityFilter = "ALL" | "EMERGENCY" | "HIGH" | "NORMAL" | "LOW";
+
+function matchesPriority(p: number | string, filter: PriorityFilter): boolean {
+  if (filter === "ALL") return true;
+  if (typeof p === "number") {
+    const map: Record<PriorityFilter, number | undefined> = {
+      ALL: undefined,
+      EMERGENCY: MaintenancePriorityCodes.EMERGENCY,
+      HIGH: MaintenancePriorityCodes.HIGH,
+      NORMAL: MaintenancePriorityCodes.NORMAL,
+      LOW: MaintenancePriorityCodes.LOW,
+    };
+    return p === map[filter];
+  }
+  return p === filter;
+}
+
+// Open statuses (OPEN, ASSIGNED, IN_PROGRESS)
+function isOpenStatus(s: number | string): boolean {
+  if (typeof s === "number") {
+    return s === MaintenanceStatusCodes.OPEN || s === MaintenanceStatusCodes.ASSIGNED || s === MaintenanceStatusCodes.IN_PROGRESS;
+  }
+  return s === "OPEN" || s === "ASSIGNED" || s === "IN_PROGRESS";
+}
 
 // ---------------------------------------------------------------------------
 // Page
@@ -82,8 +117,9 @@ export default function MaintenanceAllOpenPage() {
         `/maintenance-requests?scope=all-open&limit=100`,
       );
       const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
-      items.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99));
-      setRequests(items);
+      items.sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
+      // Only keep open/assigned/in-progress items
+      setRequests(items.filter((r) => isOpenStatus(r.status)));
     } catch (err) {
       setError(friendlyError(err));
     } finally {
@@ -93,17 +129,15 @@ export default function MaintenanceAllOpenPage() {
 
   useEffect(() => { void fetchRequests(); }, [fetchRequests]);
 
-  const filtered = priorityFilter === "ALL"
-    ? requests
-    : requests.filter((r) => r.priority === priorityFilter);
+  const filtered = requests.filter((r) => matchesPriority(r.priority, priorityFilter));
 
   // Count per priority for filter chips
   const counts: Record<PriorityFilter, number> = {
     ALL: requests.length,
-    EMERGENCY: requests.filter((r) => r.priority === "EMERGENCY").length,
-    HIGH: requests.filter((r) => r.priority === "HIGH").length,
-    NORMAL: requests.filter((r) => r.priority === "NORMAL").length,
-    LOW: requests.filter((r) => r.priority === "LOW").length,
+    EMERGENCY: requests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
+    HIGH: requests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
+    NORMAL: requests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
+    LOW: requests.filter((r) => matchesPriority(r.priority, "LOW")).length,
   };
 
   const filterChips: { label: string; value: PriorityFilter }[] = [
@@ -192,7 +226,8 @@ export default function MaintenanceAllOpenPage() {
             </thead>
             <tbody>
               {filtered.map((req) => {
-                const isYou = req.assigned_to?.id === user?.id;
+                const isYou = req.assigned_to?.id != null && user?.id != null &&
+                  String(req.assigned_to.id) === String(user.id);
                 const assignedName = req.assigned_to?.name ?? null;
 
                 return (

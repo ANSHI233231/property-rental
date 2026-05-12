@@ -18,6 +18,27 @@ import type { TerminationApprovalDto } from "./dto/termination-approval.dto";
 import type { DepositRefundDto } from "./dto/deposit-refund.dto";
 import { RentService } from "../rent/rent.service";
 
+/** Lease status int codes */
+export const LEASE_STATUS = {
+  ACTIVE: 0,
+  EXPIRED: 1,
+  RENEWED: 2,
+  TERMINATED: 3,
+} as const;
+
+/** Termination approval status int codes */
+export const APPROVAL_STATUS = {
+  PENDING: 0,
+  APPROVED: 1,
+  REJECTED: 2,
+} as const;
+
+/** Unit state int codes (mirrors units.service.ts UNIT_STATE) */
+const UNIT_STATE = { AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3 } as const;
+
+/** Role int codes */
+const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
+
 /** Generate a temporary password for auto-created tenant accounts. */
 function generateTempPassword(): string {
   return `Tmp@${randomBytes(6).toString("hex")}`;
@@ -81,10 +102,10 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
 
   async create(
-    propertyId: string,
-    unitId: string,
+    propertyId: number,
+    unitId: number,
     dto: CreateLeaseDto,
-    actorId: string,
+    actorId: number,
   ) {
     // Date-order guard: endDate must be strictly after startDate (BUG-008-002)
     if (new Date(dto.endDate) <= new Date(dto.startDate)) {
@@ -123,12 +144,12 @@ export class LeasesService {
       });
     }
 
-    // BL-04: unit must not be in a state that blocks leasing
-    if (unit.state === "MAINTENANCE") {
+    // BL-04: unit must not be in a state that blocks leasing (MAINTENANCE=3)
+    if (unit.state === UNIT_STATE.MAINTENANCE) {
       throw new ConflictException({
         error: {
           code: "UNIT_STATUS_BLOCKED",
-          message: `Unit is in ${unit.state} state and cannot be leased`,
+          message: `Unit is in MAINTENANCE state and cannot be leased`,
           details: { current_state: unit.state },
         },
       });
@@ -141,7 +162,7 @@ export class LeasesService {
     const recentTermination = await this.prisma.lease.findFirst({
       where: {
         unit_id: unitId,
-        status: "TERMINATED",
+        status: LEASE_STATUS.TERMINATED,
         terminated_at: { gte: twentyFourHoursAgo },
       },
       select: { id: true, terminated_at: true },
@@ -175,7 +196,7 @@ export class LeasesService {
 
     for (const t of dto.tenants) {
       const existing = await this.prisma.user.findUnique({ where: { email: t.email } });
-      if (existing && existing.role !== "TENANT") {
+      if (existing && existing.role !== ROLE.TENANT) {
         throw new ConflictException({
           error: {
             code: "USER_NOT_TENANT",
@@ -197,8 +218,8 @@ export class LeasesService {
       return await this.prisma.$transaction(
         async (tx) => {
           const tenantResults: Array<{
-            tenantId: string;
-            userId: string;
+            tenantId: number;
+            userId: number;
             name: string;
             email: string;
             isPrimary: boolean;
@@ -215,7 +236,7 @@ export class LeasesService {
                   email: td.email,
                   phone: td.phone ?? null,
                   name: td.name,
-                  role: "TENANT",
+                  role: ROLE.TENANT,
                   password_hash: td.passwordHash!,
                   created_by_user_id: actorId,
                 },
@@ -274,7 +295,7 @@ export class LeasesService {
               end_date: new Date(dto.endDate),
               monthly_rent_paise: BigInt(dto.monthlyRentPaise),
               security_deposit_paise: BigInt(dto.securityDepositPaise),
-              status: "ACTIVE",
+              status: LEASE_STATUS.ACTIVE,
               signed_by_pm_id: actorId,
               signed_at: new Date(),
             },
@@ -319,7 +340,7 @@ export class LeasesService {
           const prevState = unit.state;
           await tx.unit.update({
             where: { id: unitId },
-            data: { state: "OCCUPIED" },
+            data: { state: UNIT_STATE.OCCUPIED },
           });
 
           await this.audit.writeLog(tx, {
@@ -328,7 +349,7 @@ export class LeasesService {
             entityType: "Unit",
             entityId: unitId,
             before: { state: prevState },
-            after: { state: "OCCUPIED" },
+            after: { state: UNIT_STATE.OCCUPIED },
           });
 
           // Phase 4: generate the first rent period inside the same transaction (BL-12/BL-13).
@@ -360,7 +381,7 @@ export class LeasesService {
       );
     } catch (err) {
       if (isPrismaUniqueError(err)) {
-        // The partial unique index on leases(unit_id) WHERE status='ACTIVE' fired
+        // The partial unique index on leases(unit_id) WHERE status=0(ACTIVE) fired
         throw new ConflictException({
           error: {
             code: "UNIT_HAS_ACTIVE_LEASE",
@@ -378,48 +399,59 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
 
   async list(filters: {
-    propertyId?: string;
-    unitId?: string;
-    tenantId?: string;
+    propertyId?: number | string;
+    unitId?: number | string;
+    tenantId?: number | string;
     status?: string;
-    cursor?: string;
+    cursor?: number;
     limit?: number;
-    actorId: string;
-    actorRole: string;
+    actorId: number;
+    actorRole: number;
   }) {
     const take = Math.min(filters.limit ?? 20, 100);
 
     // Build where clause with proper Prisma types
     let where: Prisma.LeaseWhereInput = {};
 
-    if (filters.unitId) {
-      where = { ...where, unit_id: filters.unitId };
+    if (filters.unitId !== undefined) {
+      where = { ...where, unit_id: Number(filters.unitId) };
     }
 
-    if (filters.status) {
-      where = { ...where, status: filters.status as Prisma.EnumLeaseStatusFilter };
+    if (filters.status !== undefined) {
+      // Accept status as a name string ("ACTIVE", "TERMINATED") or numeric string
+      const STATUS_NAME_TO_CODE: Record<string, number> = {
+        ACTIVE: LEASE_STATUS.ACTIVE,
+        EXPIRED: LEASE_STATUS.EXPIRED,
+        RENEWED: LEASE_STATUS.RENEWED,
+        TERMINATED: LEASE_STATUS.TERMINATED,
+      };
+      const statusCode = STATUS_NAME_TO_CODE[filters.status.toUpperCase()] ??
+        (isNaN(Number(filters.status)) ? undefined : Number(filters.status));
+      if (statusCode !== undefined) {
+        where = { ...where, status: statusCode };
+      }
     }
 
-    if (filters.propertyId) {
-      where = { ...where, unit: { property_id: filters.propertyId } };
+    if (filters.propertyId !== undefined) {
+      where = { ...where, unit: { property_id: Number(filters.propertyId) } };
     }
 
-    if (filters.tenantId) {
+    if (filters.tenantId !== undefined) {
       // FC-2: tenantId param is treated as User.id (JWT sub claim).
       // Join through tenant.user_id so the FE can use its auth context directly.
       where = {
         ...where,
         lease_tenants: {
           some: {
-            tenant: { user_id: filters.tenantId },
+            tenant: { user_id: Number(filters.tenantId) },
             removed_at: null,
           },
         },
       };
     }
 
-    // PROPERTY_MANAGER: scope to their property only
-    if (filters.actorRole === "PROPERTY_MANAGER") {
+    // PROPERTY_MANAGER: scope to their property only (role code 1)
+    if (filters.actorRole === ROLE.PROPERTY_MANAGER) {
       const managedProperty = await this.prisma.property.findFirst({
         where: { active_pm_id: filters.actorId, deleted_at: null },
         select: { id: true },
@@ -471,7 +503,7 @@ export class LeasesService {
   // Get single lease (GET /leases/:id)
   // ---------------------------------------------------------------------------
 
-  async findById(id: string): Promise<LeaseRow> {
+  async findById(id: number): Promise<LeaseRow> {
     const lease = await this.prisma.lease.findUnique({
       where: { id },
       select: LEASE_SELECT,
@@ -487,7 +519,7 @@ export class LeasesService {
   }
 
   /** Returns the lease serialized for API responses (BigInt → string). */
-  async findByIdForResponse(id: string) {
+  async findByIdForResponse(id: number) {
     const lease = await this.findById(id);
 
     // Also load tenants for the single-lease endpoint
@@ -521,10 +553,10 @@ export class LeasesService {
   // BL-04: unit stays OCCUPIED throughout.
   // ---------------------------------------------------------------------------
 
-  async renew(leaseId: string, dto: RenewLeaseDto, actorId: string) {
+  async renew(leaseId: number, dto: RenewLeaseDto, actorId: number) {
     const existing = await this.findById(leaseId);
 
-    if (existing.status !== "ACTIVE") {
+    if (existing.status !== LEASE_STATUS.ACTIVE) {
       throw new ConflictException({
         error: {
           code: "LEASE_NOT_ACTIVE",
@@ -547,7 +579,7 @@ export class LeasesService {
     const recentRenew = await this.prisma.lease.findFirst({
       where: {
         unit_id: existing.unit_id,
-        status: "ACTIVE",
+        status: LEASE_STATUS.ACTIVE,
         signed_by_pm_id: actorId,
         id: { not: leaseId },
         created_at: { gte: new Date(Date.now() - 5000) },
@@ -585,7 +617,7 @@ export class LeasesService {
         // Mark old lease as RENEWED (BL-02 trigger: we don't change rent fields here)
         await tx.lease.update({
           where: { id: leaseId },
-          data: { status: "RENEWED" },
+          data: { status: LEASE_STATUS.RENEWED },
         });
 
         await this.audit.writeLog(tx, {
@@ -593,8 +625,8 @@ export class LeasesService {
           action: "lease.renew_old",
           entityType: "Lease",
           entityId: leaseId,
-          before: { status: "ACTIVE" },
-          after: { status: "RENEWED" },
+          before: { status: LEASE_STATUS.ACTIVE },
+          after: { status: LEASE_STATUS.RENEWED },
         });
 
         // Create new lease
@@ -609,7 +641,7 @@ export class LeasesService {
             security_deposit_paise: dto.securityDepositPaise !== undefined
               ? BigInt(dto.securityDepositPaise)
               : existing.security_deposit_paise,
-            status: "ACTIVE",
+            status: LEASE_STATUS.ACTIVE,
             signed_by_pm_id: actorId,
           },
           select: LEASE_SELECT,
@@ -659,14 +691,14 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
 
   async requestTermination(
-    leaseId: string,
+    leaseId: number,
     dto: TerminationRequestDto,
-    actorId: string,
-    actorRole: string,
+    actorId: number,
+    actorRole: number,
   ) {
     const lease = await this.findById(leaseId);
 
-    if (lease.status !== "ACTIVE") {
+    if (lease.status !== LEASE_STATUS.ACTIVE) {
       throw new ConflictException({
         error: {
           code: "LEASE_NOT_ACTIVE",
@@ -678,7 +710,7 @@ export class LeasesService {
     // H-01: if the caller is a TENANT, derive their Tenant.id from the JWT User.id
     // and assert it equals dto.requestedByTenantId.  PMs may pass any requestedByTenantId
     // on the lease (PM-initiated termination flow).
-    if (actorRole === "TENANT") {
+    if (actorRole === ROLE.TENANT) {
       const callerTenant = await this.prisma.tenant.findUnique({
         where: { user_id: actorId },
         select: { id: true },
@@ -749,7 +781,7 @@ export class LeasesService {
               data: {
                 termination_id: termination.id,
                 tenant_id: lt.tenant_id,
-                status: isRequester ? "APPROVED" : "PENDING",
+                status: isRequester ? APPROVAL_STATUS.APPROVED : APPROVAL_STATUS.PENDING,
                 responded_at: isRequester ? new Date() : null,
                 note: isRequester ? "Requester auto-approved" : null,
               },
@@ -792,14 +824,14 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
 
   async approveTermination(
-    leaseId: string,
+    leaseId: number,
     dto: TerminationApprovalDto,
-    actorId: string,
-    actorRole: string,
+    actorId: number,
+    actorRole: number,
   ) {
     // H-01: PMs and non-ADMIN roles cannot cast votes on behalf of tenants.
     // Only TENANT self-vote and ADMIN are allowed.
-    if (actorRole === "PROPERTY_MANAGER") {
+    if (actorRole === ROLE.PROPERTY_MANAGER) {
       throw new ForbiddenException({
         error: {
           code: "FORBIDDEN_TENANT_ACTION",
@@ -809,7 +841,7 @@ export class LeasesService {
     }
 
     // H-01: if the caller is a TENANT, they may only vote for their own approval row.
-    if (actorRole === "TENANT") {
+    if (actorRole === ROLE.TENANT) {
       const callerTenant = await this.prisma.tenant.findUnique({
         where: { user_id: actorId },
         select: { id: true },
@@ -883,13 +915,13 @@ export class LeasesService {
   // ---------------------------------------------------------------------------
 
   async withdrawTermination(
-    leaseId: string,
-    requestingTenantId: string,
-    actorId: string,
-    actorRole: string,
+    leaseId: number,
+    requestingTenantId: number,
+    actorId: number,
+    actorRole: number,
   ) {
     // H-01: TENANT caller must prove they ARE the requester before we even look up the termination.
-    if (actorRole === "TENANT") {
+    if (actorRole === ROLE.TENANT) {
       const callerTenant = await this.prisma.tenant.findUnique({
         where: { user_id: actorId },
         select: { id: true },
@@ -953,12 +985,12 @@ export class LeasesService {
   // BL-04: unit → AVAILABLE. BL-18: 24-hour turnover gap.
   // ---------------------------------------------------------------------------
 
-  async finalizeTermination(leaseId: string, actorId: string, currentDate?: Date) {
+  async finalizeTermination(leaseId: number, actorId: number, currentDate?: Date) {
     const now = currentDate ?? new Date();
 
     const lease = await this.findById(leaseId);
 
-    if (lease.status !== "ACTIVE") {
+    if (lease.status !== LEASE_STATUS.ACTIVE) {
       throw new ConflictException({
         error: {
           code: "LEASE_NOT_ACTIVE",
@@ -981,9 +1013,9 @@ export class LeasesService {
       });
     }
 
-    // Check all approvals are APPROVED (BL-08 / BL-09)
-    const pending = termination.approvals.filter((a) => a.status === "PENDING");
-    const rejected = termination.approvals.filter((a) => a.status === "REJECTED");
+    // Check all approvals are APPROVED (BL-08 / BL-09) — status code 0=PENDING, 2=REJECTED
+    const pending = termination.approvals.filter((a) => a.status === APPROVAL_STATUS.PENDING);
+    const rejected = termination.approvals.filter((a) => a.status === APPROVAL_STATUS.REJECTED);
 
     if (pending.length > 0 || rejected.length > 0) {
       throw new ConflictException({
@@ -1006,7 +1038,7 @@ export class LeasesService {
       where: {
         unit_id: unitId,
         id: { not: leaseId },
-        status: "TERMINATED",
+        status: LEASE_STATUS.TERMINATED,
         terminated_at: { gte: twentyFourHoursAgo },
       },
       select: { id: true, terminated_at: true },
@@ -1031,7 +1063,7 @@ export class LeasesService {
 
         await tx.lease.update({
           where: { id: leaseId },
-          data: { status: "TERMINATED", terminated_at: now },
+          data: { status: LEASE_STATUS.TERMINATED, terminated_at: now },
         });
 
         await this.audit.writeLog(tx, {
@@ -1039,8 +1071,8 @@ export class LeasesService {
           action: "lease.terminate",
           entityType: "Lease",
           entityId: leaseId,
-          before: { status: "ACTIVE" },
-          after: { status: "TERMINATED", terminated_at: now },
+          before: { status: LEASE_STATUS.ACTIVE },
+          after: { status: LEASE_STATUS.TERMINATED, terminated_at: now },
         });
 
         await tx.leaseTenant.updateMany({
@@ -1051,7 +1083,7 @@ export class LeasesService {
         // BL-04: unit → AVAILABLE
         await tx.unit.update({
           where: { id: unitId },
-          data: { state: "AVAILABLE" },
+          data: { state: UNIT_STATE.AVAILABLE },
         });
 
         await this.audit.writeLog(tx, {
@@ -1059,15 +1091,15 @@ export class LeasesService {
           action: "unit.state_change",
           entityType: "Unit",
           entityId: unitId,
-          before: { state: "OCCUPIED" },
-          after: { state: "AVAILABLE" },
+          before: { state: UNIT_STATE.OCCUPIED },
+          after: { state: UNIT_STATE.AVAILABLE },
         });
 
         return {
           message: "Lease terminated successfully",
           lease_id: leaseId,
           terminated_at: now,
-          unit_state: "AVAILABLE",
+          unit_state: UNIT_STATE.AVAILABLE,
         };
       },
       { isolationLevel: "Serializable" },
@@ -1080,7 +1112,7 @@ export class LeasesService {
   // Lease must be TERMINATED. One refund per lease (unique index).
   // ---------------------------------------------------------------------------
 
-  async createDepositRefund(dto: DepositRefundDto, actorId: string, actorRole: string) {
+  async createDepositRefund(dto: DepositRefundDto, actorId: number, actorRole: number) {
     const lease = await this.prisma.lease.findUnique({
       where: { id: dto.leaseId },
       select: {
@@ -1099,7 +1131,7 @@ export class LeasesService {
 
     // H-02: belt-and-suspenders PM→property check (decorator alone is not enough if bodyKey
     // resolution ever drifts). ADMIN bypasses this check.
-    if (actorRole === "PROPERTY_MANAGER") {
+    if (actorRole === ROLE.PROPERTY_MANAGER) {
       const property = await this.prisma.property.findFirst({
         where: { id: lease.unit.property_id, active_pm_id: actorId, deleted_at: null },
         select: { id: true },
@@ -1114,7 +1146,7 @@ export class LeasesService {
       }
     }
 
-    if (lease.status !== "TERMINATED") {
+    if (lease.status !== LEASE_STATUS.TERMINATED) {
       throw new ConflictException({
         error: {
           code: "LEASE_NOT_TERMINATED",

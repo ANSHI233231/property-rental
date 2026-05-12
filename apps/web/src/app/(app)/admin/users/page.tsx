@@ -19,6 +19,8 @@ import {
   type UserCreateInput,
   type UserAdminUpdateInput,
   type AdminRoleValue,
+  RoleEnum,
+  roleName,
 } from "@gharsetu/shared";
 import { Field } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
@@ -33,11 +35,12 @@ import { formatDateOnlyIST } from "@/lib/locale";
 // ---------------------------------------------------------------------------
 
 interface UserRow {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   phone?: string | null;
-  role: AdminRoleValue;
+  // API returns role as SMALLINT (0–3) after Step 1 migration; accept string for legacy
+  role: RoleEnum | AdminRoleValue;
   is_active: boolean;
   created_at?: string;
 }
@@ -58,21 +61,27 @@ interface CreateUserResponse {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function roleLabel(role: AdminRoleValue): string {
-  switch (role) {
+function roleLabel(role: RoleEnum | AdminRoleValue): string {
+  if (typeof role === "number") {
+    return roleName(role);
+  }
+  // Legacy string fallback
+  switch (role as AdminRoleValue) {
     case "ADMIN": return "Admin";
     case "PROPERTY_MANAGER": return "Property Manager";
     case "MAINTENANCE": return "Maintenance";
     case "TENANT": return "Tenant";
+    default: return String(role);
   }
 }
 
 function scopeLabel(user: UserRow): string {
-  switch (user.role) {
-    case "ADMIN": return "All properties";
-    case "MAINTENANCE": return "Read + Update only";
-    default: return "—";
-  }
+  const r = user.role;
+  const isAdmin = r === RoleEnum.ADMIN || r === "ADMIN";
+  const isMaintenance = r === RoleEnum.MAINTENANCE || r === "MAINTENANCE";
+  if (isAdmin) return "All properties";
+  if (isMaintenance) return "Read + Update only";
+  return "—";
 }
 
 function formatDate(iso?: string): string {

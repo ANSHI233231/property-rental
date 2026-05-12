@@ -1,9 +1,19 @@
 "use client";
 
 /**
- * StatusBadge — maps RentStatusValue to the correct badge class.
- * Extends prototype badge classes: badge-overdue, badge-paid, badge-partial,
- * badge-prepaid, badge-due, badge-upcoming.
+ * StatusBadge — maps rent period status to the correct badge class.
+ *
+ * The API returns status as a SMALLINT (0–5) after the Step 1 migration.
+ * Accepts both numeric codes (from API) and legacy string values for
+ * backward compatibility during the transition period.
+ *
+ * Status codes per RentPeriodStatusEnum in @gharsetu/shared/enums:
+ *   0 UPCOMING → badge-upcoming (slate)
+ *   1 DUE      → badge-due      (royal-blue)
+ *   2 PARTIAL  → badge-partial  (amber)
+ *   3 PAID     → badge-paid     (green)
+ *   4 OVERDUE  → badge-overdue  (red)
+ *   5 PREPAID  → badge-prepaid  (teal/blue)
  *
  * Design tokens per prototype/assets/styles.css:
  *   paid    → #2E7D32 (green)
@@ -14,9 +24,19 @@
  *   upcoming → slate #546E7A
  */
 
-import type { RentStatusValue } from "@gharsetu/shared";
+import { RentPeriodStatusEnum, rentPeriodStatusName } from "@gharsetu/shared";
 
-const STATUS_CLASS: Record<RentStatusValue, string> = {
+const STATUS_CLASS: Record<number, string> = {
+  [RentPeriodStatusEnum.UPCOMING]: "badge badge-upcoming",
+  [RentPeriodStatusEnum.DUE]: "badge badge-due",
+  [RentPeriodStatusEnum.PARTIAL]: "badge badge-partial",
+  [RentPeriodStatusEnum.PAID]: "badge badge-paid",
+  [RentPeriodStatusEnum.OVERDUE]: "badge badge-overdue",
+  [RentPeriodStatusEnum.PREPAID]: "badge badge-prepaid",
+};
+
+// Legacy string-value fallback
+const STRING_STATUS_CLASS: Record<string, string> = {
   PAID: "badge badge-paid",
   PARTIAL: "badge badge-partial",
   OVERDUE: "badge badge-overdue",
@@ -25,7 +45,7 @@ const STATUS_CLASS: Record<RentStatusValue, string> = {
   UPCOMING: "badge badge-upcoming",
 };
 
-const STATUS_LABEL: Record<RentStatusValue, string> = {
+const STRING_STATUS_LABEL: Record<string, string> = {
   PAID: "Paid",
   PARTIAL: "Partial",
   OVERDUE: "Overdue",
@@ -35,15 +55,27 @@ const STATUS_LABEL: Record<RentStatusValue, string> = {
 };
 
 interface StatusBadgeProps {
-  status: RentStatusValue;
+  /** Numeric code (0–5) or legacy string value. */
+  status: number | string;
   className?: string;
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
-  const label = STATUS_LABEL[status];
+  let label: string;
+  let badgeClass: string;
+
+  if (typeof status === "number") {
+    label = rentPeriodStatusName(status as RentPeriodStatusEnum);
+    badgeClass = STATUS_CLASS[status] ?? "badge";
+  } else {
+    // Legacy string path
+    label = STRING_STATUS_LABEL[status] ?? status;
+    badgeClass = STRING_STATUS_CLASS[status] ?? "badge";
+  }
+
   return (
     <span
-      className={[STATUS_CLASS[status], className].filter(Boolean).join(" ")}
+      className={[badgeClass, className].filter(Boolean).join(" ")}
       aria-label={label}
     >
       {label}

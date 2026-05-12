@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { parseISO } from "date-fns";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR, rupeesToPaise, LeaseInputSchema, type LeaseInput, type TenantInput } from "@gharsetu/shared";
+import { formatINR, rupeesToPaise, LeaseInputSchema, LeaseStatusEnum, type LeaseInput, type TenantInput } from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Modal } from "@/components/ui/Modal";
@@ -26,8 +26,8 @@ import { friendlyError } from "@/lib/api/errors";
 // ---------------------------------------------------------------------------
 
 interface LeaseRow {
-  id: string;
-  status: string;
+  id: number | string;
+  status: number | string;
   start_date: string;
   end_date: string;
   monthly_rent_paise: string | number;
@@ -85,23 +85,39 @@ interface SignLeaseFormValues {
 }
 
 // ---------------------------------------------------------------------------
-// Status badge
+// Status badge (handles both numeric LeaseStatusEnum codes and legacy strings)
 // ---------------------------------------------------------------------------
 
-const STATUS_BADGE: Record<string, string> = {
+const LEASE_STATUS_BADGE_NUM: Record<number, string> = {
+  [LeaseStatusEnum.ACTIVE]: "badge-active",
+  [LeaseStatusEnum.EXPIRED]: "badge-open",
+  [LeaseStatusEnum.RENEWED]: "badge-renewed",
+  [LeaseStatusEnum.TERMINATED]: "badge-terminated",
+};
+
+const LEASE_STATUS_BADGE_STR: Record<string, string> = {
   ACTIVE: "badge-active",
   EXPIRED: "badge-open",
   RENEWED: "badge-renewed",
   TERMINATED: "badge-terminated",
 };
 
-function StatusBadge({ status }: { status: string }) {
-  const cls = STATUS_BADGE[status] ?? "badge-open";
-  return (
-    <span className={`badge ${cls}`}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
-    </span>
-  );
+const LEASE_STATUS_LABEL_STR: Record<number, string> = {
+  [LeaseStatusEnum.ACTIVE]: "Active",
+  [LeaseStatusEnum.EXPIRED]: "Expired",
+  [LeaseStatusEnum.RENEWED]: "Renewed",
+  [LeaseStatusEnum.TERMINATED]: "Terminated",
+};
+
+function LeaseStatusBadge({ status }: { status: number | string }) {
+  if (typeof status === "number") {
+    const cls = LEASE_STATUS_BADGE_NUM[status] ?? "badge-open";
+    const label = LEASE_STATUS_LABEL_STR[status] ?? String(status);
+    return <span className={`badge ${cls}`}>{label}</span>;
+  }
+  const cls = LEASE_STATUS_BADGE_STR[status] ?? "badge-open";
+  const label = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  return <span className={`badge ${cls}`}>{label}</span>;
 }
 
 // ---------------------------------------------------------------------------
@@ -499,7 +515,7 @@ export default function PmLeasesPage() {
 
   // Leases ending soon alert
   const endingSoon = leases.filter((l) => {
-    if (l.status !== "ACTIVE") return false;
+    if (l.status !== LeaseStatusEnum.ACTIVE && l.status !== "ACTIVE") return false;
     try {
       const end = parseISO(l.end_date);
       const now = new Date();
@@ -688,7 +704,7 @@ export default function PmLeasesPage() {
                   <td>{formatRent(l.monthly_rent_paise)}</td>
                   <td>{formatRent(l.security_deposit_paise)}</td>
                   <td>
-                    <StatusBadge status={l.status} />
+                    <LeaseStatusBadge status={l.status} />
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2 flex-wrap">

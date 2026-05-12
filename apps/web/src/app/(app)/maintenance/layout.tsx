@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { MaintenanceSidebar, MaintenanceTabBar } from "@/components/maintenance/MaintenanceSidebar";
 import { ToastProvider } from "@/components/ui/Toast";
+import { RoleEnum } from "@gharsetu/shared";
 
 export default function MaintenanceLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,9 +23,9 @@ export default function MaintenanceLayout({ children }: { children: ReactNode })
       router.replace("/login");
       return;
     }
-    if (user.role !== "MAINTENANCE") {
-      if (user.role === "ADMIN") router.replace("/admin/dashboard");
-      else if (user.role === "PROPERTY_MANAGER") router.replace("/pm/dashboard");
+    if (user.role !== RoleEnum.MAINTENANCE) {
+      if (user.role === RoleEnum.ADMIN) router.replace("/admin/dashboard");
+      else if (user.role === RoleEnum.PROPERTY_MANAGER) router.replace("/pm/dashboard");
       else router.replace("/tenant/dashboard");
     }
   }, [user, loading, router]);
@@ -37,7 +38,7 @@ export default function MaintenanceLayout({ children }: { children: ReactNode })
     );
   }
 
-  if (!user || user.role !== "MAINTENANCE") return null;
+  if (!user || user.role !== RoleEnum.MAINTENANCE) return null;
 
   return (
     <ToastProvider>

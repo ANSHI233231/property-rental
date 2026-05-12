@@ -14,13 +14,19 @@ import { ROLES_KEY } from "../decorators/roles.decorator";
 import { ROLE_ERROR_CODE_KEY } from "../decorators/role-error-code.decorator";
 import type { ExecutionContext } from "@nestjs/common";
 
+// Map role name strings to int codes — mirrors RolesGuard ROLE_NAME_TO_CODE
+const ROLE_CODE: Record<string, number> = {
+  ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
+};
+
 function buildContext(userRole: string | null): ExecutionContext {
   return {
     getHandler: () => ({}),
     getClass: () => ({}),
     switchToHttp: () => ({
       getRequest: () => ({
-        user: userRole ? { sub: "user-1", role: userRole } : null,
+        // sub is Int (BL int-id refactor); role is Int code
+        user: userRole ? { sub: 1, role: ROLE_CODE[userRole] ?? -1 } : null,
       }),
     }),
   } as unknown as ExecutionContext;

@@ -46,12 +46,12 @@ export class PropertiesService {
   // PROPERTY_MANAGER: only the property assigned to them (BL-19).
   // ---------------------------------------------------------------------------
 
-  async list(cursor?: string, limit = 20, actor?: JwtPayload) {
+  async list(cursor?: number, limit = 20, actor?: JwtPayload) {
     const take = Math.min(limit, 100);
 
-    // Scope for PROPERTY_MANAGER: only their assigned property.
-    const where: { deleted_at: null; active_pm_id?: string } = { deleted_at: null };
-    if (actor?.role === "PROPERTY_MANAGER") {
+    // Scope for PROPERTY_MANAGER (role=1): only their assigned property.
+    const where: { deleted_at: null; active_pm_id?: number } = { deleted_at: null };
+    if (actor?.role === 1) {
       where.active_pm_id = actor.sub;
     }
 
@@ -77,7 +77,7 @@ export class PropertiesService {
   // Create
   // ---------------------------------------------------------------------------
 
-  async create(dto: CreatePropertyDto, actorId: string) {
+  async create(dto: CreatePropertyDto, actorId: number) {
     // Validate PM if provided
     if (dto.active_pm_id) {
       await this.validatePmAvailability(dto.active_pm_id);
@@ -115,7 +115,7 @@ export class PropertiesService {
   // Find one
   // ---------------------------------------------------------------------------
 
-  async findById(id: string) {
+  async findById(id: number) {
     const property = await this.prisma.property.findFirst({
       where: { id, deleted_at: null },
       select: PROPERTY_SELECT,
@@ -132,7 +132,7 @@ export class PropertiesService {
   // Update (PATCH /properties/:id — metadata only, not active_pm_id)
   // ---------------------------------------------------------------------------
 
-  async update(id: string, dto: UpdatePropertyDto, actorId: string) {
+  async update(id: number, dto: UpdatePropertyDto, actorId: number) {
     const before = await this.findById(id);
 
     return this.prisma.$transaction(async (tx) => {
@@ -166,7 +166,7 @@ export class PropertiesService {
   // Soft-delete (DELETE /properties/:id → sets deleted_at)
   // ---------------------------------------------------------------------------
 
-  async softDelete(id: string, actorId: string) {
+  async softDelete(id: number, actorId: number) {
     const before = await this.findById(id);
 
     // Guard: cannot delete a property that has an assigned PM.
@@ -205,7 +205,7 @@ export class PropertiesService {
   // BL-20: previous PM keeps read_only_audit access (logged here; enforced by scope guard).
   // ---------------------------------------------------------------------------
 
-  async transferPm(id: string, dto: TransferPmDto, actorId: string) {
+  async transferPm(id: number, dto: TransferPmDto, actorId: number) {
     const property = await this.findById(id);
 
     // Validate new PM if non-null
@@ -278,7 +278,7 @@ export class PropertiesService {
    * @param excludePropertyId - When transferring, exclude the current property
    *                           (the PM is already assigned here, so that's OK).
    */
-  private async validatePmAvailability(pmId: string, excludePropertyId?: string) {
+  private async validatePmAvailability(pmId: number, excludePropertyId?: number) {
     const user = await this.prisma.user.findUnique({ where: { id: pmId } });
 
     if (!user || !user.is_active) {
@@ -290,7 +290,8 @@ export class PropertiesService {
       });
     }
 
-    if (user.role !== "PROPERTY_MANAGER") {
+    // PROPERTY_MANAGER = role code 1
+    if (user.role !== 1) {
       throw new BadRequestException({
         error: {
           code: "INVALID_PM_ROLE",

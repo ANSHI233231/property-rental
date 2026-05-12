@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR, rupeesToPaise } from "@gharsetu/shared";
+import { formatINR, rupeesToPaise, LeaseStatusEnum, TerminationApprovalStatusEnum, terminationApprovalStatusName, leaseStatusName } from "@gharsetu/shared";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
@@ -22,22 +22,23 @@ import Link from "next/link";
 // ---------------------------------------------------------------------------
 
 interface LeaseTenant {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   is_primary: boolean;
 }
 
 interface TerminationApproval {
-  tenant_id: string;
+  tenant_id: number | string;
   tenant_name: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  // API returns SMALLINT (0=PENDING, 1=APPROVED, 2=REJECTED) or legacy string
+  status: number | string;
   note?: string | null;
 }
 
 interface LeaseTermination {
-  id: string;
-  requested_by_tenant_id: string;
+  id: number | string;
+  requested_by_tenant_id: number | string;
   requested_by_name?: string;
   effective_date: string;
   reason?: string | null;
@@ -45,25 +46,26 @@ interface LeaseTermination {
 }
 
 interface DepositRefund {
-  id: string;
+  id: number | string;
   amount_paise: string | number;
   deductions_paise?: string | number | null;
   deduction_reason?: string | null;
-  paid_to_tenant_id: string;
+  paid_to_tenant_id: number | string;
 }
 
 interface LeaseDetail {
-  id: string;
-  status: "ACTIVE" | "EXPIRED" | "RENEWED" | "TERMINATED";
+  id: number | string;
+  // API returns SMALLINT (0=ACTIVE, 1=EXPIRED, 2=RENEWED, 3=TERMINATED) or legacy string
+  status: number | string;
   start_date: string;
   end_date: string;
   monthly_rent_paise: string | number;
   security_deposit_paise: string | number;
-  unit?: { id: string; name: string };
+  unit?: { id: number | string; name: string };
   tenants?: LeaseTenant[];
   termination?: LeaseTermination | null;
   deposit_refund?: DepositRefund | null;
-  successor_lease_id?: string | null;
+  successor_lease_id?: number | string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,18 +86,58 @@ function formatPaise(paise: string | number | null | undefined): string {
 // Status badge
 // ---------------------------------------------------------------------------
 
-const STATUS_BADGE: Record<string, string> = {
-  ACTIVE: "badge-paid",
-  EXPIRED: "badge-open",
-  RENEWED: "badge-renewed",
-  TERMINATED: "badge-terminated",
-};
+// Status badge helper — handles both numeric codes and legacy strings
+function leaseStatusBadgeClass(s: number | string): string {
+  if (typeof s === "number") {
+    switch (s) {
+      case LeaseStatusEnum.ACTIVE: return "badge-paid";
+      case LeaseStatusEnum.EXPIRED: return "badge-open";
+      case LeaseStatusEnum.RENEWED: return "badge-renewed";
+      case LeaseStatusEnum.TERMINATED: return "badge-terminated";
+      default: return "badge-open";
+    }
+  }
+  const map: Record<string, string> = { ACTIVE: "badge-paid", EXPIRED: "badge-open", RENEWED: "badge-renewed", TERMINATED: "badge-terminated" };
+  return map[s as string] ?? "badge-open";
+}
 
-const APPROVAL_BADGE: Record<string, string> = {
-  PENDING: "badge-open",
-  APPROVED: "badge-paid",
-  REJECTED: "badge-overdue",
-};
+function leaseStatusDisplayLabel(s: number | string): string {
+  if (typeof s === "number") return leaseStatusName(s as LeaseStatusEnum);
+  return String(s).charAt(0) + String(s).slice(1).toLowerCase();
+}
+
+function approvalStatusBadgeClass(s: number | string): string {
+  if (typeof s === "number") {
+    switch (s) {
+      case TerminationApprovalStatusEnum.APPROVED: return "badge-paid";
+      case TerminationApprovalStatusEnum.REJECTED: return "badge-overdue";
+      default: return "badge-open"; // PENDING
+    }
+  }
+  const map: Record<string, string> = { PENDING: "badge-open", APPROVED: "badge-paid", REJECTED: "badge-overdue" };
+  return map[s as string] ?? "badge-open";
+}
+
+function approvalStatusLabel(s: number | string): string {
+  if (typeof s === "number") return terminationApprovalStatusName(s as TerminationApprovalStatusEnum);
+  return String(s).charAt(0) + String(s).slice(1).toLowerCase();
+}
+
+function isLeaseStatus(s: number | string, name: string): boolean {
+  if (typeof s === "number") {
+    const codeMap: Record<string, number> = { ACTIVE: LeaseStatusEnum.ACTIVE, EXPIRED: LeaseStatusEnum.EXPIRED, RENEWED: LeaseStatusEnum.RENEWED, TERMINATED: LeaseStatusEnum.TERMINATED };
+    return s === codeMap[name];
+  }
+  return s === name;
+}
+
+function isApprovalStatus(s: number | string, name: string): boolean {
+  if (typeof s === "number") {
+    const codeMap: Record<string, number> = { PENDING: TerminationApprovalStatusEnum.PENDING, APPROVED: TerminationApprovalStatusEnum.APPROVED, REJECTED: TerminationApprovalStatusEnum.REJECTED };
+    return s === codeMap[name];
+  }
+  return s === name;
+}
 
 // ---------------------------------------------------------------------------
 // Renew modal
@@ -472,10 +514,10 @@ export default function PmLeaseDetailPage() {
     );
   }
 
-  const statusCls = STATUS_BADGE[lease.status] ?? "badge-open";
+  const statusCls = leaseStatusBadgeClass(lease.status);
   const tenants = lease.tenants ?? [];
   const termination = lease.termination ?? null;
-  const allApproved = termination?.approvals.every((a) => a.status === "APPROVED") ?? false;
+  const allApproved = termination?.approvals.every((a) => isApprovalStatus(a.status, "APPROVED")) ?? false;
 
   return (
     <>
@@ -497,7 +539,7 @@ export default function PmLeaseDetailPage() {
           <div>
             <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
               <div><span className="muted">Unit:</span> <strong className="text-charcoal">{lease.unit?.name ?? "—"}</strong></div>
-              <div><span className="muted">Status:</span> <span className={`badge ${statusCls} ml-1`}>{lease.status.charAt(0) + lease.status.slice(1).toLowerCase()}</span></div>
+              <div><span className="muted">Status:</span> <span className={`badge ${statusCls} ml-1`}>{leaseStatusDisplayLabel(lease.status)}</span></div>
               <div><span className="muted">Start:</span> <strong className="text-charcoal">{formatDate(lease.start_date)}</strong></div>
               <div><span className="muted">End:</span> <strong className="text-charcoal">{formatDate(lease.end_date)}</strong></div>
               <div><span className="muted">Monthly Rent:</span> <strong className="text-charcoal">{formatPaise(lease.monthly_rent_paise)}</strong></div>
@@ -525,7 +567,7 @@ export default function PmLeaseDetailPage() {
       </section>
 
       {/* Actions by status */}
-      {lease.status === "ACTIVE" && !termination && (
+      {isLeaseStatus(lease.status, "ACTIVE") && !termination && (
         <section className="card mb-6">
           <h3 className="section-title">Actions</h3>
           <div className="flex gap-3 flex-wrap">
@@ -554,7 +596,7 @@ export default function PmLeaseDetailPage() {
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <p className="text-sm muted">
-                Requested by {termination.requested_by_name ?? tenants.find((t) => t.id === termination.requested_by_tenant_id)?.name ?? "—"}
+                Requested by {termination.requested_by_name ?? tenants.find((t) => String(t.id) === String(termination.requested_by_tenant_id))?.name ?? "—"}
                 {termination.reason ? ` · Reason: ${termination.reason}` : ""}
                 {" · Effective: "}{formatDate(termination.effective_date)}
               </p>
@@ -563,10 +605,10 @@ export default function PmLeaseDetailPage() {
                   <div key={a.tenant_id} className="p-3 rounded border border-mid-gray">
                     <div className="text-xs muted">
                       {a.tenant_name}
-                      {a.tenant_id === termination.requested_by_tenant_id ? " (requester)" : ""}
+                      {String(a.tenant_id) === String(termination.requested_by_tenant_id) ? " (requester)" : ""}
                     </div>
-                    <span className={`badge ${APPROVAL_BADGE[a.status]} mt-1`}>
-                      {a.status.charAt(0) + a.status.slice(1).toLowerCase()}
+                    <span className={`badge ${approvalStatusBadgeClass(a.status)} mt-1`}>
+                      {approvalStatusLabel(a.status)}
                     </span>
                     {a.note && <div className="text-xs muted mt-1">{a.note}</div>}
                   </div>
@@ -601,7 +643,7 @@ export default function PmLeaseDetailPage() {
       )}
 
       {/* Terminated status — deposit refund */}
-      {lease.status === "TERMINATED" && (
+      {isLeaseStatus(lease.status, "TERMINATED") && (
         <section className="card mb-6">
           <h3 className="section-title">Deposit Refund</h3>
           {lease.deposit_refund ? (
@@ -631,7 +673,7 @@ export default function PmLeaseDetailPage() {
       )}
 
       {/* Renewed / Expired — successor link */}
-      {(lease.status === "RENEWED" || lease.status === "EXPIRED") && lease.successor_lease_id && (
+      {(isLeaseStatus(lease.status, "RENEWED") || isLeaseStatus(lease.status, "EXPIRED")) && lease.successor_lease_id && (
         <section className="card mb-6">
           <p className="text-sm text-charcoal">
             This lease has been renewed.{" "}

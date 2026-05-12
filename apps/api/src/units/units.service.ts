@@ -10,9 +10,10 @@ import { AuditService } from "../audit/audit.service";
 import type { CreateUnitDto } from "./dto/create-unit.dto";
 import type { UpdateUnitDto } from "./dto/update-unit.dto";
 import type { UnitStateChangeDto } from "./dto/unit-state-change.dto";
-import type { UnitState } from "@prisma/client";
-
 /**
+ * Unit state codes (smallint, permanent contract):
+ *   AVAILABLE=0  LISTED=1  OCCUPIED=2  MAINTENANCE=3
+ *
  * Unit state transition rules (BL-04 / Phase 2 subset).
  * LISTED → OCCUPIED is allowed here so Admin can set test units to OCCUPIED.
  * Phase 3 adds the lease-link guard on top: transition to OCCUPIED is only
@@ -20,11 +21,14 @@ import type { UnitState } from "@prisma/client";
  * service method that passes the lease context). The raw PATCH /units/:id/state
  * endpoint remains available for Admin override.
  */
-const LEGAL_TRANSITIONS: Record<UnitState, UnitState[]> = {
-  AVAILABLE: ["LISTED", "MAINTENANCE"],
-  LISTED: ["AVAILABLE", "OCCUPIED", "MAINTENANCE"],
-  OCCUPIED: ["MAINTENANCE"], // Phase 3 adds the lease-end path (OCCUPIED → AVAILABLE after termination)
-  MAINTENANCE: ["AVAILABLE"],
+export const UNIT_STATE = { AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3 } as const;
+export type UnitStateCode = (typeof UNIT_STATE)[keyof typeof UNIT_STATE];
+
+const LEGAL_TRANSITIONS: Record<UnitStateCode, UnitStateCode[]> = {
+  0: [1, 3],    // AVAILABLE → LISTED, MAINTENANCE
+  1: [0, 2, 3], // LISTED    → AVAILABLE, OCCUPIED, MAINTENANCE
+  2: [3],       // OCCUPIED  → MAINTENANCE
+  3: [0],       // MAINTENANCE → AVAILABLE
 };
 
 const UNIT_SELECT = {
@@ -58,15 +62,24 @@ export class UnitsService {
   // ---------------------------------------------------------------------------
 
   async listAll(query: {
-    cursor?: string;
+    cursor?: number;
     limit?: number;
     status?: string;
   }) {
     const take = Math.min(query.limit ?? 20, 200);
-    const where: { state?: UnitState } = {};
-
+    // Accept state as int code string ("0") or name ("AVAILABLE")
+    const STATE_NAME_TO_CODE: Record<string, number> = {
+      AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3,
+    };
+    const where: { state?: number } = {};
     if (query.status) {
-      where.state = query.status as UnitState;
+      const asInt = parseInt(query.status, 10);
+      if (!isNaN(asInt)) {
+        where.state = asInt;
+      } else {
+        const code = STATE_NAME_TO_CODE[query.status.toUpperCase()];
+        if (code !== undefined) where.state = code;
+      }
     }
 
     const items = await this.prisma.unit.findMany({
@@ -91,7 +104,7 @@ export class UnitsService {
   // List units for a property (cursor-based)
   // ---------------------------------------------------------------------------
 
-  async list(propertyId: string, cursor?: string, limit = 20) {
+  async list(propertyId: number, cursor?: number, limit = 20) {
     // Verify property exists
     await this.getPropertyOrThrow(propertyId);
 
@@ -118,7 +131,7 @@ export class UnitsService {
   // Create unit
   // ---------------------------------------------------------------------------
 
-  async create(propertyId: string, dto: CreateUnitDto, actorId: string) {
+  async create(propertyId: number, dto: CreateUnitDto, actorId: number) {
     await this.getPropertyOrThrow(propertyId);
 
     // Prisma will enforce the @@unique([property_id, unit_number]) constraint.
@@ -135,7 +148,7 @@ export class UnitsService {
             bathrooms: dto.bathrooms,
             area_sqft: dto.area_sqft ?? null,
             monthly_rent_paise: dto.monthly_rent_paise,
-            state: "AVAILABLE",
+            state: UNIT_STATE.AVAILABLE,
           },
           select: UNIT_SELECT,
         });
@@ -168,7 +181,7 @@ export class UnitsService {
   // Find single unit
   // ---------------------------------------------------------------------------
 
-  async findById(id: string) {
+  async findById(id: number) {
     const unit = await this.prisma.unit.findUnique({
       where: { id },
       select: UNIT_SELECT,
@@ -188,7 +201,7 @@ export class UnitsService {
   // BL-03: monthly_rent_paise change rejected if state ∈ {OCCUPIED, MAINTENANCE}.
   // ---------------------------------------------------------------------------
 
-  async update(id: string, dto: UpdateUnitDto, actorId: string) {
+  async update(id: number, dto: UpdateUnitDto, actorId: number) {
     const isRentChange = dto.monthly_rent_paise !== undefined;
 
     // Phase 7 / BL-03 / M-05: if changing rent, run the state check AND the write
@@ -200,8 +213,8 @@ export class UnitsService {
         async (tx) => {
           // Re-read unit inside the transaction (Serializable snapshot).
           const lockedRows = await tx.$queryRaw<Array<{
-            id: string;
-            state: string;
+            id: number;
+            state: number;
             is_retired: boolean;
           }>>`
             SELECT id, state, is_retired FROM units WHERE id = ${id} FOR UPDATE
@@ -224,8 +237,8 @@ export class UnitsService {
             });
           }
 
-          const lockingStates: UnitState[] = ["OCCUPIED", "MAINTENANCE"];
-          if (lockingStates.includes(locked.state as UnitState)) {
+          const lockingStates: UnitStateCode[] = [UNIT_STATE.OCCUPIED, UNIT_STATE.MAINTENANCE];
+          if (lockingStates.includes(locked.state as UnitStateCode)) {
             throw new ConflictException({
               error: {
                 code: "UNIT_RENT_LOCKED",
@@ -308,7 +321,7 @@ export class UnitsService {
   // BL-04: state-machine guard for legal transitions.
   // ---------------------------------------------------------------------------
 
-  async changeState(id: string, dto: UnitStateChangeDto, actorId: string) {
+  async changeState(id: number, dto: UnitStateChangeDto, actorId: number) {
     const before = await this.findById(id);
 
     if (before.is_retired) {
@@ -320,8 +333,13 @@ export class UnitsService {
       });
     }
 
-    const targetState = dto.state as UnitState;
-    const legalNext = LEGAL_TRANSITIONS[before.state as UnitState] ?? [];
+    // dto.state is a string like "AVAILABLE"; map to int code
+    const STATE_NAME_TO_CODE: Record<string, UnitStateCode> = {
+      AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3,
+    };
+    const targetState: UnitStateCode = STATE_NAME_TO_CODE[dto.state] ?? (Number(dto.state) as UnitStateCode);
+    const currentState = before.state as UnitStateCode;
+    const legalNext = LEGAL_TRANSITIONS[currentState] ?? [];
 
     if (!legalNext.includes(targetState)) {
       throw new ConflictException({
@@ -358,7 +376,7 @@ export class UnitsService {
   // BL-05: one-way — is_retired=true is terminal. DB trigger also enforces this.
   // ---------------------------------------------------------------------------
 
-  async retire(id: string, actorId: string) {
+  async retire(id: number, actorId: number) {
     const before = await this.findById(id);
 
     if (before.is_retired) {
@@ -379,7 +397,7 @@ export class UnitsService {
           retired_by_user_id: actorId,
           // Set state to MAINTENANCE per plan (keeps the partial-index consistent
           // and prevents any accidental lease-link in Phase 3).
-          state: "MAINTENANCE",
+          state: UNIT_STATE.MAINTENANCE,
         },
         select: UNIT_SELECT,
       });
@@ -414,7 +432,7 @@ export class UnitsService {
   // Helpers
   // ---------------------------------------------------------------------------
 
-  private async getPropertyOrThrow(propertyId: string) {
+  private async getPropertyOrThrow(propertyId: number) {
     const property = await this.prisma.property.findFirst({
       where: { id: propertyId, deleted_at: null },
     });

@@ -9,6 +9,7 @@ import {
   Matches,
   Max,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 export enum PaymentMethodDto {
   CASH = "CASH",
@@ -23,9 +24,10 @@ export enum PaymentMethodDto {
  * BL-10: endpoint restricted to PROPERTY_MANAGER + ADMIN; this DTO validates the shape.
  */
 export class RecordPaymentDto {
-  @IsString()
-  @IsNotEmpty()
-  rentPeriodId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  rentPeriodId!: number;
 
   /**
    * Amount in paise. Must be a positive integer, capped at ₹10 crore (1,000,000,000 paise).

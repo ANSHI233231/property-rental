@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { LeasesService } from "./leases.service";
 import { CreateLeaseDto } from "./dto/create-lease.dto";
@@ -24,6 +25,9 @@ import { PropertyScope } from "../auth/decorators/property-scope.decorator";
 import { PropertyScopeBody } from "../auth/decorators/property-scope-body.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
+
+/** TENANT role code */
+const TENANT_ROLE = 3;
 
 /**
  * Leases controller — Phase 3.
@@ -53,8 +57,8 @@ export class LeasesController {
   @PropertyScope("property")
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Param("propertyId") propertyId: string,
-    @Param("unitId") unitId: string,
+    @Param("propertyId", ParseIntPipe) propertyId: number,
+    @Param("unitId", ParseIntPipe) unitId: number,
     @Body() dto: CreateLeaseDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -80,15 +84,18 @@ export class LeasesController {
     // A TENANT may only list leases scoped to themselves. The service treats
     // the tenantId query as a User.id (see leases.service.ts §FC-2), so we
     // force it to the caller's sub regardless of what they sent.
-    const effectiveTenantId =
-      actor!.role === "TENANT" ? actor!.sub : tenantId;
+    // actor.role is a number: 3 = TENANT
+    const effectiveTenantId: number | undefined =
+      actor!.role === TENANT_ROLE
+        ? actor!.sub
+        : (tenantId ? parseInt(tenantId, 10) : undefined);
 
     return this.leasesService.list({
-      propertyId,
-      unitId,
+      propertyId: propertyId ? parseInt(propertyId, 10) : undefined,
+      unitId: unitId ? parseInt(unitId, 10) : undefined,
       tenantId: effectiveTenantId,
       status,
-      cursor,
+      cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : 20,
       actorId: actor!.sub,
       actorRole: actor!.role,
@@ -103,7 +110,7 @@ export class LeasesController {
   @Roles("ADMIN", "PROPERTY_MANAGER")
   @PropertyScope("lease")
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.leasesService.findByIdForResponse(id);
   }
 
@@ -116,7 +123,7 @@ export class LeasesController {
   @PropertyScope("lease")
   @HttpCode(HttpStatus.CREATED)
   async renew(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: RenewLeaseDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -133,7 +140,7 @@ export class LeasesController {
   @PropertyScope("lease")
   @HttpCode(HttpStatus.CREATED)
   async terminateRequest(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: TerminationRequestDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -150,7 +157,7 @@ export class LeasesController {
   @PropertyScope("lease")
   @HttpCode(HttpStatus.OK)
   async terminateApprove(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: TerminationApprovalDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -167,7 +174,7 @@ export class LeasesController {
   @PropertyScope("lease")
   @HttpCode(HttpStatus.OK)
   async terminateWithdraw(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: TerminationWithdrawDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -184,7 +191,7 @@ export class LeasesController {
   @PropertyScope("lease")
   @HttpCode(HttpStatus.OK)
   async finalizeTermination(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.leasesService.finalizeTermination(id, actor.sub);

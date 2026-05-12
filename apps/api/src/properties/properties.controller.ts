@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { PropertiesService } from "./properties.service";
 import { CreatePropertyDto } from "./dto/create-property.dto";
@@ -51,7 +52,8 @@ export class PropertiesController {
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
   ) {
-    return this.propertiesService.list(cursor, limit ? parseInt(limit, 10) : 20, actor);
+    const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
+    return this.propertiesService.list(cursorNum, limit ? parseInt(limit, 10) : 20, actor);
   }
 
   /** POST /properties */
@@ -66,14 +68,14 @@ export class PropertiesController {
 
   /** GET /properties/:id */
   @Get(":id")
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.propertiesService.findById(id);
   }
 
   /** PATCH /properties/:id — update name/address/etc. NOT active_pm_id. */
   @Patch(":id")
   async update(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdatePropertyDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -87,7 +89,7 @@ export class PropertiesController {
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
   async softDelete(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.propertiesService.softDelete(id, actor.sub);
@@ -101,7 +103,7 @@ export class PropertiesController {
   @Post(":id/transfer-pm")
   @HttpCode(HttpStatus.OK)
   async transferPm(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: TransferPmDto,
     @CurrentUser() actor: JwtPayload,
   ) {

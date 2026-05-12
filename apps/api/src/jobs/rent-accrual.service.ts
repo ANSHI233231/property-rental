@@ -7,6 +7,15 @@ import { AuditService } from "../audit/audit.service";
 import { computeLateFeePaise } from "@gharsetu/shared";
 import { RentService } from "../rent/rent.service";
 
+/** Role int codes */
+const ROLE_ADMIN = 0;
+
+/** Lease status ACTIVE int code */
+const LEASE_ACTIVE = 0;
+
+/** Rent period status int codes */
+const RENT_STATUS = { DUE: 1, PARTIAL: 2, OVERDUE: 4 } as const;
+
 /**
  * RentAccrualService — @nestjs/schedule cron for daily rent-period lifecycle management.
  *
@@ -42,7 +51,7 @@ export class RentAccrualService {
   private readonly logger = new Logger(RentAccrualService.name);
 
   /** Resolved at first run: the bootstrap Admin user's ID used as audit actor. */
-  private systemActorId: string | null = null;
+  private systemActorId: number | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -52,10 +61,10 @@ export class RentAccrualService {
   ) {}
 
   /** Resolve a valid DB user ID to use as the audit actor for system jobs. */
-  private async resolveSystemActorId(): Promise<string> {
-    if (this.systemActorId) return this.systemActorId;
+  private async resolveSystemActorId(): Promise<number> {
+    if (this.systemActorId !== null) return this.systemActorId;
     const admin = await this.prisma.user.findFirst({
-      where: { role: "ADMIN" },
+      where: { role: ROLE_ADMIN },
       select: { id: true },
     });
     if (!admin) throw new Error("No ADMIN user found for system job audit actor");
@@ -112,8 +121,6 @@ export class RentAccrualService {
     }
 
     // Create or update the log row with started_at.
-    // M-01: two concurrent calls on the same date race past the existingLog check.
-    // The second create will hit the unique index on run_date (P2002) — treat as skip.
     let logEntry: Awaited<ReturnType<typeof this.prisma.rentAccrualLog.create>>;
     try {
       logEntry = existingLog
@@ -129,7 +136,6 @@ export class RentAccrualService {
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === "P2002"
       ) {
-        // Another concurrent call already created the log for this date.
         this.logger.log(
           `Accrual log P2002 — another run for ${istNow} is already in progress or finished. Skipping.`,
         );
@@ -158,15 +164,14 @@ export class RentAccrualService {
       // BL-12: 5 calendar days past due_date → OVERDUE
       const overdueThreshold = new Date(now);
       overdueThreshold.setDate(overdueThreshold.getDate() - 5);
-      // Normalize to date-only (midnight UTC)
       const overdueThresholdDate = new Date(
         Date.UTC(overdueThreshold.getUTCFullYear(), overdueThreshold.getUTCMonth(), overdueThreshold.getUTCDate()),
       );
 
-      // Find all actionable periods (DUE, PARTIAL, OVERDUE) with due_date <= threshold
+      // Find all actionable periods (DUE=1, PARTIAL=2, OVERDUE=4) with due_date <= threshold
       const actionablePeriods = await this.prisma.rentPeriod.findMany({
         where: {
-          status: { in: ["DUE", "PARTIAL", "OVERDUE"] },
+          status: { in: [RENT_STATUS.DUE, RENT_STATUS.PARTIAL, RENT_STATUS.OVERDUE] },
           due_date: { lte: overdueThresholdDate },
         },
         select: {
@@ -193,8 +198,8 @@ export class RentAccrualService {
         );
 
         const newLateFee = computeLateFeePaise(period.amount_due_paise, daysOverdue);
-        const wasOverdue = period.status === "OVERDUE";
-        const newStatus = "OVERDUE";
+        const wasOverdue = period.status === RENT_STATUS.OVERDUE;
+        const newStatus = RENT_STATUS.OVERDUE;
 
         const newOutstanding =
           period.amount_due_paise + newLateFee - period.paid_paise < 0n
@@ -245,32 +250,28 @@ export class RentAccrualService {
       sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
 
       const activeLeases = await this.prisma.lease.findMany({
-        where: { status: "ACTIVE" },
+        where: { status: LEASE_ACTIVE },
         select: {
           id: true,
           monthly_rent_paise: true,
           end_date: true,
-          rent_periods: {
-            orderBy: { period_start: "desc" },
-            take: 1,
-            select: {
-              id: true,
-              period_end: true,
-              period_start: true,
-            },
-          },
         },
       });
 
       for (const lease of activeLeases) {
-        const latestPeriod = lease.rent_periods[0];
+        // Find the latest rent period for this lease
+        const latestPeriod = await this.prisma.rentPeriod.findFirst({
+          where: { lease_id: lease.id },
+          orderBy: { period_start: "desc" },
+          select: { id: true, period_end: true, period_start: true },
+        });
+
         if (!latestPeriod) continue;
 
         const periodEnd = new Date(latestPeriod.period_end);
 
         // Generate next period if it ends within 7 days from now
         if (periodEnd <= sevenDaysFromNow) {
-          // Check no next period already exists
           const nextStart = new Date(periodEnd);
           nextStart.setDate(nextStart.getDate() + 1);
 
@@ -331,7 +332,6 @@ export class RentAccrualService {
   // ---------------------------------------------------------------------------
 
   private toISTDate(utcDate: Date): string {
-    // IST = UTC + 5:30 (330 minutes)
     const istOffset = 5 * 60 + 30; // minutes
     const istMs = utcDate.getTime() + istOffset * 60 * 1000;
     const istDate = new Date(istMs);

@@ -28,11 +28,11 @@ import { AuditService } from "../audit/audit.service";
 // ---------------------------------------------------------------------------
 
 const mockUser = {
-  id: "sec-test-user-id",
+  id: 1, // Int PK (BL int-id refactor: was "sec-test-user-id")
   email: "admin@gharsetu.local",
   name: "Security Test Admin",
   password_hash: "",
-  role: "ADMIN",
+  role: 0, // ADMIN=0 (BL int-id refactor: was "ADMIN")
   is_active: true,
   failed_login_count: 0,
   locked_until: null,

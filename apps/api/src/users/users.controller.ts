@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { UsersService } from "./users.service";
@@ -88,7 +89,8 @@ export class UsersController {
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
   ) {
-    return this.usersService.listUsers(role, cursor, limit ? parseInt(limit, 10) : 20);
+    const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
+    return this.usersService.listUsers(role, cursorNum, limit ? parseInt(limit, 10) : 20);
   }
 
   /**
@@ -114,7 +116,7 @@ export class UsersController {
   @Get(":id")
   @UseGuards(RolesGuard)
   @Roles("ADMIN")
-  async adminFindById(@Param("id") id: string) {
+  async adminFindById(@Param("id", ParseIntPipe) id: number) {
     return this.usersService.adminFindById(id);
   }
 
@@ -126,7 +128,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles("ADMIN")
   async adminUpdateUser(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() dto: AdminUpdateUserDto,
     @CurrentUser() actor: JwtPayload,
   ) {
@@ -142,7 +144,7 @@ export class UsersController {
   @Roles("ADMIN")
   @HttpCode(HttpStatus.OK)
   async adminDeactivateUser(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.usersService.adminDeactivateUser(id, actor.sub);
@@ -156,7 +158,7 @@ export class UsersController {
   @Roles("ADMIN")
   @HttpCode(HttpStatus.OK)
   async adminActivateUser(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.usersService.adminActivateUser(id, actor.sub);

@@ -28,6 +28,7 @@ import { paiseStringToINR, parseBigPaise, daysOverdue } from "@/lib/rent/format"
 import {
   VoidPaymentSchema,
   PaymentMethodEnum,
+  RentPeriodStatusEnum,
   type RentStatusValue,
   type RecordPaymentInput,
   type VoidPaymentInput,
@@ -41,26 +42,26 @@ import { ApiError } from "@/lib/api/client";
 // ---------------------------------------------------------------------------
 
 interface Lease {
-  id: string;
-  unit?: { id: string; name: string; monthly_rent_paise?: string };
-  tenants?: { id: string; name: string }[];
+  id: number | string;
+  unit?: { id: number | string; name: string; monthly_rent_paise?: string };
+  tenants?: { id: number | string; name: string }[];
   start_date: string;
   end_date: string;
   rent_due_day?: number;
 }
 
 interface Payment {
-  id: string;
-  rentPeriodId: string;
-  leaseId: string;
+  id: number | string;
+  rentPeriodId: number | string;
+  leaseId: number | string;
   amountPaise: string;
   method: string;
   reference?: string | null;
   paidOn: string;
-  recordedByUserId: string;
+  recordedByUserId: number | string;
   recordedAt: string;
   isVoided: boolean;
-  voidedByUserId?: string | null;
+  voidedByUserId?: number | string | null;
   voidedAt?: string | null;
   voidReason?: string | null;
   recordedByName?: string;
@@ -68,8 +69,8 @@ interface Payment {
 }
 
 interface RentPeriod {
-  id: string;
-  leaseId: string;
+  id: number | string;
+  leaseId: number | string;
   periodStart: string;
   periodEnd: string;
   dueDate: string;
@@ -77,7 +78,7 @@ interface RentPeriod {
   lateFeePaise: string;
   paidPaise: string;
   outstandingPaise: string;
-  status: RentStatusValue;
+  status: number | string;
   lastAccruedAt: string | null;
   payments?: Payment[];
 }
@@ -197,7 +198,7 @@ function RecordPaymentModal({ open, period, onClose, onSuccess }: RecordPaymentM
       const paidOnISO = format(parsedDate, "yyyy-MM-dd");
 
       const body: RecordPaymentInput = {
-        rentPeriodId: period.id,
+        rentPeriodId: String(period.id),
         amountPaise,
         method: values.method,
         reference: values.reference || undefined,
@@ -346,7 +347,7 @@ interface VoidModalProps {
   open: boolean;
   payment: Payment | null;
   onClose: () => void;
-  onSuccess: (periodId: string) => void;
+  onSuccess: (periodId: number | string) => void;
 }
 
 function VoidPaymentModal({ open, payment, onClose, onSuccess }: VoidModalProps) {
@@ -440,7 +441,7 @@ interface PeriodDetailDrawerProps {
   open: boolean;
   period: RentPeriod | null;
   onClose: () => void;
-  onVoidSuccess: (periodId: string) => void;
+  onVoidSuccess: (periodId: number | string) => void;
 }
 
 function PeriodDetailDrawer({ open, period, onClose, onVoidSuccess }: PeriodDetailDrawerProps) {
@@ -458,7 +459,7 @@ function PeriodDetailDrawer({ open, period, onClose, onVoidSuccess }: PeriodDeta
     setVoidOpen(true);
   }
 
-  function handleVoidSuccess(pid: string) {
+  function handleVoidSuccess(pid: number | string) {
     onVoidSuccess(pid);
     setVoidOpen(false);
     setVoidTarget(null);
@@ -603,7 +604,9 @@ function PeriodDetailDrawer({ open, period, onClose, onVoidSuccess }: PeriodDeta
 // Status filter chips
 // ---------------------------------------------------------------------------
 
-const STATUS_OPTIONS: { label: string; value: RentStatusValue | "ALL" }[] = [
+type StatusFilterValue = RentStatusValue | "ALL";
+
+const STATUS_OPTIONS: { label: string; value: StatusFilterValue }[] = [
   { label: "All", value: "ALL" },
   { label: "Due", value: "DUE" },
   { label: "Overdue", value: "OVERDUE" },
@@ -611,6 +614,38 @@ const STATUS_OPTIONS: { label: string; value: RentStatusValue | "ALL" }[] = [
   { label: "Paid", value: "PAID" },
   { label: "Prepaid", value: "PREPAID" },
 ];
+
+function matchesRentStatus(status: number | string, filter: StatusFilterValue): boolean {
+  if (filter === "ALL") return true;
+  if (typeof status === "number") {
+    const MAP: Record<StatusFilterValue, number | undefined> = {
+      ALL: undefined,
+      DUE: RentPeriodStatusEnum.DUE,
+      OVERDUE: RentPeriodStatusEnum.OVERDUE,
+      PARTIAL: RentPeriodStatusEnum.PARTIAL,
+      PAID: RentPeriodStatusEnum.PAID,
+      PREPAID: RentPeriodStatusEnum.PREPAID,
+      UPCOMING: RentPeriodStatusEnum.UPCOMING,
+    };
+    return status === MAP[filter];
+  }
+  return status === filter;
+}
+
+function isPaidOrPrepaid(status: number | string): boolean {
+  return status === RentPeriodStatusEnum.PAID || status === "PAID" ||
+    status === RentPeriodStatusEnum.PREPAID || status === "PREPAID";
+}
+
+function isOverdue(status: number | string): boolean {
+  return status === RentPeriodStatusEnum.OVERDUE || status === "OVERDUE";
+}
+
+function isOutstanding(status: number | string): boolean {
+  return status === RentPeriodStatusEnum.OVERDUE || status === "OVERDUE" ||
+    status === RentPeriodStatusEnum.DUE || status === "DUE" ||
+    status === RentPeriodStatusEnum.PARTIAL || status === "PARTIAL";
+}
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -628,7 +663,7 @@ export default function PmRentCollectionPage() {
   // Rent periods
   const [periods, setPeriods] = useState<RentPeriod[]>([]);
   const [periodsLoading, setPeriodsLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<RentStatusValue | "ALL">("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
 
   // Modals / drawer state
   const [payModalOpen, setPayModalOpen] = useState(false);
@@ -651,7 +686,8 @@ export default function PmRentCollectionPage() {
           const items = res.data ?? res.items ?? [];
           setLeases(items);
           if (items.length > 0 && !selectedLeaseId) {
-            setSelectedLeaseId(items[0]?.id ?? null);
+            const firstId = items[0]?.id;
+            setSelectedLeaseId(firstId != null ? String(firstId) : null);
           }
         }
       } catch {
@@ -687,15 +723,15 @@ export default function PmRentCollectionPage() {
   }, [selectedLeaseId, fetchPeriods]);
 
   function handlePaymentSuccess(updated: RentPeriod) {
-    setPeriods((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    setPeriods((prev) => prev.map((p) => (String(p.id) === String(updated.id) ? updated : p)));
   }
 
-  function handleVoidSuccess(periodId: string) {
+  function handleVoidSuccess(periodId: number | string) {
     if (!selectedLeaseId) return;
     // Re-fetch periods to get updated payment list
     void fetchPeriods(selectedLeaseId);
     // If drawer is showing this period, refresh it
-    if (drawerPeriod?.id === periodId) {
+    if (drawerPeriod && String(drawerPeriod.id) === String(periodId)) {
       apiFetch<RentPeriod>(`/rent-periods/${periodId}`)
         .then((updated) => setDrawerPeriod(updated))
         .catch(() => {});
@@ -713,13 +749,10 @@ export default function PmRentCollectionPage() {
     }
   }
 
-  const selectedLease = leases.find((l) => l.id === selectedLeaseId) ?? null;
+  const selectedLease = leases.find((l) => String(l.id) === String(selectedLeaseId)) ?? null;
   const tenantNames = selectedLease?.tenants?.map((t) => t.name).join(" + ") ?? "";
 
-  const filteredPeriods =
-    statusFilter === "ALL"
-      ? periods
-      : periods.filter((p) => p.status === statusFilter);
+  const filteredPeriods = periods.filter((p) => matchesRentStatus(p.status, statusFilter));
 
   const today = new Date();
 
@@ -762,7 +795,7 @@ export default function PmRentCollectionPage() {
                 <option value="">No active leases</option>
               )}
               {leases.map((l) => (
-                <option key={l.id} value={l.id}>
+                <option key={String(l.id)} value={String(l.id)}>
                   {l.unit?.name ?? "Unit"} —{" "}
                   {l.tenants?.map((t) => t.name).join(" + ") ?? "—"}{" "}
                   {l.unit?.monthly_rent_paise
@@ -779,7 +812,7 @@ export default function PmRentCollectionPage() {
               id="status-filter"
               className="input"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as RentStatusValue | "ALL")}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilterValue)}
             >
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -811,9 +844,7 @@ export default function PmRentCollectionPage() {
             </div>
             {/* Current period outstanding badge */}
             {(() => {
-              const current = periods.find(
-                (p) => p.status === "OVERDUE" || p.status === "DUE" || p.status === "PARTIAL",
-              );
+              const current = periods.find((p) => isOutstanding(p.status));
               if (!current) return null;
               return (
                 <div className="flex gap-2 items-center">
@@ -864,8 +895,7 @@ export default function PmRentCollectionPage() {
             {!periodsLoading &&
               filteredPeriods.map((period) => {
                 const overdueCount = daysOverdue(parseISO(period.dueDate), today);
-                const canRecord =
-                  period.status !== "PAID" && period.status !== "PREPAID";
+                const canRecord = !isPaidOrPrepaid(period.status);
 
                 return (
                   <tr key={period.id}>
@@ -875,7 +905,7 @@ export default function PmRentCollectionPage() {
                     <td>{formatDate(period.dueDate)}</td>
                     <td>
                       <StatusBadge status={period.status} />
-                      {period.status === "OVERDUE" && overdueCount > 0 && (
+                      {isOverdue(period.status) && overdueCount > 0 && (
                         <span className="text-xs muted ml-1">({overdueCount}d)</span>
                       )}
                     </td>

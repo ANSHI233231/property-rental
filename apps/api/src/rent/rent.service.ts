@@ -5,12 +5,31 @@ import {
   ConflictException,
   Logger,
 } from "@nestjs/common";
-import { Prisma, RentPeriodStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import type { RecordPaymentDto } from "./dto/record-payment.dto";
 import type { VoidPaymentDto } from "./dto/void-payment.dto";
+
+/**
+ * Rent period status int codes
+ * UPCOMING=0  DUE=1  PARTIAL=2  PAID=3  OVERDUE=4  PREPAID=5
+ */
+const RENT_STATUS = {
+  UPCOMING: 0,
+  DUE: 1,
+  PARTIAL: 2,
+  PAID: 3,
+  OVERDUE: 4,
+  PREPAID: 5,
+} as const;
+
+/** Role int codes */
+const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
+
+/** Lease status ACTIVE int code */
+const LEASE_ACTIVE = 0;
 
 /**
  * TransactionClient — the intersection of what Prisma's $transaction callback
@@ -55,13 +74,9 @@ function computeOutstanding(
 /**
  * withSerializableRetry — retries a Serializable transaction on P2034 / 40001 / 40P01
  * (Postgres serialization failure or deadlock). Up to maxAttempts tries with
- * exponential-ish backoff + small jitter. Kept co-located because only
- * recordPayment and voidPayment need it (two callers — not worth a shared file).
+ * exponential-ish backoff + small jitter.
  */
 async function withSerializableRetry<T>(fn: () => Promise<T>, maxAttempts = 10): Promise<T> {
-  // Initial random jitter before first attempt to spread concurrent callers apart.
-  // Under 10 parallel POST /payments the first-attempt spread dramatically reduces
-  // the collision rate without adding latency to the common (non-concurrent) path.
   await new Promise((r) => setTimeout(r, Math.floor(Math.random() * 30)));
 
   let lastErr: unknown;
@@ -73,8 +88,6 @@ async function withSerializableRetry<T>(fn: () => Promise<T>, maxAttempts = 10):
       if (isPrismaKnown) {
         const prismaErr = e as Prisma.PrismaClientKnownRequestError;
         const topCode = prismaErr.code;
-        // P2010 = $queryRaw failed; real Postgres SQLSTATE lives in meta.code
-        // P2034 = ORM-level serialization failure (interactive transaction)
         const metaCode =
           typeof prismaErr.meta?.code === "string" ? (prismaErr.meta.code as string) : "";
         const isRetryable =
@@ -88,7 +101,6 @@ async function withSerializableRetry<T>(fn: () => Promise<T>, maxAttempts = 10):
       } else {
         throw e;
       }
-      // Exponential backoff with full jitter: cap at 500ms per attempt
       const base = Math.min(50 * attempt * attempt, 500);
       const jitter = Math.floor(Math.random() * 100);
       await new Promise((r) => setTimeout(r, base + jitter));
@@ -98,11 +110,11 @@ async function withSerializableRetry<T>(fn: () => Promise<T>, maxAttempts = 10):
   throw lastErr;
 }
 
-/** Derive RentPeriodStatus after a payment update. */
-function deriveStatus(outstanding: bigint, paid: bigint): RentPeriodStatus {
-  if (outstanding === 0n) return "PAID";
-  if (paid === 0n) return "DUE";
-  return "PARTIAL";
+/** Derive rent period status (as int code) after a payment update. */
+function deriveStatus(outstanding: bigint, paid: bigint): number {
+  if (outstanding === 0n) return RENT_STATUS.PAID;
+  if (paid === 0n) return RENT_STATUS.DUE;
+  return RENT_STATUS.PARTIAL;
 }
 
 @Injectable()
@@ -117,16 +129,14 @@ export class RentService {
   // ---------------------------------------------------------------------------
   // generateFirstPeriod — called from LeasesService.create
   // Creates the initial rent period when a lease is signed.
-  // period_start = lease.start_date, period_end = start + 1 month - 1 day
-  // due_date = period_start (grace_days = 0 for v1)
   // ---------------------------------------------------------------------------
 
   async generateFirstPeriod(
     tx: TransactionClient,
-    leaseId: string,
+    leaseId: number,
     startDate: Date,
     monthlyRentPaise: bigint,
-    actorId: string,
+    actorId: number,
   ): Promise<void> {
     const periodStart = new Date(startDate);
     const periodEnd = this.addMonthMinusOneDay(periodStart);
@@ -144,7 +154,7 @@ export class RentService {
         late_fee_paise: 0n,
         paid_paise: 0n,
         outstanding_paise: outstanding,
-        status: "DUE",
+        status: RENT_STATUS.DUE,
       },
     });
 
@@ -158,7 +168,7 @@ export class RentService {
         lease_id: leaseId,
         period_start: periodStart,
         period_end: periodEnd,
-        status: "DUE",
+        status: RENT_STATUS.DUE,
         amount_due_paise: monthlyRentPaise.toString(),
       },
     });
@@ -166,41 +176,41 @@ export class RentService {
 
   // ---------------------------------------------------------------------------
   // List rent periods
-  // GET /rent-periods?leaseId=&unitId=&propertyId=&status=
-  //                  &periodStart_gte=YYYY-MM-DD&periodStart_lte=YYYY-MM-DD
-  //                  &cursor=&limit=20
-  //
-  // FC-1: propertyId filter — PMs auto-scoped to their property; explicit
-  //        propertyId must fall within that scope or returns empty.
-  // FC-2: response includes lease.unit.property for admin overdue table.
-  // FC-3: periodStart_gte / periodStart_lte date range filters.
-  // H-01: PROPERTY_MANAGER list is already scoped to their property here.
   // ---------------------------------------------------------------------------
 
   async listPeriods(filters: {
-    leaseId?: string;
-    unitId?: string;
-    propertyId?: string;
+    leaseId?: number;
+    unitId?: number;
+    propertyId?: number;
     status?: string;
     periodStart_gte?: string;
     periodStart_lte?: string;
-    cursor?: string;
+    cursor?: number;
     limit?: number;
-    actorId: string;
-    actorRole: string;
+    actorId: number;
+    actorRole: number;
   }) {
     const take = Math.min(filters.limit ?? 20, 100);
     let where: Prisma.RentPeriodWhereInput = {};
 
-    if (filters.leaseId) {
+    if (filters.leaseId !== undefined) {
       where = { ...where, lease_id: filters.leaseId };
     }
 
     if (filters.status) {
-      where = {
-        ...where,
-        status: filters.status as RentPeriodStatus,
+      // Accept status name string and map to int code
+      const STATUS_NAME_TO_CODE: Record<string, number> = {
+        UPCOMING: RENT_STATUS.UPCOMING,
+        DUE: RENT_STATUS.DUE,
+        PARTIAL: RENT_STATUS.PARTIAL,
+        PAID: RENT_STATUS.PAID,
+        OVERDUE: RENT_STATUS.OVERDUE,
+        PREPAID: RENT_STATUS.PREPAID,
       };
+      const code = STATUS_NAME_TO_CODE[filters.status.toUpperCase()];
+      if (code !== undefined) {
+        where = { ...where, status: code };
+      }
     }
 
     // FC-3: period_start date range filter
@@ -214,7 +224,7 @@ export class RentService {
       };
     }
 
-    if (filters.unitId) {
+    if (filters.unitId !== undefined) {
       where = {
         ...where,
         lease: {
@@ -224,8 +234,7 @@ export class RentService {
       };
     }
 
-    // FC-1: explicit propertyId filter (Admin can supply any; PM must own it)
-    if (filters.propertyId) {
+    if (filters.propertyId !== undefined) {
       where = {
         ...where,
         lease: {
@@ -239,7 +248,7 @@ export class RentService {
     }
 
     // TENANT: only their own lease's periods
-    if (filters.actorRole === "TENANT") {
+    if (filters.actorRole === ROLE.TENANT) {
       const tenant = await this.prisma.tenant.findUnique({
         where: { user_id: filters.actorId },
         select: { id: true },
@@ -258,9 +267,8 @@ export class RentService {
       };
     }
 
-    // H-01 / PROPERTY_MANAGER: scope to their property.
-    // If an explicit propertyId was supplied, it must match; if it doesn't, return empty.
-    if (filters.actorRole === "PROPERTY_MANAGER") {
+    // PROPERTY_MANAGER: scope to their property.
+    if (filters.actorRole === ROLE.PROPERTY_MANAGER) {
       const managedProperty = await this.prisma.property.findFirst({
         where: { active_pm_id: filters.actorId, deleted_at: null },
         select: { id: true },
@@ -269,10 +277,9 @@ export class RentService {
         return { data: [], meta: { next_cursor: null, has_more: false } };
       }
       // If PM supplied a propertyId that differs from their assigned one → empty
-      if (filters.propertyId && filters.propertyId !== managedProperty.id) {
+      if (filters.propertyId !== undefined && filters.propertyId !== managedProperty.id) {
         return { data: [], meta: { next_cursor: null, has_more: false } };
       }
-      // Override/enforce the property filter with the PM's actual property
       where = {
         ...where,
         lease: {
@@ -328,10 +335,9 @@ export class RentService {
 
   // ---------------------------------------------------------------------------
   // Get single rent period with its payments and prepaid credits
-  // GET /rent-periods/:id
   // ---------------------------------------------------------------------------
 
-  async findPeriodById(id: string) {
+  async findPeriodById(id: number) {
     const period = await this.prisma.rentPeriod.findUnique({
       where: { id },
       include: {
@@ -370,12 +376,12 @@ export class RentService {
 
   async recordPayment(
     dto: RecordPaymentDto,
-    actorId: string,
-    actorRole: string,
+    actorId: number,
+    actorRole: number,
     idempotencyKey?: string,
   ) {
     // BL-10: belt-and-suspenders role check (decorator is primary enforcement)
-    if (actorRole !== "PROPERTY_MANAGER" && actorRole !== "ADMIN") {
+    if (actorRole !== ROLE.PROPERTY_MANAGER && actorRole !== ROLE.ADMIN) {
       throw new ForbiddenException({
         error: {
           code: "BL_10_TENANT_CANNOT_RECORD_PAYMENT",
@@ -384,8 +390,7 @@ export class RentService {
       });
     }
 
-    // Phase 7: Idempotency-Key check — if a Payment already exists for this key,
-    // return it directly (200 semantics; controller sets 201 on first call).
+    // Phase 7: Idempotency-Key check
     if (idempotencyKey) {
       const existing = await this.prisma.payment.findFirst({
         where: { idempotency_key: idempotencyKey },
@@ -409,18 +414,15 @@ export class RentService {
       this.prisma.$transaction(
         async (tx) => {
         // BL-11: lock the rent period row for the duration of the transaction.
-        // Prisma Serializable + findUnique inside the transaction provides
-        // snapshot isolation with conflict detection. We use raw SQL FOR UPDATE
-        // for explicit row-level locking on the period.
         // $queryRaw returns BIGINT columns as strings in node-postgres; coerce to BigInt.
         const periodRows = await tx.$queryRaw<Array<{
-          id: string;
-          lease_id: string;
+          id: number;
+          lease_id: number;
           amount_due_paise: string | bigint;
           late_fee_paise: string | bigint;
           paid_paise: string | bigint;
           outstanding_paise: string | bigint;
-          status: string;
+          status: number;
         }>>`
           SELECT id, lease_id, amount_due_paise, late_fee_paise, paid_paise, outstanding_paise, status
           FROM rent_periods
@@ -443,13 +445,8 @@ export class RentService {
           outstanding_paise: BigInt(rawPeriod.outstanding_paise),
         };
 
-        // Payments against a PAID period are allowed — the full amount routes to
-        // PrepaidCredit (spillover). This supports concurrent overpayment where
-        // multiple transactions each see outstanding > 0 at read time but only one
-        // actually applies to the period; the rest create prepaid credit.
-
         // PROPERTY_MANAGER scope check: must be PM for this property
-        if (actorRole === "PROPERTY_MANAGER") {
+        if (actorRole === ROLE.PROPERTY_MANAGER) {
           const lease = await tx.lease.findUnique({
             where: { id: period.lease_id },
             select: { unit: { select: { property_id: true } } },
@@ -507,17 +504,28 @@ export class RentService {
           },
         });
 
+        // Map PaymentMethod string to int code
+        const METHOD_CODE: Record<string, number> = {
+          CASH: 0,
+          BANK_TRANSFER: 1,
+          UPI: 2,
+          CHEQUE: 3,
+          OTHER: 4,
+        };
+        const methodCode = typeof dto.method === "string"
+          ? (METHOD_CODE[dto.method.toUpperCase()] ?? 0)
+          : (dto.method as number);
+
         // Create the Payment record (append-only)
         const payment = await tx.payment.create({
           data: {
             rent_period_id: period.id,
             lease_id: period.lease_id,
             amount_paise: incomingPaise,
-            method: dto.method as unknown as import("@prisma/client").PaymentMethod,
+            method: methodCode,
             reference: dto.reference ?? null,
             paid_on: new Date(dto.paidOn),
             recorded_by_user_id: actorId,
-            // Phase 7: persist idempotency key if provided.
             idempotency_key: idempotencyKey ?? null,
           },
         });
@@ -541,7 +549,7 @@ export class RentService {
         });
 
         // Handle spillover: create PrepaidCredit if excess exists
-        let prepaidCredit: { id: string; amount_paise: string } | null = null;
+        let prepaidCredit: { id: number; amount_paise: string } | null = null;
 
         if (spilloverPaise > 0n) {
           const credit = await tx.prepaidCredit.create({
@@ -590,18 +598,17 @@ export class RentService {
   // ---------------------------------------------------------------------------
   // Void payment — POST /payments/:id/void
   // BL-10: PROPERTY_MANAGER + ADMIN only.
-  // Cascade block: reject void if downstream prepaid credit has been consumed.
   // ---------------------------------------------------------------------------
 
-  async voidPayment(paymentId: string, dto: VoidPaymentDto, actorId: string, actorRole: string) {
+  async voidPayment(paymentId: number, dto: VoidPaymentDto, actorId: number, actorRole: number) {
     return withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
         // Lock the payment row
         const rawPayments = await tx.$queryRaw<Array<{
-          id: string;
-          rent_period_id: string;
-          lease_id: string;
+          id: number;
+          rent_period_id: number;
+          lease_id: number;
           amount_paise: string | bigint;
           is_voided: boolean;
         }>>`
@@ -627,7 +634,7 @@ export class RentService {
         }
 
         // PROPERTY_MANAGER scope check
-        if (actorRole === "PROPERTY_MANAGER") {
+        if (actorRole === ROLE.PROPERTY_MANAGER) {
           const lease = await tx.lease.findUnique({
             where: { id: payment.lease_id },
             select: { unit: { select: { property_id: true } } },
@@ -679,7 +686,7 @@ export class RentService {
           });
         }
 
-        // Mark the payment as voided (only allowed columns change — trigger permits this)
+        // Mark the payment as voided
         await tx.payment.update({
           where: { id: paymentId },
           data: {
@@ -692,11 +699,11 @@ export class RentService {
 
         // Recompute the affected rent period
         const rawPeriodRows = await tx.$queryRaw<Array<{
-          id: string;
+          id: number;
           amount_due_paise: string | bigint;
           late_fee_paise: string | bigint;
           paid_paise: string | bigint;
-          status: string;
+          status: number;
         }>>`
           SELECT id, amount_due_paise, late_fee_paise, paid_paise, status
           FROM rent_periods
@@ -712,8 +719,7 @@ export class RentService {
           paid_paise: BigInt(rawPeriodRow.paid_paise),
         };
 
-        // Sum all non-voided payments for this period (including the just-voided one
-        // which now has is_voided=true)
+        // Sum all non-voided payments for this period
         const sumResult = await tx.$queryRaw<Array<{ total: string | bigint | null }>>`
           SELECT COALESCE(SUM(amount_paise), 0) AS total
           FROM payments
@@ -730,14 +736,14 @@ export class RentService {
         );
 
         // Determine status: if previously PAID/PARTIAL, revert appropriately
-        let newStatus: RentPeriodStatus;
+        let newStatus: number;
         if (newPaidPaise === 0n) {
           // Back to due or overdue — preserve OVERDUE if it was overdue
-          newStatus = period.status === "OVERDUE" ? "OVERDUE" : "DUE";
+          newStatus = period.status === RENT_STATUS.OVERDUE ? RENT_STATUS.OVERDUE : RENT_STATUS.DUE;
         } else if (newOutstanding === 0n) {
-          newStatus = "PAID";
+          newStatus = RENT_STATUS.PAID;
         } else {
-          newStatus = "PARTIAL";
+          newStatus = RENT_STATUS.PARTIAL;
         }
 
         await tx.rentPeriod.update({
@@ -782,7 +788,7 @@ export class RentService {
   // tenantHasAccessToPeriod — ownership check for TENANT role
   // ---------------------------------------------------------------------------
 
-  async tenantHasAccessToPeriod(periodId: string, userId: string): Promise<boolean> {
+  async tenantHasAccessToPeriod(periodId: number, userId: number): Promise<boolean> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { user_id: userId },
       select: { id: true },
@@ -803,11 +809,9 @@ export class RentService {
 
   // ---------------------------------------------------------------------------
   // pmHasAccessToPeriod — H-01: ownership check for PROPERTY_MANAGER role
-  // Resolves rent_period → lease → unit → property and verifies active_pm_id.
-  // This mirrors the inline pattern used in recordPayment and voidPayment.
   // ---------------------------------------------------------------------------
 
-  async pmHasAccessToPeriod(periodId: string, pmUserId: string): Promise<boolean> {
+  async pmHasAccessToPeriod(periodId: number, pmUserId: number): Promise<boolean> {
     const period = await this.prisma.rentPeriod.findUnique({
       where: { id: periodId },
       select: { lease_id: true },
@@ -832,59 +836,30 @@ export class RentService {
   // ---------------------------------------------------------------------------
 
   private addMonthMinusOneDay(date: Date): Date {
-    // period_end = same day next month - 1 day, but if next month has fewer days,
-    // use the last day of next month (avoids Jan-31 → Mar-2 overflow).
-    //
-    // Strategy: take the first day of the month two ahead, then subtract 1 day.
-    // This always yields the last day of next month — which is the correct
-    // period_end for month-overflow inputs per TC-RENT-012 (Jan 31 → Feb 28).
-    //
-    // For non-overflow inputs the same formula also works:
-    //   Jun 15: setUTCDate(1)→Jun 1; setUTCMonth(+2)→Aug 1; setUTCDate(0)→Jul 31.
-    //   That gives Jul 31, but we want Jul 14 (Jun 15 + 1 month - 1 day).
-    //
-    // Correct unified algorithm:
-    //   1. Compute lastDayOfNextMonth = Date.UTC(y, m+2, 0).
-    //   2. If date.day >= lastDayOfNextMonth.day → overflow; return lastDayOfNextMonth.
-    //   3. Else → return Date.UTC(y, m+1, date.day - 1).
-    //
-    // Verified against TC-RENT-012 and task-specified adjacent cases:
-    //   Jan 31 (2026): last(Feb)=28; 31>28 → Feb 28  ✓
-    //   Jan 31 (2024): last(Feb)=29; 31>29 → Feb 29  ✓
-    //   Feb 28 (non-leap): last(Mar)=31; 28<=31 → Mar 27  ✓
-    //   Feb 29 (2024): last(Mar)=31; 29<=31 → Mar 28  ✓
-    //   Mar 31: last(Apr)=30; 31>30 → Apr 30  ✓  (spec code gives Apr 30)
-    //   Apr 30: last(May)=31; 30<=31 → May 29  ✓
-    //   Dec 31: last(Jan)=31; 31>=31 → Jan 31  (overflow path)
-    //   Jun 15: last(Jul)=31; 15<=31 → Jul 14  ✓
     const y = date.getUTCFullYear();
-    const m = date.getUTCMonth(); // 0-indexed
+    const m = date.getUTCMonth();
     const d = date.getUTCDate();
 
-    // Last day of next month
-    const lastOfNextMonth = new Date(Date.UTC(y, m + 2, 0)); // day=0 → last day of month m+1
+    const lastOfNextMonth = new Date(Date.UTC(y, m + 2, 0));
     const lastDay = lastOfNextMonth.getUTCDate();
 
     if (d >= lastDay) {
-      // Overflow (or exact boundary): period_end = last day of next month
       return lastOfNextMonth;
     }
 
-    // Normal: period_end = same day next month - 1 day
     return new Date(Date.UTC(y, m + 1, d - 1));
   }
 
   // ---------------------------------------------------------------------------
   // generateNextPeriod — called by @nestjs/schedule cron service
-  // Creates the next rent period for a lease if none exists for the coming month.
   // ---------------------------------------------------------------------------
 
   async generateNextPeriod(
     tx: TransactionClient,
-    leaseId: string,
+    leaseId: number,
     lastPeriodEnd: Date,
     monthlyRentPaise: bigint,
-    actorId: string,
+    actorId: number,
   ): Promise<void> {
     const nextStart = new Date(lastPeriodEnd);
     nextStart.setDate(nextStart.getDate() + 1);
@@ -909,12 +884,12 @@ export class RentService {
         late_fee_paise: 0n,
         paid_paise: 0n,
         outstanding_paise: monthlyRentPaise,
-        status: "DUE",
+        status: RENT_STATUS.DUE,
       },
     });
 
     await this.audit.writeLog(tx, {
-      actorId: actorId,
+      actorId,
       action: "rent_period.generate",
       entityType: "RentPeriod",
       entityId: period.id,
@@ -923,7 +898,7 @@ export class RentService {
         lease_id: leaseId,
         period_start: nextStart,
         period_end: periodEnd,
-        status: "DUE",
+        status: RENT_STATUS.DUE,
         amount_due_paise: monthlyRentPaise.toString(),
       },
     });

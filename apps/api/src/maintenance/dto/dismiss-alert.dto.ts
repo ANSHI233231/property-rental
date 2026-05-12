@@ -1,13 +1,15 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength } from "class-validator";
+import { IsInt, IsPositive, IsString, IsOptional, MaxLength } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * POST /maintenance-requests/dismiss-alert
  * BL-17: Admin or PM dismisses a maintenance frequency alert.
  */
 export class DismissAlertDto {
-  @IsString()
-  @IsNotEmpty()
-  alertId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  alertId!: number;
 
   @IsString()
   @IsOptional()

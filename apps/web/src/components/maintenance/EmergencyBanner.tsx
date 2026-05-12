@@ -8,28 +8,44 @@
  * the banner uses the .alert.alert-emergency class.
  *
  * This component is intentionally omitted from tenant and maintenance-staff views.
+ *
+ * Accepts both numeric codes (new API) and legacy strings.
  */
 
-import type { MaintenancePriorityValue, MaintenanceStatusValue } from "@gharsetu/shared";
+import { MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName } from "@gharsetu/shared";
 
 export interface EmergencyRequestSummary {
-  id: string;
+  id: number | string;
   title: string;
   unit?: { name?: string } | null;
-  status: MaintenanceStatusValue;
-  priority: MaintenancePriorityValue;
+  // API returns SMALLINT codes; accept string for legacy
+  status: number | string;
+  priority: number | string;
 }
 
 interface EmergencyBannerProps {
   requests: EmergencyRequestSummary[];
 }
 
-const ACTIVE_STATUSES: MaintenanceStatusValue[] = ["OPEN", "ASSIGNED", "IN_PROGRESS"];
+function isActiveStatus(s: number | string): boolean {
+  if (typeof s === "number") {
+    return s === MaintenanceStatusCodes.OPEN || s === MaintenanceStatusCodes.ASSIGNED || s === MaintenanceStatusCodes.IN_PROGRESS;
+  }
+  return s === "OPEN" || s === "ASSIGNED" || s === "IN_PROGRESS";
+}
+
+function isEmergencyPriority(p: number | string): boolean {
+  return typeof p === "number" ? p === MaintenancePriorityCodes.EMERGENCY : p === "EMERGENCY";
+}
+
+function statusLabel(s: number | string): string {
+  if (typeof s === "number") return maintenanceStatusName(s as MaintenanceStatusCodes).toLowerCase().replace("_", "-");
+  return String(s).replace("_", "-").toLowerCase();
+}
 
 export function EmergencyBanner({ requests }: EmergencyBannerProps) {
   const emergencies = requests.filter(
-    (r) =>
-      r.priority === "EMERGENCY" && ACTIVE_STATUSES.includes(r.status),
+    (r) => isEmergencyPriority(r.priority) && isActiveStatus(r.status),
   );
 
   if (emergencies.length === 0) return null;
@@ -49,7 +65,7 @@ export function EmergencyBanner({ requests }: EmergencyBannerProps) {
               {r.unit?.name ? `Unit ${r.unit.name} — ` : ""}
               {r.title}
               {" "}
-              <span className="opacity-75">({r.status.replace("_", "-").toLowerCase()})</span>
+              <span className="opacity-75">({statusLabel(r.status)})</span>
             </span>
           ))}
         </div>

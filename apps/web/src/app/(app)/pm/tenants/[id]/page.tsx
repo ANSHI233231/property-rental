@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR } from "@gharsetu/shared";
+import { formatINR, LeaseStatusEnum, leaseStatusName } from "@gharsetu/shared";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TenantUpdateSchema, type TenantUpdate } from "@gharsetu/shared";
@@ -22,7 +22,7 @@ import Link from "next/link";
 // ---------------------------------------------------------------------------
 
 interface TenantDetail {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   phone?: string;
@@ -31,15 +31,28 @@ interface TenantDetail {
   id_proof_number?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
-  unit?: { id: string; name: string };
+  unit?: { id: number | string; name: string };
   lease?: {
-    id: string;
+    id: number | string;
     start_date: string;
     end_date: string;
     monthly_rent_paise: string | number;
     security_deposit_paise: string | number;
-    status: string;
+    status: number | string;
   };
+}
+
+function leaseStatusLabel(status: number | string): string {
+  if (typeof status === "number") {
+    const name = leaseStatusName(status as LeaseStatusEnum);
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  }
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
+
+function leaseStatusBadgeClass(status: number | string): string {
+  const isActive = status === LeaseStatusEnum.ACTIVE || status === "ACTIVE";
+  return isActive ? "badge-paid" : "badge-open";
 }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +241,7 @@ export default function PmTenantDetailPage() {
           <h3 className="section-title">Current Lease</h3>
           <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
             <div><span className="muted">Unit:</span> <strong className="text-charcoal">{tenant.unit?.name ?? "—"}</strong></div>
-            <div><span className="muted">Status:</span> <span className="badge badge-paid ml-1">{tenant.lease.status}</span></div>
+            <div><span className="muted">Status:</span> <span className={`badge ${leaseStatusBadgeClass(tenant.lease.status)} ml-1`}>{leaseStatusLabel(tenant.lease.status)}</span></div>
             <div><span className="muted">Start:</span> <strong className="text-charcoal">{formatDate(tenant.lease.start_date)}</strong></div>
             <div><span className="muted">End:</span> <strong className="text-charcoal">{formatDate(tenant.lease.end_date)}</strong></div>
             <div><span className="muted">Monthly Rent:</span> <strong className="text-charcoal">{formatRent(tenant.lease.monthly_rent_paise)}</strong></div>

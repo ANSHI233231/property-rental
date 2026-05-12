@@ -19,8 +19,8 @@ import { CharCounter } from "@/components/maintenance/CharCounter";
 import { friendlyError } from "@/lib/api/errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateMaintenanceRequestSchema } from "@gharsetu/shared";
-import type { CreateMaintenanceRequestInput, MaintenancePriorityValue, MaintenanceStatusValue } from "@gharsetu/shared";
+import { CreateMaintenanceRequestSchema, MaintenanceStatusCodes, MaintenancePriorityCodes } from "@gharsetu/shared";
+import type { CreateMaintenanceRequestInput } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,11 +38,11 @@ interface LeasesResponse {
 }
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
   description: string;
-  priority: MaintenancePriorityValue;
-  status: MaintenanceStatusValue;
+  priority: number | string;
+  status: number | string;
   resolution_notes?: string | null;
   assigned_to?: { name?: string } | null;
   created_at: string;
@@ -63,7 +63,7 @@ function formatDate(iso: string | null | undefined): string {
   return formatDateOnlyIST(iso);
 }
 
-const PRIORITY_OPTIONS: { value: MaintenancePriorityValue; label: string }[] = [
+const PRIORITY_OPTIONS: { value: string; label: string }[] = [
   { value: "LOW", label: "LOW — cosmetic" },
   { value: "NORMAL", label: "NORMAL — needs fixing" },
   { value: "HIGH", label: "HIGH — affects daily use" },
@@ -225,7 +225,7 @@ export default function TenantMaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRaiseModal, setShowRaiseModal] = useState(false);
-  const [closeLoading, setCloseLoading] = useState<string | null>(null);
+  const [closeLoading, setCloseLoading] = useState<number | string | null>(null);
   const [closeError, setCloseError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -244,11 +244,22 @@ export default function TenantMaintenancePage() {
       if (requestsRes.status === "fulfilled") {
         const items = requestsRes.value.data ?? requestsRes.value.items ?? (Array.isArray(requestsRes.value) ? requestsRes.value as MaintenanceRequest[] : []);
         // Sort: open first, then by created_at desc
+        const STATUS_ORDER_NUM: Record<number, number> = {
+          [MaintenanceStatusCodes.IN_PROGRESS]: 0,
+          [MaintenanceStatusCodes.ASSIGNED]: 1,
+          [MaintenanceStatusCodes.OPEN]: 2,
+          [MaintenanceStatusCodes.RESOLVED]: 3,
+          [MaintenanceStatusCodes.CLOSED]: 4,
+        };
+        const STATUS_ORDER_STR: Record<string, number> = {
+          IN_PROGRESS: 0, ASSIGNED: 1, OPEN: 2, RESOLVED: 3, CLOSED: 4,
+        };
+        function statusSortKey(s: number | string): number {
+          if (typeof s === "number") return STATUS_ORDER_NUM[s] ?? 99;
+          return STATUS_ORDER_STR[s] ?? 99;
+        }
         items.sort((a, b) => {
-          const STATUS_ORDER: Record<MaintenanceStatusValue, number> = {
-            IN_PROGRESS: 0, ASSIGNED: 1, OPEN: 2, RESOLVED: 3, CLOSED: 4,
-          };
-          const diff = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+          const diff = statusSortKey(a.status) - statusSortKey(b.status);
           if (diff !== 0) return diff;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
@@ -261,7 +272,7 @@ export default function TenantMaintenancePage() {
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
-  async function handleClose(requestId: string) {
+  async function handleClose(requestId: number | string) {
     setCloseLoading(requestId);
     setCloseError(null);
     try {
@@ -332,7 +343,7 @@ export default function TenantMaintenancePage() {
       ) : (
         <div className="grid gap-4">
           {requests.map((req) => {
-            const isEmergency = req.priority === "EMERGENCY";
+            const isEmergency = req.priority === MaintenancePriorityCodes.EMERGENCY || req.priority === "EMERGENCY";
 
             return (
               <section
@@ -356,12 +367,12 @@ export default function TenantMaintenancePage() {
                         Assigned to: <strong className="text-charcoal">{req.assigned_to.name}</strong>
                       </p>
                     )}
-                    {req.status === "RESOLVED" && req.resolution_notes && (
+                    {(req.status === MaintenanceStatusCodes.RESOLVED || req.status === "RESOLVED") && req.resolution_notes && (
                       <p className="text-sm mt-3">
                         <strong className="text-charcoal">Resolution:</strong> {req.resolution_notes}
                       </p>
                     )}
-                    {req.status === "CLOSED" && (
+                    {(req.status === MaintenanceStatusCodes.CLOSED || req.status === "CLOSED") && (
                       <p className="text-sm mt-3">
                         No further action available. Closed requests cannot be reopened — if the same issue returns, please raise a new request.
                       </p>
@@ -370,7 +381,7 @@ export default function TenantMaintenancePage() {
                 </div>
 
                 {/* BL-21: Close only for RESOLVED requests, TENANT only */}
-                {req.status === "RESOLVED" && (
+                {(req.status === MaintenanceStatusCodes.RESOLVED || req.status === "RESOLVED") && (
                   <>
                     <hr className="divider" />
                     <p className="text-sm muted mb-3">
@@ -381,7 +392,7 @@ export default function TenantMaintenancePage() {
                         type="button"
                         className="btn btn-primary !py-2 !text-sm"
                         onClick={() => void handleClose(req.id)}
-                        disabled={closeLoading === req.id}
+                        disabled={String(closeLoading) === String(req.id)}
                         aria-label={`Close request "${req.title}"`}
                       >
                         {closeLoading === req.id ? "Closing…" : "Close Request"}

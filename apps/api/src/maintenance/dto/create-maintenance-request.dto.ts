@@ -2,9 +2,12 @@ import {
   IsString,
   IsNotEmpty,
   IsEnum,
+  IsInt,
+  IsPositive,
   MinLength,
   MaxLength,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 export enum MaintenancePriorityDto {
   LOW = "LOW",
@@ -19,9 +22,10 @@ export enum MaintenancePriorityDto {
  * BL-16: MAINTENANCE role blocked via @Roles + @RoleErrorCode at controller.
  */
 export class CreateMaintenanceRequestDto {
-  @IsString()
-  @IsNotEmpty()
-  unitId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  unitId!: number;
 
   @IsString()
   @IsNotEmpty()

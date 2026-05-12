@@ -19,15 +19,17 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { rawFetch, parseResponse, API_BASE_URL, ApiError } from "../api/client";
+import { RoleEnum } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type UserRole = "ADMIN" | "PROPERTY_MANAGER" | "MAINTENANCE" | "TENANT";
+/** Numeric role — matches the SMALLINT column in the DB (Step 3 migration). */
+export type UserRole = RoleEnum;
 
 export interface AuthUser {
-  id: string;
+  id: number;
   role: UserRole;
   name: string;
   email: string;
@@ -82,10 +84,11 @@ function setLoggedInCookie(value: boolean) {
  * Set or clear the __role cookie.
  * Non-HttpOnly, SameSite=Strict, NOT a security gate.
  * Used by Edge middleware for cross-role redirect only.
+ * Stores the numeric role code as a string (e.g. "0" for ADMIN).
  */
-function setRoleCookie(role: string | null) {
+function setRoleCookie(role: UserRole | null) {
   if (typeof document === "undefined") return;
-  if (role) {
+  if (role !== null && role !== undefined) {
     document.cookie = `__role=${role}; Path=/; SameSite=Strict; Max-Age=604800`;
   } else {
     document.cookie = "__role=; Path=/; SameSite=Strict; Max-Age=0";
@@ -301,13 +304,15 @@ export function useAuth(): AuthContextValue {
 
 export function dashboardPathForRole(role: UserRole): string {
   switch (role) {
-    case "ADMIN":
+    case RoleEnum.ADMIN:
       return "/admin/dashboard";
-    case "PROPERTY_MANAGER":
+    case RoleEnum.PROPERTY_MANAGER:
       return "/pm/dashboard";
-    case "MAINTENANCE":
+    case RoleEnum.MAINTENANCE:
       return "/maintenance/dashboard";
-    case "TENANT":
+    case RoleEnum.TENANT:
       return "/tenant/dashboard";
+    default:
+      return "/login";
   }
 }

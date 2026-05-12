@@ -246,6 +246,14 @@
   }
   .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 
+  /* Role card (landing page) */
+  .role-card { transition: transform 200ms, box-shadow 200ms; cursor: pointer; }
+  .role-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .role-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center; color: #fff;
+  }
+
   /* Alert */
   .alert {
     @apply flex gap-3 items-start p-4 rounded-card text-sm;

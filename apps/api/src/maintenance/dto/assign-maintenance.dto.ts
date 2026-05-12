@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsInt, IsPositive } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * POST /maintenance-requests/:id/assign
@@ -6,7 +7,8 @@ import { IsString, IsNotEmpty } from "class-validator";
  * @Roles: PROPERTY_MANAGER, ADMIN.
  */
 export class AssignMaintenanceDto {
-  @IsString()
-  @IsNotEmpty()
-  assigneeUserId!: string;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  assigneeUserId!: number;
 }

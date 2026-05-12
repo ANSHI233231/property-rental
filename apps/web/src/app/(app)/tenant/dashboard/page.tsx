@@ -20,7 +20,7 @@ import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR, computeLateFeePaise } from "@gharsetu/shared";
+import { formatINR, computeLateFeePaise, RentPeriodStatusEnum, MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName, TerminationApprovalStatusEnum, terminationApprovalStatusName } from "@gharsetu/shared";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
@@ -29,7 +29,7 @@ import { SkeletonCard } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import Link from "next/link";
-import type { RentStatusValue } from "@gharsetu/shared";
+// RentStatusValue removed: status is now number after Step 1 migration
 import { paiseStringToINR, parseBigPaise, daysOverdue as calcDaysOverdue } from "@/lib/rent/format";
 
 // ---------------------------------------------------------------------------
@@ -37,22 +37,23 @@ import { paiseStringToINR, parseBigPaise, daysOverdue as calcDaysOverdue } from 
 // ---------------------------------------------------------------------------
 
 interface LeaseTenant {
-  id: string;
+  id: number | string;
   name: string;
   email: string;
   is_primary: boolean;
 }
 
 interface TerminationApproval {
-  tenant_id: string;
+  tenant_id: string | number;
   tenant_name: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  // API returns numeric code (0=PENDING, 1=APPROVED, 2=REJECTED) or legacy string
+  status: number | string;
   note?: string | null;
 }
 
 interface LeaseTermination {
-  id: string;
-  requested_by_tenant_id: string;
+  id: string | number;
+  requested_by_tenant_id: string | number;
   effective_date: string;
   reason?: string | null;
   approvals: TerminationApproval[];
@@ -78,16 +79,17 @@ interface PaginatedLeaseResponse {
 }
 
 interface RentPeriod {
-  id: string;
-  leaseId: string;
+  id: number | string;
+  leaseId: number | string;
   periodStart: string;
   periodEnd: string;
   dueDate: string;
-  amountDuePaise: string;
-  lateFeePaise: string;
-  paidPaise: string;
-  outstandingPaise: string;
-  status: RentStatusValue;
+  amountDuePaise: string | number;
+  lateFeePaise: string | number;
+  paidPaise: string | number;
+  outstandingPaise: string | number;
+  // API returns SMALLINT after Step 1 migration; accept string for legacy
+  status: number | string;
   lastAccruedAt: string | null;
 }
 
@@ -97,10 +99,10 @@ interface RentPeriodsResponse {
 }
 
 interface MaintenanceRequest {
-  id: string;
+  id: number | string;
   title: string;
-  status: string;
-  priority: string;
+  status: number | string;
+  priority: number | string;
   created_at: string;
   unit?: { name?: string } | null;
 }
@@ -148,10 +150,12 @@ function LateFeeBreakdown({
   lateFeePaise,
   dueDate,
 }: {
-  amountDuePaise: string;
-  lateFeePaise: string;
+  amountDuePaise: string | number;
+  lateFeePaise: string | number;
   dueDate: string;
 }) {
+  const amountDuePaiseStr = String(amountDuePaise);
+  const lateFeePaiseStr = String(lateFeePaise);
   const today = new Date();
   let dueDateObj: Date;
   try { dueDateObj = parseISO(dueDate); } catch { return null; }
@@ -161,8 +165,8 @@ function LateFeeBreakdown({
 
   if (weeks === 0) return null;
 
-  const amountDue = parseBigPaise(amountDuePaise);
-  const lateFeeAPI = parseBigPaise(lateFeePaise);
+  const amountDue = parseBigPaise(amountDuePaiseStr);
+  const lateFeeAPI = parseBigPaise(lateFeePaiseStr);
 
   // Defensive check
   const expected = computeLateFeePaise(BigInt(amountDue), days);
@@ -174,7 +178,7 @@ function LateFeeBreakdown({
 
   return (
     <p className="text-sm mt-2" style={{ color: "var(--color-status-overdue)" }}>
-      Late fee = 2% × {paiseStringToINR(amountDuePaise)} × {weeks} week{weeks !== 1 ? "s" : ""} overdue = {paiseStringToINR(lateFeePaise)}
+      Late fee = 2% × {paiseStringToINR(amountDuePaiseStr)} × {weeks} week{weeks !== 1 ? "s" : ""} overdue = {paiseStringToINR(lateFeePaiseStr)}
     </p>
   );
 }
@@ -184,11 +188,20 @@ function LateFeeBreakdown({
 // ---------------------------------------------------------------------------
 
 function CurrentPeriodCard({ period }: { period: RentPeriod }) {
-  const outstanding = parseBigPaise(period.outstandingPaise);
-  const paid = parseBigPaise(period.paidPaise);
-  const amountDue = parseBigPaise(period.amountDuePaise);
+  const outstanding = parseBigPaise(String(period.outstandingPaise));
+  const paid = parseBigPaise(String(period.paidPaise));
+  const amountDue = parseBigPaise(String(period.amountDuePaise));
 
-  const borderColor: Record<string, string> = {
+  // Border color lookup — support both numeric codes and legacy strings
+  const borderColorByCode: Record<number, string> = {
+    [RentPeriodStatusEnum.OVERDUE]: "var(--color-status-overdue)",
+    [RentPeriodStatusEnum.DUE]: "var(--color-status-prepaid)",
+    [RentPeriodStatusEnum.PARTIAL]: "var(--color-status-partial)",
+    [RentPeriodStatusEnum.PAID]: "var(--color-status-paid)",
+    [RentPeriodStatusEnum.PREPAID]: "var(--color-status-paid)",
+    [RentPeriodStatusEnum.UPCOMING]: "var(--color-mid-gray)",
+  };
+  const borderColorByString: Record<string, string> = {
     OVERDUE: "var(--color-status-overdue)",
     DUE: "var(--color-status-prepaid)",
     PARTIAL: "var(--color-status-partial)",
@@ -196,11 +209,14 @@ function CurrentPeriodCard({ period }: { period: RentPeriod }) {
     PREPAID: "var(--color-status-paid)",
     UPCOMING: "var(--color-mid-gray)",
   };
+  const borderColor = typeof period.status === "number"
+    ? borderColorByCode[period.status] ?? "var(--color-mid-gray)"
+    : borderColorByString[period.status] ?? "var(--color-mid-gray)";
 
   return (
     <section
       className="card mb-6 border-l-4"
-      style={{ borderLeftColor: borderColor[period.status] ?? "var(--color-mid-gray)" }}
+      style={{ borderLeftColor: borderColor }}
     >
       <h3 className="section-title">Current Period</h3>
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -227,7 +243,7 @@ function CurrentPeriodCard({ period }: { period: RentPeriod }) {
             </div>
           </div>
 
-          {period.status === "OVERDUE" && (
+          {(period.status === RentPeriodStatusEnum.OVERDUE || period.status === "OVERDUE") && (
             <LateFeeBreakdown
               amountDuePaise={period.amountDuePaise}
               lateFeePaise={period.lateFeePaise}
@@ -280,8 +296,8 @@ function OpenMaintenanceCard({
                     {formatDate(req.created_at)}
                   </span>
                 </div>
-                <span className={`badge badge-${req.priority === "EMERGENCY" ? "emergency" : "open"} text-xs`}>
-                  {req.priority === "EMERGENCY" ? "Emergency" : req.status}
+                <span className={`badge badge-${(req.priority === MaintenancePriorityCodes.EMERGENCY || req.priority === "EMERGENCY") ? "emergency" : "open"} text-xs`}>
+                  {(req.priority === MaintenancePriorityCodes.EMERGENCY || req.priority === "EMERGENCY") ? "Emergency" : (typeof req.status === "number" ? maintenanceStatusName(req.status as MaintenanceStatusCodes) : req.status)}
                 </span>
               </div>
             ))}
@@ -440,11 +456,20 @@ export default function TenantDashboardPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const APPROVAL_BADGE: Record<string, string> = {
-    PENDING: "badge-open",
-    APPROVED: "badge-paid",
-    REJECTED: "badge-overdue",
-  };
+  // Approval badge class — supports both numeric codes and legacy strings
+  function approvalBadgeClass(status: number | string): string {
+    if (typeof status === "number") {
+      if (status === TerminationApprovalStatusEnum.APPROVED) return "badge-paid";
+      if (status === TerminationApprovalStatusEnum.REJECTED) return "badge-overdue";
+      return "badge-open"; // PENDING
+    }
+    const map: Record<string, string> = { PENDING: "badge-open", APPROVED: "badge-paid", REJECTED: "badge-overdue" };
+    return map[status] ?? "badge-open";
+  }
+  function approvalStatusLabel(status: number | string): string {
+    if (typeof status === "number") return terminationApprovalStatusName(status as TerminationApprovalStatusEnum);
+    return String(status).charAt(0) + String(status).slice(1).toLowerCase();
+  }
 
   const fetchLease = useCallback(async () => {
     if (!user) return;
@@ -466,9 +491,20 @@ export default function TenantDashboardPage() {
           );
           const periods = periodsRes.data ?? periodsRes.items ?? [];
           // Find the most recent non-UPCOMING period, or the first UPCOMING
-          const current = periods.find((p) => ["DUE", "OVERDUE", "PARTIAL", "PAID", "PREPAID"].includes(p.status))
-            ?? periods[0]
-            ?? null;
+          // Accept both numeric codes (new API) and string values (legacy)
+          const ACTIVE_STATUSES_NUMERIC = new Set<number>([
+            RentPeriodStatusEnum.DUE,
+            RentPeriodStatusEnum.OVERDUE,
+            RentPeriodStatusEnum.PARTIAL,
+            RentPeriodStatusEnum.PAID,
+            RentPeriodStatusEnum.PREPAID,
+          ]);
+          const ACTIVE_STATUSES_STRING = new Set(["DUE", "OVERDUE", "PARTIAL", "PAID", "PREPAID"]);
+          const current = periods.find((p) =>
+            typeof p.status === "number"
+              ? ACTIVE_STATUSES_NUMERIC.has(p.status)
+              : ACTIVE_STATUSES_STRING.has(String(p.status))
+          ) ?? periods[0] ?? null;
           setCurrentPeriod(current);
         } catch {
           setCurrentPeriod(null);
@@ -490,7 +526,12 @@ export default function TenantDashboardPage() {
     apiFetch<MaintenanceListResponse>(`/maintenance-requests?limit=50`)
       .then((res) => {
         const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
-        const open = items.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status));
+        const open = items.filter((r) => {
+          const s = r.status;
+          return typeof s === "number"
+            ? s === MaintenanceStatusCodes.OPEN || s === MaintenanceStatusCodes.ASSIGNED || s === MaintenanceStatusCodes.IN_PROGRESS
+            : s === "OPEN" || s === "ASSIGNED" || s === "IN_PROGRESS";
+        });
         setTotalOpenCount(open.length);
         setOpenRequests(open.slice(0, 2));
       })
@@ -557,11 +598,15 @@ export default function TenantDashboardPage() {
 
   const termination = lease?.termination ?? null;
   const tenants = lease?.tenants ?? [];
+  // Use string comparison for tenant IDs to handle both number and string from API
   const myTenantId = tenants.find((t) => t.email === user?.email)?.id ?? null;
+  const myTenantIdStr = myTenantId !== null ? String(myTenantId) : null;
   const myApproval = termination
-    ? termination.approvals.find((a) => a.tenant_id === myTenantId)
+    ? termination.approvals.find((a) => String(a.tenant_id) === myTenantIdStr)
     : null;
-  const isRequester = termination?.requested_by_tenant_id === myTenantId;
+  const isRequester = myTenantIdStr !== null && termination?.requested_by_tenant_id !== undefined
+    ? String(termination.requested_by_tenant_id) === myTenantIdStr
+    : false;
   const leaseEndDays = lease ? daysRemaining(lease.end_date) : 0;
 
   return (
@@ -643,10 +688,10 @@ export default function TenantDashboardPage() {
                   <div key={a.tenant_id} className="p-3 rounded border border-mid-gray">
                     <div className="text-xs muted">
                       {a.tenant_name}
-                      {a.tenant_id === termination.requested_by_tenant_id ? " (requester)" : ""}
+                      {String(a.tenant_id) === String(termination.requested_by_tenant_id) ? " (requester)" : ""}
                     </div>
-                    <span className={`badge ${APPROVAL_BADGE[a.status] ?? "badge-open"} mt-1`} aria-label={a.status}>
-                      {a.status.charAt(0) + a.status.slice(1).toLowerCase()}
+                    <span className={`badge ${approvalBadgeClass(a.status)} mt-1`} aria-label={approvalStatusLabel(a.status)}>
+                      {approvalStatusLabel(a.status)}
                     </span>
                     {a.note && <div className="text-xs muted mt-1">{a.note}</div>}
                   </div>
@@ -731,8 +776,8 @@ export default function TenantDashboardPage() {
           open={approvalModal.open}
           onClose={() => setApprovalModal(null)}
           decision={approvalModal.decision}
-          leaseId={lease.id}
-          tenantId={myTenantId}
+          leaseId={String(lease.id)}
+          tenantId={String(myTenantId)}
           onSuccess={() => void fetchLease()}
         />
       )}
@@ -741,8 +786,8 @@ export default function TenantDashboardPage() {
         <InitiateTerminationModal
           open={showInitTermModal}
           onClose={() => setShowInitTermModal(false)}
-          leaseId={lease.id}
-          tenantId={myTenantId}
+          leaseId={String(lease.id)}
+          tenantId={String(myTenantId)}
           onSuccess={() => void fetchLease()}
         />
       )}

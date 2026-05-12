@@ -48,7 +48,7 @@ export interface AuditLogFilter {
   entityType?: string;
   from?: string;
   to?: string;
-  cursor?: string;
+  cursor?: number;
   limit?: number;
 }
 
@@ -60,11 +60,11 @@ export class AuditLogService {
    * GET /audit-log — Admin-only paginated audit log with filters.
    *
    * Supports:
-   * - actorId (exact match)
-   * - action (prefix match via LIKE 'action%')
+   * - actorId (actor user id as number string or number)
+   * - action (prefix match via startsWith)
    * - entityType (exact match)
    * - from / to date range (ISO 8601)
-   * - cursor-based pagination (cursor = last seen `id`)
+   * - cursor-based pagination (cursor = last seen `id` as number)
    * - limit (default 50, max 100)
    *
    * Returns `before`/`after` fields with sensitive keys redacted.
@@ -75,8 +75,14 @@ export class AuditLogService {
     // Build Prisma where clause
     const where: Record<string, unknown> = {};
 
-    if (filters.actorId) {
-      where["actor_id"] = filters.actorId;
+    if (filters.actorId !== undefined) {
+      // actor_id is Int? in DB; accept numeric string or number
+      const actorIdNum = typeof filters.actorId === "string"
+        ? parseInt(filters.actorId, 10)
+        : filters.actorId;
+      if (!isNaN(Number(actorIdNum))) {
+        where["actor_id"] = Number(actorIdNum);
+      }
     }
 
     if (filters.entityType) {

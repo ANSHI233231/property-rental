@@ -16,6 +16,7 @@ import React, {
   useState,
 } from "react";
 import { useAuth } from "@/lib/auth/context";
+import { RoleEnum } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -62,7 +63,7 @@ export function PmPropertyProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     // Only fetch for PM role
-    if (!user || user.role !== "PROPERTY_MANAGER") {
+    if (!user || user.role !== RoleEnum.PROPERTY_MANAGER) {
       setLoading(false);
       return;
     }

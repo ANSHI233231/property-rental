@@ -13,6 +13,7 @@ import { format, parseISO, isWithinInterval, addDays, startOfMonth, endOfMonth }
 import { todayIST, formatDateOnlyIST } from "@/lib/locale";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { paiseStringToINR, parseBigPaise } from "@/lib/rent/format";
+import { MaintenanceStatusCodes, MaintenancePriorityCodes } from "@gharsetu/shared";
 import Link from "next/link";
 
 // ---------------------------------------------------------------------------
@@ -165,9 +166,17 @@ export default function PmDashboardPage() {
           // Phase 5 — maintenance KPIs
           if (openMaintRes.status === "fulfilled") {
             const items = openMaintRes.value.data ?? openMaintRes.value.items ?? [];
-            const openReqs = items.filter((r) => ["OPEN", "ASSIGNED", "IN_PROGRESS"].includes(r.status));
+            const openReqs = items.filter((r) => {
+              const s = r.status;
+              return typeof s === "number"
+                ? s === MaintenanceStatusCodes.OPEN || s === MaintenanceStatusCodes.ASSIGNED || s === MaintenanceStatusCodes.IN_PROGRESS
+                : s === "OPEN" || s === "ASSIGNED" || s === "IN_PROGRESS";
+            });
             setOpenMaintenanceCount(openReqs.length);
-            setEmergencyMaintenanceCount(openReqs.filter((r) => r.priority === "EMERGENCY").length);
+            setEmergencyMaintenanceCount(openReqs.filter((r) => {
+              const p = r.priority;
+              return typeof p === "number" ? p === MaintenancePriorityCodes.EMERGENCY : p === "EMERGENCY";
+            }).length);
           } else {
             setOpenMaintenanceCount(0);
             setEmergencyMaintenanceCount(0);

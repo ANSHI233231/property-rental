@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { PmSidebar, PmTabBar } from "@/components/pm/PmSidebar";
 import { PmPropertyProvider } from "@/lib/pm/context";
 import { ToastProvider } from "@/components/ui/Toast";
+import { RoleEnum } from "@gharsetu/shared";
 
 export default function PmLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -23,9 +24,9 @@ export default function PmLayout({ children }: { children: ReactNode }) {
       router.replace("/login");
       return;
     }
-    if (user.role !== "PROPERTY_MANAGER") {
-      if (user.role === "ADMIN") router.replace("/admin/dashboard");
-      else if (user.role === "MAINTENANCE") router.replace("/maintenance/dashboard");
+    if (user.role !== RoleEnum.PROPERTY_MANAGER) {
+      if (user.role === RoleEnum.ADMIN) router.replace("/admin/dashboard");
+      else if (user.role === RoleEnum.MAINTENANCE) router.replace("/maintenance/dashboard");
       else router.replace("/tenant/dashboard");
     }
   }, [user, loading, router]);
@@ -38,7 +39,7 @@ export default function PmLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || user.role !== "PROPERTY_MANAGER") return null;
+  if (!user || user.role !== RoleEnum.PROPERTY_MANAGER) return null;
 
   return (
     <ToastProvider>
