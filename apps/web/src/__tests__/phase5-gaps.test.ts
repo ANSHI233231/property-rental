@@ -235,17 +235,21 @@ describe("EmergencyBanner component logic", () => {
     ).toBe(2);
   });
 
-  it("EmergencyBanner component source confirms ACTIVE_STATUSES filter", () => {
+  it("EmergencyBanner component source filters active-status emergencies only", () => {
     const source = readFileSync(
       join(__dirname, "../components/maintenance/EmergencyBanner.tsx"),
       "utf-8",
     );
-    expect(source).toContain("ACTIVE_STATUSES");
+    // Filter must reject CLOSED + RESOLVED rows by only accepting these three.
     expect(source).toContain("OPEN");
     expect(source).toContain("ASSIGNED");
     expect(source).toContain("IN_PROGRESS");
+    // Priority filter
     expect(source).toContain("EMERGENCY");
-    // Banner should NOT appear on tenant or maintenance-staff views (omitted there)
+    // Both filters are applied (active status AND emergency priority)
+    expect(source).toContain("isActiveStatus");
+    expect(source).toContain("isEmergencyPriority");
+    // Banner uses the prototype's .alert.alert-emergency class
     expect(source).toContain("alert-emergency");
   });
 });
