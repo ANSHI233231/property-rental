@@ -16,26 +16,37 @@ import { differenceInCalendarDays } from "date-fns";
 // ---------------------------------------------------------------------------
 
 /**
- * Convert a paise string (as serialised BigInt from the API) to an INR string.
+ * Convert a paise value (string or number, as serialised BigInt from the API)
+ * to an INR string. Defensive: undefined/null/empty are treated as 0 so a
+ * single missing field does not crash the page.
  * Example: "1800000" → "₹18,000"
  *
  * Safe up to ~₹90 crore (Number.MAX_SAFE_INTEGER in paise ≈ ₹90 lakh crore).
  * Residential rent never approaches this.
  */
-export function paiseStringToINR(s: string): string {
+export function paiseStringToINR(s: string | number | null | undefined): string {
   const n = parseBigPaise(s);
   return formatINR(n);
 }
 
 /**
- * Parse a paise string to a regular number.
- * Use BigInt internally then convert, so we don't lose precision on large
- * values accidentally passed as floating-point strings.
- * Example: "1800000" → 1800000
+ * Parse a paise value (string or number) to a regular JS number.
+ * Defensive: undefined/null/empty/NaN-shaped strings return 0 instead of
+ * throwing. This guards against partially-shaped API responses or fields the
+ * client expected but the server omitted.
+ * Example: "1800000" → 1800000 · undefined → 0 · "x" → 0
  */
-export function parseBigPaise(s: string): number {
-  // BigInt parse handles any integer string without floating-point errors.
-  return Number(BigInt(s));
+export function parseBigPaise(s: string | number | null | undefined): number {
+  if (s === undefined || s === null || s === "") return 0;
+  const str = typeof s === "number" ? String(s) : s;
+  // Strip any decimals — paise is integer by contract.
+  const clean = str.split(".")[0]!.replace(/[^0-9-]/g, "");
+  if (clean === "" || clean === "-") return 0;
+  try {
+    return Number(BigInt(clean));
+  } catch {
+    return 0;
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -10,6 +10,8 @@
 import { useAuth } from "@/lib/auth/context";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -33,6 +35,7 @@ import { friendlyError } from "@/lib/api/errors";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { formatDateOnlyIST } from "@/lib/locale";
+import { useRefetchOnFocus } from "@/lib/hooks/use-refetch-on-focus";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -570,16 +573,34 @@ export default function PropertyDetailPage() {
   const { toast } = useToast();
 
   const [property, setProperty] = useState<PropertyDetail | null>(null);
-  const [units, setUnits] = useState<UnitRow[]>([]);
   const [loadingProp, setLoadingProp] = useState(true);
-  const [loadingUnits, setLoadingUnits] = useState(true);
-  const [unitsTotal, setUnitsTotal] = useState<number | undefined>();
+  const [unitsRefetchKey, setUnitsRefetchKey] = useState(0);
 
   // Modal states
   const [transferOpen, setTransferOpen] = useState(false);
   const [addUnitOpen, setAddUnitOpen] = useState(false);
   const [changeStateUnit, setChangeStateUnit] = useState<UnitRow | null>(null);
   const [retireUnit, setRetireUnit] = useState<UnitRow | null>(null);
+
+  // Units via pagination hook
+  const {
+    items: units,
+    page: unitsPage,
+    totalPages: unitsTotalPages,
+    total: unitsTotal,
+    pageSize: unitsPageSize,
+    hasNext: unitsHasNext,
+    hasPrev: unitsHasPrev,
+    loading: loadingUnits,
+    next: unitsNext,
+    prev: unitsPrev,
+    goToPage: unitsGoToPage,
+    refresh: refreshUnits,
+  } = usePaginatedList<UnitRow>({
+    url: `/properties/${id}/units`,
+    pageSize: 10,
+    refetchKey: unitsRefetchKey,
+  });
 
   const fetchProperty = useCallback(async () => {
     try {
@@ -592,25 +613,16 @@ export default function PropertyDetailPage() {
     }
   }, [id, apiFetch, toast]);
 
-  const fetchUnits = useCallback(async () => {
-    setLoadingUnits(true);
-    try {
-      const res = await apiFetch<UnitsResponse>(
-        `/properties/${id}/units?limit=50`,
-      );
-      setUnits(res.data ?? []);
-      setUnitsTotal(res.meta?.total ?? res.total);
-    } catch {
-      // swallow
-    } finally {
-      setLoadingUnits(false);
-    }
-  }, [id, apiFetch]);
-
-  useEffect(() => {
+  const refreshAll = useCallback(() => {
     void fetchProperty();
-    void fetchUnits();
-  }, [fetchProperty, fetchUnits]);
+    setUnitsRefetchKey((k) => k + 1);
+  }, [fetchProperty]);
+
+  useEffect(() => refreshAll(), [refreshAll]);
+
+  // Cross-role name sync: if the assigned PM updates their profile, refetch
+  // on tab focus so the admin sees the new name without a hard reload.
+  useRefetchOnFocus(refreshAll);
 
   if (loadingProp) {
     return (
@@ -710,7 +722,7 @@ export default function PropertyDetailPage() {
       <section className="section">
         <div className="flex items-center justify-between mb-3">
           <h3 className="section-title m-0">
-            Units {unitsTotal != null ? `(${unitsTotal})` : ""}
+            Units
           </h3>
           <button
             type="button"
@@ -746,7 +758,7 @@ export default function PropertyDetailPage() {
                 ))}
               </tbody>
             </table>
-          ) : units.length === 0 ? (
+          ) : units.length === 0 && !loadingUnits ? (
             <div className="flex flex-col items-center py-12 text-center">
               <p className="font-poppins font-semibold text-charcoal mb-1">No units yet.</p>
               <p className="text-sm muted mb-4">Add units to this property.</p>
@@ -759,68 +771,83 @@ export default function PropertyDetailPage() {
               </button>
             </div>
           ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Unit</th>
-                  <th>Floor</th>
-                  <th>Bed/Bath</th>
-                  <th>Area</th>
-                  <th>Rent</th>
-                  <th>State</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {units.map((unit) => (
-                  <tr key={unit.id}>
-                    <td className="font-poppins font-semibold text-charcoal">
-                      {unit.unit_number}
-                    </td>
-                    <td>{unit.floor ?? "—"}</td>
-                    <td>
-                      {unit.bedrooms}B / {unit.bathrooms}Ba
-                    </td>
-                    <td>{unit.area_sqft ? `${unit.area_sqft} sq ft` : "—"}</td>
-                    <td className="font-poppins font-semibold">
-                      {formatINR(typeof unit.monthly_rent_paise === "string" ? parseInt(unit.monthly_rent_paise, 10) : unit.monthly_rent_paise)}
-                    </td>
-                    <td>
-                      <span
-                        className={
-                          unit.is_retired
-                            ? "badge badge-closed"
-                            : stateBadgeClass(unit.state)
-                        }
-                      >
-                        {unit.is_retired ? "Retired" : stateLabel(unit.state)}
-                      </span>
-                    </td>
-                    <td>
-                      {!unit.is_retired && (
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            className="text-royal-blue font-poppins font-semibold text-sm hover:underline"
-                            onClick={() => setChangeStateUnit(unit)}
-                          >
-                            State
-                          </button>
-                          <span className="text-mid-gray">·</span>
-                          <button
-                            type="button"
-                            className="text-status-overdue font-poppins font-semibold text-sm hover:underline"
-                            onClick={() => setRetireUnit(unit)}
-                          >
-                            Retire
-                          </button>
-                        </div>
-                      )}
-                    </td>
+            <>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Unit</th>
+                    <th>Floor</th>
+                    <th>Bed/Bath</th>
+                    <th>Area</th>
+                    <th>Rent</th>
+                    <th>State</th>
+                    <th></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {units.map((unit) => (
+                    <tr key={unit.id}>
+                      <td className="font-poppins font-semibold text-charcoal">
+                        {unit.unit_number}
+                      </td>
+                      <td>{unit.floor ?? "—"}</td>
+                      <td>
+                        {unit.bedrooms}B / {unit.bathrooms}Ba
+                      </td>
+                      <td>{unit.area_sqft ? `${unit.area_sqft} sq ft` : "—"}</td>
+                      <td className="font-poppins font-semibold">
+                        {formatINR(typeof unit.monthly_rent_paise === "string" ? parseInt(unit.monthly_rent_paise, 10) : unit.monthly_rent_paise)}
+                      </td>
+                      <td>
+                        <span
+                          className={
+                            unit.is_retired
+                              ? "badge badge-closed"
+                              : stateBadgeClass(unit.state)
+                          }
+                        >
+                          {unit.is_retired ? "Retired" : stateLabel(unit.state)}
+                        </span>
+                      </td>
+                      <td>
+                        {!unit.is_retired && (
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="text-royal-blue font-poppins font-semibold text-sm hover:underline"
+                              onClick={() => setChangeStateUnit(unit)}
+                            >
+                              State
+                            </button>
+                            <span className="text-mid-gray">·</span>
+                            <button
+                              type="button"
+                              className="text-status-overdue font-poppins font-semibold text-sm hover:underline"
+                              onClick={() => setRetireUnit(unit)}
+                            >
+                              Retire
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Pagination
+                page={unitsPage}
+                totalPages={unitsTotalPages}
+                total={unitsTotal}
+                pageSize={unitsPageSize}
+                hasPrev={unitsHasPrev}
+                hasNext={unitsHasNext}
+                onPrev={unitsPrev}
+                onNext={unitsNext}
+                onGoToPage={unitsGoToPage}
+                itemsOnPage={units.length}
+                loading={loadingUnits}
+              />
+            </>
           )}
         </div>
       </section>
@@ -838,21 +865,21 @@ export default function PropertyDetailPage() {
         open={addUnitOpen}
         onClose={() => setAddUnitOpen(false)}
         propertyId={id}
-        onCreated={fetchUnits}
+        onCreated={refreshUnits}
       />
 
       <ChangeStateModal
         open={changeStateUnit !== null}
         onClose={() => setChangeStateUnit(null)}
         unit={changeStateUnit}
-        onChanged={fetchUnits}
+        onChanged={refreshUnits}
       />
 
       <RetireModal
         open={retireUnit !== null}
         onClose={() => setRetireUnit(null)}
         unit={retireUnit}
-        onRetired={fetchUnits}
+        onRetired={refreshUnits}
       />
     </>
   );

@@ -161,8 +161,12 @@ export class UsersService {
    * GET /users — Admin paginated list.
    * role query param accepts int code (0-3) or role-name string for backward compat.
    */
-  async listUsers(role?: string, cursor?: number, limit = 20) {
-    const take = Math.min(limit, 100);
+  async listUsers(role?: string, cursor?: number, limit = 20, page?: number, pageSize?: number) {
+    const useOffset = page !== undefined;
+    const ps = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(limit, 100);
+    const currentPage = page ?? 1;
+
     // Build role filter — accept either int code string ("0") or name ("ADMIN")
     const ROLE_NAME_TO_CODE: Record<string, number> = {
       ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
@@ -178,21 +182,54 @@ export class UsersService {
       }
     }
 
-    const items = await this.prisma.user.findMany({
-      where,
-      select: USER_SAFE_SELECT,
-      orderBy: { created_at: "asc" },
-      take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
+    // Explicit-branch findMany — avoids TS conditional-spread inference issue.
+    const findManyPromise = useOffset
+      ? this.prisma.user.findMany({
+          where,
+          select: USER_SAFE_SELECT,
+          orderBy: { created_at: "asc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.user.findMany({
+          where,
+          select: USER_SAFE_SELECT,
+          orderBy: { created_at: "asc" },
+          take: take + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        });
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.user.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      data = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
       data,
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
     };
   }
 

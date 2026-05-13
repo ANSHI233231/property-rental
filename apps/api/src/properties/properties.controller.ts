@@ -51,9 +51,19 @@ export class PropertiesController {
     @CurrentUser() actor: JwtPayload,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
     const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
-    return this.propertiesService.list(cursorNum, limit ? parseInt(limit, 10) : 20, actor);
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize ? parseInt(pageSize, 10) : undefined;
+    return this.propertiesService.list(
+      cursorNum,
+      limit ? parseInt(limit, 10) : 20,
+      actor,
+      pageNum,
+      pageSizeNum,
+    );
   }
 
   /** POST /properties */

@@ -11,6 +11,8 @@
 import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
 import { useCallback, useEffect, useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { formatDateOnlyIST, formatDateIST } from "@/lib/locale";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
@@ -20,8 +22,8 @@ import { EmergencyBanner } from "@/components/maintenance/EmergencyBanner";
 import { friendlyError } from "@/lib/api/errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AssignMaintenanceSchema, MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName, maintenancePriorityName } from "@gharsetu/shared";
-import type { AssignMaintenanceInput } from "@gharsetu/shared";
+import { AssignMaintenanceSchema, MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName, maintenancePriorityName, CreateMaintenanceRequestSchema } from "@gharsetu/shared";
+import type { AssignMaintenanceInput, CreateMaintenanceRequestInput } from "@gharsetu/shared";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 // ---------------------------------------------------------------------------
@@ -325,46 +327,63 @@ export default function PmMaintenancePage() {
   const { apiFetch } = useAuth();
   const { property, propertyId } = usePmProperty();
 
-  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
   const [assignModal, setAssignModal] = useState<{ requestId: string; requestTitle: string } | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [refetchKey, setRefetchKey] = useState(0);
 
-  const fetchRequests = useCallback(async () => {
+  const extraQuery: Record<string, string | undefined> = {};
+  if (propertyId) extraQuery.propertyId = propertyId;
+  if (priorityFilter !== "ALL") extraQuery.priority = priorityFilter;
+  if (statusFilter !== "ALL") extraQuery.status = statusFilter;
+
+  const {
+    items: filtered,
+    page,
+    totalPages,
+    total,
+    pageSize: activePageSize,
+    hasNext,
+    hasPrev,
+    loading,
+    error,
+    next,
+    prev,
+    goToPage,
+    refresh,
+  } = usePaginatedList<MaintenanceRequest>({
+    url: "/maintenance-requests",
+    extraQuery: propertyId ? extraQuery : undefined,
+    pageSize: 10,
+    refetchKey,
+  });
+
+  // Sort fetched page by priority
+  const sortedFiltered = [...filtered].sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
+
+  // For chip counts, we fetch a summary without pagination (limit=200 for counts only)
+  const [allRequests, setAllRequests] = useState<MaintenanceRequest[]>([]);
+  const fetchAllForCounts = useCallback(async () => {
     if (!propertyId) return;
-    setLoading(true);
-    setError(null);
     try {
-      const res = await apiFetch<RequestsResponse>(
-        `/maintenance-requests?propertyId=${propertyId}&limit=100`,
-      );
+      const res = await apiFetch<RequestsResponse>(`/maintenance-requests?propertyId=${propertyId}&limit=200`);
       const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
-      items.sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
-      setRequests(items);
-    } catch (err) {
-      setError(friendlyError(err));
-    } finally {
-      setLoading(false);
+      setAllRequests(items);
+    } catch {
+      // swallow
     }
   }, [propertyId, apiFetch]);
 
-  useEffect(() => { void fetchRequests(); }, [fetchRequests]);
-
-  const filtered = requests.filter((r) => {
-    if (!matchesPriority(r.priority, priorityFilter)) return false;
-    if (!matchesStatus(r.status, statusFilter)) return false;
-    return true;
-  });
+  useEffect(() => { void fetchAllForCounts(); }, [fetchAllForCounts]);
 
   const counts: Record<PriorityFilter, number> = {
-    ALL: requests.length,
-    EMERGENCY: requests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
-    HIGH: requests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
-    NORMAL: requests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
-    LOW: requests.filter((r) => matchesPriority(r.priority, "LOW")).length,
+    ALL: allRequests.length,
+    EMERGENCY: allRequests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
+    HIGH: allRequests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
+    NORMAL: allRequests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
+    LOW: allRequests.filter((r) => matchesPriority(r.priority, "LOW")).length,
   };
 
   const priorityChips: { label: string; value: PriorityFilter }[] = [
@@ -375,7 +394,7 @@ export default function PmMaintenancePage() {
     { label: `Low · ${counts.LOW}`, value: "LOW" },
   ];
 
-  const openCount = requests.filter((r) =>
+  const openCount = allRequests.filter((r) =>
     matchesStatus(r.status, "OPEN") || matchesStatus(r.status, "ASSIGNED") || matchesStatus(r.status, "IN_PROGRESS")
   ).length;
 
@@ -388,10 +407,21 @@ export default function PmMaintenancePage() {
             {property?.name ?? ""} · {openCount} open request{openCount !== 1 ? "s" : ""}
           </div>
         </div>
+        {/* BL-16 deviation (user-approved 2026-05-13): PM may raise on
+            behalf for units in their assigned property. */}
+        {propertyId && (
+          <button
+            type="button"
+            className="btn btn-primary !py-2 !text-sm"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + New Request
+          </button>
+        )}
       </header>
 
       {/* Emergency banner — PM view */}
-      <EmergencyBanner requests={requests} />
+      <EmergencyBanner requests={allRequests} />
 
       {error && <div className="field-error show mb-4">{error}</div>}
 
@@ -438,14 +468,14 @@ export default function PmMaintenancePage() {
             </div>
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : sortedFiltered.length === 0 ? (
         <EmptyState
           heading="No requests"
           body="No maintenance requests match the current filters."
         />
       ) : (
         <section className="grid lg:grid-cols-2 gap-4">
-          {filtered.map((req) => {
+          {sortedFiltered.map((req) => {
             const isEmergency = matchesPriority(req.priority, "EMERGENCY");
 
             return (
@@ -523,6 +553,25 @@ export default function PmMaintenancePage() {
         </section>
       )}
 
+      {/* Pagination */}
+      {!loading && sortedFiltered.length > 0 && (
+        <div className="mt-4">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={activePageSize}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={prev}
+            onNext={next}
+            onGoToPage={goToPage}
+            itemsOnPage={sortedFiltered.length}
+            loading={loading}
+          />
+        </div>
+      )}
+
       {/* Detail drawer */}
       {selectedRequest && !assignModal && (
         <RequestDetail
@@ -544,10 +593,177 @@ export default function PmMaintenancePage() {
           requestTitle={assignModal.requestTitle}
           onSuccess={() => {
             setAssignModal(null);
-            void fetchRequests();
+            setRefetchKey((k) => k + 1);
+            void fetchAllForCounts();
+          }}
+        />
+      )}
+
+      {/* Raise New Request — PM acts on behalf of tenants on their property. */}
+      {showCreateModal && propertyId && (
+        <PmCreateRequestModal
+          open={true}
+          onClose={() => setShowCreateModal(false)}
+          propertyId={String(propertyId)}
+          onSuccess={() => {
+            setShowCreateModal(false);
+            setRefetchKey((k) => k + 1);
+            void fetchAllForCounts();
           }}
         />
       )}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PM Create Request Modal — BL-16 deviation (user-approved 2026-05-13)
+// ---------------------------------------------------------------------------
+
+interface PmUnitOption {
+  id: number | string;
+  unit_number: string;
+}
+
+function PmCreateRequestModal({
+  open,
+  onClose,
+  propertyId,
+  onSuccess,
+}: {
+  open: boolean;
+  onClose: () => void;
+  propertyId: string;
+  onSuccess: () => void;
+}) {
+  const { apiFetch } = useAuth();
+  const [units, setUnits] = useState<PmUnitOption[]>([]);
+  const [serverError, setServerError] = useState<string>("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting, isSubmitted },
+  } = useForm<CreateMaintenanceRequestInput>({
+    resolver: zodResolver(CreateMaintenanceRequestSchema),
+    defaultValues: { priority: "NORMAL", unitId: "" },
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await apiFetch<{ data?: PmUnitOption[]; items?: PmUnitOption[] }>(
+          `/properties/${propertyId}/units?limit=200`,
+        );
+        if (cancelled) return;
+        setUnits(res.data ?? res.items ?? []);
+      } catch {
+        if (!cancelled) setUnits([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, propertyId, apiFetch]);
+
+  const description = watch("description") ?? "";
+
+  async function onSubmit(data: CreateMaintenanceRequestInput) {
+    setServerError("");
+    try {
+      await apiFetch("/maintenance-requests", {
+        method: "POST",
+        body: JSON.stringify({
+          unitId: Number(data.unitId),
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+        }),
+      });
+      reset();
+      onSuccess();
+    } catch (err) {
+      setServerError(friendlyError(err));
+    }
+  }
+
+  const errorList: string[] = [];
+  if (errors.unitId?.message) errorList.push(errors.unitId.message);
+  if (errors.title?.message) errorList.push(errors.title.message);
+  if (errors.description?.message) errorList.push(errors.description.message);
+  if (errors.priority?.message) errorList.push(errors.priority.message);
+  const showErrors = isSubmitted && (errorList.length > 0 || !!serverError);
+
+  return (
+    <Modal open={open} onClose={onClose} title="Raise New Maintenance Request" maxWidth="max-w-[600px]">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4">
+        {showErrors && (
+          <div role="alert" className="field-error show">
+            <strong>Please fix the following:</strong>
+            <ul className="list-disc pl-5 mt-1">
+              {errorList.map((m, i) => <li key={i}>{m}</li>)}
+              {serverError && <li>{serverError}</li>}
+            </ul>
+          </div>
+        )}
+
+        <Field id="pm-create-unitId" label="Unit" error={errors.unitId?.message}>
+          <select id="pm-create-unitId" className="input" disabled={units.length === 0} {...register("unitId")}>
+            <option value="">
+              {units.length === 0 ? "— No units on this property —" : "— Select unit —"}
+            </option>
+            {units.map((u) => (
+              <option key={u.id} value={u.id}>Unit {u.unit_number}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field id="pm-create-title" label="Title" error={errors.title?.message}>
+          <input
+            id="pm-create-title"
+            className="input"
+            type="text"
+            maxLength={120}
+            placeholder="Leaking tap in kitchen"
+            {...register("title")}
+          />
+        </Field>
+
+        <div>
+          <Field id="pm-create-description" label="Description (min 30 chars)" error={errors.description?.message}>
+            <textarea
+              id="pm-create-description"
+              className="input"
+              rows={4}
+              placeholder="Describe the issue in at least 30 characters…"
+              {...register("description")}
+            />
+          </Field>
+          <div className={`text-xs mt-1 ${description.length < 30 ? "text-status-overdue" : "muted"}`}>
+            {description.length} / 30 minimum
+          </div>
+        </div>
+
+        <Field id="pm-create-priority" label="Priority">
+          <select id="pm-create-priority" className="input" {...register("priority")}>
+            <option value="LOW">LOW — cosmetic</option>
+            <option value="NORMAL">NORMAL — needs fixing</option>
+            <option value="HIGH">HIGH — affects daily use</option>
+            <option value="EMERGENCY">EMERGENCY — water leak, electrical, security risk</option>
+          </select>
+        </Field>
+
+        <div className="flex gap-3 justify-end mt-2">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button type="submit" className="btn btn-primary" disabled={isSubmitting} aria-busy={isSubmitting}>
+            {isSubmitting ? "Submitting…" : "Raise Request"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

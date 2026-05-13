@@ -38,6 +38,8 @@ import { RentModule } from "./rent/rent.module";
 import { MaintenanceModule } from "./maintenance/maintenance.module";
 import { JobsModule } from "./jobs/jobs.module";
 import { AuditLogModule } from "./audit-log/audit-log.module";
+import { NotificationsModule } from "./notifications/notifications.module";
+import { RentChangeScheduleModule } from "./rent-change-schedule/rent-change-schedule.module";
 
 @Module({
   imports: [
@@ -110,6 +112,8 @@ import { AuditLogModule } from "./audit-log/audit-log.module";
     RentModule,
     MaintenanceModule,
     JobsModule,
+    NotificationsModule,
+    RentChangeScheduleModule,
   ],
   providers: [
     // Global exception filter — normalises every error to { error: { code, message } }

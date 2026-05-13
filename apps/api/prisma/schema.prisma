@@ -78,6 +78,9 @@ model User {
   maintenance_alerts_tenant        MaintenanceAlert[]   @relation("MaintenanceAlertTenant")
   maintenance_alerts_dismissed_by  MaintenanceAlert[]   @relation("MaintenanceAlertDismissedBy")
 
+  // Change 5 relations
+  rent_change_schedules_created    RentChangeSchedule[] @relation("RentChangeScheduleCreatedBy")
+
   @@map("users")
 }
 
@@ -200,6 +203,9 @@ model Unit {
   maintenance_requests MaintenanceRequest[]
   maintenance_alerts   MaintenanceAlert[]
 
+  // Change 5 relations
+  rent_change_schedules RentChangeSchedule[]
+
   /// Unique unit number per property (e.g. can have "3B" in two different properties).
   @@unique([property_id, unit_number])
   @@index([state])
@@ -245,6 +251,11 @@ model AuditLog {
   /// Nullable — null for unauthenticated events such as auth.login.failure
   /// where no valid user is identified. Phase 7 addition.
   actor_id    Int?
+  /// Actor's role at the time of the event (snapshot, not derived).
+  /// Auto-populated by trg_audit_log_fill_actor_role BEFORE INSERT trigger
+  /// when actor_id is present and actor_role isn't already supplied.
+  /// Codes: 0=ADMIN 1=PROPERTY_MANAGER 2=MAINTENANCE 3=TENANT
+  actor_role  Int?
   /// Human-readable action key e.g. 'property.create', 'unit.state_change'.
   action      String
   entity_type String
@@ -453,14 +464,14 @@ model RentPeriod {
   due_date         DateTime         @db.Date
   /// Snapshotted from lease.monthly_rent_paise at period creation time.
   amount_due_paise BigInt
-  late_fee_paise   BigInt           @default(0)
   paid_paise       BigInt           @default(0)
-  /// Service-recomputed: amount_due_paise + late_fee_paise - paid_paise.
+  /// Stored: amount_due_paise - paid_paise (no fee). The late fee is NOT
+  /// persisted — it is computed on read via @gharsetu/shared's
+  /// computeLateFeePaise(amount_due_paise, daysOverdue) and added back
+  /// in the response. See rent.service.ts → serializePeriod.
   outstanding_paise BigInt          @default(0)
   /// 0=UPCOMING 1=DUE 2=PARTIAL 3=PAID 4=OVERDUE 5=PREPAID
   status           Int              @default(1)
-  /// BL-13 idempotency: timestamp of last late-fee accrual run for this period.
-  last_accrued_at  DateTime?
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
 
@@ -645,4 +656,39 @@ model RentAccrualLog {
   created_at             DateTime  @default(now())
 
   @@map("rent_accrual_log")
+}
+
+// ---------------------------------------------------------------------------
+// RentChangeSchedule  (Change 5)
+// ---------------------------------------------------------------------------
+
+/// Scheduled rent changes. A PM picks a new monthly rent and an effective date
+/// (must be >= 60 calendar days from creation). On the effective date, the
+/// rent-change-apply cron sets the unit's monthly_rent_paise to the new value
+/// and flips status to APPLIED.
+///
+/// At most ONE PENDING schedule per unit at a time (enforced by partial unique
+/// index rent_change_schedules_one_pending_per_unit in migration SQL).
+///
+/// status: PENDING=0  CANCELLED=1  APPLIED=2
+model RentChangeSchedule {
+  id                 Int       @id @default(autoincrement())
+  unit_id            Int
+  new_amount_paise   BigInt
+  effective_date     DateTime  @db.Date
+  /// 0=PENDING 1=CANCELLED 2=APPLIED
+  status             Int       @default(0)
+  created_by_user_id Int
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  /// When the cron applied this schedule. Null until applied.
+  applied_at         DateTime?
+  /// When the PM cancelled this schedule. Null unless cancelled.
+  cancelled_at       DateTime?
+
+  unit       Unit @relation(fields: [unit_id], references: [id])
+  created_by User @relation("RentChangeScheduleCreatedBy", fields: [created_by_user_id], references: [id])
+
+  @@index([unit_id, status])
+  @@map("rent_change_schedules")
 }

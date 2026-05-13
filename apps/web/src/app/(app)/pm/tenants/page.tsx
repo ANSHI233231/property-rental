@@ -7,14 +7,15 @@
  * Row click → /pm/tenants/[id].
  */
 
-import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatDateOnlyIST } from "@/lib/locale";
 import { formatINR, LeaseStatusEnum } from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,23 +36,11 @@ interface TenantRow {
   };
 }
 
-interface PaginatedResponse {
-  data?: TenantRow[];
-  items?: TenantRow[];
-  meta?: {
-    total?: number;
-    count?: number;
-    next_cursor?: string | null;
-    hasMore?: boolean;
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Status badge
 // ---------------------------------------------------------------------------
 
 function StatusBadge({ status }: { status: number | string }) {
-  // Lease status badge — handles numeric LeaseStatusEnum codes and legacy strings
   if (typeof status === "number") {
     const NUM_CLASS: Record<number, string> = {
       [LeaseStatusEnum.ACTIVE]: "badge-paid",
@@ -87,55 +76,45 @@ function StatusBadge({ status }: { status: number | string }) {
 // ---------------------------------------------------------------------------
 
 export default function PmTenantsPage() {
-  const { apiFetch } = useAuth();
   const { property, propertyId, loading: propertyLoading } = usePmProperty();
   const router = useRouter();
 
-  const [tenants, setTenants] = useState<TenantRow[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Any");
+  // Committed values (applied on Search button click or Enter)
+  const [committedSearch, setCommittedSearch] = useState("");
+  const [committedStatus, setCommittedStatus] = useState("Any");
 
-  const fetchTenants = useCallback(
-    async (cursor: string | null = null, append = false) => {
-      if (!propertyId) return;
-      if (append) setLoadingMore(true);
-      else setLoading(true);
+  const extraQuery: Record<string, string | undefined> = {};
+  if (committedSearch.trim()) extraQuery.search = committedSearch.trim();
+  if (committedStatus !== "Any") extraQuery.status = committedStatus.toUpperCase();
+  if (propertyId) extraQuery._propertyId = propertyId; // force-included for stable serialisation
 
-      try {
-        const params = new URLSearchParams({ limit: "20" });
-        if (cursor) params.set("cursor", cursor);
-        if (search.trim()) params.set("search", search.trim());
-        if (statusFilter !== "Any") params.set("status", statusFilter.toUpperCase());
+  const {
+    items: tenants,
+    page,
+    totalPages,
+    total,
+    pageSize: activePageSize,
+    hasNext,
+    hasPrev,
+    loading,
+    next,
+    prev,
+    goToPage,
+  } = usePaginatedList<TenantRow>({
+    url: propertyId ? `/properties/${propertyId}/tenants` : "/properties/0/tenants",
+    extraQuery: propertyId ? extraQuery : undefined,
+    pageSize: 10,
+  });
 
-        const res = await apiFetch<PaginatedResponse>(
-          `/properties/${propertyId}/tenants?${params.toString()}`,
-        );
-        const rows: TenantRow[] = res.data ?? res.items ?? [];
+  // Wait for property context
+  const isReady = !propertyLoading && !!propertyId;
 
-        setTenants((prev) => (append ? [...prev, ...rows] : rows));
-        setTotal(res.meta?.total ?? null);
-        setNextCursor(res.meta?.next_cursor ?? null);
-      } catch {
-        if (!append) setTenants([]);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [apiFetch, propertyId, search, statusFilter],
-  );
-
-  useEffect(() => {
-    if (!propertyLoading && propertyId) {
-      void fetchTenants();
-    } else if (!propertyLoading && !propertyId) {
-      setLoading(false);
-    }
-  }, [fetchTenants, propertyLoading, propertyId]);
+  function applyFilters() {
+    setCommittedSearch(search);
+    setCommittedStatus(statusFilter);
+  }
 
   const formatDate = (iso: string) => formatDateOnlyIST(iso);
 
@@ -153,7 +132,6 @@ export default function PmTenantsPage() {
           <h1 className="page-title">Tenants</h1>
           <div className="page-subtitle">
             {property?.name ?? ""}
-            {total != null ? ` · ${total} active tenant${total !== 1 ? "s" : ""}` : ""}
           </div>
         </div>
       </header>
@@ -169,7 +147,7 @@ export default function PmTenantsPage() {
               placeholder="Tenant name, phone, unit"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") void fetchTenants(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
             />
           </div>
           <div>
@@ -189,7 +167,7 @@ export default function PmTenantsPage() {
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => void fetchTenants()}
+              onClick={applyFilters}
             >
               Search
             </button>
@@ -212,7 +190,7 @@ export default function PmTenantsPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {loading || !isReady ? (
               <SkeletonTableRows rows={5} cols={7} />
             ) : isEmpty ? (
               <tr>
@@ -273,22 +251,19 @@ export default function PmTenantsPage() {
           </tbody>
         </table>
         {!loading && !isEmpty && (
-          <div className="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
-            <div>
-              Showing {tenants.length}
-              {total != null ? ` of ${total}` : ""}
-            </div>
-            {nextCursor && (
-              <button
-                type="button"
-                className="btn btn-secondary !py-1 !px-3 !text-sm"
-                onClick={() => void fetchTenants(nextCursor, true)}
-                disabled={loadingMore}
-              >
-                {loadingMore ? "Loading…" : "Load more"}
-              </button>
-            )}
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={activePageSize}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={prev}
+            onNext={next}
+            onGoToPage={goToPage}
+            itemsOnPage={tenants.length}
+            loading={loading}
+          />
         )}
       </section>
     </>

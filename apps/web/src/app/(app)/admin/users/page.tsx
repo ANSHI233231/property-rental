@@ -10,6 +10,8 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { useCallback, useEffect, useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,6 +29,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { friendlyError } from "@/lib/api/errors";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
+import { useRefetchOnFocus } from "@/lib/hooks/use-refetch-on-focus";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDateOnlyIST } from "@/lib/locale";
 
@@ -386,82 +389,37 @@ export default function UsersPage() {
   const { apiFetch } = useAuth();
   const { toast } = useToast();
 
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState<number | undefined>();
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | undefined>();
-  const [loadingMore, setLoadingMore] = useState(false);
   const [roleFilter, setRoleFilter] = useState<AdminRoleValue | "ALL">("ALL");
-
   const [addOpen, setAddOpen] = useState(false);
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [tempPw, setTempPw] = useState<{ user: UserRow; password: string } | null>(null);
+  const [refetchKey, setRefetchKey] = useState(0);
 
-  const fetchUsers = useCallback(
-    async (role: AdminRoleValue | "ALL", nextCursor?: string) => {
-      const params = new URLSearchParams({ limit: "20" });
-      if (role !== "ALL") params.set("role", role);
-      if (nextCursor) params.set("cursor", nextCursor);
-      return apiFetch<UsersResponse>(`/users?${params.toString()}`);
-    },
-    [apiFetch],
-  );
+  const extraQuery: Record<string, string | undefined> = {};
+  if (roleFilter !== "ALL") extraQuery.role = roleFilter;
 
-  // Initial / filter change load
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setRows([]);
-    setCursor(undefined);
+  const {
+    items: rows,
+    page,
+    totalPages,
+    total,
+    pageSize: activePageSize,
+    hasNext,
+    hasPrev,
+    loading,
+    next,
+    prev,
+    goToPage,
+    refresh,
+  } = usePaginatedList<UserRow>({
+    url: "/users",
+    extraQuery,
+    pageSize: 10,
+    refetchKey,
+  });
 
-    fetchUsers(roleFilter)
-      .then((res) => {
-        if (cancelled) return;
-        setRows(res.data ?? []);
-        setTotal(res.meta?.total ?? res.total);
-        setHasMore(res.meta?.hasMore ?? res.hasMore ?? false);
-        setCursor(res.meta?.cursor);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [roleFilter, fetchUsers]);
-
-  async function handleLoadMore() {
-    if (!cursor) return;
-    setLoadingMore(true);
-    try {
-      const res = await fetchUsers(roleFilter, cursor);
-      setRows((prev) => [...prev, ...(res.data ?? [])]);
-      setHasMore(res.meta?.hasMore ?? res.hasMore ?? false);
-      setCursor(res.meta?.cursor);
-    } catch {
-      // swallow
-    } finally {
-      setLoadingMore(false);
-    }
-  }
-
-  function handleRefresh() {
-    setRows([]);
-    setCursor(undefined);
-    setLoading(true);
-    fetchUsers(roleFilter)
-      .then((res) => {
-        setRows(res.data ?? []);
-        setTotal(res.meta?.total ?? res.total);
-        setHasMore(res.meta?.hasMore ?? res.hasMore ?? false);
-        setCursor(res.meta?.cursor);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }
+  // Refetch when the tab regains focus (cross-role name-change sync).
+  useRefetchOnFocus(() => { refresh(); });
 
   async function handleToggleActive(user: UserRow) {
     const endpoint = user.is_active
@@ -476,7 +434,7 @@ export default function UsersPage() {
           : `${user.name} activated.`,
         "success",
       );
-      handleRefresh();
+      setRefetchKey((k) => k + 1);
     } catch (err) {
       toast(friendlyError(err), "error");
     }
@@ -488,13 +446,13 @@ export default function UsersPage() {
     } else {
       toast("User created successfully.", "success");
     }
-    handleRefresh();
+    setRefetchKey((k) => k + 1);
   }
 
-  const countLabel =
-    total != null
-      ? `Showing 1–${rows.length} of ${total}`
-      : `${rows.length} users`;
+  // Keep useCallback for handleRefresh since useRefetchOnFocus needs it
+  const handleRefresh = useCallback(() => {
+    setRefetchKey((k) => k + 1);
+  }, []);
 
   return (
     <>
@@ -618,19 +576,19 @@ export default function UsersPage() {
 
         {/* Pagination footer */}
         {!loading && rows.length > 0 && (
-          <div className="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
-            <div>{countLabel}</div>
-            {hasMore && (
-              <button
-                type="button"
-                className="btn btn-secondary !py-1 !px-3 !text-sm"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-              >
-                {loadingMore ? "Loading…" : "Load more"}
-              </button>
-            )}
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={activePageSize}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={prev}
+            onNext={next}
+            onGoToPage={goToPage}
+            itemsOnPage={rows.length}
+            loading={loading}
+          />
         )}
       </section>
 

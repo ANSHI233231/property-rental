@@ -55,17 +55,29 @@ export type TenantInput = z.infer<typeof TenantInputSchema>;
 // ---------------------------------------------------------------------------
 
 export const TenantUpdateSchema = z.object({
+  // Accept "YYYY-MM-DD" or empty/null. ISO timestamps coming back from the
+  // API are sliced to date-only on form populate (see /pm/tenants/[id]).
   dob: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD")
+    .trim()
+    .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Date must be YYYY-MM-DD")
+    .transform((v) => (v === "" ? undefined : v))
     .optional()
     .nullable(),
-  id_proof_type: z.string().max(50).optional().nullable(),
-  id_proof_number: z.string().max(100).optional().nullable(),
-  emergency_contact_name: z.string().max(200).optional().nullable(),
+  id_proof_type: z.string().trim().max(50).optional().nullable(),
+  id_proof_number: z.string().trim().max(100).optional().nullable(),
+  emergency_contact_name: z.string().trim().max(200).optional().nullable(),
+  // 10-digit Indian mobile, optionally prefixed with +91 or 0. Whitespace
+  // and dashes are stripped before the regex check so paste-friendly.
   emergency_contact_phone: z
     .string()
-    .regex(/^[6-9]\d{9}$/, "Valid Indian mobile number required")
+    .trim()
+    .transform((v) => v.replace(/[\s-]/g, "").replace(/^\+?91/, "").replace(/^0/, ""))
+    .refine(
+      (v) => v === "" || /^[6-9]\d{9}$/.test(v),
+      "Valid Indian mobile number required (10 digits starting 6-9)",
+    )
+    .transform((v) => (v === "" ? undefined : v))
     .optional()
     .nullable(),
 });

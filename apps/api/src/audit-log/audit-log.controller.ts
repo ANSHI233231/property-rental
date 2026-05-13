@@ -50,9 +50,13 @@ export class AuditLogController {
     @Query("to") to?: string,
     @Query("cursor") cursor?: string,
     @Query("limit") limitStr?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
     const limit = limitStr ? Math.min(parseInt(limitStr, 10) || 50, 100) : 50;
     const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
+    const pageNum = page !== undefined ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize !== undefined ? parseInt(pageSize, 10) : undefined;
     return this.auditLogService.findMany({
       actorId,
       action,
@@ -61,6 +65,8 @@ export class AuditLogController {
       to,
       cursor: cursorNum,
       limit,
+      page: pageNum !== undefined && !isNaN(pageNum) ? pageNum : undefined,
+      pageSize: pageSizeNum !== undefined && !isNaN(pageSizeNum) ? pageSizeNum : undefined,
     });
   }
 }

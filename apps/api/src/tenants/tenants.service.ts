@@ -47,7 +47,7 @@ export class TenantsService {
   // List tenants on active leases for a property (cursor-based)
   // ---------------------------------------------------------------------------
 
-  async listByProperty(propertyId: number, cursor?: number, limit = 20) {
+  async listByProperty(propertyId: number, cursor?: number, limit = 20, page?: number, pageSize?: number) {
     // Verify property exists
     const property = await this.prisma.property.findFirst({
       where: { id: propertyId, deleted_at: null },
@@ -58,48 +58,142 @@ export class TenantsService {
       });
     }
 
-    const take = Math.min(limit, 100);
+    const useOffset = page !== undefined;
+    const ps = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(limit, 100);
+    const currentPage = page ?? 1;
 
-    // Get tenants who have active LeaseTenant rows on leases in this property.
-    const leaseTenants = await this.prisma.leaseTenant.findMany({
-      where: {
-        removed_at: null,
-        lease: {
-          status: LEASE_ACTIVE,
-          unit: { property_id: propertyId },
-        },
+    const where = {
+      removed_at: null,
+      lease: {
+        status: LEASE_ACTIVE,
+        unit: { property_id: propertyId },
       },
-      select: {
-        id: true,
-        is_primary: true,
-        lease_id: true,
-        tenant_id: true,
-      },
-      orderBy: { joined_at: "asc" },
-      take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
+    } as const;
 
-    const hasMore = leaseTenants.length > take;
-    const data = hasMore ? leaseTenants.slice(0, take) : leaseTenants;
+    const ltSelect = {
+      id: true,
+      is_primary: true,
+      lease_id: true,
+      tenant_id: true,
+    } as const;
 
-    // Load tenant details separately to avoid the nested select typing issue
+    const ltFindMany = useOffset
+      ? this.prisma.leaseTenant.findMany({
+          where,
+          select: ltSelect,
+          orderBy: { joined_at: "asc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.leaseTenant.findMany({
+          where,
+          select: ltSelect,
+          orderBy: { joined_at: "asc" },
+          take: take + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        });
+
+    const [leaseTenantRaw, total] = await Promise.all([
+      ltFindMany,
+      this.prisma.leaseTenant.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof leaseTenantRaw;
+
+    if (useOffset) {
+      data = leaseTenantRaw;
+      hasMore = currentPage * take < total;
+    } else {
+      hasMore = leaseTenantRaw.length > take;
+      data = hasMore ? leaseTenantRaw.slice(0, take) : leaseTenantRaw;
+    }
+
+    // Hydrate tenant + lease + unit + co-tenants in three batched queries so
+    // the FE table receives a fully-denormalised row (avoids N+1).
     const tenantIds = data.map((lt) => lt.tenant_id);
-    const tenants = await this.prisma.tenant.findMany({
-      where: { id: { in: tenantIds } },
-      select: TENANT_SELECT,
-    });
+    const leaseIds = Array.from(new Set(data.map((lt) => lt.lease_id)));
+
+    const [tenants, leases, coTenantLinks] = await Promise.all([
+      this.prisma.tenant.findMany({
+        where: { id: { in: tenantIds } },
+        select: TENANT_SELECT,
+      }),
+      this.prisma.lease.findMany({
+        where: { id: { in: leaseIds } },
+        select: {
+          id: true,
+          start_date: true,
+          end_date: true,
+          monthly_rent_paise: true,
+          status: true,
+          unit: { select: { id: true, unit_number: true } },
+        },
+      }),
+      // All active co-tenant links across the same leases — used to build
+      // the co_tenants[] sibling list for each row.
+      this.prisma.leaseTenant.findMany({
+        where: { lease_id: { in: leaseIds }, removed_at: null },
+        select: {
+          lease_id: true,
+          tenant_id: true,
+          tenant: {
+            select: { id: true, user: { select: { name: true } } },
+          },
+        },
+      }),
+    ]);
+
     const tenantMap = new Map(tenants.map((t) => [t.id, t]));
+    const leaseMap = new Map(leases.map((l) => [l.id, l]));
+    const coTenantsByLease = new Map<number, Array<{ id: number; name: string }>>();
+    for (const link of coTenantLinks) {
+      const arr = coTenantsByLease.get(link.lease_id) ?? [];
+      arr.push({ id: link.tenant.id, name: link.tenant.user.name });
+      coTenantsByLease.set(link.lease_id, arr);
+    }
 
     return {
-      data: data.map((lt) => ({
-        ...tenantMap.get(lt.tenant_id),
-        is_primary: lt.is_primary,
-        lease_id: lt.lease_id,
-      })),
+      data: data.map((lt) => {
+        const tenant = tenantMap.get(lt.tenant_id);
+        const lease = leaseMap.get(lt.lease_id);
+        const user = tenant?.user;
+        const coTenants = (coTenantsByLease.get(lt.lease_id) ?? []).filter(
+          (c) => c.id !== lt.tenant_id,
+        );
+        return {
+          // tenant identity + nested user (kept for back-compat)
+          ...tenant,
+          // Flattened user fields the FE table reads as top-level keys
+          name: user?.name ?? null,
+          email: user?.email ?? null,
+          phone: user?.phone ?? null,
+          // Lease + unit context
+          lease_id: lt.lease_id,
+          lease: lease
+            ? {
+                id: lease.id,
+                start_date: lease.start_date,
+                end_date: lease.end_date,
+                monthly_rent_paise: lease.monthly_rent_paise.toString(),
+                status: lease.status,
+              }
+            : null,
+          unit: lease?.unit
+            ? { id: lease.unit.id, name: lease.unit.unit_number }
+            : null,
+          co_tenants: coTenants,
+          is_primary: lt.is_primary,
+        };
+      }),
       meta: {
-        next_cursor: hasMore ? (data[data.length - 1]?.id ?? null) : null,
+        next_cursor: hasMore && !useOffset ? (data[data.length - 1]?.id ?? null) : null,
         has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: total === 0 ? 0 : Math.ceil(total / take),
       },
     };
   }
@@ -120,7 +214,61 @@ export class TenantsService {
       });
     }
 
-    return tenant;
+    // Hydrate the most recent active LeaseTenant link (if any) so the
+    // tenant-detail page receives lease + unit + co_tenants alongside the
+    // flat user fields, matching the FE's expected shape.
+    const link = await this.prisma.leaseTenant.findFirst({
+      where: { tenant_id: id, removed_at: null, lease: { status: LEASE_ACTIVE } },
+      orderBy: { joined_at: "desc" },
+      select: {
+        lease_id: true,
+        is_primary: true,
+        lease: {
+          select: {
+            id: true,
+            start_date: true,
+            end_date: true,
+            monthly_rent_paise: true,
+            status: true,
+            unit: { select: { id: true, unit_number: true } },
+          },
+        },
+      },
+    });
+
+    let coTenants: Array<{ id: number; name: string }> = [];
+    if (link) {
+      const peers = await this.prisma.leaseTenant.findMany({
+        where: { lease_id: link.lease_id, removed_at: null, tenant_id: { not: id } },
+        select: { tenant: { select: { id: true, user: { select: { name: true } } } } },
+      });
+      coTenants = peers.map((p) => ({ id: p.tenant.id, name: p.tenant.user.name }));
+    }
+
+    const user = tenant.user;
+    return {
+      ...tenant,
+      // Flattened user fields (FE reads tenant.name / .email / .phone)
+      name: user?.name ?? null,
+      email: user?.email ?? null,
+      phone: user?.phone ?? null,
+      // Lease + unit context (matches PM Tenants detail page expectations)
+      lease_id: link?.lease_id ?? null,
+      lease: link?.lease
+        ? {
+            id: link.lease.id,
+            start_date: link.lease.start_date,
+            end_date: link.lease.end_date,
+            monthly_rent_paise: link.lease.monthly_rent_paise.toString(),
+            status: link.lease.status,
+          }
+        : null,
+      unit: link?.lease?.unit
+        ? { id: link.lease.unit.id, name: link.lease.unit.unit_number }
+        : null,
+      co_tenants: coTenants,
+      is_primary: link?.is_primary ?? null,
+    };
   }
 
   // ---------------------------------------------------------------------------

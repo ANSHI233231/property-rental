@@ -413,9 +413,9 @@ describe("Admin maintenance page: no Close button (BL-21)", () => {
 // ---------------------------------------------------------------------------
 
 describe("Phase-5 error code mapping (full set)", () => {
-  it("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE → 'Only tenants can raise maintenance requests.'", () => {
+  it("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE → 'Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.'", () => {
     expect(mapApiErrorCode("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE")).toBe(
-      "Only tenants can raise maintenance requests.",
+      "Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.",
     );
   });
 
@@ -448,7 +448,7 @@ describe("Phase-5 error code mapping (full set)", () => {
 
   it("friendlyError extracts BL_16 from error object correctly", () => {
     const msg = friendlyError({ code: "BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE" });
-    expect(msg).toBe("Only tenants can raise maintenance requests.");
+    expect(msg).toBe("Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.");
   });
 
   it("friendlyError extracts BL_21 from error object correctly", () => {

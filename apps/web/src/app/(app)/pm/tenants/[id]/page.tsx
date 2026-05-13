@@ -87,8 +87,11 @@ export default function PmTenantDetailPage() {
         const res = await apiFetch<TenantDetail>(`/tenants/${id}`);
         if (!cancelled) {
           setTenant(res);
+          // DOB from API is a full ISO timestamp; the input expects YYYY-MM-DD.
+          const dobIso = res.dob ?? "";
+          const dobDate = dobIso.length >= 10 ? dobIso.slice(0, 10) : "";
           reset({
-            dob: res.dob ?? undefined,
+            dob: dobDate || undefined,
             id_proof_type: res.id_proof_type ?? undefined,
             id_proof_number: res.id_proof_number ?? undefined,
             emergency_contact_name: res.emergency_contact_name ?? undefined,

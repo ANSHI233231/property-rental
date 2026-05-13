@@ -24,6 +24,8 @@ import { useAuth } from "@/lib/auth/context";
 import { useToast } from "@/components/ui/Toast";
 import { formatDateIST } from "@/lib/locale";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -294,14 +296,15 @@ function exportCSV(entries: AuditLogEntry[]) {
 // Page
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Audit log page size
+// ---------------------------------------------------------------------------
+
+const AUDIT_PAGE_SIZE = 10;
+
 export default function AdminAuditLogPage() {
   const { apiFetch } = useAuth();
   const { toast } = useToast();
-
-  const [entries, setEntries] = useState<AuditLogEntry[]>(PLACEHOLDER_DATA);
-  const [loading, setLoading] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
 
   // Filters
   const [fromDate, setFromDate] = useState("");
@@ -310,39 +313,66 @@ export default function AdminAuditLogPage() {
   const [entityTypeFilter, setEntityTypeFilter] = useState("All");
   const [actorFilter, setActorFilter] = useState("");
 
+  // Committed filter values (applied on Search click)
+  const [committedFrom, setCommittedFrom] = useState("");
+  const [committedTo, setCommittedTo] = useState("");
+  const [committedAction, setCommittedAction] = useState("");
+  const [committedEntity, setCommittedEntity] = useState("All");
+  const [committedActor, setCommittedActor] = useState("");
+
   const pendingToastShown = useRef(false);
 
-  // TODO (Phase 8 — BE integration):
-  // When GET /audit-log lands, replace the placeholder load with this:
-  //
-  // async function fetchAuditLog(reset = true) {
-  //   setLoading(true);
-  //   try {
-  //     const params = new URLSearchParams({ limit: "50" });
-  //     if (fromDate) params.set("from", new Date(fromDate.split("/").reverse().join("-")).toISOString());
-  //     if (toDate) params.set("to", new Date(toDate.split("/").reverse().join("-")).toISOString());
-  //     if (actionFilter) params.set("action", actionFilter);
-  //     if (entityTypeFilter !== "All") params.set("entityType", entityTypeFilter);
-  //     if (actorFilter) params.set("actorId", actorFilter);
-  //     if (!reset && cursor) params.set("cursor", cursor);
-  //
-  //     const res = await apiFetch<AuditLogResponse>(`/audit-log?${params.toString()}`);
-  //     const newEntries = res.data ?? [];
-  //     setEntries(reset ? newEntries : (prev) => [...prev, ...newEntries]);
-  //     setCursor(res.meta?.cursor ?? null);
-  //     setHasMore(res.meta?.hasMore ?? false);
-  //   } catch {
-  //     toast("Failed to load audit log.", "error");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
+  // When the BE endpoint ships, swap this to usePaginatedList with url="/audit-log"
+  // For now: use placeholder data and show a developer notice
+  const extraQuery: Record<string, string | undefined> = {};
+  if (committedFrom) extraQuery.from = committedFrom;
+  if (committedTo) extraQuery.to = committedTo;
+  if (committedAction) extraQuery.action = committedAction;
+  if (committedEntity !== "All") extraQuery.entityType = committedEntity;
+  if (committedActor) extraQuery.actor = committedActor;
+
+  const {
+    items: apiEntries,
+    page,
+    totalPages: apiTotalPages,
+    total: apiTotal,
+    pageSize: apiPageSize,
+    hasNext,
+    hasPrev,
+    loading: apiLoading,
+    next,
+    prev,
+    goToPage,
+    refresh,
+  } = usePaginatedList<AuditLogEntry>({
+    url: "/audit-log",
+    extraQuery,
+    pageSize: AUDIT_PAGE_SIZE,
+  });
+
+  // Track whether we got a real response or not
+  const [usePlaceholder, setUsePlaceholder] = useState(false);
+  const [entries, setEntries] = useState<AuditLogEntry[]>(PLACEHOLDER_DATA);
+  const loading = apiLoading;
 
   useEffect(() => {
-    // Show one-time toast that the endpoint is pending
+    // If apiEntries come back empty but the call succeeded (i.e. no network error),
+    // fall back to placeholder only if endpoint returns 404/not-found.
+    if (!apiLoading) {
+      if (apiEntries.length > 0) {
+        setEntries(apiEntries);
+        setUsePlaceholder(false);
+      } else {
+        // Keep placeholder visible while endpoint is pending
+        setUsePlaceholder(true);
+      }
+    }
+  }, [apiEntries, apiLoading]);
+
+  useEffect(() => {
+    // Show one-time toast that the endpoint may be pending
     if (!pendingToastShown.current) {
       pendingToastShown.current = true;
-      // Small delay so toast system is mounted
       setTimeout(() => {
         toast(
           "Audit log: backend endpoint (GET /audit-log) is pending. Showing placeholder data.",
@@ -350,23 +380,49 @@ export default function AdminAuditLogPage() {
         );
       }, 800);
     }
-    // When BE ships, replace this with: void fetchAuditLog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Client-side filter on placeholder data (remove when real API is wired)
-  const filtered = entries.filter((e) => {
-    if (actionFilter && !e.action.startsWith(actionFilter)) return false;
-    if (entityTypeFilter !== "All" && e.entityType !== entityTypeFilter) return false;
-    if (actorFilter && !(e.actorName ?? "").toLowerCase().includes(actorFilter.toLowerCase()))
-      return false;
-    return true;
-  });
+  // Display entries: real API data if available, else filtered placeholder
+  const displayEntries = usePlaceholder
+    ? entries.filter((e) => {
+        if (committedAction && !e.action.startsWith(committedAction)) return false;
+        if (committedEntity !== "All" && e.entityType !== committedEntity) return false;
+        if (committedActor && !(e.actorName ?? "").toLowerCase().includes(committedActor.toLowerCase())) return false;
+        return true;
+      })
+    : entries;
+
+  // Client-side pagination for placeholder data
+  const placeholderPage = usePlaceholder
+    ? displayEntries.slice((page - 1) * AUDIT_PAGE_SIZE, page * AUDIT_PAGE_SIZE)
+    : displayEntries;
+  const placeholderHasNext = usePlaceholder ? page * AUDIT_PAGE_SIZE < displayEntries.length : hasNext;
+  const placeholderHasPrev = usePlaceholder ? page > 1 : hasPrev;
+  const [placeholderPageNum, setPlaceholderPageNum] = useState(1);
+
+  const filtered = usePlaceholder ? placeholderPage : displayEntries;
+  const effectivePage = usePlaceholder ? placeholderPageNum : page;
+  const effectiveHasNext = usePlaceholder ? placeholderPageNum * AUDIT_PAGE_SIZE < displayEntries.length : hasNext;
+  const effectiveHasPrev = usePlaceholder ? placeholderPageNum > 1 : hasPrev;
+  const effectiveTotalPages = usePlaceholder
+    ? Math.max(1, Math.ceil(displayEntries.length / AUDIT_PAGE_SIZE))
+    : apiTotalPages;
+  const effectiveTotal = usePlaceholder ? displayEntries.length : apiTotal;
+  const effectivePageSize = usePlaceholder ? AUDIT_PAGE_SIZE : apiPageSize;
+  const effectiveGoToPage = usePlaceholder
+    ? (n: number) => setPlaceholderPageNum(Math.max(1, Math.min(n, effectiveTotalPages)))
+    : goToPage;
 
   const handleSearch = useCallback(() => {
-    // TODO: call fetchAuditLog(true) when BE endpoint is live
-    // For now just re-apply the client-side filter (no-op — reactive via filtered)
-  }, []);
+    setCommittedFrom(fromDate);
+    setCommittedTo(toDate);
+    setCommittedAction(actionFilter);
+    setCommittedEntity(entityTypeFilter);
+    setCommittedActor(actorFilter);
+    if (usePlaceholder) setPlaceholderPageNum(1);
+    else refresh();
+  }, [fromDate, toDate, actionFilter, entityTypeFilter, actorFilter, usePlaceholder, refresh]);
 
   return (
     <>
@@ -467,6 +523,12 @@ export default function AdminAuditLogPage() {
               setActionFilter("");
               setEntityTypeFilter("All");
               setActorFilter("");
+              setCommittedFrom("");
+              setCommittedTo("");
+              setCommittedAction("");
+              setCommittedEntity("All");
+              setCommittedActor("");
+              if (usePlaceholder) setPlaceholderPageNum(1);
             }}
             aria-label="Clear all filters"
           >
@@ -502,25 +564,31 @@ export default function AdminAuditLogPage() {
             {!loading && filtered.map((entry) => (
               <AuditRow key={entry.id} entry={entry} />
             ))}
+
           </tbody>
         </table>
       </section>
 
-      {/* Load more (will be wired to cursor pagination when BE lands) */}
-      {hasMore && (
-        <div className="flex justify-center mt-4">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => {
-              // TODO: fetchAuditLog(false) when BE endpoint available
-            }}
-            disabled={loading}
-          >
-            {loading ? "Loading…" : "Load more"}
-          </button>
-        </div>
-      )}
+      {/* Pagination */}
+      <Pagination
+        page={effectivePage}
+        totalPages={effectiveTotalPages}
+        total={effectiveTotal}
+        pageSize={effectivePageSize}
+        hasPrev={effectiveHasPrev}
+        hasNext={effectiveHasNext}
+        onPrev={() => {
+          if (usePlaceholder) setPlaceholderPageNum((p) => Math.max(1, p - 1));
+          else prev();
+        }}
+        onNext={() => {
+          if (usePlaceholder) setPlaceholderPageNum((p) => p + 1);
+          else next();
+        }}
+        onGoToPage={effectiveGoToPage}
+        itemsOnPage={filtered.length}
+        loading={loading}
+      />
 
       <p className="text-xs muted mt-4">
         Times displayed in Asia/Kolkata (IST). Audit log is append-only; entries cannot be deleted.

@@ -19,6 +19,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { PropertyScope } from "../auth/decorators/property-scope.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
+import { RoleEnum } from "@gharsetu/shared";
 
 /**
  * Tenants controller.
@@ -27,7 +28,26 @@ import type { JwtPayload } from "../auth/jwt.service";
  *   GET    /properties/:propertyId/tenants?cursor=&limit=20 — list tenants on active leases
  *   GET    /tenants/:id                                      — single tenant
  *   PATCH  /tenants/:id                                      — update personal info
+ *
+ * PII redaction: when the caller is PROPERTY_MANAGER, the nested `user.email`
+ * and `user.phone` fields are stripped from the response. ADMIN sees the full
+ * record; tenants reading their own data go through /users/me (not these routes).
  */
+
+/** Strip user.email + user.phone for PM callers; leave other roles untouched. */
+function redactTenantPiiForPm<T extends { user?: unknown } | null | undefined>(
+  tenant: T,
+  actor: JwtPayload,
+): T {
+  if (actor.role !== RoleEnum.PROPERTY_MANAGER) return tenant;
+  if (!tenant || typeof tenant !== "object" || !("user" in tenant) || !tenant.user) return tenant;
+  const user = tenant.user as Record<string, unknown>;
+  const { email: _e, phone: _p, ...rest } = user;
+  void _e;
+  void _p;
+  return { ...tenant, user: rest };
+}
+
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard, PropertyScopeGuard)
 export class TenantsController {
@@ -42,15 +62,21 @@ export class TenantsController {
   @PropertyScope("property")
   @HttpCode(HttpStatus.OK)
   async listByProperty(
+    @CurrentUser() actor: JwtPayload,
     @Param("propertyId", ParseIntPipe) propertyId: number,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
-    return this.tenantsService.listByProperty(
+    const res = await this.tenantsService.listByProperty(
       propertyId,
       cursor ? parseInt(cursor, 10) : undefined,
       limit ? parseInt(limit, 10) : 20,
+      page ? parseInt(page, 10) : undefined,
+      pageSize ? parseInt(pageSize, 10) : undefined,
     );
+    return { ...res, data: res.data.map((t) => redactTenantPiiForPm(t, actor)) };
   }
 
   // ---------------------------------------------------------------------------
@@ -61,8 +87,12 @@ export class TenantsController {
   @Roles("ADMIN", "PROPERTY_MANAGER")
   @PropertyScope("tenant")
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.tenantsService.findById(id);
+  async findOne(
+    @CurrentUser() actor: JwtPayload,
+    @Param("id", ParseIntPipe) id: number,
+  ) {
+    const tenant = await this.tenantsService.findById(id);
+    return redactTenantPiiForPm(tenant, actor);
   }
 
   // ---------------------------------------------------------------------------
@@ -78,6 +108,7 @@ export class TenantsController {
     @Body() dto: UpdateTenantDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.tenantsService.update(id, dto, actor.sub);
+    const updated = await this.tenantsService.update(id, dto, actor.sub);
+    return redactTenantPiiForPm(updated, actor);
   }
 }

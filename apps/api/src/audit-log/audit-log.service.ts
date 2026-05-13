@@ -50,6 +50,8 @@ export interface AuditLogFilter {
   to?: string;
   cursor?: number;
   limit?: number;
+  page?: number;
+  pageSize?: number;
 }
 
 @Injectable()
@@ -70,7 +72,10 @@ export class AuditLogService {
    * Returns `before`/`after` fields with sensitive keys redacted.
    */
   async findMany(filters: AuditLogFilter) {
-    const take = Math.min(filters.limit ?? 50, 100);
+    const useOffset = filters.page !== undefined;
+    const ps = filters.pageSize !== undefined ? Math.min(Math.max(filters.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(filters.limit ?? 50, 100);
+    const currentPage = filters.page ?? 1;
 
     // Build Prisma where clause
     const where: Record<string, unknown> = {};
@@ -102,18 +107,45 @@ export class AuditLogService {
       where["created_at"] = dateFilter;
     }
 
-    const items = await this.prisma.auditLog.findMany({
-      where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
-      orderBy: { created_at: "desc" },
-      take: take + 1,
-      ...(filters.cursor
-        ? { cursor: { id: filters.cursor }, skip: 1 }
-        : {}),
-    });
+    // Explicit-branch findMany — avoids TS conditional-spread inference issue.
+    const findManyPromise = useOffset
+      ? this.prisma.auditLog.findMany({
+          where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
+          orderBy: { created_at: "desc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.auditLog.findMany({
+          where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
+          orderBy: { created_at: "desc" },
+          take: take + 1,
+          ...(filters.cursor
+            ? { cursor: { id: filters.cursor }, skip: 1 }
+            : {}),
+        });
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.auditLog.count({
+        where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
+      }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      data = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     // Redact sensitive fields from snapshots at the read boundary (defensive).
     const redacted = data.map((row) => ({
@@ -124,7 +156,15 @@ export class AuditLogService {
 
     return {
       data: redacted,
-      meta: { cursor: nextCursor ?? null, has_more: hasMore },
+      meta: {
+        cursor: nextCursor ?? null,
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
     };
   }
 }

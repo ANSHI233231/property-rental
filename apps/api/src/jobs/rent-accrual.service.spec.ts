@@ -117,6 +117,12 @@ describe("RentAccrualService", () => {
       lease: {
         findMany: jest.fn().mockResolvedValue([]),
       } as unknown as PrismaService["lease"],
+      // generateNextPeriod auto-consumes unconsumed prepaid credits — keep the
+      // mock empty so existing tests don't hit unexpected branches.
+      prepaidCredit: {
+        findMany: jest.fn().mockResolvedValue([]),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      } as unknown as PrismaService["prepaidCredit"],
       auditLog: {
         create: jest.fn().mockResolvedValue({}),
       } as unknown as PrismaService["auditLog"],
@@ -132,11 +138,16 @@ describe("RentAccrualService", () => {
       async (fn: (tx: unknown) => Promise<unknown>) => fn(prismaMock),
     );
 
+    const rentChangeScheduleMock = {
+      getEffectiveRentForUnit: jest.fn().mockResolvedValue(null),
+    };
+
     service = new RentAccrualService(
       prismaMock as unknown as PrismaService,
       auditMock as unknown as AuditService,
       rentServiceMock as unknown as RentService,
       configMock as unknown as ConfigService,
+      rentChangeScheduleMock as unknown as import("../rent-change-schedule/rent-change-schedule.service").RentChangeScheduleService,
     );
   });
 
@@ -209,14 +220,17 @@ describe("RentAccrualService", () => {
   // BL-13 worked example: ₹18,000 rent, 17 days overdue → ₹720 late fee
   // ---------------------------------------------------------------------------
 
-  it("BL-13 worked example: 17 days overdue → late_fee = 72,000 paise (₹720)", async () => {
+  it("BL-13: 17 days overdue period is flipped to OVERDUE; late fee is NOT stored", async () => {
+    // After the late-fee storage refactor, the cron only flips status. The
+    // late fee is computed on read by serializePeriod (BL-13 formula).
+    // The numeric example (17 days → ₹720) is preserved by
+    // computeLateFeePaise unit tests at the top of this file.
     const AMOUNT_DUE = 1_800_000n;
     const period = {
       id: 2,
       lease_id: 2,
-      due_date: DUE_17_DAYS_AGO, // 2026-04-24
+      due_date: DUE_17_DAYS_AGO,
       amount_due_paise: AMOUNT_DUE,
-      late_fee_paise: 0n,
       paid_paise: 0n,
       outstanding_paise: AMOUNT_DUE,
       status: 1, // DUE=1
@@ -225,36 +239,35 @@ describe("RentAccrualService", () => {
     (prismaMock.rentPeriod!.findMany as jest.Mock).mockResolvedValue([period]);
     (prismaMock.lease!.findMany as jest.Mock).mockResolvedValue([]);
 
-    // Capture the update call to verify late_fee_paise
     const updateSpy = prismaMock.rentPeriod!.update as jest.Mock;
-    updateSpy.mockImplementation((args: { data: Record<string, unknown> }) => Promise.resolve({ id: "period-2", ...args.data }));
+    updateSpy.mockImplementation((args: { data: Record<string, unknown> }) => Promise.resolve({ id: 2, ...args.data }));
 
     const result = await service.runAccrual(TODAY_UTC);
 
     expect(result.periodsExamined).toBe(1);
     expect(result.periodsOverdueFlipped).toBe(1);
-    // 17 days → floor(17/7)=2 weeks → 2 × 0.02 × 1,800,000 = 72,000
-    expect(result.lateFeesAddedPaise).toBe("72000");
+    // No longer accumulated; field stays 0.
+    expect(result.lateFeesAddedPaise).toBe("0");
 
-    // Verify the update was called with the correct late_fee_paise
-    // status: 4 = OVERDUE (smallint int code after BL int-id refactor)
+    // The cron must only set status — never late_fee_paise / outstanding_paise.
     expect(updateSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          status: 4, // OVERDUE=4
-          late_fee_paise: 72_000n,
-          outstanding_paise: 1_872_000n, // 1,800,000 + 72,000
-        }),
+        data: { status: 4 }, // OVERDUE
       }),
     );
+    const updateCall = updateSpy.mock.calls[0]?.[0] as { data: Record<string, unknown> } | undefined;
+    expect(updateCall?.data).not.toHaveProperty("late_fee_paise");
+    expect(updateCall?.data).not.toHaveProperty("outstanding_paise");
   });
 
   // ---------------------------------------------------------------------------
   // BL-13 partial week: 13 days → 1 full week → ₹360
   // ---------------------------------------------------------------------------
 
-  it("BL-13: 13 days overdue → 1 full week → late_fee = 36,000 paise (₹360)", async () => {
-    // due_date = 2026-04-28 (13 days before 2026-05-11)
+  it("BL-13: 13 days overdue period is flipped to OVERDUE (one full week post-grace)", async () => {
+    // computeLateFeePaise unit test above already proves the numeric ₹360 case.
+    // This integration test just confirms the cron flips a 13-day-overdue
+    // period to OVERDUE without writing late_fee_paise / outstanding_paise.
     const DUE_13_DAYS_AGO = new Date("2026-04-28T00:00:00Z");
     const AMOUNT_DUE = 1_800_000n;
     const period = {
@@ -262,7 +275,6 @@ describe("RentAccrualService", () => {
       lease_id: 3,
       due_date: DUE_13_DAYS_AGO,
       amount_due_paise: AMOUNT_DUE,
-      late_fee_paise: 0n,
       paid_paise: 0n,
       outstanding_paise: AMOUNT_DUE,
       status: 1, // DUE=1
@@ -272,17 +284,15 @@ describe("RentAccrualService", () => {
     (prismaMock.lease!.findMany as jest.Mock).mockResolvedValue([]);
 
     const updateSpy = prismaMock.rentPeriod!.update as jest.Mock;
-    updateSpy.mockImplementation((args: { data: Record<string, unknown> }) => Promise.resolve({ id: "period-3", ...args.data }));
+    updateSpy.mockImplementation((args: { data: Record<string, unknown> }) => Promise.resolve({ id: 3, ...args.data }));
 
     const result = await service.runAccrual(TODAY_UTC);
 
-    expect(result.lateFeesAddedPaise).toBe("36000");
+    expect(result.periodsOverdueFlipped).toBe(1);
+    expect(result.lateFeesAddedPaise).toBe("0");
     expect(updateSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          late_fee_paise: 36_000n,
-          outstanding_paise: 1_836_000n,
-        }),
+        data: { status: 4 },
       }),
     );
   });

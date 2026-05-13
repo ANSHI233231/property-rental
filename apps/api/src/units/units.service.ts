@@ -65,8 +65,13 @@ export class UnitsService {
     cursor?: number;
     limit?: number;
     status?: string;
+    page?: number;
+    pageSize?: number;
   }) {
-    const take = Math.min(query.limit ?? 20, 200);
+    const useOffset = query.page !== undefined;
+    const ps = query.pageSize !== undefined ? Math.min(Math.max(query.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(query.limit ?? 20, 200);
+
     // Accept state as int code string ("0") or name ("AVAILABLE")
     const STATE_NAME_TO_CODE: Record<string, number> = {
       AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3,
@@ -82,21 +87,55 @@ export class UnitsService {
       }
     }
 
-    const items = await this.prisma.unit.findMany({
-      where,
-      select: UNIT_SELECT,
-      orderBy: { created_at: "asc" },
-      take: take + 1,
-      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
-    });
+    const currentPage = query.page ?? 1;
+    const findManyPromise = useOffset
+      ? this.prisma.unit.findMany({
+          where,
+          select: UNIT_SELECT,
+          orderBy: { created_at: "asc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.unit.findMany({
+          where,
+          select: UNIT_SELECT,
+          orderBy: { created_at: "asc" },
+          take: take + 1,
+          ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+        });
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.unit.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let raw: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      raw = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      raw = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? raw[raw.length - 1]?.id : undefined;
+    }
+
+    const data = await this.enrichWithScheduledRent(raw);
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
       data,
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
     };
   }
 
@@ -104,26 +143,85 @@ export class UnitsService {
   // List units for a property (cursor-based)
   // ---------------------------------------------------------------------------
 
-  async list(propertyId: number, cursor?: number, limit = 20) {
+  async list(
+    propertyId: number,
+    cursor?: number,
+    limit = 20,
+    state?: string,
+    page?: number,
+    pageSize?: number,
+  ) {
     // Verify property exists
     await this.getPropertyOrThrow(propertyId);
 
-    const take = Math.min(limit, 100);
-    const items = await this.prisma.unit.findMany({
-      where: { property_id: propertyId },
-      select: UNIT_SELECT,
-      orderBy: { created_at: "asc" },
-      take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
+    const useOffset = page !== undefined;
+    const ps = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(limit, 100);
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    // Accept state as int code string ("0") or name ("AVAILABLE")
+    const STATE_NAME_TO_CODE: Record<string, number> = {
+      AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3,
+    };
+    const where: { property_id: number; state?: number } = { property_id: propertyId };
+    if (state) {
+      const asInt = parseInt(state, 10);
+      if (!isNaN(asInt)) {
+        where.state = asInt;
+      } else {
+        const code = STATE_NAME_TO_CODE[state.toUpperCase()];
+        if (code !== undefined) where.state = code;
+      }
+    }
+
+    const currentPage = page ?? 1;
+    const findManyPromise = useOffset
+      ? this.prisma.unit.findMany({
+          where,
+          select: UNIT_SELECT,
+          orderBy: { created_at: "asc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.unit.findMany({
+          where,
+          select: UNIT_SELECT,
+          orderBy: { created_at: "asc" },
+          take: take + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        });
+
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.unit.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let raw: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      raw = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      raw = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? raw[raw.length - 1]?.id : undefined;
+    }
+
+    const data = await this.enrichWithScheduledRent(raw);
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
       data,
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
     };
   }
 
@@ -194,6 +292,13 @@ export class UnitsService {
     }
 
     return unit;
+  }
+
+  /** Find single unit with scheduled rent enrichment (for GET /units/:id) */
+  async findByIdWithSchedule(id: number) {
+    const unit = await this.findById(id);
+    const [enriched] = await this.enrichWithScheduledRent([unit]);
+    return enriched!;
   }
 
   // ---------------------------------------------------------------------------
@@ -425,6 +530,44 @@ export class UnitsService {
         code: "METHOD_NOT_ALLOWED",
         message: "Units cannot be deleted. Use POST /units/:id/retire to retire a unit (BL-05).",
       },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Enrich unit rows with scheduled-rent info (Change 5)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * For a list of unit rows, find any PENDING RentChangeSchedule for each unit
+   * and append scheduledRent (new_amount_paise as string) and
+   * scheduledRentEffectiveDate (YYYY-MM-DD) to the response shape.
+   *
+   * Done in a single batch query: one findMany for all unit IDs.
+   */
+  async enrichWithScheduledRent<T extends { id: number }>(
+    units: T[],
+  ): Promise<(T & { scheduledRent: string | null; scheduledRentEffectiveDate: string | null })[]> {
+    if (units.length === 0) return [];
+
+    const unitIds = units.map((u) => u.id);
+    const pendingSchedules = await this.prisma.rentChangeSchedule.findMany({
+      where: { unit_id: { in: unitIds }, status: 0 /* PENDING */ },
+      select: { unit_id: true, new_amount_paise: true, effective_date: true },
+    });
+
+    // Build lookup: unitId → schedule
+    const scheduleMap = new Map<number, { new_amount_paise: bigint; effective_date: Date }>();
+    for (const s of pendingSchedules) {
+      scheduleMap.set(s.unit_id, s);
+    }
+
+    return units.map((unit) => {
+      const s = scheduleMap.get(unit.id);
+      return {
+        ...unit,
+        scheduledRent: s ? s.new_amount_paise.toString() : null,
+        scheduledRentEffectiveDate: s ? s.effective_date.toISOString().slice(0, 10) : null,
+      };
     });
   }
 

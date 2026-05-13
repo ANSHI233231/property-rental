@@ -46,8 +46,18 @@ export class PropertiesService {
   // PROPERTY_MANAGER: only the property assigned to them (BL-19).
   // ---------------------------------------------------------------------------
 
-  async list(cursor?: number, limit = 20, actor?: JwtPayload) {
-    const take = Math.min(limit, 100);
+  async list(
+    cursor?: number,
+    limit = 20,
+    actor?: JwtPayload,
+    page?: number,
+    pageSize?: number,
+  ) {
+    const effectivePageSize = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
+    const useOffset = page !== undefined;
+    const take = useOffset
+      ? (effectivePageSize ?? 10)
+      : Math.min(limit, 100);
 
     // Scope for PROPERTY_MANAGER (role=1): only their assigned property.
     const where: { deleted_at: null; active_pm_id?: number } = { deleted_at: null };
@@ -55,21 +65,57 @@ export class PropertiesService {
       where.active_pm_id = actor.sub;
     }
 
-    const items = await this.prisma.property.findMany({
-      where,
-      select: PROPERTY_SELECT,
-      orderBy: { created_at: "asc" },
-      take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
+    // Explicit-branch findMany — see note in leases.service.ts.
+    const findManyPromise = useOffset
+      ? this.prisma.property.findMany({
+          where,
+          select: PROPERTY_SELECT,
+          orderBy: { created_at: "asc" },
+          skip: ((page ?? 1) - 1) * take,
+          take,
+        })
+      : this.prisma.property.findMany({
+          where,
+          select: PROPERTY_SELECT,
+          orderBy: { created_at: "asc" },
+          take: take + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        });
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    const [items, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.property.count({ where }),
+    ]);
+
+    const currentPage = useOffset ? (page ?? 1) : 1;
+    const ps = take;
+
+    let hasMore: boolean;
+    let data: typeof items;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = items;
+      hasMore = currentPage * ps < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = items.length > take;
+      data = hasMore ? items.slice(0, take) : items;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / ps);
 
     return {
       data,
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: ps,
+        total_pages: totalPages,
+      },
     };
   }
 

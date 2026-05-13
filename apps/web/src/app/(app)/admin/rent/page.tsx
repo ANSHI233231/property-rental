@@ -17,6 +17,8 @@ import { parseISO, differenceInCalendarDays } from "date-fns";
 // Note: date-fns format() removed — use formatDateOnlyIST / todayIST from @/lib/locale instead
 import { useAuth } from "@/lib/auth/context";
 import { useToast } from "@/components/ui/Toast";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { Modal } from "@/components/ui/Modal";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
@@ -156,19 +158,20 @@ export default function AdminRentPage() {
   const [overduePeriods, setOverduePeriods] = useState<RentPeriod[]>([]);
   const [partialPeriods, setPartialPeriods] = useState<RentPeriod[]>([]);
   const [allPeriods, setAllPeriods] = useState<RentPeriod[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [kpiLoading, setKpiLoading] = useState(true);
   const [recomputeOpen, setRecomputeOpen] = useState(false);
   const [recomputeRunning, setRecomputeRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<StatusChip>("OVERDUE");
+  const [tableRefetchKey, setTableRefetchKey] = useState(0);
 
+  // KPI aggregation — loads full data for counts (kept independent of pagination)
   useEffect(() => {
     let cancelled = false;
 
     async function fetchData() {
-      setLoading(true);
+      setKpiLoading(true);
       try {
-        // Fetch overdue periods (for table + aggregate)
         const [overdueRes, partialRes, paidRes, prepaidRes] = await Promise.allSettled([
           apiFetch<RentPeriodsResponse>("/rent-periods?status=OVERDUE&limit=100"),
           apiFetch<RentPeriodsResponse>("/rent-periods?status=PARTIAL&limit=100"),
@@ -201,13 +204,38 @@ export default function AdminRentPage() {
       } catch {
         // Silently fail
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setKpiLoading(false);
       }
     }
 
     void fetchData();
     return () => { cancelled = true; };
   }, [apiFetch]);
+
+  const loading = kpiLoading;
+
+  // Paginated table — uses status chip as filter
+  const tableExtraQuery: Record<string, string | undefined> = {};
+  if (activeChip !== "ALL") tableExtraQuery.status = activeChip;
+
+  const {
+    items: displayPeriods,
+    page: tablePage,
+    totalPages: tableTotalPages,
+    total: tableTotal,
+    pageSize: tablePageSize,
+    hasNext: tableHasNext,
+    hasPrev: tableHasPrev,
+    loading: tableLoading,
+    next: tableNext,
+    prev: tablePrev,
+    goToPage: tableGoToPage,
+  } = usePaginatedList<RentPeriod>({
+    url: "/rent-periods",
+    extraQuery: tableExtraQuery,
+    pageSize: 10,
+    refetchKey: tableRefetchKey,
+  });
 
   async function handleRecompute() {
     setRecomputeRunning(true);
@@ -217,16 +245,21 @@ export default function AdminRentPage() {
       setLastRun(now);
       toast("Accrual job completed. Statuses and late fees have been updated.", "success");
       setRecomputeOpen(false);
-      // Refresh data
-      setLoading(true);
-      const res = await apiFetch<RentPeriodsResponse>("/rent-periods?status=OVERDUE&limit=100");
-      setOverduePeriods(res.data ?? res.items ?? []);
+      // Refresh KPI data + table
+      setKpiLoading(true);
+      const [overdueRes] = await Promise.allSettled([
+        apiFetch<RentPeriodsResponse>("/rent-periods?status=OVERDUE&limit=100"),
+      ]);
+      if (overdueRes.status === "fulfilled") {
+        setOverduePeriods(overdueRes.value.data ?? overdueRes.value.items ?? []);
+      }
+      setTableRefetchKey((k) => k + 1);
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : friendlyError(err);
       toast(`Accrual failed: ${msg}`, "error");
     } finally {
       setRecomputeRunning(false);
-      setLoading(false);
+      setKpiLoading(false);
     }
   }
 
@@ -259,14 +292,6 @@ export default function AdminRentPage() {
   const tenantsInArrears = new Set(overduePeriods.map((p) => p.leaseId)).size;
 
   const today = new Date();
-
-  // Chip-filtered periods for the table
-  const displayPeriods =
-    activeChip === "OVERDUE"
-      ? overduePeriods
-      : activeChip === "PARTIAL"
-      ? partialPeriods
-      : allPeriods;
 
   return (
     <>
@@ -374,9 +399,9 @@ export default function AdminRentPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && <SkeletonTableRows rows={3} cols={8} />}
+              {tableLoading && <SkeletonTableRows rows={3} cols={8} />}
 
-              {!loading && displayPeriods.length === 0 && (
+              {!tableLoading && displayPeriods.length === 0 && (
                 <tr>
                   <td colSpan={8} className="text-center muted py-8">
                     No {activeChip === "ALL" ? "" : activeChip.toLowerCase() + " "}
@@ -385,7 +410,7 @@ export default function AdminRentPage() {
                 </tr>
               )}
 
-              {!loading &&
+              {!tableLoading &&
                 displayPeriods.map((period) => {
                   const tenants =
                     period.lease?.tenants?.map((t) => t.name).join(" + ") ??
@@ -421,6 +446,21 @@ export default function AdminRentPage() {
                 })}
             </tbody>
           </table>
+          {!tableLoading && displayPeriods.length > 0 && (
+            <Pagination
+              page={tablePage}
+              totalPages={tableTotalPages}
+              total={tableTotal}
+              pageSize={tablePageSize}
+              hasPrev={tableHasPrev}
+              hasNext={tableHasNext}
+              onPrev={tablePrev}
+              onNext={tableNext}
+              onGoToPage={tableGoToPage}
+              itemsOnPage={displayPeriods.length}
+              loading={tableLoading}
+            />
+          )}
         </div>
         <p className="text-xs muted mt-3">
           Late fee = 2% of outstanding × full weeks overdue. Calculated automatically — PMs do not enter it manually.

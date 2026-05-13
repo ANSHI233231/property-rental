@@ -405,10 +405,15 @@ export class LeasesService {
     status?: string;
     cursor?: number;
     limit?: number;
+    page?: number;
+    pageSize?: number;
     actorId: number;
     actorRole: number;
   }) {
-    const take = Math.min(filters.limit ?? 20, 100);
+    const useOffset = filters.page !== undefined;
+    const ps = filters.pageSize !== undefined ? Math.min(Math.max(filters.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(filters.limit ?? 20, 100);
+    const currentPage = filters.page ?? 1;
 
     // Build where clause with proper Prisma types
     let where: Prisma.LeaseWhereInput = {};
@@ -462,40 +467,94 @@ export class LeasesService {
           unit: { ...(where.unit as Prisma.UnitWhereInput ?? {}), property_id: managedProperty.id },
         };
       } else {
-        return { data: [], meta: { next_cursor: null, has_more: false } };
+        return {
+          data: [],
+          meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 },
+        };
       }
     }
 
-    const items = await this.prisma.lease.findMany({
-      where,
-      select: {
-        ...LEASE_SELECT,
-        lease_tenants: {
-          where: { removed_at: null },
-          select: {
-            is_primary: true,
-            tenant: {
-              select: {
-                id: true,
-                user_id: true,
-                user: { select: { id: true, name: true, email: true, phone: true } },
-              },
+    const findManySelect = {
+      ...LEASE_SELECT,
+      unit: { select: { id: true, unit_number: true } },
+      lease_tenants: {
+        where: { removed_at: null },
+        select: {
+          is_primary: true,
+          tenant: {
+            select: {
+              id: true,
+              user_id: true,
+              user: { select: { id: true, name: true, email: true, phone: true } },
             },
           },
         },
       },
-      orderBy: { created_at: "asc" },
-      take: take + 1,
-      ...(filters.cursor ? { cursor: { id: filters.cursor }, skip: 1 } : {}),
-    });
+    } as const;
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    // Explicit-branch findMany avoids a TS inference issue with conditional
+    // spread of `cursor`/`skip` (Prisma's typed args don't unify cleanly).
+    const findManyPromise = useOffset
+      ? this.prisma.lease.findMany({
+          where,
+          select: findManySelect,
+          orderBy: { created_at: "asc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.lease.findMany({
+          where,
+          select: findManySelect,
+          orderBy: { created_at: "asc" },
+          take: take + 1,
+          ...(filters.cursor ? { cursor: { id: filters.cursor }, skip: 1 } : {}),
+        });
+
+    const [items, total] = await this.prisma.$transaction([
+      findManyPromise,
+      this.prisma.lease.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof items;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = items;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = items.length > take;
+      data = hasMore ? items.slice(0, take) : items;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
-      data: data.map((l) => serializeLease(l)),
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      // Flatten unit + tenants for the FE table contract.
+      // `lease_tenants` is still returned alongside for any consumer that
+      // wants the raw nested shape.
+      data: data.map((l) => {
+        const serialized = serializeLease(l as LeaseRow & Record<string, unknown>);
+        const lt = (l as unknown as {
+          unit: { id: number; unit_number: string } | null;
+          lease_tenants: Array<{
+            is_primary: boolean;
+            tenant: { id: number; user: { name: string } };
+          }>;
+        });
+        return {
+          ...serialized,
+          unit: lt.unit ? { id: lt.unit.id, name: lt.unit.unit_number } : null,
+          tenants: lt.lease_tenants.map((row) => ({
+            id: row.tenant.id,
+            name: row.tenant.user.name,
+            is_primary: row.is_primary,
+          })),
+        };
+      }),
+      meta: { next_cursor: nextCursor ?? null, has_more: hasMore, total, page: currentPage, page_size: take, total_pages: totalPages },
     };
   }
 
@@ -544,7 +603,33 @@ export class LeasesService {
       },
     });
 
-    return { ...serializeLease(lease), lease_tenants: leaseTenants };
+    // Load the unit so the FE detail page can render unit_number / property.
+    const unit = await this.prisma.unit.findUnique({
+      where: { id: lease.unit_id },
+      select: {
+        id: true,
+        unit_number: true,
+        property: { select: { id: true, name: true } },
+      },
+    });
+
+    // Flatten unit + tenants for the FE contract. Raw `lease_tenants` is
+    // kept alongside so existing consumers that walked the nested shape
+    // continue to work.
+    return {
+      ...serializeLease(lease),
+      unit: unit ? { id: unit.id, name: unit.unit_number, property: unit.property } : null,
+      tenants: leaseTenants
+        .filter((lt) => lt.removed_at === null)
+        .map((lt) => ({
+          id: lt.tenant.id,
+          name: lt.tenant.user.name,
+          email: lt.tenant.user.email,
+          phone: lt.tenant.user.phone,
+          is_primary: lt.is_primary,
+        })),
+      lease_tenants: leaseTenants,
+    };
   }
 
   // ---------------------------------------------------------------------------

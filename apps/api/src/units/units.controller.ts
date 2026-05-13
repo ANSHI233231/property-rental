@@ -18,7 +18,9 @@ import { UpdateUnitDto } from "./dto/update-unit.dto";
 import { UnitStateChangeDto } from "./dto/unit-state-change.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
+import { PropertyScopeGuard } from "../auth/guards/property-scope.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { PropertyScope } from "../auth/decorators/property-scope.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/jwt.service";
 
@@ -55,18 +57,22 @@ export class UnitsController {
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
     @Query("status") status?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
     return this.unitsService.listAll({
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 200) : 20,
       status,
+      page: page ? parseInt(page, 10) : undefined,
+      pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
     });
   }
 
-  /** GET /units/:id */
+  /** GET /units/:id — includes scheduledRent + scheduledRentEffectiveDate (Change 5) */
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.unitsService.findById(id);
+    return this.unitsService.findByIdWithSchedule(id);
   }
 
   /**
@@ -124,19 +130,37 @@ export class UnitsController {
  * Admin-only in Phase 2.
  */
 @Controller("properties/:propertyId/units")
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PropertyScopeGuard)
 @Roles("ADMIN")
 export class PropertyUnitsController {
   constructor(private readonly unitsService: UnitsService) {}
 
-  /** GET /properties/:propertyId/units?cursor=&limit=20 */
+  /**
+   * GET /properties/:propertyId/units?cursor=&limit=20&state=AVAILABLE
+   *
+   * ADMIN can list units for any property; PROPERTY_MANAGER may only list units
+   * for properties they're assigned to (enforced by PropertyScopeGuard).
+   * Optional `state` filter accepts an int code ("0") or name ("AVAILABLE").
+   */
   @Get()
+  @Roles("ADMIN", "PROPERTY_MANAGER")
+  @PropertyScope("property")
   async list(
     @Param("propertyId", ParseIntPipe) propertyId: number,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("state") state?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
-    return this.unitsService.list(propertyId, cursor ? parseInt(cursor, 10) : undefined, limit ? parseInt(limit, 10) : 20);
+    return this.unitsService.list(
+      propertyId,
+      cursor ? parseInt(cursor, 10) : undefined,
+      limit ? parseInt(limit, 10) : 20,
+      state,
+      page ? parseInt(page, 10) : undefined,
+      pageSize ? parseInt(pageSize, 10) : undefined,
+    );
   }
 
   /** POST /properties/:propertyId/units */

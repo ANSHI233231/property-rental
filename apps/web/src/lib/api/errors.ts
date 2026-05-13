@@ -39,8 +39,10 @@ const ERROR_MAP: Record<string, string> = {
   HTTP_429: "Too many attempts. Try again shortly.",
   RATE_LIMIT_EXCEEDED: "Too many attempts. Try again shortly.",
   // Phase 5 — Maintenance
+  // BL-16 deviation (2026-05-13): Tenant, Admin, and PM may raise. Only
+  // MAINTENANCE staff are blocked from raising.
   BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE:
-    "Only tenants can raise maintenance requests.",
+    "Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.",
   BL_21_ONLY_TENANT_CAN_CLOSE_MAINTENANCE:
     "Only the tenant who raised this request can close it.",
   NO_ACTIVE_LEASE_ON_UNIT:
@@ -49,6 +51,10 @@ const ERROR_MAP: Record<string, string> = {
     "This request can't transition from its current status.",
   NOT_YOUR_ASSIGNMENT:
     "You can only act on requests assigned to you.",
+  // Cross-property scope violation — surfaced when a PM tries to act on a
+  // unit/property they don't manage.
+  PROPERTY_ACCESS_DENIED:
+    "You can only act on units in your assigned property.",
 };
 
 const DEFAULT_ERROR = "Something went wrong. Please try again.";

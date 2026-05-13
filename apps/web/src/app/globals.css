@@ -163,7 +163,7 @@
 
   /* Main shell */
   .app-shell { @apply min-h-screen; }
-  .app-main { margin-left: 240px; padding: 32px 48px; max-width: 1440px; }
+  .app-main { margin-left: 240px; padding: 32px 48px; }
 
   /* Topbar */
   .topbar {

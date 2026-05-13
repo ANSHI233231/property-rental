@@ -256,7 +256,7 @@ describe("EmergencyBanner visibility logic", () => {
 describe("Phase 5 error code mapping", () => {
   it("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE maps correctly", () => {
     const msg = mapApiErrorCode("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE");
-    expect(msg).toBe("Only tenants can raise maintenance requests.");
+    expect(msg).toBe("Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.");
   });
 
   it("BL_21_ONLY_TENANT_CAN_CLOSE_MAINTENANCE maps correctly", () => {
@@ -287,7 +287,7 @@ describe("Phase 5 error code mapping", () => {
 
   it("friendlyError extracts Phase 5 code from error object", () => {
     const msg = friendlyError({ code: "BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE" });
-    expect(msg).toBe("Only tenants can raise maintenance requests.");
+    expect(msg).toBe("Maintenance staff cannot raise requests. Ask a tenant, PM, or admin.");
   });
 });
 

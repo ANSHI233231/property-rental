@@ -16,9 +16,10 @@ import { useAuth } from "@/lib/auth/context";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { paiseStringToINR, parseBigPaise, daysOverdue, weeksOverdue } from "@/lib/rent/format";
 import { computeLateFeePaise, RentPeriodStatusEnum } from "@gharsetu/shared";
-import type { RentStatusValue } from "@gharsetu/shared";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -187,42 +188,70 @@ function KpiCard({
 export default function TenantRentPage() {
   const { user, apiFetch } = useAuth();
 
+  // Fetch tenant's active lease for KPI context
   const [lease, setLease] = useState<LeaseInfo | null>(null);
-  const [periods, setPeriods] = useState<RentPeriod[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [leaseLoading, setLeaseLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-
-    async function fetchData() {
-      setLoading(true);
+    async function fetchLease() {
+      setLeaseLoading(true);
       try {
-        // Tenant's own lease (token-scoped)
-        const leasesRes = await apiFetch<LeasesResponse>("/leases?status=ACTIVE&limit=1");
-        const leaseItems = leasesRes.data ?? leasesRes.items ?? [];
-        const myLease = leaseItems[0] ?? null;
-
-        if (!cancelled) setLease(myLease);
-
-        if (myLease) {
-          const periodsRes = await apiFetch<RentPeriodsResponse>(
-            `/rent-periods?leaseId=${myLease.id}&limit=50`,
-          );
-          if (!cancelled) {
-            const items = periodsRes.data ?? periodsRes.items ?? [];
-            setPeriods(items);
-          }
-        }
+        const res = await apiFetch<LeasesResponse>("/leases?status=ACTIVE&limit=1");
+        const items = res.data ?? res.items ?? [];
+        if (!cancelled) setLease(items[0] ?? null);
       } catch {
         // silent
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLeaseLoading(false);
       }
     }
-
-    void fetchData();
+    void fetchLease();
     return () => { cancelled = true; };
   }, [apiFetch]);
+
+  // Paginated rent periods for the history table
+  const historyExtraQuery: Record<string, string | undefined> = {};
+  if (lease?.id) historyExtraQuery.leaseId = String(lease.id);
+
+  const {
+    items: periods,
+    page: periodsPage,
+    totalPages: periodsTotalPages,
+    total: periodsTotal,
+    pageSize: periodsPageSize,
+    hasNext: periodsHasNext,
+    hasPrev: periodsHasPrev,
+    loading: periodsLoading,
+    next: periodsNext,
+    prev: periodsPrev,
+    goToPage: periodsGoToPage,
+  } = usePaginatedList<RentPeriod>({
+    url: "/rent-periods",
+    extraQuery: lease?.id ? historyExtraQuery : undefined,
+    pageSize: 10,
+  });
+
+  // Separate lightweight fetch for KPI aggregation (current period + totals)
+  // Using a larger limit since a tenant typically has <24 periods per year
+  const [allPeriods, setAllPeriods] = useState<RentPeriod[]>([]);
+  useEffect(() => {
+    if (!lease?.id) return;
+    let cancelled = false;
+    apiFetch<{ data?: RentPeriod[]; items?: RentPeriod[] }>(
+      `/rent-periods?leaseId=${String(lease.id)}&limit=100`
+    )
+      .then((res) => {
+        if (!cancelled) {
+          setAllPeriods(res.data ?? res.items ?? []);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiFetch, lease?.id]);
+
+  const loading = leaseLoading;
 
   function initials(name: string): string {
     return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
@@ -241,16 +270,16 @@ export default function TenantRentPage() {
     return names.includes(s as string);
   }
 
-  // Identify the current (most recent open) period
-  const currentPeriod = periods.find(
+  // Identify the current (most recent open) period from all-periods fetch
+  const currentPeriod = allPeriods.find(
     (p) => isStatus(p.status, "OVERDUE", "PARTIAL", "DUE"),
-  ) ?? periods[0] ?? null;
+  ) ?? allPeriods[0] ?? null;
 
-  // Aggregate KPIs
-  const paidTotal = periods
+  // Aggregate KPIs from all periods
+  const paidTotal = allPeriods
     .filter((p) => isStatus(p.status, "PAID", "PREPAID"))
     .reduce((acc, p) => acc + parseBigPaise(String(p.paidPaise)), 0);
-  const paidPeriods = periods.filter(
+  const paidPeriods = allPeriods.filter(
     (p) => isStatus(p.status, "PAID", "PREPAID"),
   ).length;
   const monthlyRent = lease?.monthly_rent_paise
@@ -393,7 +422,7 @@ export default function TenantRentPage() {
           <KpiCard
             label="Paid this year"
             value={paidTotal > 0 ? paiseStringToINR(String(paidTotal)) : "—"}
-            meta={paidPeriods > 0 ? `${paidPeriods} of ${periods.length} periods` : "No payments yet"}
+            meta={paidPeriods > 0 ? `${paidPeriods} of ${allPeriods.length} periods` : "No payments yet"}
             color={paidTotal > 0 ? "var(--color-status-paid)" : undefined}
           />
         </div>
@@ -416,7 +445,9 @@ export default function TenantRentPage() {
               </tr>
             </thead>
             <tbody>
-              {periods.length === 0 && (
+              {periodsLoading && <SkeletonTableRows rows={4} cols={7} />}
+
+              {!periodsLoading && periods.length === 0 && (
                 <tr>
                   <td colSpan={7} className="text-center muted py-8">
                     No payment history yet.
@@ -424,7 +455,7 @@ export default function TenantRentPage() {
                 </tr>
               )}
 
-              {periods.map((period) => {
+              {!periodsLoading && periods.map((period) => {
                 // Active (non-voided) payments
                 const activePays = (period.payments ?? []).filter((p) => !p.isVoided);
                 const latestPay = activePays[activePays.length - 1];
@@ -487,6 +518,21 @@ export default function TenantRentPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          page={periodsPage}
+          totalPages={periodsTotalPages}
+          total={periodsTotal}
+          pageSize={periodsPageSize}
+          hasPrev={periodsHasPrev}
+          hasNext={periodsHasNext}
+          onPrev={periodsPrev}
+          onNext={periodsNext}
+          onGoToPage={periodsGoToPage}
+          itemsOnPage={periods.length}
+          loading={periodsLoading}
+        />
+
         <p className="text-xs muted mt-3">
           Periods turn <span className="badge badge-overdue">Overdue</span> 5 calendar days after the due date. Late fees are calculated automatically (2% of outstanding × full weeks overdue).
         </p>

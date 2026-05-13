@@ -11,7 +11,7 @@
  * Drawer: period detail with all payments for that period.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +24,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { paiseStringToINR, parseBigPaise, daysOverdue } from "@/lib/rent/format";
 import {
   VoidPaymentSchema,
@@ -86,11 +88,6 @@ interface RentPeriod {
 interface LeasesResponse {
   data?: Lease[];
   items?: Lease[];
-}
-
-interface RentPeriodsResponse {
-  data?: RentPeriod[];
-  items?: RentPeriod[];
 }
 
 // ---------------------------------------------------------------------------
@@ -660,10 +657,11 @@ export default function PmRentCollectionPage() {
   const [leasesLoading, setLeasesLoading] = useState(true);
   const [selectedLeaseId, setSelectedLeaseId] = useState<string | null>(null);
 
-  // Rent periods
-  const [periods, setPeriods] = useState<RentPeriod[]>([]);
-  const [periodsLoading, setPeriodsLoading] = useState(false);
+  // Status filter for rent periods
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
+
+  // Bump to force re-fetch after payment or void
+  const [periodsRefetchKey, setPeriodsRefetchKey] = useState(0);
 
   // Modals / drawer state
   const [payModalOpen, setPayModalOpen] = useState(false);
@@ -702,34 +700,37 @@ export default function PmRentCollectionPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiFetch, propertyId]);
 
-  // Load periods for selected lease
-  const fetchPeriods = useCallback(async (leaseId: string) => {
-    setPeriodsLoading(true);
-    try {
-      const params = new URLSearchParams({ leaseId, limit: "50" });
-      const res = await apiFetch<RentPeriodsResponse>(`/rent-periods?${params.toString()}`);
-      const items = res.data ?? res.items ?? [];
-      setPeriods(items);
-    } catch {
-      setPeriods([]);
-    } finally {
-      setPeriodsLoading(false);
-    }
-  }, [apiFetch]);
+  // Paginated rent periods for the selected lease
+  const periodsExtraQuery: Record<string, string | undefined> = {};
+  if (selectedLeaseId) periodsExtraQuery.leaseId = selectedLeaseId;
+  if (statusFilter !== "ALL") periodsExtraQuery.status = statusFilter;
 
-  useEffect(() => {
-    if (!selectedLeaseId) return;
-    void fetchPeriods(selectedLeaseId);
-  }, [selectedLeaseId, fetchPeriods]);
+  const {
+    items: filteredPeriods,
+    page: periodsPage,
+    totalPages: periodsTotalPages,
+    total: periodsTotal,
+    pageSize: periodsPageSize,
+    hasNext: periodsHasNext,
+    hasPrev: periodsHasPrev,
+    loading: periodsLoading,
+    next: periodsNext,
+    prev: periodsPrev,
+    goToPage: periodsGoToPage,
+  } = usePaginatedList<RentPeriod>({
+    url: "/rent-periods",
+    extraQuery: selectedLeaseId ? periodsExtraQuery : undefined,
+    pageSize: 10,
+    refetchKey: periodsRefetchKey,
+  });
 
-  function handlePaymentSuccess(updated: RentPeriod) {
-    setPeriods((prev) => prev.map((p) => (String(p.id) === String(updated.id) ? updated : p)));
+  function handlePaymentSuccess(_updated: RentPeriod) {
+    // Re-fetch current page to reflect updated period status
+    setPeriodsRefetchKey((k) => k + 1);
   }
 
   function handleVoidSuccess(periodId: number | string) {
-    if (!selectedLeaseId) return;
-    // Re-fetch periods to get updated payment list
-    void fetchPeriods(selectedLeaseId);
+    setPeriodsRefetchKey((k) => k + 1);
     // If drawer is showing this period, refresh it
     if (drawerPeriod && String(drawerPeriod.id) === String(periodId)) {
       apiFetch<RentPeriod>(`/rent-periods/${periodId}`)
@@ -752,7 +753,24 @@ export default function PmRentCollectionPage() {
   const selectedLease = leases.find((l) => String(l.id) === String(selectedLeaseId)) ?? null;
   const tenantNames = selectedLease?.tenants?.map((t) => t.name).join(" + ") ?? "";
 
-  const filteredPeriods = periods.filter((p) => matchesRentStatus(p.status, statusFilter));
+  // Summary: fetch first outstanding period for context card (separate lightweight fetch)
+  const [summaryPeriod, setSummaryPeriod] = useState<RentPeriod | null>(null);
+  useEffect(() => {
+    if (!selectedLeaseId) { setSummaryPeriod(null); return; }
+    let cancelled = false;
+    apiFetch<{ data?: RentPeriod[]; items?: RentPeriod[] }>(
+      `/rent-periods?leaseId=${selectedLeaseId}&limit=10`
+    )
+      .then((res) => {
+        if (cancelled) return;
+        const items = res.data ?? res.items ?? [];
+        const outstanding = items.find((p) => isOutstanding(p.status)) ?? null;
+        setSummaryPeriod(outstanding);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiFetch, selectedLeaseId, periodsRefetchKey]);
 
   const today = new Date();
 
@@ -843,24 +861,20 @@ export default function PmRentCollectionPage() {
               </p>
             </div>
             {/* Current period outstanding badge */}
-            {(() => {
-              const current = periods.find((p) => isOutstanding(p.status));
-              if (!current) return null;
-              return (
-                <div className="flex gap-2 items-center">
-                  <StatusBadge status={current.status} />
-                  <span className="text-sm muted">
-                    Outstanding:{" "}
-                    <strong className="text-charcoal">
-                      {paiseStringToINR(current.outstandingPaise)}
-                    </strong>
-                    {parseBigPaise(current.lateFeePaise) > 0 && (
-                      <> (incl. {paiseStringToINR(current.lateFeePaise)} late fee)</>
-                    )}
-                  </span>
-                </div>
-              );
-            })()}
+            {summaryPeriod && (
+              <div className="flex gap-2 items-center">
+                <StatusBadge status={summaryPeriod.status} />
+                <span className="text-sm muted">
+                  Outstanding:{" "}
+                  <strong className="text-charcoal">
+                    {paiseStringToINR(summaryPeriod.outstandingPaise)}
+                  </strong>
+                  {parseBigPaise(summaryPeriod.lateFeePaise) > 0 && (
+                    <> (incl. {paiseStringToINR(summaryPeriod.lateFeePaise)} late fee)</>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -954,6 +968,20 @@ export default function PmRentCollectionPage() {
           </tbody>
         </table>
       </section>
+
+      <Pagination
+        page={periodsPage}
+        totalPages={periodsTotalPages}
+        total={periodsTotal}
+        pageSize={periodsPageSize}
+        hasPrev={periodsHasPrev}
+        hasNext={periodsHasNext}
+        onPrev={periodsPrev}
+        onNext={periodsNext}
+        onGoToPage={periodsGoToPage}
+        itemsOnPage={filteredPeriods.length}
+        loading={periodsLoading}
+      />
 
       <p className="text-xs muted mt-3">
         A period becomes <strong>Overdue</strong> 5 calendar days past the due date. Late fee = 2% of outstanding balance per full week overdue, calculated automatically.

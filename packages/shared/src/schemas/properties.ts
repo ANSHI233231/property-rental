@@ -43,8 +43,19 @@ export const PropertyUpdateSchema = z.object({
 });
 
 export const TransferPmInputSchema = z.object({
-  /** New PM user ID. Pass null to unassign (property becomes unmanaged). */
-  toPmId: z.string().cuid().nullable(),
+  /**
+   * New PM user ID (int after the BL int-ID refactor).
+   * Accepts the string the HTML <select> emits and coerces it; the empty
+   * string from the "Unassign" option becomes null.
+   */
+  toPmId: z.preprocess(
+    (v) => {
+      if (v === "" || v === null || v === undefined) return null;
+      const n = typeof v === "number" ? v : Number(v);
+      return Number.isFinite(n) ? n : v;
+    },
+    z.number().int().positive().nullable(),
+  ),
   note: z.string().max(500).optional(),
 });
 

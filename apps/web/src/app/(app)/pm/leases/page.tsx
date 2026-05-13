@@ -8,18 +8,30 @@
 
 import { useAuth } from "@/lib/auth/context";
 import { usePmProperty } from "@/lib/pm/context";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseISO } from "date-fns";
 import { formatDateOnlyIST } from "@/lib/locale";
-import { formatINR, rupeesToPaise, LeaseInputSchema, LeaseStatusEnum, type LeaseInput, type TenantInput } from "@gharsetu/shared";
+import {
+  formatINR,
+  rupeesToPaise,
+  LeaseInputSchema,
+  LeaseStatusEnum,
+  unitStateName,
+  type LeaseInput,
+  type TenantInput,
+  type UnitStateEnum,
+} from "@gharsetu/shared";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { friendlyError } from "@/lib/api/errors";
+import { useRefetchOnFocus } from "@/lib/hooks/use-refetch-on-focus";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,20 +48,13 @@ interface LeaseRow {
   tenants?: { id: string; name: string; is_primary: boolean }[];
 }
 
-interface PaginatedResponse {
-  data?: LeaseRow[];
-  items?: LeaseRow[];
-  meta?: {
-    total?: number;
-    count?: number;
-    next_cursor?: string | null;
-  };
-}
-
 interface Unit {
-  id: string;
-  name: string;
-  state: string;
+  /** int after the BL int-ID refactor; HTML <option value> stringifies anyway */
+  id: number | string;
+  /** API field is `unit_number` (e.g. "3A") */
+  unit_number: string;
+  /** UnitState smallint code: 0=AVAILABLE 1=LISTED 2=OCCUPIED 3=MAINTENANCE */
+  state: number;
   monthly_rent_paise?: string | number;
 }
 
@@ -286,8 +291,8 @@ function SignLeaseModal({
                 <select className="input" {...register("unitId", { required: "Please select a unit" })}>
                   <option value="">Choose a unit</option>
                   {units.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} — {u.state.charAt(0) + u.state.slice(1).toLowerCase()}
+                    <option key={u.id} value={String(u.id)}>
+                      {u.unit_number} — {unitStateName(u.state as UnitStateEnum)}
                       {u.monthly_rent_paise
                         ? ` · ${formatINR(typeof u.monthly_rent_paise === "string" ? parseInt(u.monthly_rent_paise, 10) : u.monthly_rent_paise)}`
                         : ""}
@@ -499,19 +504,41 @@ export default function PmLeasesPage() {
   const { property, propertyId, loading: propertyLoading } = usePmProperty();
   const router = useRouter();
 
-  const [leases, setLeases] = useState<LeaseRow[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showNewLeaseModal, setShowNewLeaseModal] = useState(false);
   const [availableUnits, setAvailableUnits] = useState<Unit[]>([]);
-
   const [showTempPassModal, setShowTempPassModal] = useState(false);
   const [createdTenants, setCreatedTenants] = useState<NewTenantCreated[]>([]);
   const [newLeaseId, setNewLeaseId] = useState<string | null>(null);
+  const [refetchKey, setRefetchKey] = useState(0);
+
+  const extraQuery: Record<string, string | undefined> = {};
+  if (statusFilter !== "ALL") extraQuery.status = statusFilter;
+  if (propertyId) extraQuery.propertyId = propertyId;
+
+  const {
+    items: leases,
+    page,
+    totalPages,
+    total,
+    pageSize: activePageSize,
+    hasNext,
+    hasPrev,
+    loading,
+    next,
+    prev,
+    goToPage,
+  } = usePaginatedList<LeaseRow>({
+    url: "/leases",
+    extraQuery: propertyId ? extraQuery : undefined,
+    pageSize: 10,
+    refetchKey,
+  });
+
+  // Cross-role name sync — tenant rename reflects on tab refocus.
+  useRefetchOnFocus(() => {
+    if (!propertyLoading && propertyId) setRefetchKey((k) => k + 1);
+  });
 
   // Leases ending soon alert
   const endingSoon = leases.filter((l) => {
@@ -523,42 +550,6 @@ export default function PmLeasesPage() {
       return days >= 0 && days <= 30;
     } catch { return false; }
   });
-
-  const fetchLeases = useCallback(
-    async (cursor: string | null = null, append = false) => {
-      if (!propertyId) return;
-      if (append) setLoadingMore(true);
-      else setLoading(true);
-
-      try {
-        const params = new URLSearchParams({ limit: "20" });
-        if (cursor) params.set("cursor", cursor);
-        if (statusFilter !== "ALL") params.set("status", statusFilter);
-        params.set("propertyId", propertyId);
-
-        const res = await apiFetch<PaginatedResponse>(`/leases?${params.toString()}`);
-        const rows: LeaseRow[] = res.data ?? res.items ?? [];
-
-        setLeases((prev) => (append ? [...prev, ...rows] : rows));
-        setTotal(res.meta?.total ?? null);
-        setNextCursor(res.meta?.next_cursor ?? null);
-      } catch {
-        if (!append) setLeases([]);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [apiFetch, propertyId, statusFilter],
-  );
-
-  useEffect(() => {
-    if (!propertyLoading && propertyId) {
-      void fetchLeases();
-    } else if (!propertyLoading && !propertyId) {
-      setLoading(false);
-    }
-  }, [fetchLeases, propertyLoading, propertyId]);
 
   async function openNewLeaseModal() {
     if (!propertyId) return;
@@ -579,7 +570,7 @@ export default function PmLeasesPage() {
     setCreatedTenants(newTenants);
     setNewLeaseId(leaseId);
     setShowTempPassModal(true);
-    void fetchLeases();
+    setRefetchKey((k) => k + 1);
   }
 
   function handleTempPassDismiss() {
@@ -723,19 +714,19 @@ export default function PmLeasesPage() {
           </tbody>
         </table>
         {!loading && !isEmpty && (
-          <div className="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
-            <div>Showing {leases.length}{total != null ? ` of ${total}` : ""}</div>
-            {nextCursor && (
-              <button
-                type="button"
-                className="btn btn-secondary !py-1 !px-3 !text-sm"
-                onClick={() => void fetchLeases(nextCursor, true)}
-                disabled={loadingMore}
-              >
-                {loadingMore ? "Loading…" : "Load more"}
-              </button>
-            )}
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={activePageSize}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={prev}
+            onNext={next}
+            onGoToPage={goToPage}
+            itemsOnPage={leases.length}
+            loading={loading}
+          />
         )}
       </section>
 

@@ -83,14 +83,30 @@ export class UsersController {
    */
   @Get()
   @UseGuards(RolesGuard)
-  @Roles("ADMIN")
+  @Roles("ADMIN", "PROPERTY_MANAGER")
   async listUsers(
-    @Query("role") role?: string,
-    @Query("cursor") cursor?: string,
-    @Query("limit") limit?: string,
+    @Query("role") role: string | undefined,
+    @Query("cursor") cursor: string | undefined,
+    @Query("limit") limit: string | undefined,
+    @Query("page") page: string | undefined,
+    @Query("pageSize") pageSize: string | undefined,
+    @CurrentUser() actor: JwtPayload,
   ) {
+    // PMs need to populate the maintenance-staff picker when assigning a
+    // request. Force-scope them to MAINTENANCE so they cannot enumerate other
+    // PMs, admins, or tenants regardless of what they pass on the wire.
+    const PROPERTY_MANAGER_ROLE = 1;
+    const effectiveRole = actor.role === PROPERTY_MANAGER_ROLE ? "MAINTENANCE" : role;
     const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
-    return this.usersService.listUsers(role, cursorNum, limit ? parseInt(limit, 10) : 20);
+    const pageNum = page !== undefined ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize !== undefined ? parseInt(pageSize, 10) : undefined;
+    return this.usersService.listUsers(
+      effectiveRole,
+      cursorNum,
+      limit ? parseInt(limit, 10) : 20,
+      pageNum !== undefined && !isNaN(pageNum) ? pageNum : undefined,
+      pageSizeNum !== undefined && !isNaN(pageSizeNum) ? pageSizeNum : undefined,
+    );
   }
 
   /**

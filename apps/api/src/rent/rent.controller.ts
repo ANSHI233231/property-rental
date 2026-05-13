@@ -55,6 +55,8 @@ export class RentController {
     @Query("periodStart_lte") periodStart_lte?: string,
     @Query("cursor") cursor?: string,
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
     @CurrentUser() actor?: JwtPayload,
   ) {
     return this.rentService.listPeriods({
@@ -66,6 +68,8 @@ export class RentController {
       periodStart_lte,
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit,
+      page: page ? parseInt(page, 10) : undefined,
+      pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
       actorId: actor!.sub,
       actorRole: actor!.role,
     });
@@ -103,6 +107,18 @@ export class RentController {
             message: "You are not the assigned manager for this property",
           },
         });
+      }
+    }
+
+    // PII redaction: TENANT callers must not see the bank reference number.
+    // Stored value is untouched; we only null it out in the response.
+    if (actor?.role === ROLE.TENANT) {
+      const payments = (period as { payments?: Array<Record<string, unknown>> }).payments;
+      if (Array.isArray(payments)) {
+        return {
+          ...period,
+          payments: payments.map((p) => ({ ...p, reference: null })),
+        };
       }
     }
 

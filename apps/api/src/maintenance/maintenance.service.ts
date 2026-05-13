@@ -78,6 +78,10 @@ const REQUEST_SELECT = {
   closed_by_user_id: true,
   created_at: true,
   updated_at: true,
+  // Nested context for FE — req.unit.name, req.raised_by.name, req.assigned_to.name
+  unit: { select: { id: true, unit_number: true } },
+  raised_by: { select: { id: true, name: true } },
+  assigned_to: { select: { id: true, name: true } },
 } as const;
 
 const ALERT_SELECT = {
@@ -134,9 +138,15 @@ export class MaintenanceService {
       scope?: string;
       cursor?: number;
       limit?: number;
+      page?: number;
+      pageSize?: number;
     },
   ) {
-    const limit = Math.min(query.limit ?? 20, 100);
+    const useOffset = query.page !== undefined;
+    const ps = query.pageSize !== undefined ? Math.min(Math.max(query.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(query.limit ?? 20, 100);
+    const currentPage = query.page ?? 1;
+
     const where: Prisma.MaintenanceRequestWhereInput = {};
 
     if (actor.role === ROLE.TENANT) {
@@ -157,7 +167,10 @@ export class MaintenanceService {
         select: { id: true },
       });
       if (!pm) {
-        return { data: [], nextCursor: null };
+        return {
+          data: [],
+          meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 },
+        };
       }
       where.unit = { property_id: pm.id };
       if (query.unitId !== undefined) where.unit_id = query.unitId;
@@ -184,25 +197,60 @@ export class MaintenanceService {
       where.status = STATUS_NAME_TO_CODE[upperStatus];
     }
 
-    const items = await this.prisma.maintenanceRequest.findMany({
-      where,
-      select: REQUEST_SELECT,
-      orderBy: { created_at: "desc" },
-      take: limit + 1,
-      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
-    });
+    // Explicit-branch findMany — avoids TS conditional-spread inference issue.
+    const findManyPromise = useOffset
+      ? this.prisma.maintenanceRequest.findMany({
+          where,
+          select: REQUEST_SELECT,
+          orderBy: { created_at: "desc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.maintenanceRequest.findMany({
+          where,
+          select: REQUEST_SELECT,
+          orderBy: { created_at: "desc" },
+          take: take + 1,
+          ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+        });
 
-    const hasMore = items.length > limit;
-    let data = hasMore ? items.slice(0, limit) : items;
-    const lastItem = data[data.length - 1];
-    const nextCursor = hasMore && lastItem ? lastItem.id : null;
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.maintenanceRequest.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      data = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
 
     // M-01: strip lease_id from MAINTENANCE all-open scope — no PII linkage needed
     if (actor.role === ROLE.MAINTENANCE && query.scope === "all-open") {
       data = data.map((item) => ({ ...item, lease_id: null }));
     }
 
-    return { data, nextCursor };
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
+
+    return {
+      data,
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -273,6 +321,33 @@ export class MaintenanceService {
       leaseId = leaseTenant.lease_id;
     } else if (actor.role === ROLE.ADMIN) {
       // Admin acts on behalf — find active lease if any
+      const lease = await this.prisma.lease.findFirst({
+        where: { unit_id: dto.unitId, status: LEASE_ACTIVE },
+        select: { id: true },
+      });
+      leaseId = lease?.id ?? null;
+    } else if (actor.role === ROLE.PROPERTY_MANAGER) {
+      // BL-16 deviation: PM raises on behalf of a tenant on a unit in their
+      // assigned property. Scope-check the unit → property → active_pm_id.
+      const unit = await this.prisma.unit.findUnique({
+        where: { id: dto.unitId },
+        select: {
+          id: true,
+          property: { select: { id: true, active_pm_id: true } },
+        },
+      });
+      if (!unit) {
+        throw new NotFoundException({
+          code: "RESOURCE_NOT_FOUND",
+          message: `Unit ${dto.unitId} not found`,
+        });
+      }
+      if (unit.property.active_pm_id !== actor.sub) {
+        throw new ForbiddenException({
+          code: "PROPERTY_ACCESS_DENIED",
+          message: "You can only raise requests on units in your assigned property.",
+        });
+      }
       const lease = await this.prisma.lease.findFirst({
         where: { unit_id: dto.unitId, status: LEASE_ACTIVE },
         select: { id: true },
@@ -553,8 +628,13 @@ export class MaintenanceService {
     dismissed?: string;
     cursor?: number;
     limit?: number;
+    page?: number;
+    pageSize?: number;
   }) {
-    const take = Math.min(query.limit ?? 20, 100);
+    const useOffset = query.page !== undefined;
+    const ps = query.pageSize !== undefined ? Math.min(Math.max(query.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(query.limit ?? 20, 100);
+    const currentPage = query.page ?? 1;
 
     const where: Prisma.MaintenanceAlertWhereInput = {};
 
@@ -570,26 +650,64 @@ export class MaintenanceService {
         select: { id: true },
       });
       if (!pm) {
-        return { data: [], nextCursor: null };
+        return {
+          data: [],
+          meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 },
+        };
       }
       where.unit = { property_id: pm.id };
     }
     // ADMIN: no additional scoping
 
-    const items = await this.prisma.maintenanceAlert.findMany({
-      where,
-      select: ALERT_SELECT,
-      orderBy: { triggered_at: "desc" },
-      take: take + 1,
-      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
-    });
+    // Explicit-branch findMany — avoids TS conditional-spread inference issue.
+    const findManyPromise = useOffset
+      ? this.prisma.maintenanceAlert.findMany({
+          where,
+          select: ALERT_SELECT,
+          orderBy: { triggered_at: "desc" },
+          skip: (currentPage - 1) * take,
+          take,
+        })
+      : this.prisma.maintenanceAlert.findMany({
+          where,
+          select: ALERT_SELECT,
+          orderBy: { triggered_at: "desc" },
+          take: take + 1,
+          ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+        });
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const lastItem = data[data.length - 1];
-    const nextCursor = hasMore && lastItem ? lastItem.id : null;
+    const [rawItems, total] = await Promise.all([
+      findManyPromise,
+      this.prisma.maintenanceAlert.count({ where }),
+    ]);
 
-    return { data, nextCursor };
+    let hasMore: boolean;
+    let data: typeof rawItems;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = rawItems;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = rawItems.length > take;
+      data = hasMore ? rawItems.slice(0, take) : rawItems;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
+
+    return {
+      data,
+      meta: {
+        next_cursor: nextCursor ?? null,
+        has_more: hasMore,
+        total,
+        page: currentPage,
+        page_size: take,
+        total_pages: totalPages,
+      },
+    };
   }
 
   // ---------------------------------------------------------------------------

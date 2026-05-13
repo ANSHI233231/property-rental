@@ -52,7 +52,11 @@ export class MaintenanceController {
     @Query("scope") scope?: string,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
+    const pageNum = page !== undefined ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize !== undefined ? parseInt(pageSize, 10) : undefined;
     return this.maintenanceService.list(actor, {
       unitId: unitId ? parseInt(unitId, 10) : undefined,
       propertyId: propertyId ? parseInt(propertyId, 10) : undefined,
@@ -61,6 +65,8 @@ export class MaintenanceController {
       scope,
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 100) : 20,
+      page: pageNum !== undefined && !isNaN(pageNum) ? pageNum : undefined,
+      pageSize: pageSizeNum !== undefined && !isNaN(pageSizeNum) ? pageSizeNum : undefined,
     });
   }
 
@@ -77,11 +83,17 @@ export class MaintenanceController {
     @Query("dismissed") dismissed?: string,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
   ) {
+    const pageNum = page !== undefined ? parseInt(page, 10) : undefined;
+    const pageSizeNum = pageSize !== undefined ? parseInt(pageSize, 10) : undefined;
     return this.maintenanceService.listAlerts(actor, {
       dismissed,
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 100) : 20,
+      page: pageNum !== undefined && !isNaN(pageNum) ? pageNum : undefined,
+      pageSize: pageSizeNum !== undefined && !isNaN(pageSizeNum) ? pageSizeNum : undefined,
     });
   }
 
@@ -116,12 +128,15 @@ export class MaintenanceController {
 
   // ---------------------------------------------------------------------------
   // POST /maintenance-requests
-  // BL-16: MAINTENANCE blocked; TENANT + ADMIN allowed.
+  // BL-16 deviation (user-approved 2026-05-13): TENANT, ADMIN, and PM may
+  // raise. MAINTENANCE is still blocked.
+  // PMs are additionally scoped to their assigned property by service-layer
+  // checks; cross-property raises return 403.
   // @RoleErrorCode: surfaces BL code in 403 response.
   // ---------------------------------------------------------------------------
 
   @Post()
-  @Roles("TENANT", "ADMIN")
+  @Roles("TENANT", "ADMIN", "PROPERTY_MANAGER")
   @RoleErrorCode("BL_16_ONLY_TENANT_CAN_RAISE_MAINTENANCE")
   @HttpCode(HttpStatus.CREATED)
   async create(

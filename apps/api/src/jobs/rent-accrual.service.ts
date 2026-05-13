@@ -6,6 +6,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import { computeLateFeePaise } from "@gharsetu/shared";
 import { RentService } from "../rent/rent.service";
+import { RentChangeScheduleService } from "../rent-change-schedule/rent-change-schedule.service";
 
 /** Role int codes */
 const ROLE_ADMIN = 0;
@@ -58,6 +59,7 @@ export class RentAccrualService {
     private readonly audit: AuditService,
     private readonly rentService: RentService,
     private readonly config: ConfigService,
+    private readonly rentChangeScheduleService: RentChangeScheduleService,
   ) {}
 
   /** Resolve a valid DB user ID to use as the audit actor for system jobs. */
@@ -168,10 +170,12 @@ export class RentAccrualService {
         Date.UTC(overdueThreshold.getUTCFullYear(), overdueThreshold.getUTCMonth(), overdueThreshold.getUTCDate()),
       );
 
-      // Find all actionable periods (DUE=1, PARTIAL=2, OVERDUE=4) with due_date <= threshold
+      // Find all DUE/PARTIAL periods past the 5-day threshold that should flip
+      // to OVERDUE. (OVERDUE periods don't need re-flipping — they're already
+      // OVERDUE and the late fee is computed on read, not stored.)
       const actionablePeriods = await this.prisma.rentPeriod.findMany({
         where: {
-          status: { in: [RENT_STATUS.DUE, RENT_STATUS.PARTIAL, RENT_STATUS.OVERDUE] },
+          status: { in: [RENT_STATUS.DUE, RENT_STATUS.PARTIAL] },
           due_date: { lte: overdueThresholdDate },
         },
         select: {
@@ -179,7 +183,6 @@ export class RentAccrualService {
           lease_id: true,
           due_date: true,
           amount_due_paise: true,
-          late_fee_paise: true,
           paid_paise: true,
           outstanding_paise: true,
           status: true,
@@ -197,51 +200,34 @@ export class RentAccrualService {
           (todayIST.getTime() - dueDateIST.getTime()) / (1000 * 60 * 60 * 24),
         );
 
-        const newLateFee = computeLateFeePaise(period.amount_due_paise, daysOverdue);
-        const wasOverdue = period.status === RENT_STATUS.OVERDUE;
         const newStatus = RENT_STATUS.OVERDUE;
+        // The late fee is no longer persisted; computed on read via
+        // serializePeriod → computeLateFeePaise. We still surface what the
+        // late fee WOULD be at flip time in the audit log for traceability.
+        const lateFeeAtFlip = computeLateFeePaise(period.amount_due_paise, daysOverdue);
+        periodsOverdueFlipped++;
 
-        const newOutstanding =
-          period.amount_due_paise + newLateFee - period.paid_paise < 0n
-            ? 0n
-            : period.amount_due_paise + newLateFee - period.paid_paise;
-
-        if (!wasOverdue) periodsOverdueFlipped++;
-
-        const lateFeeAdded = newLateFee - period.late_fee_paise;
-        if (lateFeeAdded > 0n) lateFeesAddedPaise += lateFeeAdded;
-
-        // Update the period transactionally
         await this.prisma.$transaction(async (tx) => {
           await tx.rentPeriod.update({
             where: { id: period.id },
-            data: {
-              status: newStatus,
-              late_fee_paise: newLateFee,
-              outstanding_paise: newOutstanding,
-              last_accrued_at: now,
-            },
+            data: { status: newStatus },
           });
 
-          if (!wasOverdue || lateFeeAdded > 0n) {
-            await this.audit.writeLog(tx, {
-              actorId,
-              action: !wasOverdue ? "rent_period.overdue_flip" : "rent_period.late_fee_accrual",
-              entityType: "RentPeriod",
-              entityId: period.id,
-              before: {
-                status: period.status,
-                late_fee_paise: period.late_fee_paise.toString(),
-                outstanding_paise: period.outstanding_paise.toString(),
-              },
-              after: {
-                status: newStatus,
-                days_overdue: daysOverdue,
-                late_fee_paise: newLateFee.toString(),
-                outstanding_paise: newOutstanding.toString(),
-              },
-            });
-          }
+          await this.audit.writeLog(tx, {
+            actorId,
+            action: "rent_period.overdue_flip",
+            entityType: "RentPeriod",
+            entityId: period.id,
+            before: {
+              status: period.status,
+              outstanding_paise: period.outstanding_paise.toString(),
+            },
+            after: {
+              status: newStatus,
+              days_overdue: daysOverdue,
+              late_fee_at_flip_paise: lateFeeAtFlip.toString(),
+            },
+          });
         });
       }
 
@@ -253,6 +239,7 @@ export class RentAccrualService {
         where: { status: LEASE_ACTIVE },
         select: {
           id: true,
+          unit_id: true,
           monthly_rent_paise: true,
           end_date: true,
         },
@@ -282,12 +269,18 @@ export class RentAccrualService {
           });
 
           if (!existingNext) {
+            // Honor any rent change effective on this new period's due_date.
+            // Falls back to the lease's BL-02 snapshot when there's no schedule.
+            const effectiveRent = await this.rentChangeScheduleService
+              .getEffectiveRentForUnit(lease.unit_id, nextStart);
+            const rentForNextPeriod = effectiveRent ?? lease.monthly_rent_paise;
+
             await this.prisma.$transaction(async (tx) => {
               await this.rentService.generateNextPeriod(
                 tx,
                 lease.id,
                 periodEnd,
-                lease.monthly_rent_paise,
+                rentForNextPeriod,
                 actorId,
               );
             });

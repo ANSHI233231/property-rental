@@ -11,6 +11,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import type { RecordPaymentDto } from "./dto/record-payment.dto";
 import type { VoidPaymentDto } from "./dto/void-payment.dto";
+import { computeLateFeePaise } from "@gharsetu/shared";
 
 /**
  * Rent period status int codes
@@ -41,26 +42,96 @@ type TransactionClient = Omit<
   "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
 >;
 
-/** Serialize BigInt fields on a RentPeriod to strings for JSON safety. */
+/** Calendar-day diff today−dueDate (UTC date math; positive = past due). */
+function daysOverdueFromDueDate(dueDate: Date | string | undefined | null): number {
+  if (!dueDate) return 0;
+  const due = new Date(dueDate);
+  const dueUTC = Date.UTC(due.getUTCFullYear(), due.getUTCMonth(), due.getUTCDate());
+  const now = new Date();
+  const nowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.floor((nowUTC - dueUTC) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Serialize a RentPeriod row for the wire. BigInts → strings.
+ *
+ * `late_fee_paise` is NOT stored — it is computed on every read via the
+ * BL-13 formula. `outstanding_paise` stored is `amount_due - paid`; the
+ * response value adds the computed late fee back so consumers see the
+ * total tenants owe.
+ */
 function serializePeriod(p: Record<string, unknown>): Record<string, unknown> {
+  const amountDue = (p["amount_due_paise"] as bigint | undefined) ?? 0n;
+  const paid = (p["paid_paise"] as bigint | undefined) ?? 0n;
+  const status = (p["status"] as number | undefined) ?? RENT_STATUS.DUE;
+
+  // Settled / not-yet-due periods do not accrue a late fee.
+  const accrues = status === RENT_STATUS.DUE
+    || status === RENT_STATUS.PARTIAL
+    || status === RENT_STATUS.OVERDUE;
+  const days = accrues
+    ? daysOverdueFromDueDate(p["due_date"] as Date | string | undefined)
+    : 0;
+  const lateFee = computeLateFeePaise(amountDue, days);
+
+  const storedOutstanding = (p["outstanding_paise"] as bigint | undefined) ?? (amountDue - paid);
+  const totalOutstanding = storedOutstanding + lateFee;
+  const outstandingStr = (totalOutstanding < 0n ? 0n : totalOutstanding).toString();
+
+  // Emit BOTH snake_case (for Prisma-aligned internal tooling) and camelCase
+  // (the FE contract used across pm/admin/tenant rent pages). Adding camelCase
+  // is the canonical fix for BUG observed at /pm/rent-collection where the
+  // page reads outstandingPaise/lateFeePaise etc. and got undefined.
   return {
     ...p,
-    amount_due_paise: p["amount_due_paise"]?.toString(),
-    late_fee_paise: p["late_fee_paise"]?.toString(),
-    paid_paise: p["paid_paise"]?.toString(),
-    outstanding_paise: p["outstanding_paise"]?.toString(),
+    // snake_case (existing wire shape, kept for back-compat)
+    amount_due_paise: amountDue.toString(),
+    late_fee_paise: lateFee.toString(),
+    paid_paise: paid.toString(),
+    outstanding_paise: outstandingStr,
+    // camelCase (FE contract)
+    id: p["id"],
+    leaseId: p["lease_id"],
+    periodStart: p["period_start"],
+    periodEnd: p["period_end"],
+    dueDate: p["due_date"],
+    status: p["status"],
+    lastAccruedAt: p["last_accrued_at"] ?? null,
+    amountDuePaise: amountDue.toString(),
+    lateFeePaise: lateFee.toString(),
+    paidPaise: paid.toString(),
+    outstandingPaise: outstandingStr,
   };
 }
 
 /** Serialize BigInt fields on a Payment to strings for JSON safety. */
 function serializePayment(p: Record<string, unknown>): Record<string, unknown> {
+  const amount = p["amount_paise"]?.toString();
   return {
     ...p,
-    amount_paise: p["amount_paise"]?.toString(),
+    amount_paise: amount,
+    // camelCase aliases for FE contract (rent pages consume this shape)
+    id: p["id"],
+    rentPeriodId: p["rent_period_id"],
+    leaseId: p["lease_id"],
+    amountPaise: amount,
+    method: p["method"],
+    reference: p["reference"],
+    paidOn: p["paid_on"],
+    recordedByUserId: p["recorded_by_user_id"],
+    recordedAt: p["recorded_at"],
+    isVoided: p["is_voided"],
+    voidedByUserId: p["voided_by_user_id"] ?? null,
+    voidedAt: p["voided_at"] ?? null,
+    voidReason: p["void_reason"] ?? null,
   };
 }
 
-/** Compute outstanding = amount_due + late_fee - paid (BigInt). */
+/**
+ * Compute outstanding = amount_due + late_fee - paid (BigInt).
+ * Kept for internal payment-processing math. `lateFee` is computed at the
+ * call site via computeLateFeePaise (no longer read from DB).
+ */
 function computeOutstanding(
   amountDue: bigint,
   lateFee: bigint,
@@ -142,7 +213,7 @@ export class RentService {
     const periodEnd = this.addMonthMinusOneDay(periodStart);
     const dueDate = new Date(periodStart);
 
-    const outstanding = monthlyRentPaise; // no late fee yet
+    const outstanding = monthlyRentPaise; // amount_due - paid (no fee — fee is computed on read)
 
     const period = await tx.rentPeriod.create({
       data: {
@@ -151,7 +222,6 @@ export class RentService {
         period_end: periodEnd,
         due_date: dueDate,
         amount_due_paise: monthlyRentPaise,
-        late_fee_paise: 0n,
         paid_paise: 0n,
         outstanding_paise: outstanding,
         status: RENT_STATUS.DUE,
@@ -187,10 +257,15 @@ export class RentService {
     periodStart_lte?: string;
     cursor?: number;
     limit?: number;
+    page?: number;
+    pageSize?: number;
     actorId: number;
     actorRole: number;
   }) {
-    const take = Math.min(filters.limit ?? 20, 100);
+    const useOffset = filters.page !== undefined;
+    const ps = filters.pageSize !== undefined ? Math.min(Math.max(filters.pageSize, 1), 100) : undefined;
+    const take = useOffset ? (ps ?? 10) : Math.min(filters.limit ?? 20, 100);
+    const currentPage = filters.page ?? 1;
     let where: Prisma.RentPeriodWhereInput = {};
 
     if (filters.leaseId !== undefined) {
@@ -254,7 +329,7 @@ export class RentService {
         select: { id: true },
       });
       if (!tenant) {
-        return { data: [], meta: { next_cursor: null, has_more: false } };
+        return { data: [], meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 } };
       }
       where = {
         ...where,
@@ -274,11 +349,11 @@ export class RentService {
         select: { id: true },
       });
       if (!managedProperty) {
-        return { data: [], meta: { next_cursor: null, has_more: false } };
+        return { data: [], meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 } };
       }
       // If PM supplied a propertyId that differs from their assigned one → empty
       if (filters.propertyId !== undefined && filters.propertyId !== managedProperty.id) {
-        return { data: [], meta: { next_cursor: null, has_more: false } };
+        return { data: [], meta: { next_cursor: null, has_more: false, total: 0, page: currentPage, page_size: take, total_pages: 0 } };
       }
       where = {
         ...where,
@@ -292,44 +367,60 @@ export class RentService {
       };
     }
 
-    // FC-2: include lease → unit → property for admin overdue table
-    const items = await this.prisma.rentPeriod.findMany({
-      where,
-      orderBy: { period_start: "desc" },
-      take: take + 1,
-      include: {
-        lease: {
-          select: {
-            id: true,
-            unit: {
-              select: {
-                id: true,
-                unit_number: true,
-                property: {
-                  select: {
-                    id: true,
-                    name: true,
-                    city: true,
-                  },
+    const leaseInclude = {
+      lease: {
+        select: {
+          id: true,
+          unit: {
+            select: {
+              id: true,
+              unit_number: true,
+              property: {
+                select: {
+                  id: true,
+                  name: true,
+                  city: true,
                 },
               },
             },
           },
         },
       },
-      ...(filters.cursor ? { cursor: { id: filters.cursor }, skip: 1 } : {}),
-    });
+    };
 
-    const hasMore = items.length > take;
-    const data = hasMore ? items.slice(0, take) : items;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    // FC-2: include lease → unit → property for admin overdue table
+    const baseArgs = { where, orderBy: { period_start: "desc" as const }, include: leaseInclude };
+    const [items, total] = await Promise.all([
+      useOffset
+        ? this.prisma.rentPeriod.findMany({ ...baseArgs, skip: (currentPage - 1) * take, take })
+        : filters.cursor
+          ? this.prisma.rentPeriod.findMany({ ...baseArgs, take: take + 1, cursor: { id: filters.cursor }, skip: 1 })
+          : this.prisma.rentPeriod.findMany({ ...baseArgs, take: take + 1 }),
+      this.prisma.rentPeriod.count({ where }),
+    ]);
+
+    let hasMore: boolean;
+    let data: typeof items;
+    let nextCursor: number | undefined;
+
+    if (useOffset) {
+      data = items;
+      hasMore = currentPage * take < total;
+      nextCursor = undefined;
+    } else {
+      hasMore = items.length > take;
+      data = hasMore ? items.slice(0, take) : items;
+      nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    }
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
       data: data.map((p) => ({
         ...serializePeriod(p as unknown as Record<string, unknown>),
         lease: p.lease,
       })),
-      meta: { next_cursor: nextCursor ?? null, has_more: hasMore },
+      meta: { next_cursor: nextCursor ?? null, has_more: hasMore, total, page: currentPage, page_size: take, total_pages: totalPages },
     };
   }
 
@@ -415,16 +506,17 @@ export class RentService {
         async (tx) => {
         // BL-11: lock the rent period row for the duration of the transaction.
         // $queryRaw returns BIGINT columns as strings in node-postgres; coerce to BigInt.
+        // late_fee_paise is no longer stored — computed below from due_date.
         const periodRows = await tx.$queryRaw<Array<{
           id: number;
           lease_id: number;
           amount_due_paise: string | bigint;
-          late_fee_paise: string | bigint;
           paid_paise: string | bigint;
           outstanding_paise: string | bigint;
           status: number;
+          due_date: Date;
         }>>`
-          SELECT id, lease_id, amount_due_paise, late_fee_paise, paid_paise, outstanding_paise, status
+          SELECT id, lease_id, amount_due_paise, paid_paise, outstanding_paise, status, due_date
           FROM rent_periods
           WHERE id = ${dto.rentPeriodId}
           FOR UPDATE
@@ -437,10 +529,20 @@ export class RentService {
         }
 
         const rawPeriod = periodRows[0]!;
+        const lateFeeAtPaymentTime = (
+          rawPeriod.status === RENT_STATUS.DUE
+            || rawPeriod.status === RENT_STATUS.PARTIAL
+            || rawPeriod.status === RENT_STATUS.OVERDUE
+        )
+          ? computeLateFeePaise(
+              BigInt(rawPeriod.amount_due_paise),
+              daysOverdueFromDueDate(rawPeriod.due_date),
+            )
+          : 0n;
         const period = {
           ...rawPeriod,
           amount_due_paise: BigInt(rawPeriod.amount_due_paise),
-          late_fee_paise: BigInt(rawPeriod.late_fee_paise),
+          late_fee_paise: lateFeeAtPaymentTime,
           paid_paise: BigInt(rawPeriod.paid_paise),
           outstanding_paise: BigInt(rawPeriod.outstanding_paise),
         };
@@ -486,20 +588,26 @@ export class RentService {
           spilloverPaise = 0n;
         }
 
-        // Update paid_paise and recompute outstanding
+        // Update paid_paise and recompute status. `outstanding_paise` is stored
+        // as max(0, amount_due - paid) (no fee); the late fee is recomputed on
+        // every read. Status decisions use the TOTAL outstanding (incl. fee).
         const newPaidPaise = period.paid_paise + appliedToPeriod;
-        const newOutstanding = computeOutstanding(
+        const newTotalOutstanding = computeOutstanding(
           period.amount_due_paise,
           period.late_fee_paise,
           newPaidPaise,
         );
-        const newStatus = deriveStatus(newOutstanding, newPaidPaise);
+        const newStoredOutstanding =
+          period.amount_due_paise - newPaidPaise < 0n
+            ? 0n
+            : period.amount_due_paise - newPaidPaise;
+        const newStatus = deriveStatus(newTotalOutstanding, newPaidPaise);
 
         await tx.rentPeriod.update({
           where: { id: period.id },
           data: {
             paid_paise: newPaidPaise,
-            outstanding_paise: newOutstanding,
+            outstanding_paise: newStoredOutstanding,
             status: newStatus,
           },
         });
@@ -585,7 +693,7 @@ export class RentService {
             id: period.id,
             status: newStatus,
             paid_paise: newPaidPaise.toString(),
-            outstanding_paise: newOutstanding.toString(),
+            outstanding_paise: newTotalOutstanding.toString(),
           },
           ...(prepaidCredit ? { prepaid_credit: prepaidCredit } : {}),
         };
@@ -697,25 +805,36 @@ export class RentService {
           },
         });
 
-        // Recompute the affected rent period
+        // Recompute the affected rent period.
+        // late_fee_paise is no longer stored — recomputed here from due_date.
         const rawPeriodRows = await tx.$queryRaw<Array<{
           id: number;
           amount_due_paise: string | bigint;
-          late_fee_paise: string | bigint;
           paid_paise: string | bigint;
           status: number;
+          due_date: Date;
         }>>`
-          SELECT id, amount_due_paise, late_fee_paise, paid_paise, status
+          SELECT id, amount_due_paise, paid_paise, status, due_date
           FROM rent_periods
           WHERE id = ${payment.rent_period_id}
           FOR UPDATE
         `;
 
         const rawPeriodRow = rawPeriodRows[0]!;
+        const periodLateFee = (
+          rawPeriodRow.status === RENT_STATUS.DUE
+            || rawPeriodRow.status === RENT_STATUS.PARTIAL
+            || rawPeriodRow.status === RENT_STATUS.OVERDUE
+        )
+          ? computeLateFeePaise(
+              BigInt(rawPeriodRow.amount_due_paise),
+              daysOverdueFromDueDate(rawPeriodRow.due_date),
+            )
+          : 0n;
         const period = {
           ...rawPeriodRow,
           amount_due_paise: BigInt(rawPeriodRow.amount_due_paise),
-          late_fee_paise: BigInt(rawPeriodRow.late_fee_paise),
+          late_fee_paise: periodLateFee,
           paid_paise: BigInt(rawPeriodRow.paid_paise),
         };
 
@@ -729,18 +848,23 @@ export class RentService {
 
         const rawTotal = sumResult[0]?.total ?? 0;
         const newPaidPaise = rawTotal !== null ? BigInt(rawTotal) : 0n;
-        const newOutstanding = computeOutstanding(
+        const newTotalOutstanding = computeOutstanding(
           period.amount_due_paise,
           period.late_fee_paise,
           newPaidPaise,
         );
+        // Stored outstanding excludes the fee.
+        const newStoredOutstanding =
+          period.amount_due_paise - newPaidPaise < 0n
+            ? 0n
+            : period.amount_due_paise - newPaidPaise;
 
         // Determine status: if previously PAID/PARTIAL, revert appropriately
         let newStatus: number;
         if (newPaidPaise === 0n) {
           // Back to due or overdue — preserve OVERDUE if it was overdue
           newStatus = period.status === RENT_STATUS.OVERDUE ? RENT_STATUS.OVERDUE : RENT_STATUS.DUE;
-        } else if (newOutstanding === 0n) {
+        } else if (newTotalOutstanding === 0n) {
           newStatus = RENT_STATUS.PAID;
         } else {
           newStatus = RENT_STATUS.PARTIAL;
@@ -750,7 +874,7 @@ export class RentService {
           where: { id: period.id },
           data: {
             paid_paise: newPaidPaise,
-            outstanding_paise: newOutstanding,
+            outstanding_paise: newStoredOutstanding,
             status: newStatus,
           },
         });
@@ -775,7 +899,7 @@ export class RentService {
             id: period.id,
             status: newStatus,
             paid_paise: newPaidPaise.toString(),
-            outstanding_paise: newOutstanding.toString(),
+            outstanding_paise: newTotalOutstanding.toString(),
           },
         };
         },
@@ -881,7 +1005,6 @@ export class RentService {
         period_end: periodEnd,
         due_date: dueDate,
         amount_due_paise: monthlyRentPaise,
-        late_fee_paise: 0n,
         paid_paise: 0n,
         outstanding_paise: monthlyRentPaise,
         status: RENT_STATUS.DUE,
@@ -902,5 +1025,60 @@ export class RentService {
         amount_due_paise: monthlyRentPaise.toString(),
       },
     });
+
+    // Auto-consume any unconsumed prepaid credits for this lease, FIFO. Credits
+    // arise from concurrent-payment spillover (BL-11) — the second payment for a
+    // fully-paid period becomes a PrepaidCredit, then this consumes it against
+    // the next period when generated. A single credit that would over-pay the
+    // period is left intact for the period after this one (no splitting).
+    const credits = await tx.prepaidCredit.findMany({
+      where: { lease_id: leaseId, consumed_at: null },
+      orderBy: { created_at: "asc" },
+      select: { id: true, amount_paise: true },
+    });
+
+    let consumedTotalPaise = 0n;
+    const consumedCreditIds: number[] = [];
+    for (const credit of credits) {
+      if (consumedTotalPaise + credit.amount_paise > monthlyRentPaise) break;
+      consumedTotalPaise += credit.amount_paise;
+      consumedCreditIds.push(credit.id);
+    }
+
+    if (consumedCreditIds.length > 0) {
+      const now = new Date();
+      await tx.prepaidCredit.updateMany({
+        where: { id: { in: consumedCreditIds } },
+        data: { consumed_at: now },
+      });
+
+      const newOutstanding = monthlyRentPaise - consumedTotalPaise;
+      const newStatus = newOutstanding === 0n
+        ? RENT_STATUS.PREPAID  // period fully covered before due_date
+        : RENT_STATUS.PARTIAL;
+
+      await tx.rentPeriod.update({
+        where: { id: period.id },
+        data: {
+          paid_paise: consumedTotalPaise,
+          outstanding_paise: newOutstanding,
+          status: newStatus,
+        },
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "prepaid_credit.auto_applied",
+        entityType: "RentPeriod",
+        entityId: period.id,
+        before: { paid_paise: "0", status: RENT_STATUS.DUE },
+        after: {
+          paid_paise: consumedTotalPaise.toString(),
+          outstanding_paise: newOutstanding.toString(),
+          status: newStatus,
+          consumed_credit_ids: consumedCreditIds,
+        },
+      });
+    }
   }
 }

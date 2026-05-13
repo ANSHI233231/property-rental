@@ -15,6 +15,8 @@
 import { useAuth } from "@/lib/auth/context";
 import { useCallback, useEffect, useState } from "react";
 import { formatDateIST } from "@/lib/locale";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { MaintenanceStatusBadge } from "@/components/maintenance/MaintenanceStatusBadge";
 import { PriorityBadge } from "@/components/maintenance/PriorityBadge";
 import { friendlyError } from "@/lib/api/errors";
@@ -104,40 +106,60 @@ function isOpenStatus(s: number | string): boolean {
 export default function MaintenanceAllOpenPage() {
   const { user, apiFetch } = useAuth();
 
-  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("ALL");
 
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await apiFetch<ListResponse>(
-        `/maintenance-requests?scope=all-open&limit=100`,
-      );
-      const items = res.data ?? res.items ?? (Array.isArray(res) ? (res as MaintenanceRequest[]) : []);
-      items.sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
-      // Only keep open/assigned/in-progress items
-      setRequests(items.filter((r) => isOpenStatus(r.status)));
-    } catch (err) {
-      setError(friendlyError(err));
-    } finally {
-      setLoading(false);
-    }
+  const extraQuery: Record<string, string | undefined> = {
+    scope: "all-open",
+  };
+  if (priorityFilter !== "ALL") extraQuery.priority = priorityFilter;
+
+  const {
+    items: rawItems,
+    page,
+    totalPages,
+    total,
+    pageSize: activePageSize,
+    hasNext,
+    hasPrev,
+    loading,
+    error,
+    next,
+    prev,
+    goToPage,
+  } = usePaginatedList<MaintenanceRequest>({
+    url: "/maintenance-requests",
+    extraQuery,
+    pageSize: 10,
+  });
+
+  // Filter to open statuses only and sort by priority
+  const filtered = rawItems
+    .filter((r) => isOpenStatus(r.status))
+    .sort((a, b) => prioritySortKey(a.priority) - prioritySortKey(b.priority));
+
+  // For chip counts, fetch a summary separately
+  const [allOpenRequests, setAllOpenRequests] = useState<MaintenanceRequest[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<{ data?: MaintenanceRequest[]; items?: MaintenanceRequest[] }>(
+      "/maintenance-requests?scope=all-open&limit=200"
+    )
+      .then((res) => {
+        if (!cancelled) {
+          const items = res.data ?? res.items ?? [];
+          setAllOpenRequests(items.filter((r) => isOpenStatus(r.status)));
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, [apiFetch]);
 
-  useEffect(() => { void fetchRequests(); }, [fetchRequests]);
-
-  const filtered = requests.filter((r) => matchesPriority(r.priority, priorityFilter));
-
-  // Count per priority for filter chips
   const counts: Record<PriorityFilter, number> = {
-    ALL: requests.length,
-    EMERGENCY: requests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
-    HIGH: requests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
-    NORMAL: requests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
-    LOW: requests.filter((r) => matchesPriority(r.priority, "LOW")).length,
+    ALL: allOpenRequests.length,
+    EMERGENCY: allOpenRequests.filter((r) => matchesPriority(r.priority, "EMERGENCY")).length,
+    HIGH: allOpenRequests.filter((r) => matchesPriority(r.priority, "HIGH")).length,
+    NORMAL: allOpenRequests.filter((r) => matchesPriority(r.priority, "NORMAL")).length,
+    LOW: allOpenRequests.filter((r) => matchesPriority(r.priority, "LOW")).length,
   };
 
   const filterChips: { label: string; value: PriorityFilter }[] = [
@@ -168,7 +190,7 @@ export default function MaintenanceAllOpenPage() {
         <div>
           <h1 className="page-title">All Open Requests</h1>
           <div className="page-subtitle">
-            Across all properties · {requests.length} open · sorted by priority
+            Across all properties · {counts.ALL} open · sorted by priority
           </div>
         </div>
         <div className="topbar-user">
@@ -259,6 +281,20 @@ export default function MaintenanceAllOpenPage() {
           </table>
         </section>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={activePageSize}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+        onPrev={prev}
+        onNext={next}
+        onGoToPage={goToPage}
+        itemsOnPage={filtered.length}
+        loading={loading}
+      />
 
       <p className="text-xs muted mt-4">
         Cannot see: <strong>Rent</strong> · <strong>Leases</strong> · <strong>Tenant financial data</strong> · <strong>Payment history</strong>

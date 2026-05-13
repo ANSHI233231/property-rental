@@ -79,6 +79,8 @@ export class LeasesController {
     @Query("status") status?: string,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
     @CurrentUser() actor?: JwtPayload,
   ) {
     // A TENANT may only list leases scoped to themselves. The service treats
@@ -97,6 +99,8 @@ export class LeasesController {
       status,
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : 20,
+      page: page ? parseInt(page, 10) : undefined,
+      pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
       actorId: actor!.sub,
       actorRole: actor!.role,
     });
