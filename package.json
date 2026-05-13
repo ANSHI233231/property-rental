@@ -10,6 +10,8 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "pnpm -r --filter \"./packages/**\" build && pnpm -r --filter \"./apps/**\" build",
+    "build:shared": "pnpm --filter @gharsetu/shared build",
+    "postinstall": "pnpm --filter @gharsetu/shared build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
