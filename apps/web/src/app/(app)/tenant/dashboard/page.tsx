@@ -28,6 +28,7 @@ import { friendlyError } from "@/lib/api/errors";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { RentChangeBanner } from "@/components/tenant/RentChangeBanner";
 import Link from "next/link";
 // RentStatusValue removed: status is now number after Step 1 migration
 import { paiseStringToINR, parseBigPaise, daysOverdue as calcDaysOverdue } from "@/lib/rent/format";
@@ -66,7 +67,7 @@ interface ActiveLease {
   end_date: string;
   monthly_rent_paise: string | number;
   security_deposit_paise: string | number;
-  unit?: { name: string };
+  unit?: { id?: number | string; name: string };
   property?: { name: string; address: string };
   tenants?: LeaseTenant[];
   property_manager?: { name: string };
@@ -623,6 +624,9 @@ export default function TenantDashboardPage() {
           </span>
         </div>
       </header>
+
+      {/* Rent-change notice — only shown if there's a pending schedule. */}
+      {lease?.unit?.id !== undefined && <RentChangeBanner unitId={lease.unit.id} />}
 
       {/* 1. Lease summary card */}
       {lease ? (

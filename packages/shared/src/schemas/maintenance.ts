@@ -34,7 +34,10 @@ export type MaintenanceStatusValue = z.infer<typeof MaintenanceStatusEnum>;
 // ---------------------------------------------------------------------------
 
 export const CreateMaintenanceRequestSchema = z.object({
-  unitId: z.string().min(1, "unitId is required"),
+  // Coerce to string so numeric ID columns (Phase 5+ BIGSERIAL ints) coming
+  // from FE state (lease.unit.id, etc.) validate cleanly. Backend DTO uses
+  // @Type(() => Number) to coerce back to int.
+  unitId: z.coerce.string().min(1, "unitId is required"),
   title: z
     .string()
     .min(1, "title is required")

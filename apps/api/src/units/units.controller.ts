@@ -49,23 +49,29 @@ export class UnitsController {
   constructor(private readonly unitsService: UnitsService) {}
 
   /**
-   * GET /units — flat list, Admin-only. Used by the admin dashboard.
-   * Supports cursor + limit + status (UnitState) query params.
+   * GET /units — flat list. Admin sees all; PM auto-scoped to their property.
+   * Supports cursor + limit + status (UnitState or RETIRED) + propertyId query.
    */
   @Get()
+  @Roles("ADMIN", "PROPERTY_MANAGER")
   async listAll(
+    @CurrentUser() actor: JwtPayload,
     @Query("cursor") cursor?: string,
     @Query("limit") limit?: string,
     @Query("status") status?: string,
+    @Query("propertyId") propertyId?: string,
     @Query("page") page?: string,
     @Query("pageSize") pageSize?: string,
   ) {
+    const PROPERTY_MANAGER_ROLE = 1;
     return this.unitsService.listAll({
       cursor: cursor ? parseInt(cursor, 10) : undefined,
       limit: limit ? Math.min(parseInt(limit, 10), 200) : 20,
       status,
+      propertyId: propertyId ? parseInt(propertyId, 10) : undefined,
       page: page ? parseInt(page, 10) : undefined,
       pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
+      pmUserId: actor.role === PROPERTY_MANAGER_ROLE ? actor.sub : undefined,
     });
   }
 

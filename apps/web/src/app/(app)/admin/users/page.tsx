@@ -17,9 +17,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   UserCreateSchema,
   UserAdminUpdateSchema,
-  AdminRoleSchema,
+  AdminResetPasswordSchema,
   type UserCreateInput,
   type UserAdminUpdateInput,
+  type AdminResetPasswordInput,
   type AdminRoleValue,
   RoleEnum,
   roleName,
@@ -40,6 +41,9 @@ import { formatDateOnlyIST } from "@/lib/locale";
 interface UserRow {
   id: number | string;
   name: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  specialization?: string | null;
   email: string;
   phone?: string | null;
   // API returns role as SMALLINT (0–3) after Step 1 migration; accept string for legacy
@@ -172,11 +176,14 @@ function AddUserModal({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<UserCreateInput>({
     resolver: zodResolver(UserCreateSchema),
     defaultValues: { role: "PROPERTY_MANAGER" },
   });
+
+  const selectedRole = watch("role");
 
   function handleClose() {
     reset();
@@ -227,13 +234,22 @@ function AddUserModal({
           )}
         </div>
 
-        <Field id="user-name" label="Full name" error={errors.name?.message}>
-          <input
-            className="input"
-            placeholder="e.g. Anil Kapoor"
-            {...register("name")}
-          />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field id="user-first-name" label="First name" error={errors.firstName?.message}>
+            <input
+              className="input"
+              placeholder="e.g. Anil"
+              {...register("firstName")}
+            />
+          </Field>
+          <Field id="user-last-name" label="Last name" error={errors.lastName?.message}>
+            <input
+              className="input"
+              placeholder="e.g. Kapoor"
+              {...register("lastName")}
+            />
+          </Field>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Field id="user-phone" label="Phone" error={errors.phone?.message}>
@@ -253,6 +269,42 @@ function AddUserModal({
             />
           </Field>
         </div>
+
+        <div>
+          <Field id="user-password" label="Initial password" error={errors.password?.message}>
+            <input
+              type="password"
+              className="input"
+              placeholder="At least 10 characters, with a letter and a digit"
+              autoComplete="new-password"
+              {...register("password")}
+            />
+          </Field>
+          <p className="text-xs muted mt-1">
+            Share this password with the new user privately. They can change it after first login.
+          </p>
+        </div>
+
+        {selectedRole === "MAINTENANCE" && (
+          <Field
+            id="user-specialization"
+            label="Specialization"
+            error={errors.specialization?.message}
+          >
+            <select
+              className={`input${errors.specialization ? " error" : ""}`}
+              {...register("specialization")}
+              defaultValue=""
+            >
+              <option value="" disabled>Select a specialization</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Painter">Painter</option>
+              <option value="General">General</option>
+            </select>
+          </Field>
+        )}
 
         {serverError && (
           <div className="field-error show" role="alert">
@@ -291,6 +343,7 @@ function EditUserModal({
   const { apiFetch } = useAuth();
   const { toast } = useToast();
   const [serverError, setServerError] = useState("");
+  const [pwServerError, setPwServerError] = useState("");
 
   const {
     register,
@@ -301,15 +354,37 @@ function EditUserModal({
     resolver: zodResolver(UserAdminUpdateSchema),
   });
 
+  // Independent sub-form for the Reset Password section — separate endpoint
+  // (PATCH /users/:id/reset-password) and a separate audit entry, so we keep
+  // it isolated from the profile-update form.
+  const {
+    register: registerPw,
+    handleSubmit: handleSubmitPw,
+    reset: resetPw,
+    formState: { errors: pwErrors, isSubmitting: pwSubmitting },
+  } = useForm<AdminResetPasswordInput>({
+    resolver: zodResolver(AdminResetPasswordSchema),
+    defaultValues: { newPassword: "" },
+  });
+
   useEffect(() => {
     if (user) {
-      reset({ name: user.name, phone: user.phone ?? undefined, email: user.email });
+      reset({
+        firstName: user.first_name ?? undefined,
+        lastName: user.last_name ?? undefined,
+        phone: user.phone ?? undefined,
+        email: user.email,
+      });
+      resetPw({ newPassword: "" });
+      setPwServerError("");
     }
-  }, [user, reset]);
+  }, [user, reset, resetPw]);
 
   function handleClose() {
     reset();
+    resetPw({ newPassword: "" });
     setServerError("");
+    setPwServerError("");
     onClose();
   }
 
@@ -329,12 +404,32 @@ function EditUserModal({
     }
   }
 
+  async function onResetPassword(data: AdminResetPasswordInput) {
+    if (!user) return;
+    setPwServerError("");
+    try {
+      await apiFetch(`/users/${user.id}/reset-password`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      toast(`Password reset for ${user.name}. Share it with them privately.`, "success");
+      resetPw({ newPassword: "" });
+    } catch (err) {
+      setPwServerError(friendlyError(err));
+    }
+  }
+
   return (
     <Modal open={open} onClose={handleClose} title={`Edit — ${user?.name ?? ""}`}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-4 space-y-4">
-        <Field id="edit-name" label="Full name" error={errors.name?.message}>
-          <input className="input" {...register("name")} />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field id="edit-first-name" label="First name" error={errors.firstName?.message}>
+            <input className="input" {...register("firstName")} />
+          </Field>
+          <Field id="edit-last-name" label="Last name" error={errors.lastName?.message}>
+            <input className="input" {...register("lastName")} />
+          </Field>
+        </div>
 
         <Field id="edit-phone" label="Phone" error={errors.phone?.message}>
           <input className="input" placeholder="98xxxxxxxx" maxLength={10} {...register("phone")} />
@@ -362,6 +457,48 @@ function EditUserModal({
           </button>
           <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
             {isSubmitting ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
+
+      <hr className="my-6 border-mid-gray" />
+
+      <form onSubmit={handleSubmitPw(onResetPassword)} noValidate className="space-y-3">
+        <div>
+          <h3 className="font-poppins font-semibold text-charcoal text-sm">Reset Password</h3>
+          <p className="text-xs muted mt-1">
+            Sets a new password for this user. They can log in with it immediately. Share it
+            with them privately — no email is sent.
+          </p>
+        </div>
+
+        <Field
+          id="edit-new-password"
+          label="New password"
+          error={pwErrors.newPassword?.message}
+        >
+          <input
+            type="password"
+            className="input"
+            placeholder="At least 10 characters, with a letter and a digit"
+            autoComplete="new-password"
+            {...registerPw("newPassword")}
+          />
+        </Field>
+
+        {pwServerError && (
+          <div className="field-error show" role="alert">
+            {pwServerError}
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="btn btn-secondary !py-2 !text-sm"
+            disabled={pwSubmitting}
+          >
+            {pwSubmitting ? "Resetting…" : "Reset Password"}
           </button>
         </div>
       </form>

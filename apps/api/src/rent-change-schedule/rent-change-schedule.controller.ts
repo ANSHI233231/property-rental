@@ -26,10 +26,13 @@ import type { JwtPayload } from "../auth/jwt.service";
  * RentChangeScheduleController
  *
  * Endpoints:
- *   POST   units/:unitId/rent-schedule   — schedule a rent change (PM only)
- *   PATCH  units/:unitId/rent-schedule   — modify pending schedule (PM only)
- *   DELETE units/:unitId/rent-schedule   — cancel pending schedule (PM only)
- *   GET    units/:unitId/rent-schedule   — get current pending schedule (PM + Admin)
+ *   POST   units/:unitId/rent-schedule              — schedule a rent change (PM only)
+ *   PATCH  units/:unitId/rent-schedule              — modify pending schedule (PM only)
+ *   DELETE units/:unitId/rent-schedule              — cancel pending schedule (PM only)
+ *   GET    units/:unitId/rent-schedule              — get current pending schedule (PM + Admin)
+ *   GET    units/:unitId/rent-schedule/tenant-view  — minimal view for the tenant
+ *                                                     dashboard banner (TENANT only;
+ *                                                     scoped to their own active lease).
  */
 @Controller("units/:unitId/rent-schedule")
 @UseGuards(JwtAuthGuard, RolesGuard, PropertyScopeGuard)
@@ -95,5 +98,23 @@ export class RentChangeScheduleController {
     @Param("unitId", ParseIntPipe) unitId: number,
   ) {
     return this.service.getCurrent(unitId);
+  }
+
+  // ---------------------------------------------------------------------------
+  // GET units/:unitId/rent-schedule/tenant-view  — TENANT only
+  //
+  // No @PropertyScope decorator: PropertyScopeGuard becomes a no-op for this
+  // route. The service does its own per-tenant authorisation (must be on the
+  // unit's active lease) so a TENANT cannot peek at other units.
+  // ---------------------------------------------------------------------------
+
+  @Get("tenant-view")
+  @Roles("TENANT")
+  @HttpCode(HttpStatus.OK)
+  async getTenantView(
+    @Param("unitId", ParseIntPipe) unitId: number,
+    @CurrentUser() actor: JwtPayload,
+  ) {
+    return this.service.getTenantView(unitId, actor);
   }
 }

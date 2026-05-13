@@ -1,5 +1,5 @@
-import { IsInt, IsString, IsOptional, MaxLength, Allow } from "class-validator";
-import { Transform, Type } from "class-transformer";
+import { IsString, IsOptional, MaxLength, Allow } from "class-validator";
+import { Transform } from "class-transformer";
 
 /**
  * DTO for POST /properties/:id/transfer-pm.

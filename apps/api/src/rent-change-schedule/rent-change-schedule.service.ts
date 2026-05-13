@@ -184,7 +184,7 @@ export class RentChangeScheduleService {
     });
 
     // Fire-and-forget email to active tenants (does not block response)
-    await this.notifyActiveTenants(unitId, unit.unit_number, newAmountPaise, effectiveDate, "scheduled");
+    await this.notifyActiveTenants(unitId, newAmountPaise, effectiveDate, "scheduled");
 
     return serializeSchedule(schedule);
   }
@@ -311,7 +311,7 @@ export class RentChangeScheduleService {
     });
 
     // Notify tenants of the modification
-    await this.notifyActiveTenants(unitId, unit.unit_number, finalAmountPaise, finalEffectiveDate, "modified");
+    await this.notifyActiveTenants(unitId, finalAmountPaise, finalEffectiveDate, "modified");
 
     return serializeSchedule(newSchedule);
   }
@@ -360,7 +360,6 @@ export class RentChangeScheduleService {
     // Notify tenants of cancellation
     await this.notifyActiveTenants(
       unitId,
-      unit.unit_number,
       existing.new_amount_paise,
       existing.effective_date,
       "cancelled",
@@ -391,6 +390,52 @@ export class RentChangeScheduleService {
     }
 
     return serializeSchedule(schedule);
+  }
+
+  // ---------------------------------------------------------------------------
+  // getTenantView — GET units/:unitId/rent-schedule/tenant-view
+  //
+  // Tenant-facing read endpoint. Only returns the minimum needed for the
+  // dashboard banner (`scheduledRent`, `effectiveDate`) — never leaks other
+  // schedule fields, audit metadata, or who created it.
+  //
+  // Authorisation: the calling user must currently be on this unit's ACTIVE
+  // lease. If they aren't (or the unit doesn't exist, or there's no pending
+  // schedule), we respond with the same 404 NO_PENDING_SCHEDULE — both
+  // unify on the same shape so the FE doesn't have to distinguish, and
+  // unauthorised probes can't tell whether a unit / schedule exists.
+  // ---------------------------------------------------------------------------
+
+  async getTenantView(unitId: number, actor: JwtPayload) {
+    const NOT_FOUND = new NotFoundException({
+      error: {
+        code: "NO_PENDING_SCHEDULE",
+        message: "No pending rent change schedule found for your unit.",
+      },
+    });
+
+    // 1. Is the caller on this unit's active lease?
+    const link = await this.prisma.leaseTenant.findFirst({
+      where: {
+        lease: { unit_id: unitId, status: LEASE_ACTIVE },
+        removed_at: null,
+        tenant: { user_id: actor.sub },
+      },
+      select: { tenant_id: true },
+    });
+    if (!link) throw NOT_FOUND;
+
+    // 2. Is there a pending schedule for this unit?
+    const schedule = await this.prisma.rentChangeSchedule.findFirst({
+      where: { unit_id: unitId, status: SCHEDULE_STATUS.PENDING },
+      select: { new_amount_paise: true, effective_date: true },
+    });
+    if (!schedule) throw NOT_FOUND;
+
+    return {
+      scheduledRent: schedule.new_amount_paise.toString(),
+      effectiveDate: schedule.effective_date.toISOString().slice(0, 10),
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -585,8 +630,32 @@ export class RentChangeScheduleService {
     });
   }
 
-  /** Get email addresses of active tenants on a unit's active lease */
-  private async getActiveTenantEmails(unitId: number): Promise<string[]> {
+  /**
+   * Fetch the full context needed to compose the rent-change email:
+   *   - recipients (name + email) — only ACTIVE users still on the lease
+   *   - propertyName, unitNumber  — for the subject line
+   *   - currentRentPaise          — the rent the tenant is paying right now,
+   *                                 read from Unit (not Lease) so previously-
+   *                                 applied schedules are reflected.
+   *
+   * Returns null if the unit has no active lease (no tenants to notify).
+   */
+  private async getNotificationContext(unitId: number): Promise<{
+    recipients: { name: string; email: string }[];
+    unitNumber: string;
+    propertyName: string;
+    currentRentPaise: bigint;
+  } | null> {
+    const unit = await this.prisma.unit.findUnique({
+      where: { id: unitId },
+      select: {
+        unit_number: true,
+        monthly_rent_paise: true,
+        property: { select: { name: true } },
+      },
+    });
+    if (!unit) return null;
+
     const leaseTenants = await this.prisma.leaseTenant.findMany({
       where: {
         lease: { unit_id: unitId, status: LEASE_ACTIVE },
@@ -595,30 +664,45 @@ export class RentChangeScheduleService {
       select: {
         tenant: {
           select: {
-            user: { select: { email: true, is_active: true } },
+            user: { select: { name: true, email: true, is_active: true } },
           },
         },
       },
     });
 
-    return leaseTenants
+    const recipients = leaseTenants
       .map((lt) => lt.tenant.user)
       .filter((u) => u.is_active)
-      .map((u) => u.email);
+      .map((u) => ({ name: u.name, email: u.email }));
+
+    return {
+      recipients,
+      unitNumber: unit.unit_number,
+      propertyName: unit.property.name,
+      // Unit.monthly_rent_paise is Int in the schema; the email layer uses
+      // BigInt uniformly, so coerce here.
+      currentRentPaise: BigInt(unit.monthly_rent_paise),
+    };
   }
 
   private async notifyActiveTenants(
     unitId: number,
-    unitNumber: string,
     newAmountPaise: bigint,
     effectiveDate: Date,
     type: "scheduled" | "modified" | "cancelled",
   ): Promise<void> {
     try {
-      const emails = await this.getActiveTenantEmails(unitId);
-      if (emails.length > 0) {
-        await this.email.sendRentChangeNotice(emails, unitNumber, newAmountPaise, effectiveDate, type);
-      }
+      const ctx = await this.getNotificationContext(unitId);
+      if (!ctx || ctx.recipients.length === 0) return;
+      await this.email.sendRentChangeNotice(
+        ctx.recipients,
+        ctx.unitNumber,
+        ctx.propertyName,
+        ctx.currentRentPaise,
+        newAmountPaise,
+        effectiveDate,
+        type,
+      );
     } catch (err) {
       // Email errors must never propagate to the caller
       this.logger.error(

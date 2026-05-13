@@ -15,9 +15,11 @@
 interface PaginationProps {
   page: number;
   totalPages: number;
-  total: number;
-  pageSize: number;
-  itemsOnPage: number;
+  /** Optional summary fields. When all three are provided the "Showing X of Y"
+   * label renders on the left; otherwise only the Prev/Numbers/Next group shows. */
+  total?: number;
+  pageSize?: number;
+  itemsOnPage?: number;
   loading?: boolean;
   onPrev: () => void;
   onNext: () => void;
@@ -69,8 +71,17 @@ export function Pagination({
   onNext,
   onGoToPage,
 }: PaginationProps) {
-  // Hide entirely if it's a single short page
-  if (totalPages <= 1 && total < pageSize) {
+  const hasSummary =
+    typeof total === "number" &&
+    typeof pageSize === "number" &&
+    typeof itemsOnPage === "number";
+
+  // Hide entirely if it's a single short page (when we know the totals)
+  if (hasSummary && totalPages <= 1 && total! < pageSize!) {
+    return null;
+  }
+  // Without summary data, hide only when truly single-page
+  if (!hasSummary && totalPages <= 1) {
     return null;
   }
 
@@ -82,14 +93,28 @@ export function Pagination({
   const window = buildPageWindow(page, effectiveTotalPages);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-light-gray text-sm flex-wrap gap-2">
-      {/* Left: summary */}
-      <span className="muted whitespace-nowrap">
-        Showing {itemsOnPage} of {total} &middot; Page {page} of {effectiveTotalPages}
-      </span>
+    <div className="flex items-center justify-between px-4 py-3 border-t border-light-gray text-sm flex-wrap gap-3">
+      {/* Left: summary (optional) */}
+      {hasSummary ? (
+        <span className="muted whitespace-nowrap">
+          Showing {itemsOnPage} of {total} &middot; Page {page} of {effectiveTotalPages}
+        </span>
+      ) : (
+        <span />
+      )}
 
-      {/* Center: numbered buttons */}
+      {/* Right: Prev → numbers → Next, all in one group */}
       <div className="flex items-center gap-1 flex-wrap">
+        <button
+          type="button"
+          className="btn btn-secondary !py-1.5 !px-3 !text-sm"
+          onClick={onPrev}
+          disabled={!hasPrev || disabled}
+          aria-label="Previous page"
+        >
+          &larr; Prev
+        </button>
+
         {window.map((entry, idx) => {
           if (entry === "ellipsis") {
             return (
@@ -121,19 +146,7 @@ export function Pagination({
             </button>
           );
         })}
-      </div>
 
-      {/* Right: Prev / Next */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          className="btn btn-secondary !py-1.5 !px-3 !text-sm"
-          onClick={onPrev}
-          disabled={!hasPrev || disabled}
-          aria-label="Previous page"
-        >
-          &larr; Prev
-        </button>
         <button
           type="button"
           className="btn btn-secondary !py-1.5 !px-3 !text-sm"

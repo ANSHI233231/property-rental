@@ -138,6 +138,20 @@ function RaiseRequestModal({
         Tell us what&apos;s wrong. Your Property Manager will see it immediately.
       </p>
       <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
+        {/* Aggregate any validation errors at the top so a silent zod
+            failure (e.g. hidden unitId mismatch) is never invisible. */}
+        {(errors.unitId || errors.title || errors.description || errors.priority) && (
+          <div role="alert" className="field-error show mb-3">
+            <strong>Please fix the following:</strong>
+            <ul className="list-disc pl-5 mt-1">
+              {errors.unitId && <li>{errors.unitId.message}</li>}
+              {errors.title && <li>{errors.title.message}</li>}
+              {errors.description && <li>{errors.description.message}</li>}
+              {errors.priority && <li>{errors.priority.message}</li>}
+            </ul>
+          </div>
+        )}
+
         {/* Unit display (auto-filled, read-only for single-lease tenants) */}
         <div className="mb-4">
           <label className="label" htmlFor="raise-unit">Unit</label>

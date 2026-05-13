@@ -11,6 +11,7 @@
  */
 
 import { z } from "zod";
+import { passwordSchema } from "./users-admin.js";
 
 // ---------------------------------------------------------------------------
 // Lease status enum
@@ -46,6 +47,13 @@ export const TenantInputSchema = z.object({
     .string()
     .regex(/^[6-9]\d{9}$/, "Valid Indian mobile number required")
     .optional(),
+  /**
+   * Initial password set by the PM at lease creation. Optional at the schema
+   * level so existing-tenant rows (matched by email) don't have to provide
+   * one — the API ignores it for existing accounts and uses it only when
+   * creating a new user. The FE form should require it.
+   */
+  password: passwordSchema.optional(),
 });
 
 export type TenantInput = z.infer<typeof TenantInputSchema>;

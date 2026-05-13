@@ -155,7 +155,7 @@ export class RentAccrualService {
 
     let periodsExamined = 0;
     let periodsOverdueFlipped = 0;
-    let lateFeesAddedPaise = 0n;
+    const lateFeesAddedPaise = 0n;
     let nextPeriodsGenerated = 0;
     let errorMsg: string | null = null;
 

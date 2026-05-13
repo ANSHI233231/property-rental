@@ -58,6 +58,43 @@ interface ChangePasswordModalProps {
 // Component
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Eye-toggle button (matches /login). Independent reveal per field.
+// ---------------------------------------------------------------------------
+
+function PasswordToggle({
+  show,
+  onToggle,
+}: {
+  show: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={show ? "Hide password" : "Show password"}
+      aria-pressed={show}
+      tabIndex={-1}
+      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-royal-blue rounded"
+    >
+      {show ? (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9.88 9.88a3 3 0 0 0 4.24 4.24" />
+          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+          <line x1="2" y1="2" x2="22" y2="22" />
+        </svg>
+      ) : (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 export function ChangePasswordModal({ open, onClose, onSuccess }: ChangePasswordModalProps) {
   const { apiFetch } = useAuth();
 
@@ -73,6 +110,9 @@ export function ChangePasswordModal({ open, onClose, onSuccess }: ChangePassword
   });
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function handleClose() {
     reset();
@@ -130,25 +170,31 @@ export function ChangePasswordModal({ open, onClose, onSuccess }: ChangePassword
       >
         {/* Current password */}
         <Field id="cpw-current" label="Current password *" error={errors.currentPassword?.message}>
-          <input
-            type="password"
-            className="input"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            {...register("currentPassword")}
-          />
+          <div className="relative">
+            <input
+              type={showCurrent ? "text" : "password"}
+              className="input pr-10"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              {...register("currentPassword")}
+            />
+            <PasswordToggle show={showCurrent} onToggle={() => setShowCurrent((v) => !v)} />
+          </div>
         </Field>
 
         {/* New password */}
         <div>
           <Field id="cpw-new" label="New password *" error={errors.newPassword?.message}>
-            <input
-              type="password"
-              className="input"
-              autoComplete="new-password"
-              placeholder="At least 10 characters"
-              {...register("newPassword")}
-            />
+            <div className="relative">
+              <input
+                type={showNew ? "text" : "password"}
+                className="input pr-10"
+                autoComplete="new-password"
+                placeholder="At least 10 characters"
+                {...register("newPassword")}
+              />
+              <PasswordToggle show={showNew} onToggle={() => setShowNew((v) => !v)} />
+            </div>
           </Field>
           <ul className="mt-1.5 list-none pl-0 text-xs text-slate space-y-0.5">
             <li>· At least 10 characters</li>
@@ -158,13 +204,16 @@ export function ChangePasswordModal({ open, onClose, onSuccess }: ChangePassword
 
         {/* Confirm new password */}
         <Field id="cpw-confirm" label="Confirm new password *" error={errors.confirmPassword?.message}>
-          <input
-            type="password"
-            className="input"
-            autoComplete="new-password"
-            placeholder="Repeat new password"
-            {...register("confirmPassword")}
-          />
+          <div className="relative">
+            <input
+              type={showConfirm ? "text" : "password"}
+              className="input pr-10"
+              autoComplete="new-password"
+              placeholder="Repeat new password"
+              {...register("confirmPassword")}
+            />
+            <PasswordToggle show={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
+          </div>
         </Field>
 
         {/* Form-level error (rate limit, unexpected) */}

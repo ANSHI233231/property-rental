@@ -205,12 +205,25 @@ export class LeasesService {
         });
       }
 
+      // Strip the incoming `password` field — it never belongs on the
+      // creation entry; we feed it into the hash and discard.
+      const { password: pmSuppliedPassword, ...rest } = t;
+
       if (!existing) {
-        const tempPw = generateTempPassword();
-        const hash = await this.hashing.hashPassword(tempPw);
-        tenantCreationData.push({ ...t, tempPassword: tempPw, passwordHash: hash });
+        // PM may set the initial password during lease signing. If they did,
+        // use it verbatim; otherwise fall back to a generated temp password
+        // (preserves backward-compat with callers that don't supply one).
+        const pw =
+          pmSuppliedPassword && pmSuppliedPassword.length > 0
+            ? pmSuppliedPassword
+            : generateTempPassword();
+        const hash = await this.hashing.hashPassword(pw);
+        tenantCreationData.push({ ...rest, tempPassword: pw, passwordHash: hash });
       } else {
-        tenantCreationData.push({ ...t });
+        // Existing account — the BE never overwrites an existing user's
+        // password from the lease form. Any password the FE sent for this
+        // row is silently dropped here.
+        tenantCreationData.push({ ...rest });
       }
     }
 

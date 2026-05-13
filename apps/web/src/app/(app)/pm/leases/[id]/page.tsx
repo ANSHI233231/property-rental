@@ -16,6 +16,7 @@ import { Field } from "@/components/ui/Field";
 import { useForm } from "react-hook-form";
 import { friendlyError } from "@/lib/api/errors";
 import Link from "next/link";
+import { RentScheduleSection } from "./RentScheduleSection";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -565,6 +566,15 @@ export default function PmLeaseDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Rent Change Schedule — only meaningful while the lease is ACTIVE */}
+      {isLeaseStatus(lease.status, "ACTIVE") && lease.unit?.id !== undefined && (
+        <RentScheduleSection
+          unitId={lease.unit.id}
+          currentRentPaise={lease.monthly_rent_paise}
+          onChange={() => void fetchLease()}
+        />
+      )}
 
       {/* Actions by status */}
       {isLeaseStatus(lease.status, "ACTIVE") && !termination && (

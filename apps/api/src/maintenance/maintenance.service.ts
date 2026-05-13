@@ -78,10 +78,12 @@ const REQUEST_SELECT = {
   closed_by_user_id: true,
   created_at: true,
   updated_at: true,
-  // Nested context for FE — req.unit.name, req.raised_by.name, req.assigned_to.name
+  // Nested context for FE — req.unit.unit_number, req.raised_by.name,
+  // req.assigned_to.name. F4: assignee's specialization is included so the
+  // FE can show "who handles what kind of work" without an extra fetch.
   unit: { select: { id: true, unit_number: true } },
   raised_by: { select: { id: true, name: true } },
-  assigned_to: { select: { id: true, name: true } },
+  assigned_to: { select: { id: true, name: true, specialization: true } },
 } as const;
 
 const ALERT_SELECT = {

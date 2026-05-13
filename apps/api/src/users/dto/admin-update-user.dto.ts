@@ -26,9 +26,15 @@ export enum UserRoleEnum {
 export class AdminUpdateUserDto {
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: "Name cannot be blank" })
-  @MaxLength(200)
-  name?: string;
+  @IsNotEmpty({ message: "First name cannot be blank" })
+  @MaxLength(100)
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: "Last name cannot be blank" })
+  @MaxLength(100)
+  lastName?: string;
 
   @IsOptional()
   @IsString()
@@ -50,4 +56,13 @@ export class AdminUpdateUserDto {
     typeof value === "string" ? value.trim().toLowerCase() : value,
   )
   email?: string;
+
+  /**
+   * Editable for MAINTENANCE users only. Pass null to clear, or a string to
+   * set. The service rejects this field when the user's role isn't MAINTENANCE.
+   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  specialization?: string | null;
 }

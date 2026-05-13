@@ -29,9 +29,6 @@ const RENT_STATUS = {
 /** Role int codes */
 const ROLE = { ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3 } as const;
 
-/** Lease status ACTIVE int code */
-const LEASE_ACTIVE = 0;
-
 /**
  * TransactionClient — the intersection of what Prisma's $transaction callback
  * provides and what PrismaService adds. Using Prisma's own Omit type means

@@ -7,6 +7,7 @@ import {
   Matches,
   IsEnum,
   MinLength,
+  ValidateIf,
 } from "class-validator";
 import { Transform } from "class-transformer";
 
@@ -18,10 +19,18 @@ export enum UserRoleEnum {
 }
 
 /**
- * DTO for POST /users (Admin-only user creation).
- * If password is omitted, a temporary password is auto-generated and returned
- * ONCE in the response (Admin hands it to the user).
- * Hashed with Argon2id (SRS §11.1).
+ * DTO for POST /users.
+ *
+ * ADMIN may create any role. PROPERTY_MANAGER may create MAINTENANCE or TENANT
+ * only — role authorization is enforced server-side in UsersService.
+ *
+ * `name` is derived from firstName + lastName by the service; callers pass
+ * firstName + lastName separately.
+ *
+ * `specialization` is required when role === MAINTENANCE; rejected for any
+ * other role (enforced in the service).
+ *
+ * Hashed with Argon2id (SRS §11.1 — never bcrypt).
  */
 export class AdminCreateUserDto {
   @IsEmail({}, { message: "Must be a valid email address" })
@@ -34,21 +43,32 @@ export class AdminCreateUserDto {
   phone?: string;
 
   @IsString()
-  @IsNotEmpty({ message: "Name is required" })
-  @MaxLength(200)
-  name!: string;
+  @IsNotEmpty({ message: "First name is required" })
+  @MaxLength(100)
+  firstName!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Last name is required" })
+  @MaxLength(100)
+  lastName!: string;
 
   @IsEnum(UserRoleEnum, { message: "role must be one of: ADMIN, PROPERTY_MANAGER, MAINTENANCE, TENANT" })
   role!: UserRoleEnum;
 
-  /**
-   * Optional. If omitted, a temporary 16-character password is generated.
-   * Generated password is returned ONCE in the response (plaintext) — hash stored in DB.
-   */
-  @IsOptional()
+  /** Initial password set by the creating admin / PM. */
   @IsString()
   @MinLength(10, { message: "Password must be at least 10 characters" })
   @Matches(/[a-zA-Z]/, { message: "Password must contain at least one letter" })
   @Matches(/[0-9]/, { message: "Password must contain at least one digit" })
-  password?: string;
+  password!: string;
+
+  /**
+   * Specialization for MAINTENANCE users only. The service rejects this field
+   * for non-MAINTENANCE roles and requires it for MAINTENANCE.
+   */
+  @ValidateIf((o: { specialization?: string }) => o.specialization !== undefined)
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  specialization?: string;
 }

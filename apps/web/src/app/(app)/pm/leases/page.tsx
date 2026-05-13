@@ -83,6 +83,7 @@ interface SignLeaseFormValues {
     name: string;
     email: string;
     phone: string;
+    password: string;
     dob?: string;
     id_proof_type?: string;
     id_proof_number?: string;
@@ -206,7 +207,7 @@ function SignLeaseModal({
       endDate: "",
       monthlyRentRupees: 0,
       securityDepositRupees: 0,
-      tenants: [{ name: "", email: "", phone: "", dob: "", id_proof_type: "", id_proof_number: "" }],
+      tenants: [{ name: "", email: "", phone: "", password: "", dob: "", id_proof_type: "", id_proof_number: "" }],
     },
   });
 
@@ -223,7 +224,7 @@ function SignLeaseModal({
         endDate: "",
         monthlyRentRupees: 0,
         securityDepositRupees: 0,
-        tenants: [{ name: "", email: "", phone: "", dob: "", id_proof_type: "", id_proof_number: "" }],
+        tenants: [{ name: "", email: "", phone: "", password: "", dob: "", id_proof_type: "", id_proof_number: "" }],
       });
     }
   }, [open, resetForm]);
@@ -247,6 +248,7 @@ function SignLeaseModal({
           email: t.email,
           phone: t.phone || undefined,
           is_primary: i === 0,
+          password: t.password || undefined,
           dob: t.dob || undefined,
           id_proof_type: t.id_proof_type || undefined,
           id_proof_number: t.id_proof_number || undefined,
@@ -425,6 +427,28 @@ function SignLeaseModal({
                     />
                   </Field>
                   <Field
+                    id={`tenants.${index}.password`}
+                    label="Initial password *"
+                    error={errors.tenants?.[index]?.password?.message}
+                  >
+                    <input
+                      className="input"
+                      type="password"
+                      placeholder="At least 10 chars, with a letter and digit"
+                      autoComplete="new-password"
+                      {...register(`tenants.${index}.password`, {
+                        required: "Initial password is required",
+                        minLength: { value: 10, message: "Password must be at least 10 characters" },
+                        validate: {
+                          hasLetter: (v) =>
+                            /[a-zA-Z]/.test(v) || "Password must contain at least one letter",
+                          hasDigit: (v) =>
+                            /[0-9]/.test(v) || "Password must contain at least one digit",
+                        },
+                      })}
+                    />
+                  </Field>
+                  <Field
                     id={`tenants.${index}.dob`}
                     label="Date of Birth (YYYY-MM-DD)"
                     error={errors.tenants?.[index]?.dob?.message}
@@ -467,7 +491,7 @@ function SignLeaseModal({
               type="button"
               className="btn btn-secondary !py-2 !text-sm"
               onClick={() =>
-                append({ name: "", email: "", phone: "", dob: "", id_proof_type: "", id_proof_number: "" })
+                append({ name: "", email: "", phone: "", password: "", dob: "", id_proof_type: "", id_proof_number: "" })
               }
             >
               + Add co-tenant

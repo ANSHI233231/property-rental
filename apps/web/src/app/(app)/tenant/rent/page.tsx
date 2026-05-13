@@ -20,6 +20,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { usePaginatedList } from "@/lib/pagination/usePaginatedList";
 import { paiseStringToINR, parseBigPaise, daysOverdue, weeksOverdue } from "@/lib/rent/format";
 import { computeLateFeePaise, RentPeriodStatusEnum } from "@gharsetu/shared";
+import { RentChangeBanner } from "@/components/tenant/RentChangeBanner";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,7 +62,7 @@ interface LeaseInfo {
   monthly_rent_paise?: string;
   security_deposit_paise?: string;
   rent_due_day?: number;
-  unit?: { name?: string; property?: { name?: string } };
+  unit?: { id?: number | string; name?: string; property?: { name?: string } };
   tenants?: { id: string; name: string }[];
 }
 
@@ -341,6 +342,9 @@ export default function TenantRentPage() {
           </span>
         </div>
       </header>
+
+      {/* Rent-change notice — only shown if there's a pending schedule. */}
+      {lease?.unit?.id !== undefined && <RentChangeBanner unitId={lease.unit.id} />}
 
       {/* Current period */}
       {currentPeriod && (

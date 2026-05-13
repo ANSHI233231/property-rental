@@ -169,22 +169,24 @@ describe("PropertyInputSchema", () => {
 import { UserCreateSchema } from "@gharsetu/shared";
 
 describe("UserCreateSchema", () => {
+  // F1 changes the shape: name → firstName + lastName, password is required,
+  // and specialization is required iff role === MAINTENANCE.
+  const validPm = {
+    email: "pm@gharsetu.in",
+    firstName: "Sunita",
+    lastName: "Arora",
+    role: "PROPERTY_MANAGER" as const,
+    password: "Password123!",
+    phone: "9876543210",
+  };
+
   it("passes with valid PM create input", () => {
-    const result = UserCreateSchema.safeParse({
-      email: "pm@gharsetu.in",
-      name: "Sunita Arora",
-      role: "PROPERTY_MANAGER",
-      phone: "9876543210",
-    });
+    const result = UserCreateSchema.safeParse(validPm);
     expect(result.success).toBe(true);
   });
 
   it("fails when email is invalid", () => {
-    const result = UserCreateSchema.safeParse({
-      email: "not-an-email",
-      name: "Test User",
-      role: "PROPERTY_MANAGER",
-    });
+    const result = UserCreateSchema.safeParse({ ...validPm, email: "not-an-email" });
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.email?.length).toBeGreaterThan(0);
@@ -192,33 +194,42 @@ describe("UserCreateSchema", () => {
   });
 
   it("fails when phone is not a valid Indian mobile number", () => {
-    const result = UserCreateSchema.safeParse({
-      email: "test@gharsetu.in",
-      name: "Test",
-      role: "ADMIN",
-      phone: "123", // too short, wrong prefix
-    });
+    const result = UserCreateSchema.safeParse({ ...validPm, phone: "123" });
     expect(result.success).toBe(false);
   });
 
-  it("fails when name is empty", () => {
+  it("fails when firstName is empty", () => {
+    const result = UserCreateSchema.safeParse({ ...validPm, firstName: "" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.firstName?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("MAINTENANCE without specialization fails", () => {
     const result = UserCreateSchema.safeParse({
-      email: "test@gharsetu.in",
-      name: "",
-      role: "ADMIN",
+      ...validPm,
+      role: "MAINTENANCE",
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.name?.length).toBeGreaterThan(0);
+      expect(result.error.flatten().fieldErrors.specialization?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("non-MAINTENANCE with specialization fails", () => {
+    const result = UserCreateSchema.safeParse({
+      ...validPm,
+      specialization: "Plumber",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.specialization?.length).toBeGreaterThan(0);
     }
   });
 
   it("normalises email to lowercase", () => {
-    const result = UserCreateSchema.safeParse({
-      email: "PM@GHARSETU.IN",
-      name: "PM Name",
-      role: "PROPERTY_MANAGER",
-    });
+    const result = UserCreateSchema.safeParse({ ...validPm, email: "PM@GHARSETU.IN" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.email).toBe("pm@gharsetu.in");

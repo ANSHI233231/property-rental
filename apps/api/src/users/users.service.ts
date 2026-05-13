@@ -4,12 +4,13 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
   MethodNotAllowedException,
 } from "@nestjs/common";
-import { randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { HashingService } from "../auth/hashing.service";
 import { AuditService } from "../audit/audit.service";
+import { EmailService } from "../notifications/email.service";
 import type { UpdateProfileDto } from "./dto/update-profile.dto";
 import type { ChangePasswordDto } from "./dto/change-password.dto";
 import type { AdminCreateUserDto } from "./dto/admin-create-user.dto";
@@ -21,6 +22,10 @@ export interface SafeUser {
   email: string;
   phone: string | null;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
+  /** Only populated for MAINTENANCE users; null otherwise. */
+  specialization: string | null;
   /** Smallint role code: 0=ADMIN 1=PROPERTY_MANAGER 2=MAINTENANCE 3=TENANT */
   role: number;
   is_active: boolean;
@@ -40,6 +45,9 @@ const USER_PROFILE_SELECT = {
   email: true,
   phone: true,
   name: true,
+  first_name: true,
+  last_name: true,
+  specialization: true,
   role: true,
   is_active: true,
   created_at: true,
@@ -56,6 +64,9 @@ const USER_SAFE_SELECT = {
   email: true,
   phone: true,
   name: true,
+  first_name: true,
+  last_name: true,
+  specialization: true,
   role: true,
   is_active: true,
   created_by_user_id: true,
@@ -63,17 +74,13 @@ const USER_SAFE_SELECT = {
   updated_at: true,
 } as const;
 
-/** Generate a temporary password: 16 hex chars (8 random bytes). */
-function generateTempPassword(): string {
-  return `Tmp@${randomBytes(6).toString("hex")}`;
-}
-
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly hashing: HashingService,
     private readonly audit: AuditService,
+    private readonly email: EmailService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -129,6 +136,7 @@ export class UsersService {
     }
 
     const newHash = await this.hashing.hashPassword(dto.newPassword);
+    const changedAt = new Date();
 
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
@@ -148,9 +156,23 @@ export class UsersService {
         entityType: "Auth",
         entityId: userId,
         before: null,
-        after: { changedAt: new Date() },
+        after: { changedAt },
       });
     });
+
+    // F3.1: fire-and-forget notification to all active admins.
+    // Failure must NOT break the password change. Run after the transaction
+    // commits so the audit row is durable even if email fails.
+    const admins = await this.prisma.user.findMany({
+      where: { role: 0, is_active: true },
+      select: { email: true },
+    });
+    const adminEmails = admins.map((a) => a.email);
+    void this.email
+      .sendPasswordChangeNoticeToAdmins(adminEmails, user.name, user.email, changedAt)
+      .catch(() => {
+        /* never throw — email errors are logged inside the service. */
+      });
   }
 
   // ---------------------------------------------------------------------------
@@ -233,12 +255,67 @@ export class UsersService {
     };
   }
 
-  /** POST /users — Admin creates a user. Returns tempPassword if auto-generated. */
+  /**
+   * POST /users.
+   *
+   * Authorization:
+   *   - ADMIN (actorRole=0) may create any role.
+   *   - PROPERTY_MANAGER (actorRole=1) may create MAINTENANCE or TENANT only.
+   *   - Other roles → 403.
+   *
+   * Specialization rules:
+   *   - Required when role === MAINTENANCE.
+   *   - Rejected for any other role.
+   *
+   * `name` is auto-derived from firstName + lastName for back-compat with
+   * existing queries.
+   */
   async adminCreateUser(
     dto: AdminCreateUserDto,
     actorId: number,
-  ): Promise<SafeUser & { temp_password?: string }> {
-    // Check email uniqueness
+    actorRole: number,
+  ): Promise<SafeUser> {
+    const ROLE_CODE: Record<string, number> = {
+      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
+    };
+    const newRoleCode = ROLE_CODE[dto.role] ?? 3;
+
+    // Authorization: PROPERTY_MANAGER may only create MAINTENANCE or TENANT
+    if (actorRole === ROLE_CODE.PROPERTY_MANAGER) {
+      if (newRoleCode !== ROLE_CODE.MAINTENANCE && newRoleCode !== ROLE_CODE.TENANT) {
+        throw new ForbiddenException({
+          error: {
+            code: "FORBIDDEN_ROLE_CREATION",
+            message: "Property Managers may only create MAINTENANCE or TENANT users",
+          },
+        });
+      }
+    } else if (actorRole !== ROLE_CODE.ADMIN) {
+      throw new ForbiddenException({
+        error: { code: "FORBIDDEN", message: "Only ADMIN or PROPERTY_MANAGER may create users" },
+      });
+    }
+
+    // Specialization gating
+    if (dto.role === "MAINTENANCE") {
+      if (!dto.specialization || dto.specialization.trim().length === 0) {
+        throw new BadRequestException({
+          error: {
+            code: "SPECIALIZATION_REQUIRED",
+            message: "Specialization is required when creating a MAINTENANCE user",
+          },
+        });
+      }
+    } else if (dto.specialization !== undefined) {
+      throw new BadRequestException({
+        error: {
+          code: "SPECIALIZATION_NOT_ALLOWED",
+          message: "Specialization is only allowed when role is MAINTENANCE",
+        },
+      });
+    }
+
+    // Email uniqueness
     const emailExists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (emailExists) {
       throw new ConflictException({
@@ -246,7 +323,7 @@ export class UsersService {
       });
     }
 
-    // Check phone uniqueness if provided
+    // Phone uniqueness (if provided)
     if (dto.phone) {
       const phoneExists = await this.prisma.user.findFirst({ where: { phone: dto.phone } });
       if (phoneExists) {
@@ -256,28 +333,28 @@ export class UsersService {
       }
     }
 
-    const isTempPassword = !dto.password;
-    const plainPassword = dto.password ?? generateTempPassword();
-    const passwordHash = await this.hashing.hashPassword(plainPassword);
-
-    const ROLE_CODE: Record<string, number> = {
-      ADMIN: 0, PROPERTY_MANAGER: 1, MAINTENANCE: 2, TENANT: 3,
-    };
-    const roleCode = ROLE_CODE[dto.role] ?? 3;
+    const firstName = dto.firstName.trim();
+    const lastName = dto.lastName.trim();
+    const fullName = `${firstName} ${lastName}`.trim();
+    const passwordHash = await this.hashing.hashPassword(dto.password);
 
     const user = await this.prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
           email: dto.email,
           phone: dto.phone ?? null,
-          name: dto.name,
-          role: roleCode,
+          name: fullName,
+          first_name: firstName,
+          last_name: lastName,
+          specialization: dto.role === "MAINTENANCE" ? (dto.specialization as string).trim() : null,
+          role: newRoleCode,
           password_hash: passwordHash,
           created_by_user_id: actorId,
         },
         select: USER_SAFE_SELECT,
       });
 
+      // Audit: USER_CREATED
       await this.audit.writeLog(tx, {
         actorId,
         action: "user.create",
@@ -290,9 +367,6 @@ export class UsersService {
       return created;
     });
 
-    if (isTempPassword) {
-      return { ...user, temp_password: plainPassword };
-    }
     return user;
   }
 
@@ -414,14 +488,42 @@ export class UsersService {
           }
         }
 
+        // First/last name handling — recompute `name` if either changes.
+        const newFirst = dto.firstName?.trim();
+        const newLast = dto.lastName?.trim();
+        const effectiveFirst = newFirst ?? before.first_name ?? "";
+        const effectiveLast = newLast ?? before.last_name ?? "";
+        const nameChanged = newFirst !== undefined || newLast !== undefined;
+        const recomputedName = `${effectiveFirst} ${effectiveLast}`.trim();
+
+        // Specialization rules: only allowed on MAINTENANCE users.
+        // - Setting requires the user's effective role to be MAINTENANCE.
+        // - Setting null is always permitted (clears the field).
+        const effectiveRole = newRoleCode ?? before.role;
+        if (dto.specialization !== undefined && dto.specialization !== null) {
+          if (effectiveRole !== ROLE_CODE.MAINTENANCE) {
+            throw new BadRequestException({
+              error: {
+                code: "SPECIALIZATION_NOT_ALLOWED",
+                message: "Specialization is only allowed when role is MAINTENANCE",
+              },
+            });
+          }
+        }
+
         const updated = await tx.user.update({
           where: { id },
           data: {
-            ...(dto.name !== undefined ? { name: dto.name } : {}),
+            ...(newFirst !== undefined ? { first_name: newFirst } : {}),
+            ...(newLast !== undefined ? { last_name: newLast } : {}),
+            ...(nameChanged ? { name: recomputedName } : {}),
             ...(dto.phone !== undefined ? { phone: dto.phone ?? null } : {}),
             ...(dto.is_active !== undefined ? { is_active: dto.is_active } : {}),
             ...(newRoleCode !== undefined ? { role: newRoleCode } : {}),
             ...(dto.email !== undefined ? { email: dto.email } : {}),
+            ...(dto.specialization !== undefined
+              ? { specialization: dto.specialization ?? null }
+              : {}),
           },
           select: USER_SAFE_SELECT,
         });
@@ -439,6 +541,71 @@ export class UsersService {
       },
       { isolationLevel: "Serializable" },
     );
+  }
+
+  /**
+   * PATCH /users/:id/reset-password — Admin sets a new password for a user.
+   *
+   * Per spec:
+   *   - Admin provides the new temporary password manually.
+   *   - User can log in with it immediately.
+   *   - No email is sent to the user (admin shares it out-of-band).
+   *   - Audit entry `admin.reset_password` with actor + target.
+   *   - All existing refresh tokens for the target user are revoked, forcing
+   *     a fresh login (security baseline matching self-service change).
+   *
+   * The admin never sees the user's previous password — only sets the new one.
+   */
+  async adminResetPassword(
+    targetUserId: number,
+    newPassword: string,
+    actorId: number,
+  ): Promise<void> {
+    const target = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true, is_active: true },
+    });
+    if (!target) {
+      throw new NotFoundException({
+        error: { code: "RESOURCE_NOT_FOUND", message: `User ${targetUserId} not found` },
+      });
+    }
+    if (!target.is_active) {
+      throw new ConflictException({
+        error: {
+          code: "USER_INACTIVE",
+          message: "Cannot reset password of a deactivated user. Reactivate first.",
+        },
+      });
+    }
+
+    const newHash = await this.hashing.hashPassword(newPassword);
+    const resetAt = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: targetUserId },
+        data: {
+          password_hash: newHash,
+          failed_login_count: 0,
+          locked_until: null,
+        },
+      });
+
+      await tx.refreshToken.updateMany({
+        where: { user_id: targetUserId, revoked_at: null },
+        data: { revoked_at: resetAt },
+      });
+
+      await this.audit.writeLog(tx, {
+        actorId,
+        action: "admin.reset_password",
+        entityType: "User",
+        entityId: targetUserId,
+        before: null,
+        after: { resetAt, target_user_id: targetUserId },
+      });
+    });
   }
 
   /**

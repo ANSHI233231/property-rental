@@ -6,10 +6,10 @@ import type { Transporter } from "nodemailer";
 /** IST offset in minutes: UTC + 5:30 */
 const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
 
-/** Convert paise (BigInt) to a formatted INR string: e.g. 1800000n → "₹18,000.00" */
+/** Convert paise (BigInt) to a whole-rupee INR string: e.g. 1800000n → "₹18,000" */
 function paiseToINR(paise: bigint): string {
   const rupees = Number(paise) / 100;
-  return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `₹${rupees.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
 /** Format a Date as DD/MM/YYYY in IST */
@@ -19,6 +19,16 @@ function formatDateIST(d: Date): string {
   const mm = String(istDate.getUTCMonth() + 1).padStart(2, "0");
   const yyyy = istDate.getUTCFullYear();
   return `${dd}/${mm}/${yyyy}`;
+}
+
+/** Format a Date as DD MMM YYYY in IST: e.g. "22 Jul 2026" */
+function formatDateLongIST(d: Date): string {
+  const istDate = new Date(d.getTime() + IST_OFFSET_MS);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dd = String(istDate.getUTCDate()).padStart(2, "0");
+  const mmm = months[istDate.getUTCMonth()];
+  const yyyy = istDate.getUTCFullYear();
+  return `${dd} ${mmm} ${yyyy}`;
 }
 
 export type RentChangeNoticeType = "scheduled" | "modified" | "cancelled";
@@ -75,28 +85,92 @@ export class EmailService implements OnModuleInit {
   /**
    * Send a rent-change notice to active tenants on a unit.
    *
-   * @param to             - Array of recipient email addresses.
-   * @param unitNumber     - Human-readable unit identifier (e.g. "3B").
-   * @param newRentPaise   - New monthly rent in paise.
-   * @param effectiveDate  - Date the rent change takes effect.
-   * @param type           - "scheduled" | "modified" | "cancelled"
+   * One email is sent per recipient so the body can be personalised with the
+   * tenant's name. Subjects and bodies follow the product spec — see
+   * buildSubject/buildBody below for exact wording.
+   *
+   * @param recipients      - Active tenants on the unit's lease (name + email).
+   * @param unitNumber      - Human-readable unit identifier (e.g. "3B").
+   * @param propertyName    - Property the unit belongs to.
+   * @param currentRentPaise - The rent the tenant is paying right now (paise).
+   * @param newRentPaise    - The rent that will apply from `effectiveDate` (paise).
+   * @param effectiveDate   - Date the rent change takes effect.
+   * @param type            - "scheduled" | "modified" | "cancelled"
    */
   async sendRentChangeNotice(
-    to: string[],
+    recipients: { name: string; email: string }[],
     unitNumber: string,
+    propertyName: string,
+    currentRentPaise: bigint,
     newRentPaise: bigint,
     effectiveDate: Date,
     type: RentChangeNoticeType,
   ): Promise<void> {
-    if (to.length === 0) return;
+    if (recipients.length === 0) return;
 
-    const subject = this.buildSubject(type, unitNumber);
-    const body = this.buildBody(type, unitNumber, newRentPaise, effectiveDate);
+    const subject = this.buildSubject(type, unitNumber, propertyName);
+
+    for (const r of recipients) {
+      const body = this.buildBody(
+        type,
+        r.name,
+        unitNumber,
+        currentRentPaise,
+        newRentPaise,
+        effectiveDate,
+      );
+
+      if (this.logOnly || !this.transporter) {
+        this.logger.log(
+          `[LOG-ONLY] Would send email:\n` +
+            `  To: ${r.email}\n` +
+            `  Subject: ${subject}\n` +
+            `  Body:\n${body}`,
+        );
+        continue;
+      }
+
+      try {
+        await this.transporter.sendMail({
+          from: this.smtpFrom,
+          to: r.email,
+          subject,
+          text: body,
+        });
+        this.logger.log(`Email sent (${type}): unit=${unitNumber} to=${r.email}`);
+      } catch (err) {
+        // Never propagate — email failures must not break the underlying mutation.
+        this.logger.error(
+          `Email send failure (${type}): unit=${unitNumber} to=${r.email} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Notify admins that a user changed their password.
+   *
+   * Admins receive only the fact-of-change — never the new password. Sent
+   * fire-and-forget after the password update commits.
+   */
+  async sendPasswordChangeNoticeToAdmins(
+    adminEmails: string[],
+    userName: string,
+    userEmail: string,
+    changedAt: Date,
+  ): Promise<void> {
+    if (adminEmails.length === 0) return;
+
+    const subject = `GharSetu: Password Changed — ${userName} (${userEmail})`;
+    const body =
+      `User ${userName} (${userEmail}) changed their password on ${formatDateIST(changedAt)} (IST).\n\n` +
+      `This is an automated security notification. No action is required unless this change is unexpected — ` +
+      `in which case, suspend the account immediately.\n\n— GharSetu`;
 
     if (this.logOnly || !this.transporter) {
       this.logger.log(
         `[LOG-ONLY] Would send email:\n` +
-          `  To: ${to.join(", ")}\n` +
+          `  To: ${adminEmails.join(", ")}\n` +
           `  Subject: ${subject}\n` +
           `  Body:\n${body}`,
       );
@@ -106,15 +180,14 @@ export class EmailService implements OnModuleInit {
     try {
       await this.transporter.sendMail({
         from: this.smtpFrom,
-        to: to.join(", "),
+        to: adminEmails.join(", "),
         subject,
         text: body,
       });
-      this.logger.log(`Email sent (${type}): unit=${unitNumber} to=${to.join(",")}`);
+      this.logger.log(`Password-change notice sent: user=${userEmail} adminsNotified=${adminEmails.length}`);
     } catch (err) {
-      // Never propagate — email failures must not break the underlying mutation.
       this.logger.error(
-        `Email send failure (${type}): unit=${unitNumber} error=${err instanceof Error ? err.message : String(err)}`,
+        `Password-change notice failure: user=${userEmail} error=${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
@@ -123,52 +196,63 @@ export class EmailService implements OnModuleInit {
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  private buildSubject(type: RentChangeNoticeType, unitNumber: string): string {
+  private buildSubject(
+    type: RentChangeNoticeType,
+    unitNumber: string,
+    propertyName: string,
+  ): string {
     switch (type) {
       case "scheduled":
-        return `GharSetu: Upcoming Rent Change for Unit ${unitNumber}`;
+        return `Rent Change Notice — Unit ${unitNumber}, ${propertyName}`;
       case "modified":
-        return `GharSetu: Rent Change Updated for Unit ${unitNumber}`;
+        return `Rent Change Notice Updated — Unit ${unitNumber}, ${propertyName}`;
       case "cancelled":
-        return `GharSetu: Scheduled Rent Change Cancelled for Unit ${unitNumber}`;
+        return `Rent Change Cancelled — Unit ${unitNumber}, ${propertyName}`;
     }
   }
 
   private buildBody(
     type: RentChangeNoticeType,
+    tenantName: string,
     unitNumber: string,
+    currentRentPaise: bigint,
     newRentPaise: bigint,
     effectiveDate: Date,
   ): string {
-    const rentStr = paiseToINR(newRentPaise);
-    const dateStr = formatDateIST(effectiveDate);
+    const currentRentStr = paiseToINR(currentRentPaise);
+    const newRentStr = paiseToINR(newRentPaise);
+    const dateStr = formatDateLongIST(effectiveDate);
 
     switch (type) {
       case "scheduled":
         return (
-          `Dear Tenant,\n\n` +
-          `Your property manager has scheduled a rent change for Unit ${unitNumber}.\n\n` +
-          `New Monthly Rent: ${rentStr}\n` +
-          `Effective Date:   ${dateStr} (IST)\n\n` +
-          `If you have any questions, please contact your property manager.\n\n` +
-          `— GharSetu`
+          `Dear ${tenantName},\n\n` +
+          `This is to inform you that your rent will change effective ${dateStr}.\n\n` +
+          `Current Rent: ${currentRentStr}\n` +
+          `New Rent: ${newRentStr}\n` +
+          `Effective Date: ${dateStr}\n\n` +
+          `This notice has been issued 60+ days in advance as required.\n\n` +
+          `For any queries, contact your Property Manager.\n\n` +
+          `GharSetu Property Management`
         );
       case "modified":
         return (
-          `Dear Tenant,\n\n` +
-          `The scheduled rent change for Unit ${unitNumber} has been updated.\n\n` +
-          `New Monthly Rent: ${rentStr}\n` +
-          `Effective Date:   ${dateStr} (IST)\n\n` +
-          `If you have any questions, please contact your property manager.\n\n` +
-          `— GharSetu`
+          `Dear ${tenantName},\n\n` +
+          `This is to inform you that your rent will change effective ${dateStr}.\n\n` +
+          `Current Rent: ${currentRentStr}\n` +
+          `New Rent: ${newRentStr}\n` +
+          `Effective Date: ${dateStr}\n\n` +
+          `Note: A previously scheduled rent change has been updated with the details above.\n\n` +
+          `This notice has been issued 60+ days in advance as required.\n\n` +
+          `For any queries, contact your Property Manager.\n\n` +
+          `GharSetu Property Management`
         );
       case "cancelled":
         return (
-          `Dear Tenant,\n\n` +
-          `The previously scheduled rent change for Unit ${unitNumber} has been cancelled.\n\n` +
-          `Your current rent will remain unchanged.\n\n` +
-          `If you have any questions, please contact your property manager.\n\n` +
-          `— GharSetu`
+          `Dear ${tenantName},\n\n` +
+          `The previously scheduled rent change for your unit ${unitNumber} has been cancelled.\n` +
+          `Your current rent of ${currentRentStr} will continue unchanged.\n\n` +
+          `GharSetu Property Management`
         );
     }
   }

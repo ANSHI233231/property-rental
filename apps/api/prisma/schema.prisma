@@ -32,7 +32,17 @@ model User {
   id               Int       @id @default(autoincrement())
   email            String    @unique
   phone            String?   @unique
+  /// Display name = first_name + " " + last_name. Auto-populated by the
+  /// service on every write. Kept as a single column for back-compat with
+  /// existing queries and serializations.
   name             String
+  /// User's first name. Required on create (concatenated with last_name).
+  first_name       String?
+  /// User's last name. Optional in storage; required on create per spec.
+  last_name        String?
+  /// Maintenance staff specialization, e.g. "Plumber", "Electrician".
+  /// Only populated when role = 2 (MAINTENANCE). Service rejects otherwise.
+  specialization   String?
   password_hash    String
   /// 0=ADMIN 1=PROPERTY_MANAGER 2=MAINTENANCE 3=TENANT
   role             Int       @default(3)

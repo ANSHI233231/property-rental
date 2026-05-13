@@ -29,6 +29,17 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/pm/units",
+    label: "Units",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="11" width="18" height="10" rx="1" />
+        <path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4" />
+        <path d="M9 21v-4M15 21v-4" />
+      </svg>
+    ),
+  },
+  {
     href: "/pm/tenants",
     label: "Tenants",
     icon: (

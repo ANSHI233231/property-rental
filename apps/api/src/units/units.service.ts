@@ -46,6 +46,9 @@ const UNIT_SELECT = {
   retired_by_user_id: true,
   created_at: true,
   updated_at: true,
+  // Used by /admin/units list to show "Property Name" column. PM scope
+  // doesn't need it for display but the join is the same.
+  property: { select: { id: true, name: true } },
 } as const;
 
 @Injectable()
@@ -65,26 +68,48 @@ export class UnitsService {
     cursor?: number;
     limit?: number;
     status?: string;
+    propertyId?: number;
     page?: number;
     pageSize?: number;
+    /** When set, scope to units in the property where this user is the
+     *  active PM. Used by /pm/units. Admins pass undefined to see all. */
+    pmUserId?: number;
   }) {
     const useOffset = query.page !== undefined;
     const ps = query.pageSize !== undefined ? Math.min(Math.max(query.pageSize, 1), 100) : undefined;
     const take = useOffset ? (ps ?? 10) : Math.min(query.limit ?? 20, 200);
 
-    // Accept state as int code string ("0") or name ("AVAILABLE")
+    // Accept state as int code string ("0") or name ("AVAILABLE" / "RETIRED")
     const STATE_NAME_TO_CODE: Record<string, number> = {
       AVAILABLE: 0, LISTED: 1, OCCUPIED: 2, MAINTENANCE: 3,
     };
-    const where: { state?: number } = {};
+    const where: {
+      state?: number;
+      property_id?: number;
+      is_retired?: boolean;
+      property?: { active_pm_id: number };
+    } = {};
     if (query.status) {
-      const asInt = parseInt(query.status, 10);
-      if (!isNaN(asInt)) {
-        where.state = asInt;
+      const upper = query.status.toUpperCase();
+      if (upper === "RETIRED") {
+        // "Retired" is a derived bucket — units with is_retired=true regardless of state.
+        where.is_retired = true;
       } else {
-        const code = STATE_NAME_TO_CODE[query.status.toUpperCase()];
-        if (code !== undefined) where.state = code;
+        const asInt = parseInt(query.status, 10);
+        if (!isNaN(asInt)) {
+          where.state = asInt;
+        } else {
+          const code = STATE_NAME_TO_CODE[upper];
+          if (code !== undefined) where.state = code;
+        }
       }
+    }
+    if (query.propertyId !== undefined) {
+      where.property_id = query.propertyId;
+    }
+    if (query.pmUserId !== undefined) {
+      // PM scope — only their own property's units.
+      where.property = { active_pm_id: query.pmUserId };
     }
 
     const currentPage = query.page ?? 1;

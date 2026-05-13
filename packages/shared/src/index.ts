@@ -85,8 +85,15 @@ export {
   AdminRoleSchema,
   UserCreateSchema,
   UserAdminUpdateSchema,
+  AdminResetPasswordSchema,
+  passwordSchema,
 } from "./schemas/users-admin.js";
-export type { AdminRoleValue, UserCreateInput, UserAdminUpdateInput } from "./schemas/users-admin.js";
+export type {
+  AdminRoleValue,
+  UserCreateInput,
+  UserAdminUpdateInput,
+  AdminResetPasswordInput,
+} from "./schemas/users-admin.js";
 
 // Currency helpers (Phase 2)
 export {

@@ -22,6 +22,7 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import { AdminCreateUserDto } from "./dto/admin-create-user.dto";
 import { AdminUpdateUserDto } from "./dto/admin-update-user.dto";
+import { AdminResetPasswordDto } from "./dto/admin-reset-password.dto";
 import { UserThrottlerGuard } from "../common/guards/user-throttler.guard";
 import type { JwtPayload } from "../auth/jwt.service";
 
@@ -116,13 +117,14 @@ export class UsersController {
    */
   @Post()
   @UseGuards(RolesGuard)
-  @Roles("ADMIN")
+  @Roles("ADMIN", "PROPERTY_MANAGER")
   @HttpCode(HttpStatus.CREATED)
   async adminCreateUser(
     @Body() dto: AdminCreateUserDto,
     @CurrentUser() actor: JwtPayload,
   ) {
-    return this.usersService.adminCreateUser(dto, actor.sub);
+    // Service enforces: PROPERTY_MANAGER may only create MAINTENANCE or TENANT.
+    return this.usersService.adminCreateUser(dto, actor.sub, actor.role);
   }
 
   /**
@@ -149,6 +151,26 @@ export class UsersController {
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.usersService.adminUpdateUser(id, dto, actor.sub);
+  }
+
+  /**
+   * PATCH /users/:id/reset-password — Admin sets a new temporary password.
+   *
+   * F3.2: admin shares the password out-of-band; no email is sent. All
+   * existing refresh tokens for the target user are revoked. Audit log
+   * `admin.reset_password` records actor + target.
+   */
+  @Patch(":id/reset-password")
+  @UseGuards(RolesGuard)
+  @Roles("ADMIN")
+  @HttpCode(HttpStatus.OK)
+  async adminResetPassword(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() dto: AdminResetPasswordDto,
+    @CurrentUser() actor: JwtPayload,
+  ) {
+    await this.usersService.adminResetPassword(id, dto.newPassword, actor.sub);
+    return { message: "Password reset successfully" };
   }
 
   /**
