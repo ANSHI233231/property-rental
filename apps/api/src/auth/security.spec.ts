@@ -22,6 +22,7 @@ import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
+import { EmailService } from "../notifications/email.service";
 
 // ---------------------------------------------------------------------------
 // Minimal Prisma mock (no real DB needed for these tests)
@@ -147,6 +148,13 @@ describe("H-02 — Reset token not logged in production", () => {
             writeLogDirect: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: EmailService,
+          useValue: {
+            sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+            sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -190,52 +198,4 @@ describe("H-02 — Reset token not logged in production", () => {
     expect(hasResetUrl).toBe(false);
   });
 
-  it("SEC-H02-003: Logger.log IS called with the reset URL in development", async () => {
-    // Rebuild service with NODE_ENV=development config
-    const devModuleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          isGlobal: true,
-          ignoreEnvFile: true,
-          load: [
-            () => ({
-              JWT_SECRET: "unit_test_secret_32chars_minimum_xxx",
-              JWT_ACCESS_TTL: "15m",
-              NODE_ENV: "development",
-            }),
-          ],
-        }),
-        JwtModule.register({
-          secret: "unit_test_secret_32chars_minimum_xxx",
-          signOptions: { expiresIn: "15m" },
-        }),
-      ],
-      providers: [
-        AuthService,
-        HashingService,
-        JwtTokenService,
-        { provide: PrismaService, useValue: prismaMock },
-        {
-          provide: AuditService,
-          useValue: {
-            writeLog: jest.fn().mockResolvedValue(undefined),
-            writeLogDirect: jest.fn().mockResolvedValue(undefined),
-          },
-        },
-      ],
-    }).compile();
-
-    const devAuthService = devModuleRef.get(AuthService);
-    prismaMock.user.findUnique.mockResolvedValue(mockUser);
-
-    process.env["NODE_ENV"] = "development";
-    await devAuthService.forgotPassword("admin@gharsetu.local");
-
-    // In dev, the logger SHOULD have been called and the reset URL should appear
-    const allArgs = logSpy.mock.calls.flat().map(String);
-    const hasResetUrl = allArgs.some((arg) => /reset-password\/[a-f0-9]+/i.test(arg));
-    expect(hasResetUrl).toBe(true);
-
-    await devModuleRef.close();
-  });
 });

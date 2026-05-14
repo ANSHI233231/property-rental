@@ -61,11 +61,11 @@ afterAll(async () => {
 // Cleanup tracking
 // ---------------------------------------------------------------------------
 
-let cleanLeaseIds: string[] = [];
-let cleanTenantIds: string[] = [];
-let cleanUnitIds: string[] = [];
-let cleanPropertyIds: string[] = [];
-let cleanUserIds: string[] = [];
+let cleanLeaseIds: number[] = [];
+let cleanTenantIds: number[] = [];
+let cleanUnitIds: number[] = [];
+let cleanPropertyIds: number[] = [];
+let cleanUserIds: number[] = [];
 
 afterEach(async () => {
   // Deposit refunds
@@ -83,11 +83,11 @@ afterEach(async () => {
     }
     await prisma.leaseTenant.deleteMany({ where: { lease_id: { in: cleanLeaseIds } } });
     await prisma.auditLog.deleteMany({
-      where: { entity_type: "Lease", entity_id: { in: cleanLeaseIds } },
+      where: { entity_type: "Lease", entity_id: { in: cleanLeaseIds.map(String) } },
     });
     for (const lid of cleanLeaseIds) {
       await prisma.auditLog.deleteMany({
-        where: { entity_type: "LeaseTenant", entity_id: { startsWith: lid } },
+        where: { entity_type: "LeaseTenant", entity_id: { startsWith: String(lid) } },
       });
     }
     // Phase 4: delete prepaid_credits and payments before leases (FK cascade guard)
@@ -95,7 +95,7 @@ afterEach(async () => {
     await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_no_delete`);
     await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_restrict_update`);
     try {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, cleanLeaseIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, cleanLeaseIds);
     } finally {
       await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
       await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_restrict_update`);
@@ -106,19 +106,19 @@ afterEach(async () => {
   }
 
   if (cleanTenantIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Tenant", entity_id: { in: cleanTenantIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Tenant", entity_id: { in: cleanTenantIds.map(String) } } });
     await prisma.tenant.deleteMany({ where: { id: { in: cleanTenantIds } } });
     cleanTenantIds = [];
   }
 
   if (cleanUnitIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: cleanUnitIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: cleanUnitIds.map(String) } } });
     await prisma.unit.deleteMany({ where: { id: { in: cleanUnitIds } } });
     cleanUnitIds = [];
   }
 
   if (cleanPropertyIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: cleanPropertyIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: cleanPropertyIds.map(String) } } });
     await prisma.propertyTransferLog.deleteMany({ where: { property_id: { in: cleanPropertyIds } } });
     await prisma.property.deleteMany({ where: { id: { in: cleanPropertyIds } } });
     cleanPropertyIds = [];
@@ -129,7 +129,7 @@ afterEach(async () => {
     await prisma.auditLog.deleteMany({
       where: {
         OR: [
-          { entity_type: "User", entity_id: { in: cleanUserIds } },
+          { entity_type: "User", entity_id: { in: cleanUserIds.map(String) } },
           { actor_id: { in: cleanUserIds } },
         ],
       },
@@ -144,7 +144,7 @@ afterEach(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createProp(): Promise<{ id: string }> {
+async function createProp(): Promise<{ id: number }> {
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -156,29 +156,32 @@ async function createProp(): Promise<{ id: string }> {
       pincode: "110001",
     });
   expect(res.status).toBe(201);
-  cleanPropertyIds.push(res.body.id as string);
-  return res.body as { id: string };
+  cleanPropertyIds.push(res.body.id as number);
+  return res.body as { id: number };
 }
 
-async function createUnit(propertyId: string): Promise<{ id: string }> {
+async function createUnit(propertyId: number): Promise<{ id: number }> {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U${Date.now()}`, bedrooms: 2, bathrooms: 1, monthly_rent_paise: 1_800_000 });
   expect(res.status).toBe(201);
-  cleanUnitIds.push(res.body.id as string);
-  return res.body as { id: string };
+  cleanUnitIds.push(res.body.id as number);
+  return res.body as { id: number };
 }
 
-async function createPM(tag: string): Promise<{ id: string; email: string; temp_password: string }> {
+const SECFIX3_PM_PASSWORD = "SecFix3@pm2026!!";
+
+async function createPM(tag: string): Promise<{ id: number; email: string; temp_password: string }> {
   const email = `pm-secfix-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ email, name: `PM ${tag}`, role: "PROPERTY_MANAGER" });
+    .send({ email, firstName: "PM", lastName: tag, role: "PROPERTY_MANAGER", password: SECFIX3_PM_PASSWORD });
   expect(res.status).toBe(201);
-  cleanUserIds.push(res.body.id as string);
-  return { ...res.body as { id: string; temp_password: string }, email };
+  cleanUserIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key for backward-compat
+  return { ...(res.body as { id: number }), email, temp_password: SECFIX3_PM_PASSWORD };
 }
 
 async function loginAs(email: string, password: string): Promise<string> {
@@ -189,17 +192,37 @@ async function loginAs(email: string, password: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
+const SECFIX3_TENANT_PASSWORD = "SecFix3@ten2026!";
+
 /** Create a 2-tenant lease; returns lease + typed tenant array. */
 async function createMultiTenantLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   token: string,
 ): Promise<{
-  leaseId: string;
-  tenantA: { tenantId: string; userId: string; tempPassword: string };
-  tenantB: { tenantId: string; userId: string; tempPassword: string };
+  leaseId: number;
+  tenantA: { tenantId: number; userId: number; tempPassword: string };
+  tenantB: { tenantId: number; userId: number; tempPassword: string };
 }> {
   const ts = Date.now();
+  const emailA = `ta-secfix-${ts}@test.local`;
+  const emailB = `tb-secfix-${ts}@test.local`;
+
+  // Pre-create tenant users with a known password so we don't rely on one-shot temp_password
+  const userARes = await supertestFn(app.getHttpServer())
+    .post("/api/v1/users")
+    .set("Authorization", `Bearer ${adminToken}`)
+    .send({ email: emailA, firstName: "Tenant", lastName: "A", role: "TENANT", password: SECFIX3_TENANT_PASSWORD });
+  expect(userARes.status).toBe(201);
+  cleanUserIds.push(userARes.body.id as number);
+
+  const userBRes = await supertestFn(app.getHttpServer())
+    .post("/api/v1/users")
+    .set("Authorization", `Bearer ${adminToken}`)
+    .send({ email: emailB, firstName: "Tenant", lastName: "B", role: "TENANT", password: SECFIX3_TENANT_PASSWORD });
+  expect(userBRes.status).toBe(201);
+  cleanUserIds.push(userBRes.body.id as number);
+
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
     .set("Authorization", `Bearer ${token}`)
@@ -209,19 +232,19 @@ async function createMultiTenantLease(
       monthlyRentPaise: 1_800_000,
       securityDepositPaise: 3_600_000,
       tenants: [
-        { name: "Tenant A", email: `ta-secfix-${ts}@test.local`, is_primary: true },
-        { name: "Tenant B", email: `tb-secfix-${ts}@test.local`, is_primary: false },
+        { name: "Tenant A", email: emailA, is_primary: true },
+        { name: "Tenant B", email: emailB, is_primary: false },
       ],
     });
   expect(res.status).toBe(201);
 
-  const leaseId = res.body.lease.id as string;
+  const leaseId = res.body.lease.id as number;
   cleanLeaseIds.push(leaseId);
 
-  const tenants = res.body.tenants as Array<{ tenantId: string; userId: string; isPrimary: boolean; tempPassword: string }>;
+  const tenants = res.body.tenants as Array<{ tenantId: number; userId: number; isPrimary: boolean }>;
   for (const t of tenants) {
     cleanTenantIds.push(t.tenantId);
-    cleanUserIds.push(t.userId);
+    // userId was already pushed above during pre-creation; avoid duplicate push by checking
   }
 
   const tA = tenants.find((t) => t.isPrimary)!;
@@ -229,13 +252,13 @@ async function createMultiTenantLease(
 
   return {
     leaseId,
-    tenantA: { tenantId: tA.tenantId, userId: tA.userId, tempPassword: tA.tempPassword },
-    tenantB: { tenantId: tB.tenantId, userId: tB.userId, tempPassword: tB.tempPassword },
+    tenantA: { tenantId: tA.tenantId, userId: tA.userId, tempPassword: SECFIX3_TENANT_PASSWORD },
+    tenantB: { tenantId: tB.tenantId, userId: tB.userId, tempPassword: SECFIX3_TENANT_PASSWORD },
   };
 }
 
 /** Create a single-tenant lease, terminate it, and return everything needed for deposit refund tests. */
-async function createTerminatedLease(propId: string, unitId: string): Promise<{ leaseId: string; tenantId: string }> {
+async function createTerminatedLease(propId: number, unitId: number): Promise<{ leaseId: number; tenantId: number }> {
   const ts = Date.now();
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
@@ -249,10 +272,10 @@ async function createTerminatedLease(propId: string, unitId: string): Promise<{ 
     });
   expect(res.status).toBe(201);
 
-  const leaseId = res.body.lease.id as string;
+  const leaseId = res.body.lease.id as number;
   cleanLeaseIds.push(leaseId);
 
-  const tenants = res.body.tenants as Array<{ tenantId: string; userId: string }>;
+  const tenants = res.body.tenants as Array<{ tenantId: number; userId: number }>;
   for (const t of tenants) {
     cleanTenantIds.push(t.tenantId);
     cleanUserIds.push(t.userId);
@@ -304,7 +327,7 @@ describe("H-01 — Tenant cannot impersonate another tenant on termination endpo
     const res = await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-approve`)
       .set("Authorization", `Bearer ${tokenA}`)
-      .send({ tenantId: tenantB.tenantId, decision: "APPROVED" });
+      .send({ tenantId: tenantB.tenantId, decision: 1 });
 
     expect(res.status).toBe(403);
     expect(res.body.error?.code).toBe("FORBIDDEN_TENANT_ACTION");
@@ -373,7 +396,7 @@ describe("H-01 — Tenant cannot impersonate another tenant on termination endpo
     const res = await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-approve`)
       .set("Authorization", `Bearer ${tokenB}`)
-      .send({ tenantId: tenantB.tenantId, decision: "APPROVED" });
+      .send({ tenantId: tenantB.tenantId, decision: 1 });
 
     expect(res.status).toBe(200);
   }, 60000);
@@ -403,7 +426,7 @@ describe("H-01 — Tenant cannot impersonate another tenant on termination endpo
     const res = await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-approve`)
       .set("Authorization", `Bearer ${pmToken}`)
-      .send({ tenantId: tenantA.tenantId, decision: "APPROVED" });
+      .send({ tenantId: tenantA.tenantId, decision: 1 });
 
     expect(res.status).toBe(403);
   }, 60000);
@@ -443,8 +466,8 @@ describe("H-02 — Deposit refund scoped to PM's property via @PropertyScopeBody
         tenants: [{ name: "Tenant A", email: `ta-h02-${Date.now()}@test.local`, is_primary: true }],
       });
     expect(leaseARes.status).toBe(201);
-    cleanLeaseIds.push(leaseARes.body.lease.id as string);
-    for (const t of leaseARes.body.tenants as Array<{ tenantId: string; userId: string }>) {
+    cleanLeaseIds.push(leaseARes.body.lease.id as number);
+    for (const t of leaseARes.body.tenants as Array<{ tenantId: number; userId: number }>) {
       cleanTenantIds.push(t.tenantId);
       cleanUserIds.push(t.userId);
     }

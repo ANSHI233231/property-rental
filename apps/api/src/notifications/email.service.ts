@@ -148,6 +148,58 @@ export class EmailService implements OnModuleInit {
   }
 
   /**
+   * Send a password-reset email to a single user. The link in the body is a
+   * fully-qualified URL composed by the caller (auth.service.ts) using the
+   * FRONTEND_BASE_URL config. The token inside that URL is single-use and
+   * expires in 30 minutes — wording matches that contract.
+   *
+   * Log-only when SMTP env vars are missing/placeholder.
+   */
+  async sendPasswordResetEmail(
+    to: string,
+    name: string,
+    resetUrl: string,
+  ): Promise<void> {
+    if (!to) return;
+
+    const subject = `Reset your GharSetu password`;
+    const body =
+      `Dear ${name},\n\n` +
+      `We received a request to reset your password.\n\n` +
+      `Click the link below to set a new password:\n` +
+      `${resetUrl}\n\n` +
+      `This link is valid for 30 minutes and can only be used once.\n\n` +
+      `If you did not request a password reset, ignore this email.\n` +
+      `Your password will not change.\n\n` +
+      `GharSetu Property Management`;
+
+    if (this.logOnly || !this.transporter) {
+      this.logger.log(
+        `[LOG-ONLY] Would send email:\n` +
+          `  To: ${to}\n` +
+          `  Subject: ${subject}\n` +
+          `  Body:\n${body}`,
+      );
+      return;
+    }
+
+    try {
+      await this.transporter.sendMail({
+        from: this.smtpFrom,
+        to,
+        subject,
+        text: body,
+      });
+      this.logger.log(`Password reset email sent: to=${to}`);
+    } catch (err) {
+      // Never propagate — email failures must not break the underlying flow.
+      this.logger.error(
+        `Password reset email failure: to=${to} error=${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  /**
    * Notify admins that a user changed their password.
    *
    * Admins receive only the fact-of-change — never the new password. Sent

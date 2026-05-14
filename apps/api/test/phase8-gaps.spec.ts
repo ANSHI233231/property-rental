@@ -29,13 +29,13 @@ let adminToken: string;
 
 // Cleanup tracking
 const cleanup = {
-  userIds: [] as string[],
-  propertyIds: [] as string[],
-  unitIds: [] as string[],
-  leaseIds: [] as string[],
-  tenantIds: [] as string[],
-  periodIds: [] as string[],
-  maintenanceIds: [] as string[],
+  userIds: [] as number[],
+  propertyIds: [] as number[],
+  unitIds: [] as number[],
+  leaseIds: [] as number[],
+  tenantIds: [] as number[],
+  periodIds: [] as number[],
+  maintenanceIds: [] as number[],
 };
 
 beforeAll(async () => {
@@ -68,7 +68,7 @@ afterAll(async () => {
   await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_restrict_update`);
   try {
     if (cleanup.leaseIds.length > 0) {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, cleanup.leaseIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, cleanup.leaseIds);
       await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
     }
   } finally {
@@ -120,13 +120,13 @@ afterAll(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createPM(): Promise<{ pmId: string; pmToken: string }> {
+async function createPM(): Promise<{ pmId: number; pmToken: string }> {
   const email = `pm-ph8-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: "Phase8 PM", email, role: "PROPERTY_MANAGER", password: "PMpass@8888!" });
-  const pmId = res.body.id as string;
+    .send({ firstName: "Phase8", lastName: "PM", email, role: "PROPERTY_MANAGER", password: "PMpass@8888!" });
+  const pmId = res.body.id as number;
   if (!pmId) throw new Error(`createPM failed: ${JSON.stringify(res.body)}`);
   cleanup.userIds.push(pmId);
 
@@ -136,7 +136,7 @@ async function createPM(): Promise<{ pmId: string; pmToken: string }> {
   return { pmId, pmToken: loginRes.body.accessToken as string };
 }
 
-async function createPropertyAndUnit(pmId: string): Promise<{ propId: string; unitId: string }> {
+async function createPropertyAndUnit(pmId: number): Promise<{ propId: number; unitId: number }> {
   const propRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -148,7 +148,7 @@ async function createPropertyAndUnit(pmId: string): Promise<{ propId: string; un
       pincode: "110001",
       active_pm_id: pmId,
     });
-  const propId = propRes.body.id as string;
+  const propId = propRes.body.id as number;
   if (!propId) throw new Error(`createProperty failed: ${JSON.stringify(propRes.body)}`);
   cleanup.propertyIds.push(propId);
 
@@ -156,26 +156,28 @@ async function createPropertyAndUnit(pmId: string): Promise<{ propId: string; un
     .post(`/api/v1/properties/${propId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U8-${Date.now()}`, bedrooms: 1, bathrooms: 1, monthly_rent_paise: 1_800_000 });
-  const unitId = unitRes.body.id as string;
+  const unitId = unitRes.body.id as number;
   if (!unitId) throw new Error(`createUnit failed: ${JSON.stringify(unitRes.body)}`);
   cleanup.unitIds.push(unitId);
 
   return { propId, unitId };
 }
 
-async function createMaintUser(): Promise<{ id: string; token: string }> {
+const MAINT_PASSWORD = "Maint@ph8!2026x";
+
+async function createMaintUser(): Promise<{ id: number; token: string }> {
   const email = `maint-ph8-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: "Phase8 Maint", email, role: "MAINTENANCE" });
-  const id = res.body.id as string;
+    .send({ firstName: "Phase8", lastName: "Maint", email, role: "MAINTENANCE", password: MAINT_PASSWORD, specialization: "general" });
+  const id = res.body.id as number;
   if (!id) throw new Error(`createMaintUser failed: ${JSON.stringify(res.body)}`);
   cleanup.userIds.push(id);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
-    .send({ email, password: res.body.temp_password as string });
+    .send({ email, password: MAINT_PASSWORD });
   return { id, token: loginRes.body.accessToken as string };
 }
 
@@ -188,8 +190,8 @@ async function createMaintUser(): Promise<{ id: string; token: string }> {
 
 describe("TC-RENT-012 — 31-Jan start: first period end = last day of Feb (BL SRS §4 Module 5)", () => {
   let pmToken: string;
-  let propId: string;
-  let unitId: string;
+  let propId: number;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM();
@@ -224,12 +226,12 @@ describe("TC-RENT-012 — 31-Jan start: first period end = last day of Feb (BL S
       });
 
     expect(leaseRes.status).toBe(201);
-    const leaseId = leaseRes.body.lease?.id as string;
+    const leaseId = leaseRes.body.lease?.id as number;
     expect(leaseId).toBeTruthy();
     cleanup.leaseIds.push(leaseId);
 
-    const tenantUserId = leaseRes.body.tenants?.[0]?.userId as string;
-    const tenantId = leaseRes.body.tenants?.[0]?.tenantId as string;
+    const tenantUserId = leaseRes.body.tenants?.[0]?.userId as number;
+    const tenantId = leaseRes.body.tenants?.[0]?.tenantId as number;
     if (tenantId) cleanup.tenantIds.push(tenantId);
     if (tenantUserId) cleanup.userIds.push(tenantUserId);
 
@@ -265,8 +267,8 @@ describe("TC-RENT-012 — 31-Jan start: first period end = last day of Feb (BL S
 
 describe("TC-NEG-001 — Lease endDate < startDate must be rejected", () => {
   let pmToken: string;
-  let propId: string;
-  let unitId: string;
+  let propId: number;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM();
@@ -344,8 +346,8 @@ describe("TC-NEG-005 — DELETE /maintenance-requests/:id is not allowed (BL-16)
 
 describe("F-02 — tenants[] array-bomb guard: 21-element array → 400 VALIDATION_FAILED", () => {
   let pmToken: string;
-  let propId: string;
-  let unitId: string;
+  let propId: number;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM();
@@ -392,10 +394,10 @@ describe("F-02 — tenants[] array-bomb guard: 21-element array → 400 VALIDATI
       });
 
     expect(res.status).toBe(201);
-    const leaseId = res.body.lease?.id as string;
+    const leaseId = res.body.lease?.id as number;
     if (leaseId) cleanup.leaseIds.push(leaseId);
-    const tenantUserId = res.body.tenants?.[0]?.userId as string;
-    const tenantId = res.body.tenants?.[0]?.tenantId as string;
+    const tenantUserId = res.body.tenants?.[0]?.userId as number;
+    const tenantId = res.body.tenants?.[0]?.tenantId as number;
     if (tenantId) cleanup.tenantIds.push(tenantId);
     if (tenantUserId) cleanup.userIds.push(tenantUserId);
   });

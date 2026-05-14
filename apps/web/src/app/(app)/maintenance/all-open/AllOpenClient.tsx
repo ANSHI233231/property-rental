@@ -32,8 +32,10 @@ interface MaintenanceRequest {
   description: string;
   priority: number | string;
   status: number | string;
-  unit?: { name?: string } | null;
-  property?: { name?: string; address?: string } | null;
+  unit?: {
+    unit_number?: string;
+    property?: { name?: string; address?: string } | null;
+  } | null;
   assigned_to?: { id?: number | string; name?: string } | null;
   created_at: string;
 }
@@ -255,9 +257,9 @@ export default function MaintenanceAllOpenPage() {
                 return (
                   <tr key={req.id}>
                     <td className="font-poppins font-semibold text-charcoal">
-                      {req.unit?.name ?? "—"}
+                      {req.unit?.unit_number ? `Unit ${req.unit.unit_number}` : "—"}
                     </td>
-                    <td>{req.property?.name ?? "—"}</td>
+                    <td>{req.unit?.property?.name ?? "—"}</td>
                     <td>{req.title}</td>
                     <td><PriorityBadge priority={req.priority} /></td>
                     <td><MaintenanceStatusBadge status={req.status} /></td>

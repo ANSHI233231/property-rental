@@ -37,7 +37,10 @@ interface MaintenanceRequest {
   // API returns SMALLINT codes after Step 1 migration; accept string for legacy
   priority: number | string;
   status: number | string;
-  unit?: { name?: string } | null;
+  unit?: {
+    unit_number?: string;
+    property?: { name?: string } | null;
+  } | null;
   raised_by?: { name?: string } | null;
   assigned_to?: { id?: number | string; name?: string } | null;
   assigned_at?: string | null;
@@ -254,7 +257,7 @@ function RequestDetail({
           </div>
 
           <h4 className="font-poppins font-semibold text-charcoal mb-1">
-            {request.unit?.name ? `Unit ${request.unit.name} — ` : ""}
+            {request.unit?.unit_number ? `Unit ${request.unit.unit_number} — ` : ""}
             {request.title}
           </h4>
 
@@ -495,7 +498,7 @@ export default function PmMaintenancePage() {
                       <MaintenanceStatusBadge status={req.status} />
                     </div>
                     <div className="font-poppins font-semibold text-charcoal text-lg">
-                      {req.unit?.name ? `Unit ${req.unit.name} — ` : ""}
+                      {req.unit?.unit_number ? `Unit ${req.unit.unit_number} — ` : ""}
                       {req.title}
                     </div>
                     <p className="text-sm muted mt-1">

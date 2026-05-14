@@ -7,6 +7,7 @@ import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
+import { EmailService } from "../notifications/email.service";
 
 // ---------------------------------------------------------------------------
 // Minimal Prisma mock for unit tests (no real DB)
@@ -80,6 +81,13 @@ describe("AuthService", () => {
           useValue: {
             writeLog: jest.fn().mockResolvedValue(undefined),
             writeLogDirect: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+            sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

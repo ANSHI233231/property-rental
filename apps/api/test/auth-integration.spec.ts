@@ -44,7 +44,7 @@ const ADMIN_PASSWORD = "Admin@gharsetu2026!";
 const PM_EMAIL = "pm.test@gharsetu.local";
 const MAINTENANCE_EMAIL = "maintenance.test@gharsetu.local";
 const TENANT_EMAIL = "tenant.test@gharsetu.local";
-const TEST_PASSWORD = "Test@gharsetu2026!";
+const TEST_PASSWORD = "Password#123";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -91,6 +91,18 @@ describe("Phase 1 Auth Integration", () => {
 
     prisma = moduleRef.get(PrismaService);
     st = supertestFn(app.getHttpServer());
+
+    // Reset any locked seeded users to prevent 401 cascades from prior test runs
+    await prisma.user.updateMany({
+      where: {
+        email: {
+          in: [
+            ADMIN_EMAIL, PM_EMAIL, MAINTENANCE_EMAIL, TENANT_EMAIL,
+          ],
+        },
+      },
+      data: { failed_login_count: 0, locked_until: null, is_active: true },
+    });
   }, 60000);
 
   afterAll(async () => {
@@ -189,7 +201,7 @@ describe("Phase 1 Auth Integration", () => {
         .post("/api/v1/auth/login")
         .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD })
         .expect(200);
-      expect(res.body.user.role).toBe("ADMIN");
+      expect(res.body.user.role).toBe(0); // Role.ADMIN = 0
     });
 
     it("TC-AUTH-004: PM login returns role PROPERTY_MANAGER", async () => {
@@ -197,7 +209,7 @@ describe("Phase 1 Auth Integration", () => {
         .post("/api/v1/auth/login")
         .send({ email: PM_EMAIL, password: TEST_PASSWORD })
         .expect(200);
-      expect(res.body.user.role).toBe("PROPERTY_MANAGER");
+      expect(res.body.user.role).toBe(1); // Role.PROPERTY_MANAGER = 1
     });
 
     it("TC-AUTH-005: Maintenance login returns role MAINTENANCE", async () => {
@@ -205,7 +217,7 @@ describe("Phase 1 Auth Integration", () => {
         .post("/api/v1/auth/login")
         .send({ email: MAINTENANCE_EMAIL, password: TEST_PASSWORD })
         .expect(200);
-      expect(res.body.user.role).toBe("MAINTENANCE");
+      expect(res.body.user.role).toBe(2); // Role.MAINTENANCE = 2
     });
 
     it("TC-AUTH-006: Tenant login returns role TENANT", async () => {
@@ -213,7 +225,7 @@ describe("Phase 1 Auth Integration", () => {
         .post("/api/v1/auth/login")
         .send({ email: TENANT_EMAIL, password: TEST_PASSWORD })
         .expect(200);
-      expect(res.body.user.role).toBe("TENANT");
+      expect(res.body.user.role).toBe(3); // Role.TENANT = 3
     });
   });
 
@@ -589,7 +601,7 @@ describe("Phase 1 Auth Integration", () => {
         .expect(200);
 
       expect(meRes.body).toHaveProperty("email", PM_EMAIL);
-      expect(meRes.body).toHaveProperty("role", "PROPERTY_MANAGER");
+      expect(meRes.body).toHaveProperty("role", 1); // Role.PROPERTY_MANAGER = 1
       expect(meRes.body).not.toHaveProperty("password_hash");
       expect(meRes.body).not.toHaveProperty("failed_login_count");
       expect(meRes.body).not.toHaveProperty("locked_until");
@@ -621,7 +633,7 @@ describe("Phase 1 Auth Integration", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(meRes.body.role).toBe("PROPERTY_MANAGER");
+      expect(meRes.body.role).toBe(1); // Role.PROPERTY_MANAGER = 1
     });
   });
 

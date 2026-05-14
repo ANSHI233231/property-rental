@@ -35,8 +35,10 @@ interface MaintenanceRequest {
   // API returns numeric codes after Step 1 migration; accept string for legacy
   priority: number | string;
   status: number | string;
-  unit?: { name?: string } | null;
-  property?: { name?: string; address?: string } | null;
+  unit?: {
+    unit_number?: string;
+    property?: { name?: string; address?: string } | null;
+  } | null;
   raised_by?: { name?: string } | null;
   assigned_to?: { name?: string } | null;
   assigned_at?: string | null;
@@ -269,8 +271,8 @@ export default function MaintenanceDashboardPage() {
         <div className="grid gap-4">
           {requests.map((req) => {
             const isEmergency = req.priority === MaintenancePriorityCodes.EMERGENCY || req.priority === "EMERGENCY";
-            const property = req.property?.name
-              ? `${req.property.name}${req.property.address ? ", " + req.property.address : ""}`
+            const propertyInfo = req.unit?.property?.name
+              ? `${req.unit.property.name}${req.unit.property.address ? ", " + req.unit.property.address : ""}`
               : null;
 
             return (
@@ -285,11 +287,11 @@ export default function MaintenanceDashboardPage() {
                       <MaintenanceStatusBadge status={req.status} />
                     </div>
                     <h3>
-                      {req.unit?.name ? `Unit ${req.unit.name} — ` : ""}
+                      {req.unit?.unit_number ? `Unit ${req.unit.unit_number} — ` : ""}
                       {req.title}
                     </h3>
-                    {property && (
-                      <p className="text-sm muted mt-1">{property}</p>
+                    {propertyInfo && (
+                      <p className="text-sm muted mt-1">{propertyInfo}</p>
                     )}
                     <p className="text-sm mt-3">{req.description}</p>
                     <p className="text-xs muted mt-3">

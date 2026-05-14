@@ -53,16 +53,21 @@ export class PropertiesController {
     @Query("limit") limit?: string,
     @Query("page") page?: string,
     @Query("pageSize") pageSize?: string,
+    @Query("search") search?: string,
+    @Query("activePmId") activePmId?: string,
   ) {
     const cursorNum = cursor ? parseInt(cursor, 10) : undefined;
     const pageNum = page ? parseInt(page, 10) : undefined;
     const pageSizeNum = pageSize ? parseInt(pageSize, 10) : undefined;
+    const activePmIdNum = activePmId ? parseInt(activePmId, 10) : undefined;
     return this.propertiesService.list(
       cursorNum,
       limit ? parseInt(limit, 10) : 20,
       actor,
       pageNum,
       pageSizeNum,
+      search,
+      Number.isFinite(activePmIdNum) ? activePmIdNum : undefined,
     );
   }
 

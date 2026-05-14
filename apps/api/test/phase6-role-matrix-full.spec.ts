@@ -49,11 +49,11 @@ let adminToken: string;
 
 // Track created resources for cleanup
 const cleanup = {
-  leaseIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
-  requestIds: [] as string[],
+  leaseIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
+  requestIds: [] as number[],
 };
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ afterAll(async () => {
   // Clean leases and dependents
   if (cleanup.leaseIds.length > 0) {
     await prisma.$executeRawUnsafe(
-      `DELETE FROM payments WHERE lease_id = ANY($1::text[])`,
+      `DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`,
       cleanup.leaseIds,
     );
     await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
@@ -133,21 +133,22 @@ async function loginAs(email: string, password: string): Promise<string> {
 async function createUser(
   role: string,
   tag: string,
-): Promise<{ id: string; email: string; token: string }> {
+): Promise<{ id: number; email: string; token: string }> {
   const email = `matrix-full-${role.toLowerCase()}-${tag}-${Date.now()}@test.local`;
+  const extraFields = role === "MAINTENANCE" ? { specialization: "general" } : {};
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `MatrixFull ${role} ${tag}`, email, role, password: TEST_PASSWORD });
+    .send({ firstName: `MatrixFull${role}`, lastName: tag, email, role, password: TEST_PASSWORD, ...extraFields });
   expect(res.status).toBe(201);
-  cleanup.userIds.push(res.body.id as string);
+  cleanup.userIds.push(res.body.id as number);
   const token = await loginAs(email, TEST_PASSWORD);
-  return { id: res.body.id as string, email, token };
+  return { id: res.body.id as number, email, token };
 }
 
 async function createPropertyWithPm(
-  pmId: string,
-): Promise<{ propertyId: string }> {
+  pmId: number,
+): Promise<{ propertyId: number }> {
   const propRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -159,7 +160,7 @@ async function createPropertyWithPm(
       pincode: "110001",
     });
   expect(propRes.status).toBe(201);
-  const propertyId = propRes.body.id as string;
+  const propertyId = propRes.body.id as number;
   cleanup.propertyIds.push(propertyId);
 
   await supertestFn(app.getHttpServer())
@@ -170,7 +171,7 @@ async function createPropertyWithPm(
   return { propertyId };
 }
 
-async function createUnit(propertyId: string): Promise<string> {
+async function createUnit(propertyId: number): Promise<number> {
   // unit_number MaxLength(20) — use last 8 digits of timestamp + 4-char random = 14 chars total
   const rnd = Math.random().toString(36).slice(2, 6);
   const ts = String(Date.now()).slice(-8);
@@ -184,7 +185,7 @@ async function createUnit(propertyId: string): Promise<string> {
       monthly_rent_paise: 1_500_000,
     });
   expect(res.status).toBe(201);
-  const unitId = res.body.id as string;
+  const unitId = res.body.id as number;
   cleanup.unitIds.push(unitId);
   return unitId;
 }
@@ -200,7 +201,7 @@ describe("Section A — Units write endpoints: PM/TENANT/MAINTENANCE → 403", (
   let pmToken: string;
   let tenantToken: string;
   let maintToken: string;
-  let unitId: string;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createUser("PROPERTY_MANAGER", "unitA");
@@ -222,7 +223,7 @@ describe("Section A — Units write endpoints: PM/TENANT/MAINTENANCE → 403", (
         pincode: "110001",
       });
     expect(propRes.status).toBe(201);
-    const propId = propRes.body.id as string;
+    const propId = propRes.body.id as number;
     cleanup.propertyIds.push(propId);
     unitId = await createUnit(propId);
   }, 90_000);
@@ -366,7 +367,7 @@ describe("Section A — Units write endpoints: PM/TENANT/MAINTENANCE → 403", (
 describe("Section B — Users admin endpoints: MAINTENANCE/TENANT → 403", () => {
   let tenantToken: string;
   let maintToken: string;
-  let targetUserId: string;
+  let targetUserId: number;
 
   beforeAll(async () => {
     const tenant = await createUser("TENANT", "usersB");
@@ -378,7 +379,7 @@ describe("Section B — Users admin endpoints: MAINTENANCE/TENANT → 403", () =
     const meRes = await supertestFn(app.getHttpServer())
       .get("/api/v1/users/me")
       .set("Authorization", `Bearer ${adminToken}`);
-    targetUserId = meRes.body.id as string;
+    targetUserId = meRes.body.id as number;
   }, 60_000);
 
   it("MAINTENANCE → GET /users/:id → 403", async () => {
@@ -510,12 +511,12 @@ describe("Section C — Tenants module: MAINTENANCE/TENANT → 403", () => {
 describe("Section D — Leases: MAINTENANCE/TENANT blocked on write endpoints", () => {
   let tenantToken: string;
   let maintToken: string;
-  let propertyId: string;
-  let unitId: string;
-  // @Roles check fires before DB lookup for MAINTENANCE/TENANT, so fake UUIDs are fine
+  let propertyId: number;
+  let unitId: number;
+  // @Roles check fires before DB lookup for MAINTENANCE/TENANT, so fake IDs are fine
   // for the lease-action endpoints. We DO need a real property+unit for the POST /leases
   // endpoint test to hit the RolesGuard (not the PropertyScopeGuard which needs real data).
-  const leaseId = "00000000-0000-0000-0000-000000000000";
+  const leaseId = 999999999;
 
   beforeAll(async () => {
     const pm = await createUser("PROPERTY_MANAGER", "leasesD");
@@ -833,10 +834,10 @@ describe("Section H — Jobs endpoints: non-Admin roles → 403", () => {
 
 describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", () => {
   let tenantAToken: string;
-  let tenantBLeaseId: string;
-  let tenantBRentPeriodId: string;
-  let tenantBRequestId: string;
-  let pmId: string;
+  let tenantBLeaseId: number;
+  let tenantBRentPeriodId: number;
+  let tenantBRequestId: number;
+  let pmId: number;
   let pmToken: string;
 
   beforeAll(async () => {
@@ -860,16 +861,16 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
     const userARes = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ name: "Scope Tenant A", email: tenantAEmail, role: "TENANT", password: TEST_PASSWORD });
+      .send({ firstName: "ScopeTenant", lastName: "A", email: tenantAEmail, role: "TENANT", password: TEST_PASSWORD });
     expect(userARes.status).toBe(201);
-    cleanup.userIds.push(userARes.body.id as string);
+    cleanup.userIds.push(userARes.body.id as number);
 
     const userBRes = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ name: "Scope Tenant B", email: tenantBEmail, role: "TENANT", password: TEST_PASSWORD });
+      .send({ firstName: "ScopeTenant", lastName: "B", email: tenantBEmail, role: "TENANT", password: TEST_PASSWORD });
     expect(userBRes.status).toBe(201);
-    cleanup.userIds.push(userBRes.body.id as string);
+    cleanup.userIds.push(userBRes.body.id as number);
 
     // Create leases
     const now = new Date();
@@ -889,7 +890,7 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
         tenants: [{ name: "Scope Tenant A", email: tenantAEmail, is_primary: true }],
       });
     expect(leaseARes.status).toBe(201);
-    cleanup.leaseIds.push(leaseARes.body.lease.id as string);
+    cleanup.leaseIds.push(leaseARes.body.lease.id as number);
     tenantAToken = await loginAs(tenantAEmail, TEST_PASSWORD);
 
     const leaseBRes = await supertestFn(app.getHttpServer())
@@ -903,7 +904,7 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
         tenants: [{ name: "Scope Tenant B", email: tenantBEmail, is_primary: true }],
       });
     expect(leaseBRes.status).toBe(201);
-    tenantBLeaseId = leaseBRes.body.lease.id as string;
+    tenantBLeaseId = leaseBRes.body.lease.id as number;
     cleanup.leaseIds.push(tenantBLeaseId);
     const tenantBToken = await loginAs(tenantBEmail, TEST_PASSWORD);
 
@@ -918,7 +919,7 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
         priority: "NORMAL",
       });
     expect(maintRes.status).toBe(201);
-    tenantBRequestId = maintRes.body.id as string;
+    tenantBRequestId = maintRes.body.id as number;
     cleanup.requestIds.push(tenantBRequestId);
 
     // Get a rent-period for Tenant-B
@@ -926,9 +927,9 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
       .get(`/api/v1/rent-periods?leaseId=${tenantBLeaseId}&limit=1`)
       .set("Authorization", `Bearer ${pmToken}`);
     if (periodsRes.status === 200 && (periodsRes.body.data as unknown[]).length > 0) {
-      tenantBRentPeriodId = ((periodsRes.body.data as Array<{ id: string }>)[0] as { id: string }).id;
+      tenantBRentPeriodId = ((periodsRes.body.data as Array<{ id: number }>)[0] as { id: number }).id;
     } else {
-      tenantBRentPeriodId = "00000000-0000-0000-0000-000000000000";
+      tenantBRentPeriodId = 999999999;
     }
   }, 120_000);
 
@@ -979,7 +980,7 @@ describe("Section I — Tenant cross-data-scope isolation (BL-19 data plane)", (
 
 describe("Section J — Properties: PM blocked on remaining Admin-only endpoints", () => {
   let pmToken: string;
-  let propertyId: string;
+  let propertyId: number;
 
   beforeAll(async () => {
     const pm = await createUser("PROPERTY_MANAGER", "propJ");
@@ -997,7 +998,7 @@ describe("Section J — Properties: PM blocked on remaining Admin-only endpoints
         pincode: "110001",
       });
     expect(propRes.status).toBe(201);
-    propertyId = propRes.body.id as string;
+    propertyId = propRes.body.id as number;
     cleanup.propertyIds.push(propertyId);
   }, 60_000);
 
@@ -1039,9 +1040,9 @@ describe("Section J — Properties: PM blocked on remaining Admin-only endpoints
 
 describe("Section K — Maintenance: TENANT blocked on workflow-transition endpoints", () => {
   let tenantToken: string;
-  let pmId: string;
-  let maintId: string;
-  let requestId: string;
+  let pmId: number;
+  let maintId: number;
+  let requestId: number;
 
   beforeAll(async () => {
     const pm = await createUser("PROPERTY_MANAGER", "maintK");
@@ -1057,9 +1058,9 @@ describe("Section K — Maintenance: TENANT blocked on workflow-transition endpo
     const userRes = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ name: "Maint K Tenant", email: tenantEmail, role: "TENANT", password: TEST_PASSWORD });
+      .send({ firstName: "MaintK", lastName: "Tenant", email: tenantEmail, role: "TENANT", password: TEST_PASSWORD });
     expect(userRes.status).toBe(201);
-    cleanup.userIds.push(userRes.body.id as string);
+    cleanup.userIds.push(userRes.body.id as number);
 
     const now = new Date();
     const startDate = now.toISOString().slice(0, 10);
@@ -1078,7 +1079,7 @@ describe("Section K — Maintenance: TENANT blocked on workflow-transition endpo
         tenants: [{ name: "Maint K Tenant", email: tenantEmail, is_primary: true }],
       });
     expect(leaseRes.status).toBe(201);
-    cleanup.leaseIds.push(leaseRes.body.lease.id as string);
+    cleanup.leaseIds.push(leaseRes.body.lease.id as number);
     tenantToken = await loginAs(tenantEmail, TEST_PASSWORD);
 
     // Tenant raises a request
@@ -1092,7 +1093,7 @@ describe("Section K — Maintenance: TENANT blocked on workflow-transition endpo
         priority: "NORMAL",
       });
     expect(maintRes.status).toBe(201);
-    requestId = maintRes.body.id as string;
+    requestId = maintRes.body.id as number;
     cleanup.requestIds.push(requestId);
   }, 120_000);
 

@@ -45,7 +45,8 @@ import { ApiError } from "@/lib/api/client";
 
 interface Lease {
   id: number | string;
-  unit?: { id: number | string; name: string; monthly_rent_paise?: string };
+  unit?: { id: number | string; name: string };
+  monthly_rent_paise?: string;
   tenants?: { id: number | string; name: string }[];
   start_date: string;
   end_date: string;
@@ -816,8 +817,8 @@ export default function PmRentCollectionPage() {
                 <option key={String(l.id)} value={String(l.id)}>
                   {l.unit?.name ?? "Unit"} —{" "}
                   {l.tenants?.map((t) => t.name).join(" + ") ?? "—"}{" "}
-                  {l.unit?.monthly_rent_paise
-                    ? `· ${paiseStringToINR(l.unit.monthly_rent_paise)}`
+                  {l.monthly_rent_paise
+                    ? `· ${paiseStringToINR(l.monthly_rent_paise)}`
                     : ""}
                 </option>
               ))}
@@ -852,8 +853,8 @@ export default function PmRentCollectionPage() {
               </h3>
               <p className="text-sm muted mt-1">
                 Lease: {formatDate(selectedLease.start_date)} → {formatDate(selectedLease.end_date)}
-                {selectedLease.unit?.monthly_rent_paise
-                  ? ` · Rent ${paiseStringToINR(selectedLease.unit.monthly_rent_paise)}`
+                {selectedLease.monthly_rent_paise
+                  ? ` · Rent ${paiseStringToINR(selectedLease.monthly_rent_paise)}`
                   : ""}
                 {selectedLease.rent_due_day
                   ? ` · Due on ${selectedLease.rent_due_day}${selectedLease.rent_due_day === 1 ? "st" : selectedLease.rent_due_day === 2 ? "nd" : selectedLease.rent_due_day === 3 ? "rd" : "th"} of each month`

@@ -35,11 +35,11 @@ let prisma: PrismaService;
 let adminToken: string;
 
 const cleanup = {
-  requestIds: [] as string[],
-  leaseIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
+  requestIds: [] as number[],
+  leaseIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
 };
 
 // ---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ afterAll(async () => {
   await prisma.maintenanceRequest.deleteMany({ where: { id: { in: cleanup.requestIds } } });
   if (cleanup.leaseIds.length > 0) {
     await prisma.$executeRawUnsafe(
-      `DELETE FROM payments WHERE lease_id = ANY($1::text[])`,
+      `DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`,
       cleanup.leaseIds,
     );
     await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
@@ -112,29 +112,34 @@ async function loginAs(email: string, password: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
-async function createPM(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+const SEC5_PM_PASSWORD = "Sec5PM@test2026!!!";
+const SEC5_MAINT_PASSWORD = "Sec5Maint@2026!!x";
+
+async function createPM(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `sec5-pm-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `PM ${tag}`, email, role: "PROPERTY_MANAGER" });
+    .send({ firstName: "PM", lastName: tag, email, role: "PROPERTY_MANAGER", password: SEC5_PM_PASSWORD });
   expect(res.status).toBe(201);
-  cleanup.userIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  cleanup.userIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: SEC5_PM_PASSWORD };
 }
 
-async function createMaintenanceUser(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+async function createMaintenanceUser(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `sec5-maint-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Maint ${tag}`, email, role: "MAINTENANCE" });
+    .send({ firstName: "Maint", lastName: tag, email, role: "MAINTENANCE", password: SEC5_MAINT_PASSWORD, specialization: "general" });
   expect(res.status).toBe(201);
-  cleanup.userIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  cleanup.userIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: SEC5_MAINT_PASSWORD };
 }
 
-async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: string; unitId: string }> {
+async function createPropertyWithUnit(pmId: number): Promise<{ propertyId: number; unitId: number }> {
   const propRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -146,7 +151,7 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
       pincode: "400001",
     });
   expect(propRes.status).toBe(201);
-  const propertyId = propRes.body.id as string;
+  const propertyId = propRes.body.id as number;
   cleanup.propertyIds.push(propertyId);
 
   await supertestFn(app.getHttpServer())
@@ -159,18 +164,18 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U-${Date.now()}`, bedrooms: 2, bathrooms: 1, monthly_rent_paise: 1_800_000 });
   expect(unitRes.status).toBe(201);
-  const unitId = unitRes.body.id as string;
+  const unitId = unitRes.body.id as number;
   cleanup.unitIds.push(unitId);
 
   return { propertyId, unitId };
 }
 
 async function createLeaseWithTenant(
-  propertyId: string,
-  unitId: string,
+  propertyId: number,
+  unitId: number,
   pmToken: string,
   tenantTag: string,
-): Promise<{ leaseId: string; tenantUserId: string; tenantEmail: string }> {
+): Promise<{ leaseId: number; tenantUserId: number; tenantEmail: string }> {
   const tenantEmail = `sec5-tenant-${tenantTag.toLowerCase()}-${Date.now()}@test.local`;
   const today = new Date().toISOString().slice(0, 10);
   const nextYear = `${new Date().getFullYear() + 1}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
@@ -178,9 +183,9 @@ async function createLeaseWithTenant(
   const userRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Tenant ${tenantTag}`, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
+    .send({ firstName: "Tenant", lastName: tenantTag, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
   expect(userRes.status).toBe(201);
-  cleanup.userIds.push(userRes.body.id as string);
+  cleanup.userIds.push(userRes.body.id as number);
 
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units/${unitId}/leases`)
@@ -193,10 +198,10 @@ async function createLeaseWithTenant(
       tenants: [{ name: `Tenant ${tenantTag}`, email: tenantEmail, is_primary: true }],
     });
   expect(res.status).toBe(201);
-  cleanup.leaseIds.push(res.body.lease.id as string);
-  const tenants = res.body.tenants as Array<{ userId: string }>;
+  cleanup.leaseIds.push(res.body.lease.id as number);
+  const tenants = res.body.tenants as Array<{ userId: number }>;
   return {
-    leaseId: res.body.lease.id as string,
+    leaseId: res.body.lease.id as number,
     tenantUserId: tenants[0]!.userId,
     tenantEmail,
   };
@@ -207,7 +212,7 @@ async function createLeaseWithTenant(
 // ---------------------------------------------------------------------------
 
 describe("H-01: PM property-scope on GET /maintenance-requests/:id", () => {
-  let requestIdFromPropertyA: string;
+  let requestIdFromPropertyA: number;
   let pmAToken: string;
   let pmBToken: string;
   let tenantAToken: string;
@@ -237,7 +242,7 @@ describe("H-01: PM property-scope on GET /maintenance-requests/:id", () => {
         priority: "NORMAL",
       });
     expect(reqRes.status).toBe(201);
-    requestIdFromPropertyA = reqRes.body.id as string;
+    requestIdFromPropertyA = reqRes.body.id as number;
     cleanup.requestIds.push(requestIdFromPropertyA);
 
     // Create PM-B assigned to Property B (different property)
@@ -314,7 +319,7 @@ describe("H-01: PM property-scope on GET /maintenance-requests/:id", () => {
 describe("M-01: lease_id absent/null in MAINTENANCE scope=all-open response", () => {
   let maintToken: string;
   let pmToken: string;
-  let requestId: string;
+  let requestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("sec5-m01");
@@ -334,7 +339,7 @@ describe("M-01: lease_id absent/null in MAINTENANCE scope=all-open response", ()
         priority: "LOW",
       });
     expect(reqRes.status).toBe(201);
-    requestId = reqRes.body.id as string;
+    requestId = reqRes.body.id as number;
     cleanup.requestIds.push(requestId);
 
     const maint = await createMaintenanceUser("sec5-m01maint");

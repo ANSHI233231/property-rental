@@ -35,14 +35,14 @@ let processor: RentAccrualService;
 let adminToken: string;
 
 const cleanup = {
-  paymentIds: [] as string[],
-  periodIds: [] as string[],
-  leaseIds: [] as string[],
-  tenantIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
-  prepaidCreditIds: [] as string[],
+  paymentIds: [] as number[],
+  periodIds: [] as number[],
+  leaseIds: [] as number[],
+  tenantIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
+  prepaidCreditIds: [] as number[],
 };
 
 beforeAll(async () => {
@@ -69,7 +69,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.rentAccrualLog.deleteMany({});
 
-  const validIds = (arr: string[]) => arr.filter((id): id is string => typeof id === "string" && id.length > 0);
+  const validIds = (arr: number[]) => arr.filter((id): id is number => typeof id === "number" && id > 0);
   const leaseIds = validIds(cleanup.leaseIds);
 
   const creditIds = validIds(cleanup.prepaidCreditIds);
@@ -80,8 +80,8 @@ afterAll(async () => {
   await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_restrict_update`);
   try {
     const payIds = validIds(cleanup.paymentIds);
-    if (payIds.length > 0) await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::text[])`, payIds);
-    if (leaseIds.length > 0) await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, leaseIds);
+    if (payIds.length > 0) await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::bigint[])`, payIds);
+    if (leaseIds.length > 0) await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, leaseIds);
   } finally {
     await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
     await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_restrict_update`);
@@ -123,13 +123,13 @@ afterAll(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string }> {
+async function createPM(suffix: string): Promise<{ pmId: number; pmToken: string }> {
   const email = `pm-sec4-${suffix}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `PM Sec4 ${suffix}`, email, role: "PROPERTY_MANAGER", password: "PMpass@9876!" });
-  const pmId = res.body.id as string;
+    .send({ firstName: "PMSec4", lastName: suffix, email, role: "PROPERTY_MANAGER", password: "PMpass@9876!" });
+  const pmId = res.body.id as number;
   if (!pmId) throw new Error(`createPM failed: ${JSON.stringify(res.body)}`);
   cleanup.userIds.push(pmId);
   const loginRes = await supertestFn(app.getHttpServer())
@@ -138,33 +138,43 @@ async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string
   return { pmId, pmToken: loginRes.body.accessToken as string };
 }
 
-async function createProperty(pmId: string): Promise<string> {
+async function createProperty(pmId: number): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ name: `Sec4 Prop ${Date.now()}`, address: "Test St", city: "Delhi", state: "Delhi", pincode: "110001", active_pm_id: pmId });
-  const propId = res.body.id as string;
+  const propId = res.body.id as number;
   cleanup.propertyIds.push(propId);
   return propId;
 }
 
-async function createUnit(propId: string): Promise<string> {
+async function createUnit(propId: number): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U-${Date.now()}`, bedrooms: 1, bathrooms: 1, monthly_rent_paise: 1_800_000 });
-  const unitId = res.body.id as string;
+  const unitId = res.body.id as number;
   cleanup.unitIds.push(unitId);
   return unitId;
 }
 
+const SEC4_TENANT_PASSWORD = "Sec4Ten@test2026!";
+
 async function createLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   pmToken: string,
   startDate: string,
-): Promise<{ leaseId: string; tenantId: string; tenantToken: string; tenantUserId: string }> {
+): Promise<{ leaseId: number; tenantId: number; tenantToken: string; tenantUserId: number }> {
   const email = `ten-sec4-${Date.now()}@test.local`;
+
+  // Pre-create tenant with a known password so we don't rely on one-shot temp_password
+  const userRes = await supertestFn(app.getHttpServer())
+    .post("/api/v1/users")
+    .set("Authorization", `Bearer ${adminToken}`)
+    .send({ email, firstName: "Sec4", lastName: "Tenant", role: "TENANT", password: SEC4_TENANT_PASSWORD });
+  if (userRes.body?.id) cleanup.userIds.push(userRes.body.id as number);
+
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
     .set("Authorization", `Bearer ${pmToken}`)
@@ -175,22 +185,22 @@ async function createLease(
       securityDepositPaise: 3_600_000,
       tenants: [{ name: "Sec4 Tenant", email, is_primary: true }],
     });
-  const leaseId = res.body.lease.id as string;
-  const tenantId = res.body.tenants[0].tenantId as string;
-  const tenantUserId = res.body.tenants[0].userId as string;
-  const tempPw = res.body.tenants[0].tempPassword as string;
+  const leaseId = res.body.lease.id as number;
+  const tenantId = res.body.tenants[0].tenantId as number;
+  const tenantUserId = res.body.tenants[0].userId as number;
   cleanup.leaseIds.push(leaseId);
   cleanup.tenantIds.push(tenantId);
-  cleanup.userIds.push(tenantUserId);
+  // tenantUserId was already pushed during pre-creation; avoid double-push
+  if (tenantUserId && !cleanup.userIds.includes(tenantUserId)) cleanup.userIds.push(tenantUserId);
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
-    .send({ email, password: tempPw });
+    .send({ email, password: SEC4_TENANT_PASSWORD });
   const periods = await prisma.rentPeriod.findMany({ where: { lease_id: leaseId } });
   for (const p of periods) cleanup.periodIds.push(p.id);
   return { leaseId, tenantId, tenantToken: loginRes.body.accessToken as string, tenantUserId };
 }
 
-async function getFirstPeriod(leaseId: string) {
+async function getFirstPeriod(leaseId: number) {
   return prisma.rentPeriod.findFirst({ where: { lease_id: leaseId }, orderBy: { period_start: "asc" } });
 }
 
@@ -201,7 +211,7 @@ async function getFirstPeriod(leaseId: string) {
 describe("H-01: GET /rent-periods/:id PM scope enforcement", () => {
   let pmAToken: string;
   let pmBToken: string;
-  let periodIdFromA: string;
+  let periodIdFromA: number;
   let tenantTokenA: string;
   let tenantTokenB: string;
 
@@ -273,7 +283,7 @@ describe("H-01: GET /rent-periods/:id PM scope enforcement", () => {
 describe("H-01: GET /rent-periods list PM scope enforcement", () => {
   let pmAToken: string;
   let pmBToken: string;
-  let propAId: string;
+  let propAId: number;
 
   beforeAll(async () => {
     const pmA = await createPM("h01-list-a");
@@ -351,7 +361,7 @@ describe("M-01: Concurrent accrual run on same date → no 500", () => {
 
 describe("M-02: amountPaise capped at ₹10 crore (1,000,000,000 paise)", () => {
   let pmToken: string;
-  let periodId: string;
+  let periodId: number;
 
   beforeAll(async () => {
     const pm = await createPM("m02");
@@ -388,7 +398,7 @@ describe("M-02: amountPaise capped at ₹10 crore (1,000,000,000 paise)", () => 
         amount_due_paise: 1_000_000_000n,
         outstanding_paise: 1_000_000_000n,
         paid_paise: 0n,
-        status: "DUE",
+        status: 1,
       },
     });
 
@@ -398,7 +408,7 @@ describe("M-02: amountPaise capped at ₹10 crore (1,000,000,000 paise)", () => 
       .send({ rentPeriodId: periodId, amountPaise: 1_000_000_000, method: "BANK_TRANSFER", paidOn: "2026-03-01" });
 
     expect(res.status).toBe(201);
-    cleanup.paymentIds.push(res.body.payment?.id as string);
+    cleanup.paymentIds.push(res.body.payment?.id as number);
   });
 });
 
@@ -433,7 +443,7 @@ describe("FC-2: GET /rent-periods list includes lease.unit.property", () => {
 
 describe("FC-3: GET /rent-periods supports periodStart_gte / periodStart_lte", () => {
   let pmToken: string;
-  let leaseId: string;
+  let leaseId: number;
 
   beforeAll(async () => {
     const pm = await createPM("fc3");

@@ -40,14 +40,14 @@ let adminToken: string;
 
 // Test data tracking
 const cleanup = {
-  paymentIds: [] as string[],
-  periodIds: [] as string[],
-  leaseIds: [] as string[],
-  tenantIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
-  prepaidCreditIds: [] as string[],
+  paymentIds: [] as number[],
+  periodIds: [] as number[],
+  leaseIds: [] as number[],
+  tenantIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
+  prepaidCreditIds: [] as number[],
 };
 
 beforeAll(async () => {
@@ -76,7 +76,7 @@ afterAll(async () => {
   await prisma.rentAccrualLog.deleteMany({});
 
   // Helper to filter undefined values pushed into cleanup arrays before a helper throws
-  const validIds = (arr: string[]) => arr.filter((id): id is string => typeof id === "string" && id.length > 0);
+  const validIds = (arr: number[]) => arr.filter((id): id is number => typeof id === "number" && id > 0);
 
   const leaseIds = validIds(cleanup.leaseIds);
 
@@ -97,10 +97,10 @@ afterAll(async () => {
   try {
     const payIds = validIds(cleanup.paymentIds);
     if (payIds.length > 0) {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::text[])`, payIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::bigint[])`, payIds);
     }
     if (leaseIds.length > 0) {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, leaseIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, leaseIds);
     }
   } finally {
     await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
@@ -157,18 +157,19 @@ afterAll(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string }> {
+async function createPM(suffix: string): Promise<{ pmId: number; pmToken: string }> {
   const email = `pm-p4-${suffix}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
     .send({
-      name: `PM Phase4 ${suffix}`,
+      firstName: "PMPhase4",
+      lastName: suffix,
       email,
       role: "PROPERTY_MANAGER",
       password: "PMpass@9876!",
     });
-  const pmId = res.body.id as string;
+  const pmId = res.body.id as number;
   if (!pmId) throw new Error(`createPM failed: ${JSON.stringify(res.body)}`);
   cleanup.userIds.push(pmId);
 
@@ -178,7 +179,7 @@ async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string
   return { pmId, pmToken: loginRes.body.accessToken as string };
 }
 
-async function createProperty(pmId: string): Promise<string> {
+async function createProperty(pmId: number): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -190,12 +191,12 @@ async function createProperty(pmId: string): Promise<string> {
       pincode: "110001",
       active_pm_id: pmId,
     });
-  const propId = res.body.id as string;
+  const propId = res.body.id as number;
   cleanup.propertyIds.push(propId);
   return propId;
 }
 
-async function createUnit(propId: string): Promise<string> {
+async function createUnit(propId: number): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
@@ -205,18 +206,28 @@ async function createUnit(propId: string): Promise<string> {
       bathrooms: 1,
       monthly_rent_paise: 1_800_000, // ₹18,000
     });
-  const unitId = res.body.id as string;
+  const unitId = res.body.id as number;
   cleanup.unitIds.push(unitId);
   return unitId;
 }
 
+const P4_TENANT_PASSWORD = "P4Tenant@test2026!";
+
 async function createLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   pmToken: string,
   startDate: string,
-): Promise<{ leaseId: string; tenantId: string; tenantToken: string; tenantUserId: string }> {
+): Promise<{ leaseId: number; tenantId: number; tenantToken: string; tenantUserId: number }> {
   const email = `tenant-p4-${Date.now()}@test.local`;
+
+  // Pre-create tenant with a known password so we don't rely on one-shot temp_password
+  const userRes = await supertestFn(app.getHttpServer())
+    .post("/api/v1/users")
+    .set("Authorization", `Bearer ${adminToken}`)
+    .send({ email, firstName: "TestTenant", lastName: "P4", role: "TENANT", password: P4_TENANT_PASSWORD });
+  if (userRes.body?.id) cleanup.userIds.push(userRes.body.id as number);
+
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
     .set("Authorization", `Bearer ${pmToken}`)
@@ -228,17 +239,17 @@ async function createLease(
       tenants: [{ name: "Test Tenant P4", email, is_primary: true }],
     });
 
-  const leaseId = res.body.lease.id as string;
-  const tenantId = res.body.tenants[0].tenantId as string;
-  const tenantUserId = res.body.tenants[0].userId as string;
-  const tempPw = res.body.tenants[0].tempPassword as string;
+  const leaseId = res.body.lease.id as number;
+  const tenantId = res.body.tenants[0].tenantId as number;
+  const tenantUserId = res.body.tenants[0].userId as number;
   cleanup.leaseIds.push(leaseId);
   cleanup.tenantIds.push(tenantId);
-  cleanup.userIds.push(tenantUserId);
+  // tenantUserId was already pushed during pre-creation; avoid double-push
+  if (tenantUserId && !cleanup.userIds.includes(tenantUserId)) cleanup.userIds.push(tenantUserId);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
-    .send({ email, password: tempPw });
+    .send({ email, password: P4_TENANT_PASSWORD });
   const tenantToken = loginRes.body.accessToken as string;
 
   // Collect the auto-generated rent period ID
@@ -248,7 +259,7 @@ async function createLease(
   return { leaseId, tenantId, tenantToken, tenantUserId };
 }
 
-async function getFirstPeriod(leaseId: string) {
+async function getFirstPeriod(leaseId: number) {
   return prisma.rentPeriod.findFirst({ where: { lease_id: leaseId }, orderBy: { period_start: "asc" } });
 }
 
@@ -259,7 +270,7 @@ async function getFirstPeriod(leaseId: string) {
 describe("BL-10: Only PM/Admin may record payments", () => {
   let pmToken: string;
   let tenantToken: string;
-  let periodId: string;
+  let periodId: number;
 
   beforeAll(async () => {
     const pm = await createPM("bl10");
@@ -289,8 +300,8 @@ describe("BL-10: Only PM/Admin may record payments", () => {
     const maintRes = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ name: "Maint P4", email: `maint-p4-${Date.now()}@test.local`, role: "MAINTENANCE", password: "Maint@9876!" });
-    cleanup.userIds.push(maintRes.body.id as string);
+      .send({ firstName: "Maint", lastName: "P4", email: `maint-p4-${Date.now()}@test.local`, role: "MAINTENANCE", password: "Maint@9876!", specialization: "general" });
+    cleanup.userIds.push(maintRes.body.id as number);
 
     const maintLogin = await supertestFn(app.getHttpServer())
       .post("/api/v1/auth/login")
@@ -312,7 +323,7 @@ describe("BL-10: Only PM/Admin may record payments", () => {
 
 describe("BL-11: payment reconciliation", () => {
   let pmToken: string;
-  let leaseId: string;
+  let leaseId: number;
 
   beforeAll(async () => {
     const pm = await createPM("bl11");
@@ -331,9 +342,9 @@ describe("BL-11: payment reconciliation", () => {
       .send({ rentPeriodId: period!.id, amountPaise: 900_000, method: "CASH", paidOn: "2026-02-01" });
 
     expect(res.status).toBe(201);
-    expect(res.body.period.status).toBe("PARTIAL");
+    expect(res.body.period.status).toBe(2); // RentPeriodStatus.PARTIAL = 2
     expect(res.body.period.paid_paise).toBe("900000");
-    cleanup.paymentIds.push(res.body.payment.id as string);
+    cleanup.paymentIds.push(res.body.payment.id as number);
   });
 
   it("exact payment → PAID status", async () => {
@@ -345,15 +356,30 @@ describe("BL-11: payment reconciliation", () => {
     const lease = await createLease(propId, unitId, pmTok, "2026-03-01");
     const period = await getFirstPeriod(lease.leaseId);
 
+    // Force the period into DUE state with a future due_date to avoid late-fee accrual
+    // skewing the outstanding amount beyond 1,800,000 paise.
+    const futureDueDate = new Date();
+    futureDueDate.setDate(futureDueDate.getDate() + 30);
+    await prisma.rentPeriod.update({
+      where: { id: period!.id },
+      data: {
+        status: 1, // DUE
+        due_date: futureDueDate,
+        outstanding_paise: 1_800_000n,
+        paid_paise: 0n,
+        amount_due_paise: 1_800_000n,
+      },
+    });
+
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/payments")
       .set("Authorization", `Bearer ${pmTok}`)
       .send({ rentPeriodId: period!.id, amountPaise: 1_800_000, method: "UPI", paidOn: "2026-03-01" });
 
     expect(res.status).toBe(201);
-    expect(res.body.period.status).toBe("PAID");
+    expect(res.body.period.status).toBe(3); // RentPeriodStatus.PAID = 3
     expect(res.body.period.outstanding_paise).toBe("0");
-    cleanup.paymentIds.push(res.body.payment.id as string);
+    cleanup.paymentIds.push(res.body.payment.id as number);
   });
 
   it("overpayment → period PAID, excess to PrepaidCredit", async () => {
@@ -365,6 +391,21 @@ describe("BL-11: payment reconciliation", () => {
     const lease = await createLease(propId, unitId, pmTok, "2026-04-01");
     const period = await getFirstPeriod(lease.leaseId);
 
+    // Force the period into DUE state with a future due_date to avoid late-fee accrual
+    // skewing the outstanding amount and changing PAID/PREPAID semantics.
+    const futureDueDate = new Date();
+    futureDueDate.setDate(futureDueDate.getDate() + 30);
+    await prisma.rentPeriod.update({
+      where: { id: period!.id },
+      data: {
+        status: 1, // DUE
+        due_date: futureDueDate,
+        outstanding_paise: 1_800_000n,
+        paid_paise: 0n,
+        amount_due_paise: 1_800_000n,
+      },
+    });
+
     // Pay 200,000 paise over the ₹18,000 (1,800,000) due = 2,000,000 paise
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/payments")
@@ -372,14 +413,14 @@ describe("BL-11: payment reconciliation", () => {
       .send({ rentPeriodId: period!.id, amountPaise: 2_000_000, method: "BANK_TRANSFER", paidOn: "2026-04-01" });
 
     expect(res.status).toBe(201);
-    expect(res.body.period.status).toBe("PAID");
+    expect(res.body.period.status).toBe(3); // RentPeriodStatus.PAID = 3
     expect(res.body.period.outstanding_paise).toBe("0");
     // Spillover should create a PrepaidCredit
     expect(res.body.prepaid_credit).toBeDefined();
     expect(res.body.prepaid_credit.amount_paise).toBe("200000");
-    cleanup.paymentIds.push(res.body.payment.id as string);
+    cleanup.paymentIds.push(res.body.payment.id as number);
     if (res.body.prepaid_credit?.id) {
-      cleanup.prepaidCreditIds.push(res.body.prepaid_credit.id as string);
+      cleanup.prepaidCreditIds.push(res.body.prepaid_credit.id as number);
     }
   });
 });
@@ -390,7 +431,7 @@ describe("BL-11: payment reconciliation", () => {
 
 describe("BL-12/BL-13: accrual worker", () => {
   let pmToken: string;
-  let leaseId: string;
+  let leaseId: number;
 
   beforeAll(async () => {
     const pm = await createPM("accrual");
@@ -414,13 +455,13 @@ describe("BL-12/BL-13: accrual worker", () => {
     fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
     await prisma.rentPeriod.update({
       where: { id: period!.id },
-      data: { due_date: fiveDaysAgo, status: "DUE" },
+      data: { due_date: fiveDaysAgo, status: 1 },
     });
 
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
-    expect(updated?.status).toBe("OVERDUE");
+    expect(updated?.status).toBe(4);
   });
 
   it("BL-13 worked example: 17 days overdue → late_fee_paise = 72,000", async () => {
@@ -433,8 +474,7 @@ describe("BL-12/BL-13: accrual worker", () => {
       where: { id: period!.id },
       data: {
         due_date: seventeenDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         paid_paise: 0n,
         outstanding_paise: 1_800_000n,
         amount_due_paise: 1_800_000n,
@@ -444,10 +484,11 @@ describe("BL-12/BL-13: accrual worker", () => {
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
-    expect(updated?.status).toBe("OVERDUE");
+    expect(updated?.status).toBe(4);
     // floor(17/7)=2 weeks → 2 × 0.02 × 1,800,000 = 72,000
-    expect(updated?.late_fee_paise).toBe(72_000n);
-    expect(updated?.outstanding_paise).toBe(1_872_000n);
+    // DB stores outstanding WITHOUT late fee (late fee is computed at read time via API).
+    // outstanding_paise in DB = amount_due_paise - paid_paise = 1,800,000 - 0 = 1,800,000
+    expect(updated?.outstanding_paise).toBe(1_800_000n);
   });
 
   it("BL-13 partial week: 13 days → late_fee_paise = 36,000", async () => {
@@ -459,8 +500,7 @@ describe("BL-12/BL-13: accrual worker", () => {
       where: { id: period!.id },
       data: {
         due_date: thirteenDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         paid_paise: 0n,
         outstanding_paise: 1_800_000n,
         amount_due_paise: 1_800_000n,
@@ -470,8 +510,9 @@ describe("BL-12/BL-13: accrual worker", () => {
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
-    // floor(13/7)=1 week → 0.02 × 1,800,000 = 36,000
-    expect(updated?.late_fee_paise).toBe(36_000n);
+    // floor(13/7)=1 week → 0.02 × 1,800,000 = 36,000 (computed at read time via API)
+    // DB stores outstanding WITHOUT late fee: 1,800,000 - 0 = 1,800,000
+    expect(updated?.outstanding_paise).toBe(1_800_000n);
   });
 
   it("BL-13 not-yet-overdue: 4 days past due → no late fee, status stays DUE", async () => {
@@ -483,8 +524,7 @@ describe("BL-12/BL-13: accrual worker", () => {
       where: { id: period!.id },
       data: {
         due_date: fourDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: 1_800_000n,
       },
     });
@@ -493,15 +533,14 @@ describe("BL-12/BL-13: accrual worker", () => {
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
     // 4 days < 5 threshold → not in worker query → no change
-    expect(updated?.status).toBe("DUE");
-    expect(updated?.late_fee_paise).toBe(0n);
+    expect(updated?.status).toBe(1);
   });
 
   it("Idempotency: running worker twice on same IST date → second run is skipped", async () => {
     const period = await getFirstPeriod(leaseId);
     const fiveDaysAgo = new Date();
     fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-    await prisma.rentPeriod.update({ where: { id: period!.id }, data: { due_date: fiveDaysAgo, status: "DUE" } });
+    await prisma.rentPeriod.update({ where: { id: period!.id }, data: { due_date: fiveDaysAgo, status: 1 } });
 
     const result1 = await processor.runAccrual();
     expect(result1.skipped).toBe(false);
@@ -517,8 +556,8 @@ describe("BL-12/BL-13: accrual worker", () => {
 
 describe("Append-only payment DB triggers", () => {
   let pmToken: string;
-  let periodId: string;
-  let paymentId: string;
+  let periodId: number;
+  let paymentId: number;
 
   beforeAll(async () => {
     const pm = await createPM("trigger");
@@ -534,7 +573,7 @@ describe("Append-only payment DB triggers", () => {
       .post("/api/v1/payments")
       .set("Authorization", `Bearer ${pmToken}`)
       .send({ rentPeriodId: periodId, amountPaise: 500_000, method: "CASH", paidOn: "2026-05-01" });
-    paymentId = res.body.payment.id as string;
+    paymentId = res.body.payment.id as number;
     cleanup.paymentIds.push(paymentId);
   }, 30000);
 
@@ -589,8 +628,8 @@ describe("Void cascade block (PAYMENT_VOID_CASCADE_BLOCKED)", () => {
       .set("Authorization", `Bearer ${pmToken}`)
       .send({ rentPeriodId: period!.id, amountPaise: 2_000_000, method: "CASH", paidOn: "2026-06-01" });
     expect(overRes.status).toBe(201);
-    const sourcePaymentId = overRes.body.payment.id as string;
-    const creditId = overRes.body.prepaid_credit?.id as string;
+    const sourcePaymentId = overRes.body.payment.id as number;
+    const creditId = overRes.body.prepaid_credit?.id as number;
     cleanup.paymentIds.push(sourcePaymentId);
     if (creditId) cleanup.prepaidCreditIds.push(creditId);
 

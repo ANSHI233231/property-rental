@@ -1,16 +1,24 @@
 /**
- * GharSetu — Prisma seed script (Phase 1)
+ * GharSetu — Prisma seed script.
  *
- * Creates the bootstrap Admin user and dev/test users.
- * Idempotent: upserts by email.
+ * Creates / refreshes the demo accounts. Idempotent — on re-run, password
+ * hashes are rotated to the current env values so this script doubles as a
+ * "reset all demo passwords" tool.
  *
  * Usage:
  *   pnpm prisma db seed
  *
  * Required env vars:
- *   BOOTSTRAP_ADMIN_EMAIL
- *   BOOTSTRAP_ADMIN_PASSWORD
- *   SEED_TEST_PASSWORD  (used for PM / Maintenance / Tenant test accounts)
+ *   BOOTSTRAP_ADMIN_EMAIL          — admin email (e.g. admin@triline.co)
+ *   BOOTSTRAP_ADMIN_PASSWORD       — plaintext admin password
+ *   SEED_TEST_PASSWORD             — plaintext password for non-admin demo accounts
+ *
+ * Optional:
+ *   SEED_DEMO_DOMAIN               — domain for pm/maintenance/tenant demo
+ *                                    accounts (default: "triline.co"). Three
+ *                                    accounts are created using the exact
+ *                                    local-parts the FE expects: pm@,
+ *                                    maintance@, tennat@.
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -54,12 +62,14 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log("[seed] Creating bootstrap admin...");
+  console.log("[seed] Upserting bootstrap admin (password will be reset)...");
 
   const adminHash = await hashPassword(adminPassword);
   const admin = await prisma.user.upsert({
     where: { email: adminEmail.toLowerCase() },
-    update: {},
+    // Rotate password + ensure the account is enabled. This is what makes
+    // re-running the seed equivalent to a password reset.
+    update: { password_hash: adminHash, is_active: true },
     create: {
       email: adminEmail.toLowerCase(),
       name: "Admin",
@@ -71,38 +81,34 @@ async function main(): Promise<void> {
 
   console.log(`[seed] Admin: ${admin.email} (id: ${admin.id})`);
 
-  // Dev/test users — only if SEED_TEST_PASSWORD is set
   if (!testPassword) {
-    console.log("[seed] SEED_TEST_PASSWORD not set — skipping test users.");
+    console.log("[seed] SEED_TEST_PASSWORD not set — skipping non-admin demo users.");
     return;
   }
 
   const testHash = await hashPassword(testPassword);
+  const demoDomain = (process.env["SEED_DEMO_DOMAIN"] ?? "triline.co").toLowerCase();
 
+  // Demo accounts the FE login screen uses. Local-parts intentionally match
+  // the spellings already in use in the product ("maintance", "tennat").
+  // Plus the legacy *.local accounts for compatibility with older tests.
   const testUsers = [
-    {
-      email: "pm.test@gharsetu.local",
-      name: "Test Property Manager",
-      role: ROLE.PROPERTY_MANAGER,
-    },
-    {
-      email: "maintenance.test@gharsetu.local",
-      name: "Test Maintenance Staff",
-      role: ROLE.MAINTENANCE,
-    },
-    {
-      email: "tenant.test@gharsetu.local",
-      name: "Test Tenant",
-      role: ROLE.TENANT,
-    },
+    { email: `pm@${demoDomain}`,        name: "Demo Property Manager", role: ROLE.PROPERTY_MANAGER },
+    { email: `maintance@${demoDomain}`, name: "Demo Maintenance Staff", role: ROLE.MAINTENANCE },
+    { email: `tennat@${demoDomain}`,    name: "Demo Tenant",            role: ROLE.TENANT },
+    { email: "pm.test@gharsetu.local",          name: "Test Property Manager",   role: ROLE.PROPERTY_MANAGER },
+    { email: "maintenance.test@gharsetu.local", name: "Test Maintenance Staff",  role: ROLE.MAINTENANCE },
+    { email: "tenant.test@gharsetu.local",      name: "Test Tenant",             role: ROLE.TENANT },
   ];
 
   for (const u of testUsers) {
+    const email = u.email.toLowerCase();
     const created = await prisma.user.upsert({
-      where: { email: u.email },
-      update: {},
+      where: { email },
+      // Rotate password + ensure active on every run.
+      update: { password_hash: testHash, is_active: true },
       create: {
-        email: u.email,
+        email,
         name: u.name,
         password_hash: testHash,
         role: u.role,

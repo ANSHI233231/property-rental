@@ -8,7 +8,7 @@
  */
 
 import { useAuth } from "@/lib/auth/context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +35,15 @@ interface PropertyRow {
   pincode: string;
   timezone: string;
   active_pm?: { id: string; name: string } | null;
+  // _count.units = non-retired unit total; units[] = OCCUPIED non-retired
+  // units (id-only) so the FE can render occupancy as occupied / total.
   _count?: { units?: number };
+  units?: Array<{ id: number | string }>;
+}
+
+interface PmOption {
+  id: number | string;
+  name: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,13 +157,35 @@ function AddPropertyModal({
 
 export default function PropertiesPage() {
   const router = useRouter();
+  const { apiFetch } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [refetchKey, setRefetchKey] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pmFilter, setPmFilter] = useState<string>("ALL");
+  const [pms, setPms] = useState<PmOption[]>([]);
+
+  // Fetch PM list once for the manager filter dropdown.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch<{ data: PmOption[] }>(
+          "/users?role=PROPERTY_MANAGER&limit=200",
+        );
+        if (!cancelled) setPms(res.data ?? []);
+      } catch {
+        if (!cancelled) setPms([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiFetch]);
 
   const extraQuery: Record<string, string | undefined> = {};
   if (search.trim()) extraQuery.search = search.trim();
+  if (pmFilter !== "ALL") extraQuery.activePmId = pmFilter;
 
   const {
     items: rows,
@@ -219,8 +249,19 @@ export default function PropertiesPage() {
             <label className="label" htmlFor="prop-manager">
               Manager
             </label>
-            <select id="prop-manager" className="input">
-              <option>Any manager</option>
+            <select
+              id="prop-manager"
+              className="input"
+              value={pmFilter}
+              onChange={(e) => setPmFilter(e.target.value)}
+            >
+              <option value="ALL">Any manager</option>
+              <option value="0">Unassigned</option>
+              {pms.map((pm) => (
+                <option key={pm.id} value={String(pm.id)}>
+                  {pm.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex items-end">
@@ -271,14 +312,29 @@ export default function PropertiesPage() {
                 </td>
               </tr>
             ) : (
-              rows.map((row) => (
+              rows.map((row) => {
+                const totalUnits = row._count?.units ?? 0;
+                const occupiedUnits = row.units?.length ?? 0;
+                const occupancyPct = totalUnits > 0
+                  ? Math.round((occupiedUnits / totalUnits) * 100)
+                  : null;
+                return (
                 <tr key={row.id}>
                   <td className="font-poppins font-semibold text-charcoal">{row.name}</td>
                   <td>{row.address}</td>
                   <td>{row.city}</td>
-                  <td>{row._count?.units ?? "—"}</td>
+                  <td>{totalUnits > 0 ? totalUnits : <span className="muted">—</span>}</td>
                   <td>{row.active_pm?.name ?? <span className="muted">—</span>}</td>
-                  <td className="muted">—</td>
+                  <td>
+                    {totalUnits > 0 ? (
+                      <span>
+                        {occupiedUnits}/{totalUnits}
+                        <span className="muted ml-1">({occupancyPct}%)</span>
+                      </span>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
+                  </td>
                   <td>
                     <button
                       type="button"
@@ -289,7 +345,8 @@ export default function PropertiesPage() {
                     </button>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

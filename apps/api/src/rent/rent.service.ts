@@ -368,6 +368,7 @@ export class RentService {
       lease: {
         select: {
           id: true,
+          monthly_rent_paise: true,
           unit: {
             select: {
               id: true,
@@ -381,11 +382,23 @@ export class RentService {
               },
             },
           },
+          lease_tenants: {
+            where: { removed_at: null },
+            select: {
+              is_primary: true,
+              tenant: {
+                select: {
+                  id: true,
+                  user: { select: { id: true, name: true } },
+                },
+              },
+            },
+          },
         },
       },
     };
 
-    // FC-2: include lease → unit → property for admin overdue table
+    // FC-2: include lease → unit → property + tenants for admin overdue table
     const baseArgs = { where, orderBy: { period_start: "desc" as const }, include: leaseInclude };
     const [items, total] = await Promise.all([
       useOffset
@@ -413,10 +426,42 @@ export class RentService {
     const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
     return {
-      data: data.map((p) => ({
-        ...serializePeriod(p as unknown as Record<string, unknown>),
-        lease: p.lease,
-      })),
+      data: data.map((p) => {
+        const lease = p.lease as unknown as {
+          id: number;
+          monthly_rent_paise: bigint;
+          unit: {
+            id: number;
+            unit_number: string;
+            property: { id: number; name: string; city: string } | null;
+          } | null;
+          lease_tenants: Array<{
+            is_primary: boolean;
+            tenant: { id: number; user: { id: number; name: string } };
+          }>;
+        } | null;
+        return {
+          ...serializePeriod(p as unknown as Record<string, unknown>),
+          lease: lease
+            ? {
+                id: lease.id,
+                monthly_rent_paise: lease.monthly_rent_paise.toString(),
+                unit: lease.unit
+                  ? {
+                      id: lease.unit.id,
+                      name: lease.unit.unit_number,
+                      property: lease.unit.property,
+                    }
+                  : null,
+                tenants: lease.lease_tenants.map((lt) => ({
+                  id: lt.tenant.id,
+                  name: lt.tenant.user.name,
+                  is_primary: lt.is_primary,
+                })),
+              }
+            : null,
+        };
+      }),
       meta: { next_cursor: nextCursor ?? null, has_more: hasMore, total, page: currentPage, page_size: take, total_pages: totalPages },
     };
   }
@@ -536,8 +581,13 @@ export class RentService {
               daysOverdueFromDueDate(rawPeriod.due_date),
             )
           : 0n;
+        // node-postgres returns INT columns from $queryRaw as JS bigint in some
+        // versions; coerce id + lease_id to Number so they round-trip cleanly
+        // through Prisma's typed client (which rejects BigInt for Int columns).
         const period = {
           ...rawPeriod,
+          id: Number(rawPeriod.id),
+          lease_id: Number(rawPeriod.lease_id),
           amount_due_paise: BigInt(rawPeriod.amount_due_paise),
           late_fee_paise: lateFeeAtPaymentTime,
           paid_paise: BigInt(rawPeriod.paid_paise),
@@ -730,7 +780,15 @@ export class RentService {
         }
 
         const rawP = rawPayments[0]!;
-        const payment = { ...rawP, amount_paise: BigInt(rawP.amount_paise) };
+        // Coerce Int IDs so they round-trip through Prisma's typed client
+        // (see same fix in recordPayment above).
+        const payment = {
+          ...rawP,
+          id: Number(rawP.id),
+          rent_period_id: Number(rawP.rent_period_id),
+          lease_id: Number(rawP.lease_id),
+          amount_paise: BigInt(rawP.amount_paise),
+        };
 
         if (payment.is_voided) {
           throw new ConflictException({
@@ -830,6 +888,7 @@ export class RentService {
           : 0n;
         const period = {
           ...rawPeriodRow,
+          id: Number(rawPeriodRow.id),
           amount_due_paise: BigInt(rawPeriodRow.amount_due_paise),
           late_fee_paise: periodLateFee,
           paid_paise: BigInt(rawPeriodRow.paid_paise),

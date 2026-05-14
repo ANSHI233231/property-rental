@@ -74,11 +74,11 @@ afterAll(async () => {
 // Cleanup tracking
 // ---------------------------------------------------------------------------
 
-let gapLeaseIds: string[] = [];
-let gapTenantIds: string[] = [];
-let gapUnitIds: string[] = [];
-let gapPropertyIds: string[] = [];
-let gapUserIds: string[] = [];
+let gapLeaseIds: number[] = [];
+let gapTenantIds: number[] = [];
+let gapUnitIds: number[] = [];
+let gapPropertyIds: number[] = [];
+let gapUserIds: number[] = [];
 
 afterEach(async () => {
   if (gapLeaseIds.length > 0) {
@@ -95,11 +95,11 @@ afterEach(async () => {
     }
     await prisma.leaseTenant.deleteMany({ where: { lease_id: { in: gapLeaseIds } } });
     await prisma.auditLog.deleteMany({
-      where: { entity_type: "Lease", entity_id: { in: gapLeaseIds } },
+      where: { entity_type: "Lease", entity_id: { in: gapLeaseIds.map(String) } },
     });
     for (const lid of gapLeaseIds) {
       await prisma.auditLog.deleteMany({
-        where: { entity_type: "LeaseTenant", entity_id: { startsWith: lid } },
+        where: { entity_type: "LeaseTenant", entity_id: { startsWith: String(lid) } },
       });
     }
     // Phase 4: delete prepaid_credits and payments before leases (FK cascade guard)
@@ -107,7 +107,7 @@ afterEach(async () => {
     await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_no_delete`);
     await prisma.$executeRawUnsafe(`ALTER TABLE payments DISABLE TRIGGER payments_restrict_update`);
     try {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, gapLeaseIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, gapLeaseIds);
     } finally {
       await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
       await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_restrict_update`);
@@ -118,19 +118,19 @@ afterEach(async () => {
   }
 
   if (gapTenantIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Tenant", entity_id: { in: gapTenantIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Tenant", entity_id: { in: gapTenantIds.map(String) } } });
     await prisma.tenant.deleteMany({ where: { id: { in: gapTenantIds } } });
     gapTenantIds = [];
   }
 
   if (gapUnitIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: gapUnitIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: gapUnitIds.map(String) } } });
     await prisma.unit.deleteMany({ where: { id: { in: gapUnitIds } } });
     gapUnitIds = [];
   }
 
   if (gapPropertyIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: gapPropertyIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: gapPropertyIds.map(String) } } });
     await prisma.propertyTransferLog.deleteMany({ where: { property_id: { in: gapPropertyIds } } });
     await prisma.property.deleteMany({ where: { id: { in: gapPropertyIds } } });
     gapPropertyIds = [];
@@ -140,7 +140,7 @@ afterEach(async () => {
     await prisma.auditLog.deleteMany({
       where: {
         OR: [
-          { entity_type: "User", entity_id: { in: gapUserIds } },
+          { entity_type: "User", entity_id: { in: gapUserIds.map(String) } },
           { actor_id: { in: gapUserIds } },
         ],
       },
@@ -155,7 +155,7 @@ afterEach(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createProp(): Promise<{ id: string }> {
+async function createProp(): Promise<{ id: number }> {
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -167,29 +167,32 @@ async function createProp(): Promise<{ id: string }> {
       pincode: "110001",
     });
   expect(res.status).toBe(201);
-  gapPropertyIds.push(res.body.id as string);
-  return res.body as { id: string };
+  gapPropertyIds.push(res.body.id as number);
+  return res.body as { id: number };
 }
 
-async function createUnit(propertyId: string): Promise<{ id: string }> {
+async function createUnit(propertyId: number): Promise<{ id: number }> {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U${Date.now()}`, bedrooms: 2, bathrooms: 1, monthly_rent_paise: 1_800_000 });
   expect(res.status).toBe(201);
-  gapUnitIds.push(res.body.id as string);
-  return res.body as { id: string };
+  gapUnitIds.push(res.body.id as number);
+  return res.body as { id: number };
 }
 
-async function createPM(tag: string): Promise<{ id: string; email: string; temp_password: string }> {
+const GAP3_PM_PASSWORD = "Gap3PM@test2026!";
+
+async function createPM(tag: string): Promise<{ id: number; email: string; temp_password: string }> {
   const email = `pm-gap-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ email, name: `PM ${tag}`, role: "PROPERTY_MANAGER" });
+    .send({ email, firstName: "PM", lastName: tag, role: "PROPERTY_MANAGER", password: GAP3_PM_PASSWORD });
   expect(res.status).toBe(201);
-  gapUserIds.push(res.body.id as string);
-  return { ...res.body as { id: string; temp_password: string }, email };
+  gapUserIds.push(res.body.id as number);
+  // temp_password no longer in response; return the known password under that key for backward-compat with callers
+  return { ...(res.body as { id: number }), email, temp_password: GAP3_PM_PASSWORD };
 }
 
 async function loginAs(email: string, password: string): Promise<string> {
@@ -201,8 +204,8 @@ async function loginAs(email: string, password: string): Promise<string> {
 }
 
 async function signLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   token: string,
   overrides: Record<string, unknown> = {},
 ) {
@@ -223,32 +226,32 @@ async function signLease(
 }
 
 type LeaseResult = {
-  leaseId: string;
-  tenantId: string;
-  userId: string;
+  leaseId: number;
+  tenantId: number;
+  userId: number;
   tempPassword?: string;
 };
 
 async function createActiveLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   overrides: Record<string, unknown> = {},
 ): Promise<LeaseResult> {
   const res = await signLease(propId, unitId, adminToken, overrides);
   expect(res.status).toBe(201);
-  gapLeaseIds.push(res.body.lease.id as string);
-  const tenant = (res.body.tenants as Array<{ tenantId: string; userId: string; tempPassword?: string }>)[0]!;
+  gapLeaseIds.push(res.body.lease.id as number);
+  const tenant = (res.body.tenants as Array<{ tenantId: number; userId: number; tempPassword?: string }>)[0]!;
   gapTenantIds.push(tenant.tenantId);
   gapUserIds.push(tenant.userId);
   return {
-    leaseId: res.body.lease.id as string,
+    leaseId: res.body.lease.id as number,
     tenantId: tenant.tenantId,
     userId: tenant.userId,
     tempPassword: tenant.tempPassword,
   };
 }
 
-async function terminateLease(leaseId: string, tenantId: string): Promise<void> {
+async function terminateLease(leaseId: number, tenantId: number): Promise<void> {
   const tReq = await supertestFn(app.getHttpServer())
     .post(`/api/v1/leases/${leaseId}/terminate-request`)
     .set("Authorization", `Bearer ${adminToken}`)
@@ -350,8 +353,8 @@ describe("TC-LEASE-005 — Tenant user_id links and temp password behaviour", ()
     const res = await signLease(prop.id, unit.id, adminToken);
     expect(res.status).toBe(201);
 
-    gapLeaseIds.push(res.body.lease.id as string);
-    const tenant = (res.body.tenants as Array<{ tenantId: string; userId: string; tempPassword: string }>)[0]!;
+    gapLeaseIds.push(res.body.lease.id as number);
+    const tenant = (res.body.tenants as Array<{ tenantId: number; userId: number; tempPassword: string }>)[0]!;
     gapTenantIds.push(tenant.tenantId);
     gapUserIds.push(tenant.userId);
 
@@ -366,8 +369,8 @@ describe("TC-LEASE-005 — Tenant user_id links and temp password behaviour", ()
     const res = await signLease(prop.id, unit.id, adminToken);
     expect(res.status).toBe(201);
 
-    gapLeaseIds.push(res.body.lease.id as string);
-    const tenantResult = (res.body.tenants as Array<{ tenantId: string; userId: string }>)[0]!;
+    gapLeaseIds.push(res.body.lease.id as number);
+    const tenantResult = (res.body.tenants as Array<{ tenantId: number; userId: number }>)[0]!;
     gapTenantIds.push(tenantResult.tenantId);
     gapUserIds.push(tenantResult.userId);
 
@@ -391,18 +394,18 @@ describe("TC-LEASE-005 — Tenant user_id links and temp password behaviour", ()
       tenants: [{ name: "Reuse User", email, is_primary: true }],
     });
     expect(r1.status).toBe(201);
-    gapLeaseIds.push(r1.body.lease.id as string);
-    const t1 = (r1.body.tenants as Array<{ tenantId: string; userId: string; tempPassword?: string }>)[0]!;
+    gapLeaseIds.push(r1.body.lease.id as number);
+    const t1 = (r1.body.tenants as Array<{ tenantId: number; userId: number; tempPassword?: string }>)[0]!;
     gapTenantIds.push(t1.tenantId);
     gapUserIds.push(t1.userId);
     expect(t1.tempPassword).toBeDefined();
 
     // Terminate first lease so unit is free
-    await terminateLease(r1.body.lease.id as string, t1.tenantId);
+    await terminateLease(r1.body.lease.id as number, t1.tenantId);
 
     // Backdate terminated_at to bypass BL-18
     await prisma.lease.update({
-      where: { id: r1.body.lease.id as string },
+      where: { id: r1.body.lease.id as number },
       data: { terminated_at: new Date(Date.now() - 25 * 60 * 60 * 1000) },
     });
 
@@ -411,8 +414,8 @@ describe("TC-LEASE-005 — Tenant user_id links and temp password behaviour", ()
       tenants: [{ name: "Reuse User", email, is_primary: true }],
     });
     expect(r2.status).toBe(201);
-    gapLeaseIds.push(r2.body.lease.id as string);
-    const t2 = (r2.body.tenants as Array<{ tenantId: string; userId: string; tempPassword?: string }>)[0]!;
+    gapLeaseIds.push(r2.body.lease.id as number);
+    const t2 = (r2.body.tenants as Array<{ tenantId: number; userId: number; tempPassword?: string }>)[0]!;
     // No new user created → no tempPassword
     expect(t2.tempPassword).toBeUndefined();
     // Same tenant row reused
@@ -430,17 +433,17 @@ describe("TC-LEASE-006 — BL-04: unit state paired with lease lifecycle", () =>
     const unit = await createUnit(prop.id);
 
     const before = await prisma.unit.findUnique({ where: { id: unit.id } });
-    expect(before?.state).toBe("AVAILABLE");
+    expect(before?.state).toBe(0); // UnitState.AVAILABLE = 0
 
     const { leaseId, tenantId } = await createActiveLease(prop.id, unit.id);
 
     const during = await prisma.unit.findUnique({ where: { id: unit.id } });
-    expect(during?.state).toBe("OCCUPIED");
+    expect(during?.state).toBe(2); // UnitState.OCCUPIED = 2
 
     await terminateLease(leaseId, tenantId);
 
     const after = await prisma.unit.findUnique({ where: { id: unit.id } });
-    expect(after?.state).toBe("AVAILABLE");
+    expect(after?.state).toBe(0); // UnitState.AVAILABLE = 0
   }, 60000);
 });
 
@@ -492,19 +495,19 @@ describe("TC-LEASE-008 — Lease renew: status transitions and tenant carry-over
       .send({ newEndDate: "2028-05-31" });
 
     expect(renewRes.status).toBe(201);
-    const newLeaseId = renewRes.body.id as string;
+    const newLeaseId = renewRes.body.id as number;
     gapLeaseIds.push(newLeaseId);
 
     // Verify old lease is now RENEWED
     const oldLease = await prisma.lease.findUnique({ where: { id: leaseId }, select: { status: true } });
-    expect(oldLease?.status).toBe("RENEWED");
+    expect(oldLease?.status).toBe(2); // LeaseStatus.RENEWED = 2
 
     // Verify new lease is ACTIVE on the same unit
     const newLease = await prisma.lease.findUnique({
       where: { id: newLeaseId },
       select: { status: true, unit_id: true },
     });
-    expect(newLease?.status).toBe("ACTIVE");
+    expect(newLease?.status).toBe(0); // LeaseStatus.ACTIVE = 0
     expect(newLease?.unit_id).toBe(unit.id);
 
     // Verify new lease has tenants carried over
@@ -532,7 +535,7 @@ describe("TC-LEASE-009 — Idempotent renew within 5-second window", () => {
       .set("Authorization", `Bearer ${adminToken}`)
       .send(payload);
     expect(r1.status).toBe(201);
-    const newId1 = r1.body.id as string;
+    const newId1 = r1.body.id as number;
     gapLeaseIds.push(newId1);
 
     const r2 = await supertestFn(app.getHttpServer())
@@ -574,10 +577,10 @@ describe("TC-TERM-001 — Single-tenant termination: requester auto-approved, fi
       .set("Authorization", `Bearer ${adminToken}`);
 
     expect(finalRes.status).toBe(200);
-    expect(finalRes.body.unit_state).toBe("AVAILABLE");
+    expect(finalRes.body.unit_state).toBe(0); // UnitState.AVAILABLE = 0
 
     const unit2 = await prisma.unit.findUnique({ where: { id: unit.id } });
-    expect(unit2?.state).toBe("AVAILABLE");
+    expect(unit2?.state).toBe(0); // UnitState.AVAILABLE = 0
   }, 60000);
 });
 
@@ -598,14 +601,14 @@ describe("TC-TERM-002 — Multi-tenant happy path", () => {
       ],
     });
     expect(leaseRes.status).toBe(201);
-    gapLeaseIds.push(leaseRes.body.lease.id as string);
+    gapLeaseIds.push(leaseRes.body.lease.id as number);
 
-    const tenants = leaseRes.body.tenants as Array<{ tenantId: string; userId: string; isPrimary: boolean }>;
+    const tenants = leaseRes.body.tenants as Array<{ tenantId: number; userId: number; isPrimary: boolean }>;
     for (const t of tenants) { gapTenantIds.push(t.tenantId); gapUserIds.push(t.userId); }
 
     const tenantA = tenants.find((t) => t.isPrimary)!;
     const tenantB = tenants.find((t) => !t.isPrimary)!;
-    const leaseId = leaseRes.body.lease.id as string;
+    const leaseId = leaseRes.body.lease.id as number;
 
     // Tenant A requests
     const tReq = await supertestFn(app.getHttpServer())
@@ -626,7 +629,7 @@ describe("TC-TERM-002 — Multi-tenant happy path", () => {
     const approveRes = await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-approve`)
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ tenantId: tenantB.tenantId, decision: "APPROVED" });
+      .send({ tenantId: tenantB.tenantId, decision: 1 }); // 1 = APPROVED
     expect(approveRes.status).toBe(200);
 
     // Now finalize succeeds
@@ -634,7 +637,7 @@ describe("TC-TERM-002 — Multi-tenant happy path", () => {
       .post(`/api/v1/leases/${leaseId}/finalize-termination`)
       .set("Authorization", `Bearer ${adminToken}`);
     expect(finalRes.status).toBe(200);
-    expect(finalRes.body.unit_state).toBe("AVAILABLE");
+    expect(finalRes.body.unit_state).toBe(0); // UnitState.AVAILABLE = 0
   }, 60000);
 });
 
@@ -655,14 +658,14 @@ describe("TC-TERM-003 — Multi-tenant rejection blocks finalize", () => {
       ],
     });
     expect(leaseRes.status).toBe(201);
-    gapLeaseIds.push(leaseRes.body.lease.id as string);
+    gapLeaseIds.push(leaseRes.body.lease.id as number);
 
-    const tenants = leaseRes.body.tenants as Array<{ tenantId: string; userId: string; isPrimary: boolean }>;
+    const tenants = leaseRes.body.tenants as Array<{ tenantId: number; userId: number; isPrimary: boolean }>;
     for (const t of tenants) { gapTenantIds.push(t.tenantId); gapUserIds.push(t.userId); }
 
     const tenantA = tenants.find((t) => t.isPrimary)!;
     const tenantC = tenants.find((t) => !t.isPrimary)!;
-    const leaseId = leaseRes.body.lease.id as string;
+    const leaseId = leaseRes.body.lease.id as number;
 
     await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-request`)
@@ -673,7 +676,7 @@ describe("TC-TERM-003 — Multi-tenant rejection blocks finalize", () => {
     await supertestFn(app.getHttpServer())
       .post(`/api/v1/leases/${leaseId}/terminate-approve`)
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ tenantId: tenantC.tenantId, decision: "REJECTED" });
+      .send({ tenantId: tenantC.tenantId, decision: 2 }); // 2 = REJECTED
 
     // Finalize is 409 forever until withdrawn + new request
     const finalRes = await supertestFn(app.getHttpServer())
@@ -713,7 +716,7 @@ describe("TC-TERM-004 — Withdraw: requester can withdraw and new request can o
 
     // Lease still ACTIVE
     const lease = await prisma.lease.findUnique({ where: { id: leaseId } });
-    expect(lease?.status).toBe("ACTIVE");
+    expect(lease?.status).toBe(0); // LeaseStatus.ACTIVE = 0
 
     // New terminate-request should succeed now
     const tReq2 = await supertestFn(app.getHttpServer())
@@ -836,11 +839,11 @@ describe("TC-REFUND-002 — One deposit refund per terminated lease", () => {
 // ===========================================================================
 
 describe("PropertyScopeGuard — PM-B cannot access Property A lease endpoints", () => {
-  let propA: { id: string };
-  let propB: { id: string };
-  let leaseId: string;
+  let propA: { id: number };
+  let propB: { id: number };
+  let leaseId: number;
   let pmBToken: string;
-  let gapLeaseIdOuter: string | undefined;
+  let gapLeaseIdOuter: number | undefined;
 
   beforeEach(async () => {
     propA = await createProp();
@@ -850,10 +853,10 @@ describe("PropertyScopeGuard — PM-B cannot access Property A lease endpoints",
     // Create lease on Property A
     const lr = await signLease(propA.id, unitA.id, adminToken);
     expect(lr.status).toBe(201);
-    leaseId = lr.body.lease.id as string;
+    leaseId = lr.body.lease.id as number;
     gapLeaseIdOuter = leaseId;
     gapLeaseIds.push(leaseId);
-    const t = (lr.body.tenants as Array<{ tenantId: string; userId: string }>)[0]!;
+    const t = (lr.body.tenants as Array<{ tenantId: number; userId: number }>)[0]!;
     gapTenantIds.push(t.tenantId);
     gapUserIds.push(t.userId);
 

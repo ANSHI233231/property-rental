@@ -489,7 +489,13 @@ export class LeasesService {
 
     const findManySelect = {
       ...LEASE_SELECT,
-      unit: { select: { id: true, unit_number: true } },
+      unit: {
+        select: {
+          id: true,
+          unit_number: true,
+          property: { select: { id: true, name: true } },
+        },
+      },
       lease_tenants: {
         where: { removed_at: null },
         select: {
@@ -551,7 +557,11 @@ export class LeasesService {
       data: data.map((l) => {
         const serialized = serializeLease(l as LeaseRow & Record<string, unknown>);
         const lt = (l as unknown as {
-          unit: { id: number; unit_number: string } | null;
+          unit: {
+            id: number;
+            unit_number: string;
+            property: { id: number; name: string } | null;
+          } | null;
           lease_tenants: Array<{
             is_primary: boolean;
             tenant: { id: number; user: { name: string } };
@@ -559,7 +569,13 @@ export class LeasesService {
         });
         return {
           ...serialized,
-          unit: lt.unit ? { id: lt.unit.id, name: lt.unit.unit_number } : null,
+          unit: lt.unit
+            ? {
+                id: lt.unit.id,
+                name: lt.unit.unit_number,
+                property: lt.unit.property,
+              }
+            : null,
           tenants: lt.lease_tenants.map((row) => ({
             id: row.tenant.id,
             name: row.tenant.user.name,

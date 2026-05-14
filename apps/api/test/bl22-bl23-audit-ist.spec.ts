@@ -51,12 +51,12 @@ let prisma: PrismaService;
 let adminToken: string;
 let pmToken: string;
 let tenantToken: string;
-let adminUserId: string;
+let adminUserId: number;
 
 // Collect IDs for post-test cleanup
-const cleanPropertyIds: string[] = [];
-const cleanUnitIds: string[] = [];
-const cleanUserIds: string[] = [];
+const cleanPropertyIds: number[] = [];
+const cleanUnitIds: number[] = [];
+const cleanUserIds: number[] = [];
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
@@ -97,16 +97,16 @@ beforeAll(async () => {
 afterAll(async () => {
   // Clean up in dependency order (FK-safe)
   if (cleanUnitIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanUnitIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanUnitIds.map(String) } } });
     await prisma.unit.deleteMany({ where: { id: { in: cleanUnitIds } } });
   }
   if (cleanPropertyIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanPropertyIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanPropertyIds.map(String) } } });
     await prisma.propertyTransferLog.deleteMany({ where: { property_id: { in: cleanPropertyIds } } });
     await prisma.property.deleteMany({ where: { id: { in: cleanPropertyIds } } });
   }
   if (cleanUserIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanUserIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_id: { in: cleanUserIds.map(String) } } });
     await prisma.refreshToken.deleteMany({ where: { user_id: { in: cleanUserIds } } });
     await prisma.user.deleteMany({ where: { id: { in: cleanUserIds } } });
   }
@@ -129,8 +129,8 @@ async function createProperty(suffix = "") {
       pincode: "110001",
     });
   expect(res.status).toBe(201);
-  cleanPropertyIds.push(res.body.id as string);
-  return res.body as { id: string };
+  cleanPropertyIds.push(res.body.id as number);
+  return res.body as { id: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +139,7 @@ async function createProperty(suffix = "") {
 // to LISTED/OCCUPIED. The CreateUnitDto forbids the `state` field (whitelist).
 // ---------------------------------------------------------------------------
 
-async function createUnit(propertyId: string) {
+async function createUnit(propertyId: number) {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
@@ -150,8 +150,8 @@ async function createUnit(propertyId: string) {
       monthly_rent_paise: 1_800_000,
     });
   expect(res.status).toBe(201);
-  cleanUnitIds.push(res.body.id as string);
-  return res.body as { id: string; state: string; monthly_rent_paise: unknown };
+  cleanUnitIds.push(res.body.id as number);
+  return res.body as { id: number; state: string; monthly_rent_paise: unknown };
 }
 
 // ===========================================================================
@@ -167,7 +167,7 @@ describe("BL-22 — audit_log written per mutation (property + auth)", () => {
     const prop = await createProperty("bl22-001");
 
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "Property", entity_id: prop.id, action: "property.create" },
+      where: { entity_type: "Property", entity_id: String(prop.id), action: "property.create" },
       orderBy: { created_at: "desc" },
     });
 
@@ -192,7 +192,7 @@ describe("BL-22 — audit_log written per mutation (property + auth)", () => {
       .send({ name: newName });
 
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "Property", entity_id: prop.id, action: "property.update" },
+      where: { entity_type: "Property", entity_id: String(prop.id), action: "property.update" },
       orderBy: { created_at: "desc" },
     });
 
@@ -287,7 +287,7 @@ describe("BL-22 — audit_log written per mutation (property + auth)", () => {
 
     if (retireRes.status === 200 || retireRes.status === 201) {
       const log = await prisma.auditLog.findFirst({
-        where: { entity_type: "Unit", entity_id: unit.id, action: "unit.retire" },
+        where: { entity_type: "Unit", entity_id: String(unit.id), action: "unit.retire" },
         orderBy: { created_at: "desc" },
       });
       expect(log).not.toBeNull();
@@ -324,11 +324,11 @@ describe("BL-22 — audit_log written per mutation (property + auth)", () => {
       .set("Authorization", `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
-    const rows = res.body.data as Array<{ created_at: string; action: string }>;
+    const rows = res.body.data as Array<{ createdAt: string; action: string }>;
     expect(rows.length).toBeGreaterThan(0);
 
     for (const row of rows) {
-      const ts = new Date(row.created_at);
+      const ts = new Date(row.createdAt);
       // Must parse successfully
       expect(isNaN(ts.getTime())).toBe(false);
       // Must be a recent date (not epoch-zero)
@@ -363,14 +363,14 @@ describe("BL-22 — user.create mutation writes audit row", () => {
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ email, name: "BL22 Test User", role: "MAINTENANCE" });
+      .send({ email, firstName: "BL22Test", lastName: "User", role: "MAINTENANCE", password: "BL22Test@2026!!", specialization: "general" });
 
     expect(res.status).toBe(201);
-    const userId = res.body.id as string;
+    const userId = res.body.id as number;
     cleanUserIds.push(userId);
 
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "User", entity_id: userId, action: "user.create" },
+      where: { entity_type: "User", entity_id: String(userId), action: "user.create" },
     });
 
     expect(log).not.toBeNull();
@@ -527,8 +527,8 @@ describe("BL-23 — IST timestamp conversion (API → IST helper round-trip)", (
 // ===========================================================================
 
 describe("BL-06 — LISTED unit rent change propagates immediately", () => {
-  let propId: string;
-  let unitId: string;
+  let propId: number;
+  let unitId: number;
 
   beforeAll(async () => {
     const prop = await createProperty("bl06");
@@ -566,7 +566,7 @@ describe("BL-06 — LISTED unit rent change propagates immediately", () => {
       .set("Authorization", `Bearer ${adminToken}`);
 
     expect(getRes.status).toBe(200);
-    const units = getRes.body.data as Array<{ id: string; monthly_rent_paise: unknown }>;
+    const units = getRes.body.data as Array<{ id: number; monthly_rent_paise: unknown }>;
     const fetched = units.find((u) => u.id === unitId);
     expect(fetched).toBeDefined();
     expect(Number(fetched!.monthly_rent_paise)).toBe(newRentPaise);
@@ -601,7 +601,7 @@ describe("BL-06 — LISTED unit rent change propagates immediately", () => {
   it("TC-BL06-004: audit_log written for unit.update on LISTED unit rent change (BL-22 cross-check)", async () => {
     // Check that the rent change in TC-BL06-001 also produced an audit row
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "Unit", entity_id: unitId, action: "unit.update" },
+      where: { entity_type: "Unit", entity_id: String(unitId), action: "unit.update" },
       orderBy: { created_at: "desc" },
     });
 

@@ -49,12 +49,12 @@ let alertProcessor: MaintenanceAlertService;
 let adminToken: string;
 
 // Shared cleanup registry
-const allLeaseIds: string[] = [];
-const allRequestIds: string[] = [];
-const allAlertIds: string[] = [];
-const allUnitIds: string[] = [];
-const allPropertyIds: string[] = [];
-const allUserIds: string[] = [];
+const allLeaseIds: number[] = [];
+const allRequestIds: number[] = [];
+const allAlertIds: number[] = [];
+const allUnitIds: number[] = [];
+const allPropertyIds: number[] = [];
+const allUserIds: number[] = [];
 
 // ---------------------------------------------------------------------------
 // Bootstrap
@@ -88,13 +88,15 @@ afterAll(async () => {
   await prisma.maintenanceRequest.deleteMany({ where: { id: { in: allRequestIds } } });
   // Bypass payment trigger to delete rent_periods
   if (allLeaseIds.length > 0) {
-    await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, allLeaseIds);
+    await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, allLeaseIds);
     await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: allLeaseIds } } });
     await prisma.rentPeriod.deleteMany({ where: { lease_id: { in: allLeaseIds } } });
     await prisma.leaseTenant.deleteMany({ where: { lease_id: { in: allLeaseIds } } });
     await prisma.lease.deleteMany({ where: { id: { in: allLeaseIds } } });
   }
   if (allUnitIds.length > 0) {
+    // Delete maintenance requests referencing these units BEFORE deleting units (FK constraint)
+    await prisma.maintenanceRequest.deleteMany({ where: { unit_id: { in: allUnitIds } } });
     await prisma.unit.deleteMany({ where: { id: { in: allUnitIds } } });
   }
   if (allPropertyIds.length > 0) {
@@ -117,28 +119,33 @@ afterAll(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
+const P5_PM_PASSWORD = "P5PM@test2026!!!";
+const P5_MAINT_PASSWORD = "P5Maint@test2026!";
+
 /** Create a PM via Admin. Returns { id, email, tempPassword }. */
-async function createPM(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+async function createPM(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `pm-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `PM ${tag}`, email, role: "PROPERTY_MANAGER" });
+    .send({ firstName: "PM", lastName: tag, email, role: "PROPERTY_MANAGER", password: P5_PM_PASSWORD });
   expect(res.status).toBe(201);
-  allUserIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  allUserIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: P5_PM_PASSWORD };
 }
 
 /** Create a MAINTENANCE user via Admin. */
-async function createMaintenanceUser(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+async function createMaintenanceUser(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `maint-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Maint ${tag}`, email, role: "MAINTENANCE" });
+    .send({ firstName: "Maint", lastName: tag, email, role: "MAINTENANCE", password: P5_MAINT_PASSWORD, specialization: "general" });
   expect(res.status).toBe(201);
-  allUserIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  allUserIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: P5_MAINT_PASSWORD };
 }
 
 /** Login and return access token. */
@@ -151,7 +158,7 @@ async function loginAs(email: string, password: string): Promise<string> {
 }
 
 /** Create a property (Admin) and assign PM. Returns { propertyId, unitId }. */
-async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: string; unitId: string }> {
+async function createPropertyWithUnit(pmId: number): Promise<{ propertyId: number; unitId: number }> {
   const propRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -163,7 +170,7 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
       pincode: "400001",
     });
   expect(propRes.status).toBe(201);
-  const propertyId = propRes.body.id as string;
+  const propertyId = propRes.body.id as number;
   allPropertyIds.push(propertyId);
 
   await supertestFn(app.getHttpServer())
@@ -176,7 +183,7 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `U-${Date.now()}`, bedrooms: 2, bathrooms: 1, monthly_rent_paise: 1_800_000 });
   expect(unitRes.status).toBe(201);
-  const unitId = unitRes.body.id as string;
+  const unitId = unitRes.body.id as number;
   allUnitIds.push(unitId);
 
   return { propertyId, unitId };
@@ -187,11 +194,11 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
  * Returns { leaseId, tenantId, tenantUserId, tenantEmail, tenantTempPw }.
  */
 async function createLeaseWithTenant(
-  propertyId: string,
-  unitId: string,
+  propertyId: number,
+  unitId: number,
   pmToken: string,
   tenantTag: string,
-): Promise<{ leaseId: string; tenantUserId: string; tenantEmail: string; tenantTempPw: string }> {
+): Promise<{ leaseId: number; tenantUserId: number; tenantEmail: string; tenantTempPw: string }> {
   // Use lowercase email throughout to avoid case-sensitivity mismatch between POST /users and lease service
   const tenantEmail = `tenant-${tenantTag.toLowerCase()}-${Date.now()}@test.local`;
   const today = new Date().toISOString().slice(0, 10);
@@ -201,9 +208,9 @@ async function createLeaseWithTenant(
   const userRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Tenant ${tenantTag}`, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
+    .send({ firstName: "Tenant", lastName: tenantTag, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
   expect(userRes.status).toBe(201);
-  allUserIds.push(userRes.body.id as string);
+  allUserIds.push(userRes.body.id as number);
 
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units/${unitId}/leases`)
@@ -216,12 +223,12 @@ async function createLeaseWithTenant(
       tenants: [{ name: `Tenant ${tenantTag}`, email: tenantEmail, is_primary: true }],
     });
   expect(res.status).toBe(201);
-  allLeaseIds.push(res.body.lease.id as string);
-  const tenants = res.body.tenants as Array<{ userId: string }>;
+  allLeaseIds.push(res.body.lease.id as number);
+  const tenants = res.body.tenants as Array<{ userId: number }>;
   const firstTenant = tenants[0]!;
   const tenantUserId = firstTenant.userId;
   // userId should match the pre-created user
-  return { leaseId: res.body.lease.id as string, tenantUserId, tenantEmail, tenantTempPw: TENANT_PASSWORD };
+  return { leaseId: res.body.lease.id as number, tenantUserId, tenantEmail, tenantTempPw: TENANT_PASSWORD };
 }
 
 // ---------------------------------------------------------------------------
@@ -230,7 +237,7 @@ async function createLeaseWithTenant(
 
 describe("BL-14: description >= 30 chars (DTO validation)", () => {
   let tenantToken: string;
-  let unitId: string;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM("bl14");
@@ -265,11 +272,11 @@ describe("BL-14: description >= 30 chars (DTO validation)", () => {
         priority: "LOW",
       });
     expect(res.status).toBe(201);
-    if (res.body.id) allRequestIds.push(res.body.id as string);
+    if (res.body.id) allRequestIds.push(res.body.id as number);
   });
 
   it("BL-14 DB CHECK: prisma.maintenanceRequest.create with 5-char desc → throws", async () => {
-    const tenantUser = await prisma.user.findFirst({ where: { role: "TENANT" }, select: { id: true } });
+    const tenantUser = await prisma.user.findFirst({ where: { role: 3 }, select: { id: true } });
     expect(tenantUser).not.toBeNull();
 
     await expect(
@@ -279,8 +286,8 @@ describe("BL-14: description >= 30 chars (DTO validation)", () => {
           raised_by_user_id: tenantUser!.id,
           title: "Test",
           description: "short", // 5 chars — violates CHECK
-          priority: "NORMAL",
-          status: "OPEN",
+          priority: 1,
+          status: 0,
         },
       }),
     ).rejects.toThrow();
@@ -313,7 +320,7 @@ describe("BL-14: resolution_notes >= 20 chars (DTO validation)", () => {
 describe("BL-16: MAINTENANCE and PM blocked from POST /maintenance-requests", () => {
   let maintenanceToken: string;
   let pmToken: string;
-  let unitId: string;
+  let unitId: number;
 
   beforeAll(async () => {
     const maint = await createMaintenanceUser("bl16");
@@ -355,7 +362,7 @@ describe("BL-16: MAINTENANCE and PM blocked from POST /maintenance-requests", ()
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ unitId, title: "Admin on-behalf", description: VALID_DESC, priority: "LOW" });
     expect(res.status).toBe(201);
-    if (res.body.id) allRequestIds.push(res.body.id as string);
+    if (res.body.id) allRequestIds.push(res.body.id as number);
   });
 });
 
@@ -367,11 +374,11 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
   let tenantToken: string;
   let pmToken: string;
   let maintToken: string;
-  let pmId: string;
-  let maintId: string;
-  let requestId: string;
-  let propertyId: string;
-  let unitId: string;
+  let pmId: number;
+  let maintId: number;
+  let requestId: number;
+  let propertyId: number;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM("trans");
@@ -394,7 +401,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "AC not cooling", description: VALID_DESC, priority: "HIGH" });
     expect(cr.status).toBe(201);
-    requestId = cr.body.id as string;
+    requestId = cr.body.id as number;
     allRequestIds.push(requestId);
   }, 60_000);
 
@@ -404,7 +411,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
       .set("Authorization", `Bearer ${pmToken}`)
       .send({ assigneeUserId: maintId });
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("ASSIGNED");
+    expect(res.body.status).toBe(1); // MaintenanceStatus.ASSIGNED = 1
     expect(res.body.assigned_to_user_id).toBe(maintId);
   });
 
@@ -413,7 +420,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
       .post(`/api/v1/maintenance-requests/${requestId}/in-progress`)
       .set("Authorization", `Bearer ${maintToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("IN_PROGRESS");
+    expect(res.body.status).toBe(2); // MaintenanceStatus.IN_PROGRESS = 2
   });
 
   it("IN_PROGRESS → RESOLVED via MAINTENANCE with valid resolutionNotes", async () => {
@@ -422,7 +429,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
       .set("Authorization", `Bearer ${maintToken}`)
       .send({ resolutionNotes: VALID_NOTES });
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("RESOLVED");
+    expect(res.body.status).toBe(3); // MaintenanceStatus.RESOLVED = 3
     expect(res.body.resolution_notes).toBe(VALID_NOTES);
   });
 
@@ -447,7 +454,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
       .post(`/api/v1/maintenance-requests/${requestId}/close`)
       .set("Authorization", `Bearer ${tenantToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("CLOSED");
+    expect(res.body.status).toBe(4); // MaintenanceStatus.CLOSED = 4
     expect(res.body.closed_at).toBeTruthy();
   });
 });
@@ -459,7 +466,7 @@ describe("State transitions: OPEN→ASSIGNED→IN_PROGRESS→RESOLVED→CLOSED (
 describe("Invalid state transitions → 409 INVALID_TRANSITION", () => {
   let tenantToken: string;
   let pmToken: string;
-  let openRequestId: string;
+  let openRequestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("inv");
@@ -473,7 +480,7 @@ describe("Invalid state transitions → 409 INVALID_TRANSITION", () => {
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "Invalid transition test", description: VALID_DESC, priority: "NORMAL" });
     expect(cr.status).toBe(201);
-    openRequestId = cr.body.id as string;
+    openRequestId = cr.body.id as number;
     allRequestIds.push(openRequestId);
   }, 60_000);
 
@@ -506,7 +513,7 @@ describe("Invalid state transitions → 409 INVALID_TRANSITION", () => {
 // ---------------------------------------------------------------------------
 
 describe("BL-15: closed request is immutable (DB trigger)", () => {
-  let closedRequestId: string;
+  let closedRequestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("bl15");
@@ -523,7 +530,7 @@ describe("BL-15: closed request is immutable (DB trigger)", () => {
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "BL-15 test request", description: VALID_DESC, priority: "NORMAL" });
     expect(cr.status).toBe(201);
-    closedRequestId = cr.body.id as string;
+    closedRequestId = cr.body.id as number;
     allRequestIds.push(closedRequestId);
 
     await supertestFn(app.getHttpServer())
@@ -563,7 +570,7 @@ describe("BL-15: closed request is immutable (DB trigger)", () => {
 
 describe("MAINTENANCE: acting on another's assigned request → 403 NOT_YOUR_ASSIGNMENT", () => {
   let maintToken2: string;
-  let requestId: string;
+  let requestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("notmine");
@@ -581,7 +588,7 @@ describe("MAINTENANCE: acting on another's assigned request → 403 NOT_YOUR_ASS
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "Not my assignment test", description: VALID_DESC, priority: "NORMAL" });
     expect(cr.status).toBe(201);
-    requestId = cr.body.id as string;
+    requestId = cr.body.id as number;
     allRequestIds.push(requestId);
 
     // Assign to maint1
@@ -606,8 +613,8 @@ describe("MAINTENANCE: acting on another's assigned request → 403 NOT_YOUR_ASS
 
 describe("PropertyScopeGuard: PM-B blocked on PM-A's requests", () => {
   let pmTokenB: string;
-  let maintBId: string;
-  let requestId: string;
+  let maintBId: number;
+  let requestId: number;
 
   beforeAll(async () => {
     const pmA = await createPM("pma");
@@ -630,7 +637,7 @@ describe("PropertyScopeGuard: PM-B blocked on PM-A's requests", () => {
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "Scope guard test", description: VALID_DESC, priority: "NORMAL" });
     expect(cr.status).toBe(201);
-    requestId = cr.body.id as string;
+    requestId = cr.body.id as number;
     allRequestIds.push(requestId);
   }, 60_000);
 
@@ -650,7 +657,7 @@ describe("PropertyScopeGuard: PM-B blocked on PM-A's requests", () => {
 
 describe("Tenant scope: Tenant-A cannot GET Tenant-B's request", () => {
   let tenantBToken: string;
-  let requestByA: string;
+  let requestByA: number;
 
   beforeAll(async () => {
     const pm = await createPM("tscope");
@@ -665,7 +672,7 @@ describe("Tenant scope: Tenant-A cannot GET Tenant-B's request", () => {
       .set("Authorization", `Bearer ${tenantAToken}`)
       .send({ unitId, title: "Tenant A's request please", description: VALID_DESC, priority: "LOW" });
     expect(cr.status).toBe(201);
-    requestByA = cr.body.id as string;
+    requestByA = cr.body.id as number;
     allRequestIds.push(requestByA);
 
     // Create tenant B with NO lease on this unit (standalone TENANT user via Admin, known password)
@@ -673,9 +680,9 @@ describe("Tenant scope: Tenant-A cannot GET Tenant-B's request", () => {
     const userBRes = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ name: "Tenant B Scope", email: emailB, role: "TENANT", password: TENANT_PASSWORD });
+      .send({ firstName: "TenantB", lastName: "Scope", email: emailB, role: "TENANT", password: TENANT_PASSWORD });
     expect(userBRes.status).toBe(201);
-    allUserIds.push(userBRes.body.id as string);
+    allUserIds.push(userBRes.body.id as number);
     tenantBToken = await loginAs(emailB, TENANT_PASSWORD);
   }, 60_000);
 
@@ -694,7 +701,7 @@ describe("Tenant scope: Tenant-A cannot GET Tenant-B's request", () => {
 
 describe("EMERGENCY priority request → 201 (log stub)", () => {
   let tenantToken: string;
-  let unitId: string;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM("emerg");
@@ -711,8 +718,8 @@ describe("EMERGENCY priority request → 201 (log stub)", () => {
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "Gas leak emergency now!!", description: VALID_DESC, priority: "EMERGENCY" });
     expect(res.status).toBe(201);
-    expect(res.body.priority).toBe("EMERGENCY");
-    if (res.body.id) allRequestIds.push(res.body.id as string);
+    expect(res.body.priority).toBe(3); // MaintenancePriority.EMERGENCY = 3
+    if (res.body.id) allRequestIds.push(res.body.id as number);
   });
 });
 
@@ -721,9 +728,9 @@ describe("EMERGENCY priority request → 201 (log stub)", () => {
 // ---------------------------------------------------------------------------
 
 describe("BL-17: maintenance-alert cron service", () => {
-  let tenantUserId: string;
-  let unitId: string;
-  const localRequestIds: string[] = [];
+  let tenantUserId: number;
+  let unitId: number;
+  const localRequestIds: number[] = [];
 
   beforeAll(async () => {
     const pm = await createPM("bl17");
@@ -747,8 +754,8 @@ describe("BL-17: maintenance-alert cron service", () => {
           raised_by_user_id: tenantUserId,
           title: `BL17 req #${localRequestIds.length + 1}`,
           description: "Seeded maintenance request for BL-17 alert testing purposes here.",
-          priority: "NORMAL",
-          status: "OPEN",
+          priority: 1,
+          status: 0,
         },
       });
       localRequestIds.push(r.id);
@@ -771,7 +778,7 @@ describe("BL-17: maintenance-alert cron service", () => {
     expect(alert).not.toBeNull();
     expect(alert!.request_count).toBe(5);
     expect(result.alertsCreated).toBeGreaterThanOrEqual(1);
-    if (alert) allAlertIds.push(alert.id);
+    if (alert) allAlertIds.push(alert.id as number);
   });
 
   it("BL-17 idempotency: run worker again → no duplicate (still 1 alert)", async () => {
@@ -829,7 +836,7 @@ describe("BL-17 month boundary: previous-month requests excluded from current mo
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
-    const prevIds: string[] = [];
+    const prevIds: number[] = [];
     for (let i = 0; i < 5; i++) {
       const r = await prisma.maintenanceRequest.create({
         data: {
@@ -837,8 +844,8 @@ describe("BL-17 month boundary: previous-month requests excluded from current mo
           raised_by_user_id: tenantUserId,
           title: `Prev month req ${i + 1}`,
           description: "Previous-month seeded request for calendar boundary test purposes.",
-          priority: "LOW",
-          status: "OPEN",
+          priority: 0,
+          status: 0,
           created_at: lastMonth,
         },
       });

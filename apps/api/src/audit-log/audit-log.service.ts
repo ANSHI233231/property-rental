@@ -107,16 +107,33 @@ export class AuditLogService {
       where["created_at"] = dateFilter;
     }
 
+    // FE table needs actor name + role. Join the actor relation so each
+    // row carries actorName/actorRole without a separate user lookup.
+    const auditSelect = {
+      id: true,
+      actor_id: true,
+      actor_role: true,
+      action: true,
+      entity_type: true,
+      entity_id: true,
+      before: true,
+      after: true,
+      created_at: true,
+      actor: { select: { id: true, name: true, role: true } },
+    } as const;
+
     // Explicit-branch findMany — avoids TS conditional-spread inference issue.
     const findManyPromise = useOffset
       ? this.prisma.auditLog.findMany({
           where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
+          select: auditSelect,
           orderBy: { created_at: "desc" },
           skip: (currentPage - 1) * take,
           take,
         })
       : this.prisma.auditLog.findMany({
           where: where as import("@prisma/client").Prisma.AuditLogWhereInput,
+          select: auditSelect,
           orderBy: { created_at: "desc" },
           take: take + 1,
           ...(filters.cursor
@@ -147,15 +164,33 @@ export class AuditLogService {
 
     const totalPages = total === 0 ? 0 : Math.ceil(total / take);
 
-    // Redact sensitive fields from snapshots at the read boundary (defensive).
-    const redacted = data.map((row) => ({
-      ...row,
+    // Redact sensitive fields + remap to FE-friendly camelCase contract.
+    const ROLE_NAME: Record<number, string> = {
+      0: "ADMIN",
+      1: "PROPERTY_MANAGER",
+      2: "MAINTENANCE",
+      3: "TENANT",
+    };
+    const reshaped = data.map((row) => ({
+      id: String(row.id),
+      createdAt: row.created_at.toISOString(),
+      actorId: row.actor_id != null ? String(row.actor_id) : null,
+      actorName: row.actor?.name ?? null,
+      actorRole:
+        row.actor_role != null
+          ? ROLE_NAME[row.actor_role] ?? String(row.actor_role)
+          : row.actor?.role != null
+            ? ROLE_NAME[row.actor.role] ?? String(row.actor.role)
+            : null,
+      action: row.action,
+      entityType: row.entity_type,
+      entityId: row.entity_id,
       before: redactSnapshot(row.before),
       after: redactSnapshot(row.after),
     }));
 
     return {
-      data: redacted,
+      data: reshaped,
       meta: {
         cursor: nextCursor ?? null,
         next_cursor: nextCursor ?? null,

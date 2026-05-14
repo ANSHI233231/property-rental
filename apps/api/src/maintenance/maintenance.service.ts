@@ -78,10 +78,17 @@ const REQUEST_SELECT = {
   closed_by_user_id: true,
   created_at: true,
   updated_at: true,
-  // Nested context for FE — req.unit.unit_number, req.raised_by.name,
-  // req.assigned_to.name. F4: assignee's specialization is included so the
-  // FE can show "who handles what kind of work" without an extra fetch.
-  unit: { select: { id: true, unit_number: true } },
+  // Nested context for FE — req.unit.unit_number, req.unit.property.name,
+  // req.raised_by.name, req.assigned_to.name. F4: assignee's specialization is
+  // included so the FE can show "who handles what kind of work" without an
+  // extra fetch.
+  unit: {
+    select: {
+      id: true,
+      unit_number: true,
+      property: { select: { id: true, name: true, address: true } },
+    },
+  },
   raised_by: { select: { id: true, name: true } },
   assigned_to: { select: { id: true, name: true, specialization: true } },
 } as const;
@@ -97,6 +104,16 @@ const ALERT_SELECT = {
   dismissed_by_user_id: true,
   dismiss_note: true,
   created_at: true,
+  // FE alert surfaces need tenant name, unit number, and property name —
+  // surface them via relations so the dashboard doesn't show "—" everywhere.
+  tenant: { select: { id: true, name: true } },
+  unit: {
+    select: {
+      id: true,
+      unit_number: true,
+      property: { select: { id: true, name: true } },
+    },
+  },
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -262,19 +279,21 @@ export class MaintenanceService {
   async findOne(id: number, actor: JwtPayload) {
     const req = await this.prisma.maintenanceRequest.findUnique({
       where: { id },
-      select: {
-        ...REQUEST_SELECT,
-        unit: { select: { property_id: true } },
-      },
+      select: REQUEST_SELECT,
     });
     if (!req) throw new NotFoundException("Maintenance request not found");
 
-    await this.assertReadAccess(req, actor);
+    // assertReadAccess needs property_id; pull it from the joined unit.property.
+    await this.assertReadAccess(
+      {
+        raised_by_user_id: req.raised_by_user_id,
+        assigned_to_user_id: req.assigned_to_user_id,
+        unit: { property_id: req.unit?.property?.id ?? 0 },
+      },
+      actor,
+    );
 
-    // Strip the joined unit field from the response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { unit: _unit, ...rest } = req;
-    return rest;
+    return req;
   }
 
   // ---------------------------------------------------------------------------
@@ -719,10 +738,7 @@ export class MaintenanceService {
   async dismissAlert(dto: DismissAlertDto, actor: JwtPayload) {
     const alert = await this.prisma.maintenanceAlert.findUnique({
       where: { id: dto.alertId },
-      select: {
-        ...ALERT_SELECT,
-        unit: { select: { property_id: true } },
-      },
+      select: ALERT_SELECT,
     });
     if (!alert) throw new NotFoundException("Maintenance alert not found");
 
@@ -732,7 +748,7 @@ export class MaintenanceService {
         where: { active_pm_id: actor.sub, deleted_at: null },
         select: { id: true },
       });
-      if (!pm || alert.unit.property_id !== pm.id) {
+      if (!pm || alert.unit.property?.id !== pm.id) {
         throw new ForbiddenException({
           code: "PROPERTY_SCOPE_VIOLATION",
           message: "This alert belongs to a property not assigned to you.",
@@ -742,9 +758,7 @@ export class MaintenanceService {
 
     // Idempotent: if already dismissed, return existing row
     if (alert.dismissed_at) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { unit: _unit, ...rest } = alert;
-      return rest;
+      return alert;
     }
 
     const now = new Date();
@@ -879,10 +893,7 @@ export class MaintenanceService {
   private async getRequestOrThrow(id: number) {
     const req = await this.prisma.maintenanceRequest.findUnique({
       where: { id },
-      select: {
-        ...REQUEST_SELECT,
-        unit: { select: { property_id: true } },
-      },
+      select: REQUEST_SELECT,
     });
     if (!req) throw new NotFoundException("Maintenance request not found");
     return req;
@@ -893,7 +904,11 @@ export class MaintenanceService {
    * own assigned (or all-open scope, handled in list()), PM sees their property.
    */
   private async assertReadAccess(
-    req: { raised_by_user_id: number; assigned_to_user_id: number | null; unit: { property_id: number } },
+    req: {
+      raised_by_user_id: number;
+      assigned_to_user_id: number | null;
+      unit: { property_id?: number; property?: { id: number } | null } | null;
+    },
     actor: JwtPayload,
   ): Promise<void> {
     if (actor.role === ROLE.ADMIN) return;
@@ -919,14 +934,13 @@ export class MaintenanceService {
     }
 
     if (actor.role === ROLE.PROPERTY_MANAGER) {
-      const pm = await this.prisma.property.findFirst({
-        where: {
-          id: req.unit.property_id,
-          active_pm_id: actor.sub,
-          deleted_at: null,
-        },
-        select: { id: true },
-      });
+      const propertyId = req.unit?.property?.id ?? req.unit?.property_id;
+      const pm = propertyId
+        ? await this.prisma.property.findFirst({
+            where: { id: propertyId, active_pm_id: actor.sub, deleted_at: null },
+            select: { id: true },
+          })
+        : null;
       if (!pm) {
         throw new ForbiddenException({
           code: "PROPERTY_ACCESS_DENIED",
@@ -941,20 +955,19 @@ export class MaintenanceService {
    * Write access check — PM must be active PM for the request's property.
    */
   private async assertWriteAccess(
-    req: { unit: { property_id: number } },
+    req: { unit: { property_id?: number; property?: { id: number } | null } | null },
     actor: JwtPayload,
   ) {
     if (actor.role === ROLE.ADMIN) return;
 
     if (actor.role === ROLE.PROPERTY_MANAGER) {
-      const pm = await this.prisma.property.findFirst({
-        where: {
-          id: req.unit.property_id,
-          active_pm_id: actor.sub,
-          deleted_at: null,
-        },
-        select: { id: true },
-      });
+      const propertyId = req.unit?.property?.id ?? req.unit?.property_id;
+      const pm = propertyId
+        ? await this.prisma.property.findFirst({
+            where: { id: propertyId, active_pm_id: actor.sub, deleted_at: null },
+            select: { id: true },
+          })
+        : null;
       if (!pm) {
         throw new ForbiddenException({
           code: "PROPERTY_SCOPE_VIOLATION",

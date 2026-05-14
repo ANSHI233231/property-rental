@@ -41,8 +41,11 @@ interface MaintenanceRequest {
   priority: number | string;
   status: number | string;
   // API returns Unit with unit_number; legacy responses used `name`.
-  unit?: { unit_number?: string; name?: string } | null;
-  property?: { name?: string } | null;
+  unit?: {
+    unit_number?: string;
+    name?: string;
+    property?: { name?: string } | null;
+  } | null;
   raised_by?: { name?: string } | null;
   assigned_to?: { name?: string } | null;
   created_at: string;
@@ -68,8 +71,11 @@ interface RequestsResponse {
 interface MaintenanceAlert {
   id: string;
   tenant?: { name?: string } | null;
-  unit?: { name?: string } | null;
-  property?: { name?: string } | null;
+  unit?: {
+    unit_number?: string;
+    name?: string;
+    property?: { name?: string } | null;
+  } | null;
   request_count: number;
   month?: string | null;
   dismissed_at?: string | null;
@@ -174,7 +180,7 @@ function DismissAlertModal({
     <Modal open={open} onClose={onClose} title="Dismiss Alert" maxWidth="max-w-[480px]">
       <p className="text-sm muted mt-1 mb-4">
         <strong className="text-charcoal">
-          {alert.tenant?.name ?? "Tenant"} · {alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
+          {alert.tenant?.name ?? "Tenant"} · {alert.unit?.unit_number ? `Unit ${alert.unit.unit_number}` : alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
         </strong>
         <br />
         {alert.request_count} requests
@@ -262,7 +268,8 @@ export default function AdminMaintenancePage() {
   const tableExtraQuery: Record<string, string | undefined> = {};
   if (priorityFilter !== "ALL") tableExtraQuery.priority = priorityFilter;
   if (statusFilter !== "ALL") tableExtraQuery.status = statusFilter;
-  if (propertyFilter !== "ALL") tableExtraQuery.property = propertyFilter;
+  // API expects propertyId (number) — propertyFilter holds the property's id.
+  if (propertyFilter !== "ALL") tableExtraQuery.propertyId = propertyFilter;
 
   const {
     items: tableRequests,
@@ -361,12 +368,12 @@ export default function AdminMaintenancePage() {
               >
                 <div className="flex-1">
                   <strong className="font-poppins">
-                    {alert.tenant?.name ?? "Tenant"} · {alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
+                    {alert.tenant?.name ?? "Tenant"} · {alert.unit?.unit_number ? `Unit ${alert.unit.unit_number}` : alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
                   </strong>
                   <div>
                     {alert.request_count} maintenance requests
                     {alert.month ? ` in ${alert.month}` : " this calendar month"}.
-                    {alert.property?.name ? ` · ${alert.property.name}` : ""}
+                    {alert.unit?.property?.name ? ` · ${alert.unit.property.name}` : ""}
                   </div>
                 </div>
                 <button
@@ -401,7 +408,7 @@ export default function AdminMaintenancePage() {
             >
               <option value="ALL">All</option>
               {properties.map((p) => (
-                <option key={p.id} value={p.name}>{p.name}</option>
+                <option key={p.id} value={String(p.id)}>{p.name}</option>
               ))}
             </select>
           </div>
@@ -472,7 +479,7 @@ export default function AdminMaintenancePage() {
                   <tr key={req.id}>
                     <td className="font-poppins font-semibold text-charcoal whitespace-nowrap">
                       {unitLabel !== "—" ? `Unit ${unitLabel}` : "—"}
-                      {req.property?.name ? ` · ${req.property.name}` : ""}
+                      {req.unit?.property?.name ? ` · ${req.unit.property.name}` : ""}
                     </td>
                     <td>{req.title}</td>
                     <td><PriorityBadge priority={req.priority} /></td>

@@ -46,12 +46,12 @@ let alertProcessor: MaintenanceAlertService;
 let adminToken: string;
 
 const cleanup = {
-  requestIds: [] as string[],
-  alertIds: [] as string[],
-  leaseIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
+  requestIds: [] as number[],
+  alertIds: [] as number[],
+  leaseIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
 };
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ afterAll(async () => {
     await prisma.maintenanceRequest.deleteMany({ where: { id: { in: cleanup.requestIds } } });
   }
   if (cleanup.leaseIds.length > 0) {
-    await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, cleanup.leaseIds);
+    await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, cleanup.leaseIds);
     await prisma.prepaidCredit.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
     await prisma.rentPeriod.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
     await prisma.leaseTenant.deleteMany({ where: { lease_id: { in: cleanup.leaseIds } } });
@@ -123,29 +123,34 @@ async function loginAs(email: string, password: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
-async function createPM(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+const GAPS5_PM_PASSWORD = "Gaps5PM@test2026!";
+const GAPS5_MAINT_PASSWORD = "Gaps5Maint@2026!!";
+
+async function createPM(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `gaps-pm-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `PM ${tag}`, email, role: "PROPERTY_MANAGER" });
+    .send({ firstName: "PM", lastName: tag, email, role: "PROPERTY_MANAGER", password: GAPS5_PM_PASSWORD });
   expect(res.status).toBe(201);
-  cleanup.userIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  cleanup.userIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: GAPS5_PM_PASSWORD };
 }
 
-async function createMaintenanceUser(tag: string): Promise<{ id: string; email: string; tempPassword: string }> {
+async function createMaintenanceUser(tag: string): Promise<{ id: number; email: string; tempPassword: string }> {
   const email = `gaps-maint-${tag}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Maint ${tag}`, email, role: "MAINTENANCE" });
+    .send({ firstName: "Maint", lastName: tag, email, role: "MAINTENANCE", password: GAPS5_MAINT_PASSWORD, specialization: "general" });
   expect(res.status).toBe(201);
-  cleanup.userIds.push(res.body.id as string);
-  return { id: res.body.id as string, email, tempPassword: res.body.temp_password as string };
+  cleanup.userIds.push(res.body.id as number);
+  // temp_password no longer in response; return known password under that key
+  return { id: res.body.id as number, email, tempPassword: GAPS5_MAINT_PASSWORD };
 }
 
-async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: string; unitId: string }> {
+async function createPropertyWithUnit(pmId: number): Promise<{ propertyId: number; unitId: number }> {
   const propRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -157,7 +162,7 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
       pincode: "110001",
     });
   expect(propRes.status).toBe(201);
-  const propertyId = propRes.body.id as string;
+  const propertyId = propRes.body.id as number;
   cleanup.propertyIds.push(propertyId);
 
   await supertestFn(app.getHttpServer())
@@ -170,18 +175,18 @@ async function createPropertyWithUnit(pmId: string): Promise<{ propertyId: strin
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ unit_number: `UG-${Date.now()}`, bedrooms: 2, bathrooms: 1, monthly_rent_paise: 1_800_000 });
   expect(unitRes.status).toBe(201);
-  const unitId = unitRes.body.id as string;
+  const unitId = unitRes.body.id as number;
   cleanup.unitIds.push(unitId);
 
   return { propertyId, unitId };
 }
 
 async function createLeaseWithTenant(
-  propertyId: string,
-  unitId: string,
+  propertyId: number,
+  unitId: number,
   pmToken: string,
   tenantTag: string,
-): Promise<{ leaseId: string; tenantUserId: string; tenantEmail: string }> {
+): Promise<{ leaseId: number; tenantUserId: number; tenantEmail: string }> {
   const tenantEmail = `gaps-tenant-${tenantTag.toLowerCase()}-${Date.now()}@test.local`;
   const today = new Date().toISOString().slice(0, 10);
   const nextYear = `${new Date().getFullYear() + 1}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
@@ -189,9 +194,9 @@ async function createLeaseWithTenant(
   const userRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ name: `Tenant ${tenantTag}`, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
+    .send({ firstName: "Tenant", lastName: tenantTag, email: tenantEmail, role: "TENANT", password: TENANT_PASSWORD });
   expect(userRes.status).toBe(201);
-  cleanup.userIds.push(userRes.body.id as string);
+  cleanup.userIds.push(userRes.body.id as number);
 
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propertyId}/units/${unitId}/leases`)
@@ -204,10 +209,10 @@ async function createLeaseWithTenant(
       tenants: [{ name: `Tenant ${tenantTag}`, email: tenantEmail, is_primary: true }],
     });
   expect(res.status).toBe(201);
-  cleanup.leaseIds.push(res.body.lease.id as string);
-  const tenants = res.body.tenants as Array<{ userId: string }>;
+  cleanup.leaseIds.push(res.body.lease.id as number);
+  const tenants = res.body.tenants as Array<{ userId: number }>;
   return {
-    leaseId: res.body.lease.id as string,
+    leaseId: res.body.lease.id as number,
     tenantUserId: tenants[0]!.userId,
     tenantEmail,
   };
@@ -215,18 +220,18 @@ async function createLeaseWithTenant(
 
 /** Drive a request through OPEN→ASSIGNED→IN_PROGRESS→RESOLVED. Returns requestId. */
 async function driveToResolved(
-  unitId: string,
+  unitId: number,
   tenantToken: string,
   pmToken: string,
-  maintId: string,
+  maintId: number,
   maintToken: string,
-): Promise<string> {
+): Promise<number> {
   const cr = await supertestFn(app.getHttpServer())
     .post("/api/v1/maintenance-requests")
     .set("Authorization", `Bearer ${tenantToken}`)
     .send({ unitId, title: "Pipe drip", description: VALID_DESC, priority: "NORMAL" });
   expect(cr.status).toBe(201);
-  const requestId = cr.body.id as string;
+  const requestId = cr.body.id as number;
   cleanup.requestIds.push(requestId);
 
   await supertestFn(app.getHttpServer())
@@ -253,7 +258,7 @@ async function driveToResolved(
 describe("TC-MAINT-005 (BL-21): co-tenant close — only original raiser can close", () => {
   let tenantAToken: string;
   let tenantBToken: string;
-  let requestId: string;
+  let requestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("bl21co");
@@ -274,7 +279,7 @@ describe("TC-MAINT-005 (BL-21): co-tenant close — only original raiser can clo
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ unit_number: `UB-${Date.now()}`, bedrooms: 1, bathrooms: 1, monthly_rent_paise: 1_200_000 });
     expect(unitResB.status).toBe(201);
-    const unitBId = unitResB.body.id as string;
+    const unitBId = unitResB.body.id as number;
     cleanup.unitIds.push(unitBId);
 
     const { tenantEmail: emailB } = await createLeaseWithTenant(propertyId, unitBId, pmToken, "bl21B");
@@ -296,7 +301,7 @@ describe("TC-MAINT-005 (BL-21): co-tenant close — only original raiser can clo
       .post(`/api/v1/maintenance-requests/${requestId}/close`)
       .set("Authorization", `Bearer ${tenantAToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("CLOSED");
+    expect(res.body.status).toBe(4); // MaintenanceStatus.CLOSED = 4
     expect(res.body.closed_at).toBeTruthy();
   });
 });
@@ -337,12 +342,12 @@ describe("TC-MAINT-008 (BL-17): concurrent /jobs/maintenance-alert/run → no 50
 
 describe("TC-MAINT-010 (partial): invalid transitions after RESOLVED", () => {
   let pmToken: string;
-  let maintId: string;
+  let maintId: number;
   let maintToken: string;
   let tenantToken: string;
-  let unitId: string;
-  let resolvedRequestId: string;
-  let closedRequestId: string;
+  let unitId: number;
+  let resolvedRequestId: number;
+  let closedRequestId: number;
 
   beforeAll(async () => {
     const pm = await createPM("inv2");
@@ -396,11 +401,11 @@ describe("TC-MAINT-010 (partial): invalid transitions after RESOLVED", () => {
 
 describe("TC-MAINT-011 (assignee role): POST /:id/assign with PM-role user → 400", () => {
   let pmToken: string;
-  let pmId: string;
+  let pmId: number;
   let tenantToken: string;
-  let unitId: string;
-  let requestId: string;
-  let anotherPmId: string;
+  let unitId: number;
+  let requestId: number;
+  let anotherPmId: number;
 
   beforeAll(async () => {
     const pm = await createPM("asgn");
@@ -417,7 +422,7 @@ describe("TC-MAINT-011 (assignee role): POST /:id/assign with PM-role user → 4
       .set("Authorization", `Bearer ${tenantToken}`)
       .send({ unitId, title: "Assignee role test", description: VALID_DESC, priority: "NORMAL" });
     expect(cr.status).toBe(201);
-    requestId = cr.body.id as string;
+    requestId = cr.body.id as number;
     cleanup.requestIds.push(requestId);
 
     // A second PM user (non-MAINTENANCE role) to use as the bad assignee
@@ -454,7 +459,7 @@ describe("TC-MAINT-011 (assignee role): POST /:id/assign with PM-role user → 4
 
 describe("TC-MAINT-013 (PropertyScopeGuard): PM-B cannot dismiss-alert for PM-A's unit", () => {
   let pmBToken: string;
-  let alertId: string;
+  let alertId: number;
 
   beforeAll(async () => {
     const pmA = await createPM("dism-A");
@@ -467,7 +472,7 @@ describe("TC-MAINT-013 (PropertyScopeGuard): PM-B cannot dismiss-alert for PM-A'
     const now = new Date();
     const istMs = now.getTime() + 330 * 60 * 1000;
     const currentMonthKey = new Date(istMs).toISOString().slice(0, 7);
-    const reqIds: string[] = [];
+    const reqIds: number[] = [];
 
     for (let i = 0; i < 5; i++) {
       const r = await prisma.maintenanceRequest.create({
@@ -476,8 +481,8 @@ describe("TC-MAINT-013 (PropertyScopeGuard): PM-B cannot dismiss-alert for PM-A'
           raised_by_user_id: tenantUserId,
           title: `Dism req ${i + 1}`,
           description: "Seeded request for dismiss-alert cross-PM test purposes only.",
-          priority: "NORMAL",
-          status: "OPEN",
+          priority: 1,
+          status: 0,
         },
       });
       reqIds.push(r.id);
@@ -497,7 +502,7 @@ describe("TC-MAINT-013 (PropertyScopeGuard): PM-B cannot dismiss-alert for PM-A'
       },
     });
     expect(alert).not.toBeNull();
-    alertId = alert!.id;
+    alertId = alert!.id as number;
     cleanup.alertIds.push(alertId);
 
     // Create PM-B with their own property (no access to PM-A's property)
@@ -524,7 +529,7 @@ describe("TC-MAINT-013 (PropertyScopeGuard): PM-B cannot dismiss-alert for PM-A'
 describe("TC-MAINT-015 (EMERGENCY logging): structured warn on EMERGENCY create — no PII", () => {
   let tenantToken: string;
   let tenantEmail: string;
-  let unitId: string;
+  let unitId: number;
 
   beforeAll(async () => {
     const pm = await createPM("emlog");
@@ -555,7 +560,7 @@ describe("TC-MAINT-015 (EMERGENCY logging): structured warn on EMERGENCY create 
         priority: "EMERGENCY",
       });
     expect(res.status).toBe(201);
-    if (res.body.id) cleanup.requestIds.push(res.body.id as string);
+    if (res.body.id) cleanup.requestIds.push(res.body.id as number);
 
     Logger.prototype.warn = origWarn;
 
@@ -599,7 +604,7 @@ describe("BL-17 (30-day simulation): alert fires for current IST month only", ()
     prevMonthIST.setMonth(prevMonthIST.getMonth() - 1);
     const prevMonthKey = prevMonthIST.toISOString().slice(0, 7);
 
-    const allReqIds: string[] = [];
+    const allReqIds: number[] = [];
 
     // Seed 5 requests with previous month's timestamp (via direct Prisma)
     for (let i = 0; i < 5; i++) {
@@ -609,8 +614,8 @@ describe("BL-17 (30-day simulation): alert fires for current IST month only", ()
           raised_by_user_id: tenantUserId,
           title: `Prev month sim ${i + 1}`,
           description: "Previous-month request for 30-day BL-17 boundary simulation test.",
-          priority: "LOW",
-          status: "OPEN",
+          priority: 0,
+          status: 0,
           created_at: prevMonthIST,
         },
       });
@@ -642,8 +647,8 @@ describe("BL-17 (30-day simulation): alert fires for current IST month only", ()
           raised_by_user_id: tenantUserId,
           title: `Current month sim ${i + 1}`,
           description: "Current-month request for 30-day BL-17 boundary simulation test.",
-          priority: "NORMAL",
-          status: "OPEN",
+          priority: 1,
+          status: 0,
           created_at: now,
         },
       });
@@ -679,7 +684,7 @@ describe("BL-17 (30-day simulation): alert fires for current IST month only", ()
     expect(prevAlertAfter).toBeNull();
 
     // Cleanup
-    if (currentAlert) cleanup.alertIds.push(currentAlert.id);
+    if (currentAlert) cleanup.alertIds.push(currentAlert.id as number);
     cleanup.requestIds.push(...allReqIds);
   }, 120_000);
 });

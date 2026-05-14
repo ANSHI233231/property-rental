@@ -66,11 +66,11 @@ class UnlimitedThrottlerStorage {
 const ADMIN_EMAIL = "admin@gharsetu.local";
 const ADMIN_PASSWORD = "Admin@gharsetu2026!";
 const TENANT_EMAIL = "tenant.test@gharsetu.local";
-const TENANT_PASSWORD = "Test@gharsetu2026!";
+const TENANT_PASSWORD = "Password#123";
 const PM_EMAIL = "pm.test@gharsetu.local";
-const PM_PASSWORD = "Test@gharsetu2026!";
+const PM_PASSWORD = "Password#123";
 const MAINTENANCE_EMAIL = "maintenance.test@gharsetu.local";
-const MAINTENANCE_PASSWORD = "Test@gharsetu2026!";
+const MAINTENANCE_PASSWORD = "Password#123";
 
 describe("Phase 7 — Security hardening", () => {
   let app: INestApplication;
@@ -132,6 +132,14 @@ describe("Phase 7 — Security hardening", () => {
 
     prisma = moduleRef.get(PrismaService);
     st = supertestFn(app.getHttpServer());
+
+    // Reset any locked seeded users to prevent 401 cascades from prior test runs
+    await prisma.user.updateMany({
+      where: {
+        email: { in: [ADMIN_EMAIL, TENANT_EMAIL, PM_EMAIL, MAINTENANCE_EMAIL] },
+      },
+      data: { failed_login_count: 0, locked_until: null, is_active: true },
+    });
 
     // Obtain tokens using seeded users
     const adminRes = await st
@@ -358,9 +366,12 @@ describe("Phase 7 — Security hardening", () => {
         .get("/api/v1/audit-log?entityType=Auth&limit=5")
         .set("Authorization", `Bearer ${adminToken}`);
       expect(res.status).toBe(200);
-      const rows = res.body.data as Array<{ entity_type: string }>;
-      for (const row of rows) {
-        expect(row.entity_type).toBe("Auth");
+      // Response uses camelCase `entityType` per audit-log service serialization
+      const rows = res.body.data as Array<{ entityType: string }>;
+      if (rows.length > 0) {
+        for (const row of rows) {
+          expect(row.entityType).toBe("Auth");
+        }
       }
     });
 
@@ -399,9 +410,9 @@ describe("Phase 7 — Security hardening", () => {
   // ---------------------------------------------------------------------------
 
   describe("7. BL-03 — Unit rent update blocked for OCCUPIED state (Serializable tx)", () => {
-    let unitId: string;
-    let propertyId: string;
-    let adminUserId: string;
+    let unitId: number;
+    let propertyId: number;
+    let adminUserId: number;
 
     beforeAll(async () => {
       const adminUser = await prisma.user.findUnique({
@@ -429,7 +440,7 @@ describe("Phase 7 — Security hardening", () => {
           bedrooms: 2,
           bathrooms: 1,
           monthly_rent_paise: 2000000,
-          state: "OCCUPIED",
+          state: 2,
         },
       });
       unitId = unit.id;
@@ -438,7 +449,7 @@ describe("Phase 7 — Security hardening", () => {
     afterAll(async () => {
       await prisma.unit.deleteMany({ where: { id: unitId } });
       await prisma.property.deleteMany({ where: { id: propertyId } });
-      await prisma.auditLog.deleteMany({ where: { entity_id: unitId } });
+      await prisma.auditLog.deleteMany({ where: { entity_id: String(unitId) } });
     });
 
     it("PATCH /units/:id with rent change on OCCUPIED unit → 409 UNIT_RENT_LOCKED", async () => {

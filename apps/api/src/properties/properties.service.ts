@@ -29,6 +29,15 @@ const PROPERTY_SELECT = {
   active_pm: {
     select: { id: true, name: true, email: true, role: true, is_active: true },
   },
+  // Aggregate counts surfaced on the admin properties list: Units column + Occupancy column.
+  _count: { select: { units: { where: { is_retired: false } } } },
+  // OCCUPIED state = 2 (see units.service.ts UNIT_STATE). Fetched as a lightweight
+  // id-only relation so the FE can compute occupancy = occupied / total without
+  // an extra request.
+  units: {
+    where: { is_retired: false, state: 2 },
+    select: { id: true },
+  },
 } as const;
 
 @Injectable()
@@ -52,6 +61,8 @@ export class PropertiesService {
     actor?: JwtPayload,
     page?: number,
     pageSize?: number,
+    search?: string,
+    activePmId?: number,
   ) {
     const effectivePageSize = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
     const useOffset = page !== undefined;
@@ -60,9 +71,27 @@ export class PropertiesService {
       : Math.min(limit, 100);
 
     // Scope for PROPERTY_MANAGER (role=1): only their assigned property.
-    const where: { deleted_at: null; active_pm_id?: number } = { deleted_at: null };
+    const where: {
+      deleted_at: null;
+      active_pm_id?: number | null;
+      OR?: Array<Record<string, unknown>>;
+    } = { deleted_at: null };
     if (actor?.role === 1) {
       where.active_pm_id = actor.sub;
+    } else if (activePmId !== undefined) {
+      // Admin filter — when an explicit PM is picked. activePmId === 0 means
+      // "Unassigned" (no PM), which is a useful filter for the admin.
+      where.active_pm_id = activePmId === 0 ? null : activePmId;
+    }
+
+    // Search filter on property name / address / city (case-insensitive contains).
+    const term = (search ?? "").trim();
+    if (term) {
+      where.OR = [
+        { name: { contains: term, mode: "insensitive" } },
+        { address: { contains: term, mode: "insensitive" } },
+        { city: { contains: term, mode: "insensitive" } },
+      ];
     }
 
     // Explicit-branch findMany — see note in leases.service.ts.

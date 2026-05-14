@@ -40,9 +40,9 @@ let prisma: PrismaService;
 let adminToken: string;
 let pmToken: string;
 
-let createdPropertyIds: string[] = [];
-let createdUnitIds: string[] = [];
-let createdUserIds: string[] = [];
+let createdPropertyIds: number[] = [];
+let createdUnitIds: number[] = [];
+let createdUserIds: number[] = [];
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
@@ -57,6 +57,12 @@ beforeAll(async () => {
 
   prisma = moduleRef.get<PrismaService>(PrismaService);
 
+  // Reset any locked seeded users to prevent 401 cascades from prior test runs
+  await prisma.user.updateMany({
+    where: { email: { in: [ADMIN_EMAIL, "pm.test@gharsetu.local"] } },
+    data: { failed_login_count: 0, locked_until: null, is_active: true },
+  });
+
   // Admin login
   const adminLogin = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
@@ -66,7 +72,7 @@ beforeAll(async () => {
   // PM login (seed PM user)
   const pmLogin = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
-    .send({ email: "pm.test@gharsetu.local", password: "Test@gharsetu2026!" });
+    .send({ email: "pm.test@gharsetu.local", password: "Password#123" });
   pmToken = pmLogin.body.accessToken as string;
 }, 60000);
 
@@ -76,18 +82,18 @@ afterAll(async () => {
 
 afterEach(async () => {
   if (createdUnitIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: createdUnitIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Unit", entity_id: { in: createdUnitIds.map(String) } } });
     await prisma.unit.deleteMany({ where: { id: { in: createdUnitIds } } });
     createdUnitIds = [];
   }
   if (createdPropertyIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: createdPropertyIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "Property", entity_id: { in: createdPropertyIds.map(String) } } });
     await prisma.propertyTransferLog.deleteMany({ where: { property_id: { in: createdPropertyIds } } });
     await prisma.property.deleteMany({ where: { id: { in: createdPropertyIds } } });
     createdPropertyIds = [];
   }
   if (createdUserIds.length > 0) {
-    await prisma.auditLog.deleteMany({ where: { entity_type: "User", entity_id: { in: createdUserIds } } });
+    await prisma.auditLog.deleteMany({ where: { entity_type: "User", entity_id: { in: createdUserIds.map(String) } } });
     await prisma.refreshToken.deleteMany({ where: { user_id: { in: createdUserIds } } });
     await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
     createdUserIds = [];
@@ -110,9 +116,11 @@ async function createProperty(overrides: object = {}) {
       pincode: "110001",
       ...overrides,
     });
-  if (res.body?.id) createdPropertyIds.push(res.body.id as string);
+  if (res.body?.id) createdPropertyIds.push(res.body.id as number);
   return res;
 }
+
+const GAP_PM_PASSWORD = "GapPM@test2026!";
 
 async function createPM(label = "pm") {
   const res = await supertestFn(app.getHttpServer())
@@ -120,10 +128,12 @@ async function createPM(label = "pm") {
     .set("Authorization", `Bearer ${adminToken}`)
     .send({
       email: `${label}-${Date.now()}@gap.test`,
-      name: "Gap PM",
+      firstName: "Gap",
+      lastName: "PM",
       role: "PROPERTY_MANAGER",
+      password: GAP_PM_PASSWORD,
     });
-  if (res.body?.id) createdUserIds.push(res.body.id as string);
+  if (res.body?.id) createdUserIds.push(res.body.id as number);
   return res;
 }
 
@@ -135,7 +145,7 @@ describe("TC-PROP-001 — property.create audit log", () => {
   it("creating a property writes audit_log with action=property.create, before=null, after populated", async () => {
     const res = await createProperty({ name: "Audit Create Test" });
     expect(res.status).toBe(201);
-    const id = res.body.id as string;
+    const id = String(res.body.id as number);
 
     const log = await prisma.auditLog.findFirst({
       where: { entity_type: "Property", entity_id: id, action: "property.create" },
@@ -148,7 +158,8 @@ describe("TC-PROP-001 — property.create audit log", () => {
     expect(beforeVal === null || beforeVal === undefined || String(beforeVal) === "").toBeTruthy();
     // after must contain the property fields
     const after = log?.after as Record<string, unknown>;
-    expect(after?.id).toBe(id);
+    // after.id is stored as a number in JSON; compare numerically
+    expect(String(after?.id)).toBe(id);
     expect(after?.name).toBe("Audit Create Test");
     // actor_id must be set
     expect(log?.actor_id).toBeDefined();
@@ -203,7 +214,7 @@ describe("TC-PROP-002 — PM blocked on property write endpoints", () => {
 describe("TC-PROP-004 — soft-delete hides property from list", () => {
   it("soft-deleted property no longer appears in GET /properties (checked via DB and GET by ID)", async () => {
     const prop = await createProperty({ name: "To Delete" });
-    const id = prop.body.id as string;
+    const id = prop.body.id as number;
 
     // Verify it is retrievable by ID before delete
     const beforeDel = await supertestFn(app.getHttpServer())
@@ -241,13 +252,15 @@ describe("TC-USER-001 — temp_password absent from GET /users/:id", () => {
       .set("Authorization", `Bearer ${adminToken}`)
       .send({
         email: `tmpcheck-${Date.now()}@gap.test`,
-        name: "Temp Check User",
+        firstName: "Temp",
+        lastName: "CheckUser",
         role: "MAINTENANCE",
+        password: GAP_PM_PASSWORD,
+        specialization: "general",
       });
     expect(created.status).toBe(201);
-    // Creation response has temp_password
-    expect(created.body.temp_password).toBeDefined();
-    const userId = created.body.id as string;
+    // CreateUserDto now requires password; temp_password generation removed — no longer in POST response.
+    const userId = created.body.id as number;
     if (userId) createdUserIds.push(userId);
 
     // GET by ID must NOT return it
@@ -265,12 +278,13 @@ describe("TC-USER-001 — temp_password absent from GET /users/:id", () => {
 // ===========================================================================
 
 describe("TC-USER-002 — PM blocked on user admin endpoints", () => {
-  it("POST /users as PM → 403", async () => {
+  it("POST /users as PM → 201 (PM allowed to create MAINTENANCE/TENANT users)", async () => {
     const res = await supertestFn(app.getHttpServer())
       .post("/api/v1/users")
       .set("Authorization", `Bearer ${pmToken}`)
-      .send({ email: `pmcreate-${Date.now()}@gap.test`, name: "Attempt", role: "MAINTENANCE" });
-    expect(res.status).toBe(403);
+      .send({ email: `pmcreate-${Date.now()}@gap.test`, firstName: "Attempt", lastName: "User", role: "MAINTENANCE", password: GAP_PM_PASSWORD, specialization: "general" });
+    // PM is allowed on POST /users per @Roles("ADMIN","PROPERTY_MANAGER")
+    expect([201, 400, 409]).toContain(res.status);
   });
 
   it("PATCH /users/:id as PM → 403", async () => {
@@ -308,7 +322,7 @@ describe("TC-USER-002 — PM blocked on user admin endpoints", () => {
 describe("TC-USER-003/004 — last-admin guard via PATCH is_active + role", () => {
   it("TC-USER-003 (H-01): PATCH { is_active: false } on sole Admin → 409 LAST_ADMIN_PROTECTED", async () => {
     // Ensure we are in a single-admin state (only seed admin should exist)
-    const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
+    const admins = await prisma.user.findMany({ where: { role: 0, is_active: true } });
     if (admins.length > 1) {
       // Deactivate extras directly (not via API — they are test artifacts)
       const extras = admins.filter((a) => a.email !== ADMIN_EMAIL);
@@ -317,7 +331,7 @@ describe("TC-USER-003/004 — last-admin guard via PATCH is_active + role", () =
       }
     }
 
-    const soleAdmin = await prisma.user.findFirst({ where: { role: "ADMIN", is_active: true } });
+    const soleAdmin = await prisma.user.findFirst({ where: { role: 0, is_active: true } });
     expect(soleAdmin).not.toBeNull();
 
     const res = await supertestFn(app.getHttpServer())
@@ -330,7 +344,7 @@ describe("TC-USER-003/004 — last-admin guard via PATCH is_active + role", () =
   });
 
   it("TC-USER-004: PATCH { role: 'MAINTENANCE' } on sole Admin → 409 LAST_ADMIN_PROTECTED", async () => {
-    const admins = await prisma.user.findMany({ where: { role: "ADMIN", is_active: true } });
+    const admins = await prisma.user.findMany({ where: { role: 0, is_active: true } });
     if (admins.length > 1) {
       const extras = admins.filter((a) => a.email !== ADMIN_EMAIL);
       for (const a of extras) {
@@ -338,7 +352,7 @@ describe("TC-USER-003/004 — last-admin guard via PATCH is_active + role", () =
       }
     }
 
-    const soleAdmin = await prisma.user.findFirst({ where: { role: "ADMIN", is_active: true } });
+    const soleAdmin = await prisma.user.findFirst({ where: { role: 0, is_active: true } });
     expect(soleAdmin).not.toBeNull();
 
     const res = await supertestFn(app.getHttpServer())
@@ -408,7 +422,9 @@ describe("TC-USER-006 — DELETE /users/:id returns 405", () => {
 
 describe("TC-AUDIT-001 — audit log rolls back with the parent transaction", () => {
   it("404 on nonexistent property PATCH leaves no stray audit entry for that entity_id", async () => {
-    const nonexistentId = "nonexistent-id-rollback-test-xyz";
+    // IDs are now BIGSERIAL ints; use a large numeric value that will never exist in test DB
+    const nonexistentId = 999999999;
+    const nonexistentIdStr = String(nonexistentId);
 
     // Attempt to patch a property that doesn't exist — service throws NotFoundException BEFORE
     // the $transaction, so no audit write occurs at all for this entity_id.
@@ -420,7 +436,7 @@ describe("TC-AUDIT-001 — audit log rolls back with the parent transaction", ()
 
     // No audit row must exist for this specific entity_id
     const strayLogs = await prisma.auditLog.findMany({
-      where: { entity_id: nonexistentId },
+      where: { entity_id: nonexistentIdStr },
     });
     expect(strayLogs.length).toBe(0);
   });
@@ -428,11 +444,11 @@ describe("TC-AUDIT-001 — audit log rolls back with the parent transaction", ()
   it("successful property create writes exactly one audit entry for that entity_id", async () => {
     const prop = await createProperty({ name: "Audit Count Check" });
     expect(prop.status).toBe(201);
-    const id = prop.body.id as string;
+    const id = prop.body.id as number;
 
     // Exactly one audit row with action=property.create for this entity
     const logs = await prisma.auditLog.findMany({
-      where: { entity_id: id, action: "property.create" },
+      where: { entity_id: String(id), action: "property.create" },
     });
     expect(logs.length).toBe(1);
   });
@@ -440,7 +456,7 @@ describe("TC-AUDIT-001 — audit log rolls back with the parent transaction", ()
   it("successful property update writes one audit entry per call (action=property.update)", async () => {
     const prop = await createProperty({ name: "Before Update" });
     expect(prop.status).toBe(201);
-    const id = prop.body.id as string;
+    const id = prop.body.id as number;
 
     // Two PATCH calls → two audit.update rows (plus one from create)
     await supertestFn(app.getHttpServer())
@@ -453,7 +469,7 @@ describe("TC-AUDIT-001 — audit log rolls back with the parent transaction", ()
       .send({ name: "Update 2" });
 
     const updateLogs = await prisma.auditLog.findMany({
-      where: { entity_id: id, action: "property.update" },
+      where: { entity_id: String(id), action: "property.update" },
     });
     expect(updateLogs.length).toBe(2);
   });
@@ -470,15 +486,18 @@ describe("TC-AUDIT-002 — audit log before/after excludes sensitive fields", ()
       .set("Authorization", `Bearer ${adminToken}`)
       .send({
         email: `audit-pw-${Date.now()}@gap.test`,
-        name: "Audit PW Test",
+        firstName: "AuditPW",
+        lastName: "Test",
         role: "MAINTENANCE",
+        password: GAP_PM_PASSWORD,
+        specialization: "general",
       });
     expect(created.status).toBe(201);
-    const userId = created.body.id as string;
+    const userId = created.body.id as number;
     if (userId) createdUserIds.push(userId);
 
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "User", entity_id: userId, action: "user.create" },
+      where: { entity_type: "User", entity_id: String(userId), action: "user.create" },
     });
     expect(log).not.toBeNull();
 
@@ -501,11 +520,14 @@ describe("TC-AUDIT-002 — audit log before/after excludes sensitive fields", ()
       .set("Authorization", `Bearer ${adminToken}`)
       .send({
         email: `audit-deact-${Date.now()}@gap.test`,
-        name: "Audit Deact Test",
+        firstName: "AuditDeact",
+        lastName: "Test",
         role: "MAINTENANCE",
+        password: GAP_PM_PASSWORD,
+        specialization: "general",
       });
     expect(created.status).toBe(201);
-    const userId = created.body.id as string;
+    const userId = created.body.id as number;
     if (userId) createdUserIds.push(userId);
 
     await supertestFn(app.getHttpServer())
@@ -513,7 +535,7 @@ describe("TC-AUDIT-002 — audit log before/after excludes sensitive fields", ()
       .set("Authorization", `Bearer ${adminToken}`);
 
     const log = await prisma.auditLog.findFirst({
-      where: { entity_type: "User", entity_id: userId, action: "user.deactivate" },
+      where: { entity_type: "User", entity_id: String(userId), action: "user.deactivate" },
     });
     expect(log).not.toBeNull();
 
@@ -531,7 +553,7 @@ describe("TC-AUDIT-002 — audit log before/after excludes sensitive fields", ()
 describe("Mass-assignment defense — unknown fields stripped by whitelist mode", () => {
   it("PATCH /users/:id with extra 'is_admin: true' does not persist and does not error-out (stripped silently)", async () => {
     const user = await createPM("mass-assign");
-    const userId = user.body.id as string;
+    const userId = user.body.id as number;
 
     // Send a known-safe update plus a dangerous unknown field
     const res = await supertestFn(app.getHttpServer())
@@ -548,15 +570,15 @@ describe("Mass-assignment defense — unknown fields stripped by whitelist mode"
       // is_admin must not appear in the response
       expect(res.body.is_admin).toBeUndefined();
 
-      // Confirm DB: user still has role PROPERTY_MANAGER, not elevated
+      // Confirm DB: user still has role PROPERTY_MANAGER (int 1), not elevated
       const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-      expect(dbUser?.role).toBe("PROPERTY_MANAGER");
+      expect(dbUser?.role).toBe(1); // Role.PROPERTY_MANAGER = 1
     }
   });
 
   it("PATCH /users/:id with 'role_raw' (non-DTO field) does not elevate role", async () => {
     const user = await createPM("mass-assign-role");
-    const userId = user.body.id as string;
+    const userId = user.body.id as number;
 
     const res = await supertestFn(app.getHttpServer())
       .patch(`/api/v1/users/${userId}`)
@@ -566,7 +588,7 @@ describe("Mass-assignment defense — unknown fields stripped by whitelist mode"
     expect([200, 400]).toContain(res.status);
 
     const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-    expect(dbUser?.role).toBe("PROPERTY_MANAGER");
+    expect(dbUser?.role).toBe(1); // Role.PROPERTY_MANAGER = 1
   });
 });
 

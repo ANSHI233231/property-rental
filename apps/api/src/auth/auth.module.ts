@@ -10,12 +10,14 @@ import { RolesGuard } from "./guards/roles.guard";
 import { PropertyScopeGuard } from "./guards/property-scope.guard";
 import { PrismaModule } from "../prisma/prisma.module";
 import { AuditModule } from "../audit/audit.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [
     PrismaModule,
     ConfigModule,
     AuditModule,
+    NotificationsModule,
     // ThrottlerModule is registered globally in AppModule (H-01 fix).
     // No local registration needed here.
     JwtModule.registerAsync({

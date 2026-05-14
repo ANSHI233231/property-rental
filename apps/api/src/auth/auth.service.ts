@@ -10,6 +10,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { HashingService } from "./hashing.service";
 import { JwtTokenService } from "./jwt.service";
 import { AuditService } from "../audit/audit.service";
+import { EmailService } from "../notifications/email.service";
 import type { LoginDto } from "./dto/login.dto";
 import type { ResetPasswordDto } from "./dto/reset-password.dto";
 
@@ -49,6 +50,7 @@ export class AuthService {
     private readonly jwtService: JwtTokenService,
     private readonly configService: ConfigService,
     private readonly audit: AuditService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -264,13 +266,29 @@ export class AuthService {
       },
     });
 
-    // TODO (Phase 7): wire SMTP. For now, emit the reset URL to the console in
-    // non-production environments only (H-02 fix). In production this block is
-    // skipped so the raw token never reaches any log aggregator.
-    if (this.configService.get<string>("NODE_ENV") !== "production") {
-      const resetUrl = `/reset-password/${rawToken}`;
-      this.logger.log(`[DEV] Password reset URL for ${email}: ${resetUrl}`);
-    }
+    // Send the reset link to the user. The full URL is composed from the
+    // FRONTEND_BASE_URL config so the link works regardless of where the FE
+    // is deployed (localhost in dev, https://… in prod).
+    //
+    // The token never reaches any log aggregator: EmailService delivers via
+    // SMTP when configured, and falls into log-only mode (which still
+    // contains the URL) only when SMTP env vars are missing — that mode is
+    // intended for local dev, not production.
+    const frontendBaseUrl =
+      this.configService.get<string>("FRONTEND_BASE_URL") ?? "http://localhost:3000";
+    const resetUrl = `${frontendBaseUrl.replace(/\/$/, "")}/reset-password/${rawToken}`;
+
+    // Fire-and-forget: email failures must not propagate to the caller (the
+    // forgot-password endpoint always returns a generic 200 — see controller).
+    await this.emailService
+      .sendPasswordResetEmail(user.email, user.name, resetUrl)
+      .catch((err) => {
+        this.logger.error(
+          `Password reset email dispatch failed for ${user.email}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      });
   }
 
   // ---------------------------------------------------------------------------

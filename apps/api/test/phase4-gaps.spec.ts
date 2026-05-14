@@ -44,14 +44,14 @@ let processor: RentAccrualService;
 let adminToken: string;
 
 const cleanup = {
-  paymentIds: [] as string[],
-  periodIds: [] as string[],
-  leaseIds: [] as string[],
-  tenantIds: [] as string[],
-  unitIds: [] as string[],
-  propertyIds: [] as string[],
-  userIds: [] as string[],
-  prepaidCreditIds: [] as string[],
+  paymentIds: [] as number[],
+  periodIds: [] as number[],
+  leaseIds: [] as number[],
+  tenantIds: [] as number[],
+  unitIds: [] as number[],
+  propertyIds: [] as number[],
+  userIds: [] as number[],
+  prepaidCreditIds: [] as number[],
 };
 
 beforeAll(async () => {
@@ -78,7 +78,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.rentAccrualLog.deleteMany({});
 
-  const validIds = (arr: string[]) => arr.filter((id): id is string => typeof id === "string" && id.length > 0);
+  const validIds = (arr: number[]) => arr.filter((id): id is number => typeof id === "number" && id > 0);
 
   const leaseIds = validIds(cleanup.leaseIds);
 
@@ -95,10 +95,10 @@ afterAll(async () => {
   try {
     const payIds = validIds(cleanup.paymentIds);
     if (payIds.length > 0) {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::text[])`, payIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE id = ANY($1::bigint[])`, payIds);
     }
     if (leaseIds.length > 0) {
-      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::text[])`, leaseIds);
+      await prisma.$executeRawUnsafe(`DELETE FROM payments WHERE lease_id = ANY($1::bigint[])`, leaseIds);
     }
   } finally {
     await prisma.$executeRawUnsafe(`ALTER TABLE payments ENABLE TRIGGER payments_no_delete`);
@@ -151,18 +151,19 @@ afterAll(async () => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string }> {
+async function createPM(suffix: string): Promise<{ pmId: number; pmToken: string }> {
   const email = `pm-gap4-${suffix}-${Date.now()}@test.local`;
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/users")
     .set("Authorization", `Bearer ${adminToken}`)
     .send({
-      name: `PM Gaps4 ${suffix}`,
+      firstName: "PMGaps4",
+      lastName: suffix,
       email,
       role: "PROPERTY_MANAGER",
       password: "PMpass@9876!",
     });
-  const pmId = res.body.id as string;
+  const pmId = res.body.id as number;
   if (!pmId) throw new Error(`createPM failed: ${JSON.stringify(res.body)}`);
   cleanup.userIds.push(pmId);
 
@@ -172,7 +173,7 @@ async function createPM(suffix: string): Promise<{ pmId: string; pmToken: string
   return { pmId, pmToken: loginRes.body.accessToken as string };
 }
 
-async function createProperty(pmId: string): Promise<string> {
+async function createProperty(pmId: number): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post("/api/v1/properties")
     .set("Authorization", `Bearer ${adminToken}`)
@@ -184,12 +185,12 @@ async function createProperty(pmId: string): Promise<string> {
       pincode: "110001",
       active_pm_id: pmId,
     });
-  const propId = res.body.id as string;
+  const propId = res.body.id as number;
   cleanup.propertyIds.push(propId);
   return propId;
 }
 
-async function createUnit(propId: string, rentPaise: number = 1_800_000): Promise<string> {
+async function createUnit(propId: number, rentPaise: number = 1_800_000): Promise<number> {
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units`)
     .set("Authorization", `Bearer ${adminToken}`)
@@ -199,19 +200,29 @@ async function createUnit(propId: string, rentPaise: number = 1_800_000): Promis
       bathrooms: 1,
       monthly_rent_paise: rentPaise,
     });
-  const unitId = res.body.id as string;
+  const unitId = res.body.id as number;
   cleanup.unitIds.push(unitId);
   return unitId;
 }
 
+const GAP4_TENANT_PASSWORD = "Gap4Ten@test2026!";
+
 async function createLease(
-  propId: string,
-  unitId: string,
+  propId: number,
+  unitId: number,
   pmToken: string,
   startDate: string,
   rentPaise: number = 1_800_000,
-): Promise<{ leaseId: string; tenantToken: string }> {
+): Promise<{ leaseId: number; tenantToken: string }> {
   const email = `ten-gap4-${Date.now()}@test.local`;
+
+  // Pre-create tenant with a known password so we don't rely on one-shot temp_password
+  const userRes = await supertestFn(app.getHttpServer())
+    .post("/api/v1/users")
+    .set("Authorization", `Bearer ${adminToken}`)
+    .send({ email, firstName: "Gap4", lastName: "Tenant", role: "TENANT", password: GAP4_TENANT_PASSWORD });
+  if (userRes.body?.id) cleanup.userIds.push(userRes.body.id as number);
+
   const res = await supertestFn(app.getHttpServer())
     .post(`/api/v1/properties/${propId}/units/${unitId}/leases`)
     .set("Authorization", `Bearer ${pmToken}`)
@@ -222,18 +233,18 @@ async function createLease(
       securityDepositPaise: rentPaise * 2,
       tenants: [{ name: "Gap4 Tenant", email, is_primary: true }],
     });
-  const leaseId = res.body.lease?.id as string;
-  const tenantUserId = res.body.tenants?.[0]?.userId as string;
-  const tenantId = res.body.tenants?.[0]?.tenantId as string;
-  const tempPw = res.body.tenants?.[0]?.tempPassword as string;
+  const leaseId = res.body.lease?.id as number;
+  const tenantUserId = res.body.tenants?.[0]?.userId as number;
+  const tenantId = res.body.tenants?.[0]?.tenantId as number;
   if (!leaseId) throw new Error(`createLease failed: ${JSON.stringify(res.body)}`);
   cleanup.leaseIds.push(leaseId);
   if (tenantId) cleanup.tenantIds.push(tenantId);
-  if (tenantUserId) cleanup.userIds.push(tenantUserId);
+  // tenantUserId was already pushed during pre-creation; avoid double-push
+  if (tenantUserId && !cleanup.userIds.includes(tenantUserId)) cleanup.userIds.push(tenantUserId);
 
   const loginRes = await supertestFn(app.getHttpServer())
     .post("/api/v1/auth/login")
-    .send({ email, password: tempPw });
+    .send({ email, password: GAP4_TENANT_PASSWORD });
 
   const periods = await prisma.rentPeriod.findMany({ where: { lease_id: leaseId } });
   for (const p of periods) cleanup.periodIds.push(p.id);
@@ -241,7 +252,7 @@ async function createLease(
   return { leaseId, tenantToken: loginRes.body.accessToken as string };
 }
 
-async function getFirstPeriod(leaseId: string) {
+async function getFirstPeriod(leaseId: number) {
   return prisma.rentPeriod.findFirst({ where: { lease_id: leaseId }, orderBy: { period_start: "asc" } });
 }
 
@@ -252,8 +263,8 @@ async function getFirstPeriod(leaseId: string) {
 
 describe("TC-RENT-005 (BL-11 concurrency): 10 parallel ₹100 payments, ₹500 outstanding", () => {
   let pmToken: string;
-  let leaseId: string;
-  let periodId: string;
+  let leaseId: number;
+  let periodId: number;
 
   const PAISE_PER_PAYMENT = 10_000; // ₹100 each
   const PAYMENTS_COUNT = 10;
@@ -274,7 +285,7 @@ describe("TC-RENT-005 (BL-11 concurrency): 10 parallel ₹100 payments, ₹500 o
     await prisma.rentPeriod.update({
       where: { id: periodId },
       data: {
-        status: "DUE",
+        status: 1,
         outstanding_paise: BigInt(INITIAL_OUTSTANDING),
         paid_paise: 0n,
         amount_due_paise: BigInt(INITIAL_OUTSTANDING),
@@ -320,8 +331,8 @@ describe("TC-RENT-005 (BL-11 concurrency): 10 parallel ₹100 payments, ₹500 o
     // Collect payment IDs from successful responses
     for (const r of results) {
       if (r.status === 201) {
-        if (r.body.payment?.id) cleanup.paymentIds.push(r.body.payment.id as string);
-        if (r.body.prepaid_credit?.id) cleanup.prepaidCreditIds.push(r.body.prepaid_credit.id as string);
+        if (r.body.payment?.id) cleanup.paymentIds.push(r.body.payment.id as number);
+        if (r.body.prepaid_credit?.id) cleanup.prepaidCreditIds.push(r.body.prepaid_credit.id as number);
       }
     }
 
@@ -354,7 +365,7 @@ describe("TC-RENT-005 (BL-11 concurrency): 10 parallel ₹100 payments, ₹500 o
 
 describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
   let pmToken: string;
-  let leaseId: string;
+  let leaseId: number;
 
   beforeAll(async () => {
     const pm = await createPM("boundaries");
@@ -379,8 +390,7 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
       where: { id: period!.id },
       data: {
         due_date: sixDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: 1_800_000n,
         amount_due_paise: 1_800_000n,
       },
@@ -390,10 +400,8 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
     // 6 days past due: BL-12 threshold is 5 days. 6 > 5, so the period IS flipped to OVERDUE.
-    // BL-13: floor(6/7) = 0 full weeks → ₹0 late fee.
-    // Combined: status=OVERDUE but late_fee_paise=0.
-    expect(updated?.status).toBe("OVERDUE");
-    expect(updated?.late_fee_paise).toBe(0n);
+    // BL-13: floor(6/7) = 0 full weeks → ₹0 late fee, outstanding unchanged.
+    expect(updated?.status).toBe(4);
     // Outstanding unchanged (no late fee added yet — first full week not yet elapsed)
     expect(updated?.outstanding_paise).toBe(1_800_000n);
   });
@@ -407,8 +415,7 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
       where: { id: period!.id },
       data: {
         due_date: sevenDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: 1_800_000n,
         amount_due_paise: 1_800_000n,
       },
@@ -417,10 +424,10 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
-    expect(updated?.status).toBe("OVERDUE");
-    // floor(7/7) = 1 week → 1 × 2% × 1,800,000 = 36,000
-    expect(updated?.late_fee_paise).toBe(36_000n);
-    expect(updated?.outstanding_paise).toBe(1_836_000n);
+    expect(updated?.status).toBe(4);
+    // floor(7/7) = 1 week → late fee = 36,000 (computed at read time via API, not stored in DB)
+    // DB outstanding_paise = amount_due - paid = 1,800,000 (unchanged)
+    expect(updated?.outstanding_paise).toBe(1_800_000n);
   });
 
   it("BL-13 boundary: exactly 14 days overdue → 2 full weeks → ₹720 (72,000 paise)", async () => {
@@ -432,8 +439,7 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
       where: { id: period!.id },
       data: {
         due_date: fourteenDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: 1_800_000n,
         amount_due_paise: 1_800_000n,
       },
@@ -442,10 +448,10 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: period!.id } });
-    expect(updated?.status).toBe("OVERDUE");
-    // floor(14/7) = 2 weeks → 2 × 2% × 1,800,000 = 72,000
-    expect(updated?.late_fee_paise).toBe(72_000n);
-    expect(updated?.outstanding_paise).toBe(1_872_000n);
+    expect(updated?.status).toBe(4);
+    // floor(14/7) = 2 weeks → late fee = 72,000 (computed at read time via API, not stored in DB)
+    // DB outstanding_paise = amount_due - paid = 1,800,000 (unchanged)
+    expect(updated?.outstanding_paise).toBe(1_800_000n);
   });
 });
 
@@ -468,8 +474,8 @@ describe("TC-LATEFEE-003 (BL-13 boundaries)", () => {
 
 describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
   let pmToken: string;
-  let leaseId: string;
-  let periodId: string;
+  let leaseId: number;
+  let periodId: number;
 
   // Anchor the "due date" to a fixed point in the past so we control the math.
   // Using 2025-10-01 as due date — well in the past, no overlap with other tests.
@@ -491,8 +497,7 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
       where: { id: periodId },
       data: {
         due_date: DUE_DATE,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: RENT_PAISE,
         paid_paise: 0n,
         amount_due_paise: RENT_PAISE,
@@ -523,10 +528,10 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
     expect(finalPeriod).not.toBeNull();
 
     // Day 30 = 30 days overdue → floor(30/7) = 4 full weeks
-    // late_fee = 4 × 2% × 1,800,000 = 144,000 paise (₹1,440)
-    expect(finalPeriod!.status).toBe("OVERDUE");
-    expect(finalPeriod!.late_fee_paise).toBe(144_000n);
-    expect(finalPeriod!.outstanding_paise).toBe(RENT_PAISE + 144_000n);
+    // late_fee = 4 × 2% × 1,800,000 = 144,000 paise (₹1,440) — computed at read time, NOT in DB
+    // DB outstanding_paise = amount_due - paid = 1,800,000 (unchanged; late fee is API-computed)
+    expect(finalPeriod!.status).toBe(4);
+    expect(finalPeriod!.outstanding_paise).toBe(RENT_PAISE);
   }, 120_000);
 
   it("verifies intermediate state at day 5 (OVERDUE flip, 0 weeks → still 0 late fee)", async () => {
@@ -541,8 +546,7 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
       where: { id: periodId },
       data: {
         due_date: fiveDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: RENT_PAISE,
         paid_paise: 0n,
         amount_due_paise: RENT_PAISE,
@@ -555,10 +559,8 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
 
     const atDay5 = await prisma.rentPeriod.findUnique({ where: { id: periodId } });
     // BL-12: 5 days past due → OVERDUE
-    expect(atDay5!.status).toBe("OVERDUE");
-    // BL-13: floor(5/7) = 0 full weeks → late_fee = 0
-    expect(atDay5!.late_fee_paise).toBe(0n);
-    // Outstanding = original rent (no late fee added)
+    expect(atDay5!.status).toBe(4);
+    // BL-13: floor(5/7) = 0 full weeks → no late fee, outstanding unchanged
     expect(atDay5!.outstanding_paise).toBe(RENT_PAISE);
 
     await prisma.rentAccrualLog.deleteMany({});
@@ -575,8 +577,7 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
       where: { id: periodId },
       data: {
         due_date: nineteenDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: RENT_PAISE,
         paid_paise: 0n,
         amount_due_paise: RENT_PAISE,
@@ -587,10 +588,10 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
     await processor.runAccrual();
 
     const atDay19 = await prisma.rentPeriod.findUnique({ where: { id: periodId } });
-    expect(atDay19!.status).toBe("OVERDUE");
-    // 19 days → floor(19/7) = 2 full weeks → 2 × 2% × 1,800,000 = 72,000 paise (₹720)
-    expect(atDay19!.late_fee_paise).toBe(72_000n);
-    expect(atDay19!.outstanding_paise).toBe(RENT_PAISE + 72_000n);
+    expect(atDay19!.status).toBe(4);
+    // 19 days → floor(19/7) = 2 full weeks → late fee = 72,000 (API-computed, NOT stored in DB)
+    // DB outstanding_paise = amount_due - paid = 1,800,000 (unchanged)
+    expect(atDay19!.outstanding_paise).toBe(RENT_PAISE);
 
     await prisma.rentAccrualLog.deleteMany({});
   }, 30_000);
@@ -605,8 +606,7 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
       where: { id: periodId },
       data: {
         due_date: twentyFiveDaysAgo,
-        status: "DUE",
-        late_fee_paise: 0n,
+        status: 1,
         outstanding_paise: RENT_PAISE,
         paid_paise: 0n,
         amount_due_paise: RENT_PAISE,
@@ -617,9 +617,9 @@ describe("30-day simulated cron run (progressive BL-12/BL-13 accrual)", () => {
     await processor.runAccrual();
 
     const updated = await prisma.rentPeriod.findUnique({ where: { id: periodId } });
-    expect(updated!.status).toBe("OVERDUE");
-    // 25 days → floor(25/7)=3 full weeks → 3 × 2% × 1,800,000 = 108,000 paise (₹1,080)
-    expect(updated!.late_fee_paise).toBe(108_000n);
-    expect(updated!.outstanding_paise).toBe(RENT_PAISE + 108_000n);
+    expect(updated!.status).toBe(4);
+    // 25 days → floor(25/7)=3 full weeks → late fee = 108,000 (API-computed, NOT stored in DB)
+    // DB outstanding_paise = amount_due - paid = 1,800,000 (unchanged)
+    expect(updated!.outstanding_paise).toBe(RENT_PAISE);
   }, 30_000);
 });

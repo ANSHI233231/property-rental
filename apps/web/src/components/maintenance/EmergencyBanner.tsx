@@ -17,7 +17,9 @@ import { MaintenanceStatusCodes, MaintenancePriorityCodes, maintenanceStatusName
 export interface EmergencyRequestSummary {
   id: number | string;
   title: string;
-  unit?: { name?: string } | null;
+  // API returns Unit with unit_number (post Phase 5+); older code may still
+  // surface `name`. Accept either so callers don't need to remap.
+  unit?: { unit_number?: string; name?: string } | null;
   // API returns SMALLINT codes; accept string for legacy
   status: number | string;
   priority: number | string;
@@ -62,7 +64,7 @@ export function EmergencyBanner({ requests }: EmergencyBannerProps) {
           {emergencies.map((r, i) => (
             <span key={r.id}>
               {i > 0 && " · "}
-              {r.unit?.name ? `Unit ${r.unit.name} — ` : ""}
+              {r.unit?.unit_number ? `Unit ${r.unit.unit_number} — ` : r.unit?.name ? `Unit ${r.unit.name} — ` : ""}
               {r.title}
               {" "}
               <span className="opacity-75">({statusLabel(r.status)})</span>

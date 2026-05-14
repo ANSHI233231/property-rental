@@ -73,8 +73,11 @@ interface AlertItem {
   id: string;
   dismissed_at?: string | null;
   tenant?: { name?: string } | null;
-  unit?: { name?: string } | null;
-  property?: { name?: string } | null;
+  unit?: {
+    unit_number?: string;
+    name?: string;
+    property?: { name?: string } | null;
+  } | null;
   request_count: number;
   month?: string | null;
 }
@@ -400,8 +403,8 @@ export default function AdminDashboardPage() {
             {alerts.map((alert) => (
               <div key={alert.id} className="alert" role="alert">
                 <strong className="font-poppins">
-                  {alert.tenant?.name ?? "Tenant"} · {alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
-                  {alert.property?.name ? ` (${alert.property.name})` : ""}
+                  {alert.tenant?.name ?? "Tenant"} · {alert.unit?.unit_number ? `Unit ${alert.unit.unit_number}` : alert.unit?.name ? `Unit ${alert.unit.name}` : "—"}
+                  {alert.unit?.property?.name ? ` (${alert.unit.property.name})` : ""}
                 </strong>
                 <div>
                   {alert.request_count} maintenance requests
