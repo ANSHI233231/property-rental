@@ -21,32 +21,43 @@
         <div class="sidebar-divider"></div>
         <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
       </nav>
-      <div class="sidebar-footer">Tenant · Raj Sharma<br/>Unit 3A · Green Valley<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+      <div class="sidebar-footer">Tenant · Rohan Mehta<br/>Unit 1A, Green Valley<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
     </aside>
 
     <main class="app-main">
       <header class="topbar">
         <div>
           <h1 class="page-title">My Lease</h1>
-          <div class="page-subtitle">Welcome back, Raj 👋</div>
+          <div class="page-subtitle">Welcome back, Rohan</div>
         </div>
         <div class="topbar-user">
-          <span class="hidden md:inline">Raj Sharma</span>
-          <span class="avatar">RS</span>
+          <span class="hidden md:inline">Rohan Mehta</span>
+          <span class="avatar">RM</span>
         </div>
       </header>
+
+      <!-- Rent Change Banner — shown when a future rent change is scheduled -->
+      <div class="alert mb-6" role="status" aria-live="polite" style="background:#FEF3C7; border-left:4px solid #F59E0B; color:#92400E;">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+        <div>
+          <strong class="font-poppins">Your rent will change to ₹19,500 effective 15/07/2026.</strong>
+          <div class="text-xs mt-1" style="opacity:0.85">This change was scheduled by your Property Manager. The 60-day notice has been respected.</div>
+        </div>
+      </div>
 
       <!-- Lease summary -->
       <section class="card mb-6">
         <div class="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h3>Unit 3A · Green Valley Apartments, Dwarka</h3>
+            <h3>Unit 1A · Green Valley Apartments, Dwarka</h3>
             <div class="grid sm:grid-cols-2 gap-x-8 gap-y-2 mt-3 text-sm">
-              <div><span class="muted">Lease start:</span> <strong class="text-charcoal">01/04/2025</strong></div>
-              <div><span class="muted">Lease end:</span> <strong class="text-charcoal">31/03/2026</strong></div>
+              <div><span class="muted">Lease start:</span> <strong class="text-charcoal">15/04/2026</strong></div>
+              <div><span class="muted">Lease end:</span> <strong class="text-charcoal">14/03/2027</strong></div>
               <div><span class="muted">Monthly rent:</span> <strong class="text-charcoal">₹18,000</strong></div>
               <div><span class="muted">Security deposit:</span> <strong class="text-charcoal">₹36,000</strong></div>
-              <div><span class="muted">Co-tenant:</span> <strong class="text-charcoal">Priya Sharma</strong></div>
+              <div><span class="muted">Co-tenant:</span> <strong class="text-charcoal">None</strong></div>
               <div><span class="muted">Property Manager:</span> <strong class="text-charcoal">Sunita Arora</strong></div>
             </div>
           </div>
@@ -109,18 +120,10 @@
   </div>
 
   <nav class="tabbar">
-    <a href="dashboard.html" class="tab active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>
-      Lease
-    </a>
-    <a href="rent.html" class="tab">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>
-      Rent
-    </a>
-    <a href="maintenance.html" class="tab">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
-      Maint.
-    </a>
+    <a href="dashboard.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Lease</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="profile.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>Profile</a>
   </nav>
   <script src="../assets/validation.js"></script>
 </body>

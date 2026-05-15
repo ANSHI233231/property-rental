@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Units · Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="units.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Admin · Raj Singh<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Units</h1>
+          <div class="page-subtitle">All units across all properties · 120 total</div>
+        </div>
+      </header>
+
+      <!-- Summary tiles -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Total Units</div><div class="kpi-value">120</div></div>
+          <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value">5</div></div>
+          <div class="kpi"><div class="kpi-label">Occupied</div><div class="kpi-value">108</div></div>
+          <div class="kpi"><div class="kpi-label">Maintenance</div><div class="kpi-value">2</div></div>
+          <div class="kpi"><div class="kpi-label">Listed</div><div class="kpi-value">3</div></div>
+          <div class="kpi"><div class="kpi-label">Retired</div><div class="kpi-value">2</div></div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="unit-status-filter">Status</label>
+            <select id="unit-status-filter" class="input">
+              <option value="ALL">All</option>
+              <option value="AVAILABLE">Available</option>
+              <option value="OCCUPIED">Occupied</option>
+              <option value="MAINTENANCE">Maintenance</option>
+              <option value="LISTED">Listed</option>
+              <option value="RETIRED">Retired</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="unit-property-filter">Property</label>
+            <select id="unit-property-filter" class="input">
+              <option value="ALL">All properties</option>
+              <option>Green Valley Apartments, Dwarka</option>
+              <option>Sai Heights, Lajpat Nagar</option>
+              <option>Mayur Vihar Residency</option>
+              <option>Rohini Greens</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="unit-search">Search</label>
+            <input id="unit-search" class="input" placeholder="Unit number" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Unit Number</th>
+              <th>Property</th>
+              <th>Floor</th>
+              <th>Bedrooms</th>
+              <th>Monthly Rent</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 1A</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Green Valley, Dwarka</a></td><td>1</td><td>2</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 2B</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Green Valley, Dwarka</a></td><td>2</td><td>3</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 3A</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Green Valley, Dwarka</a></td><td>3</td><td>2</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 4B</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Sai Heights, Lajpat Nagar</a></td><td>4</td><td>3</td><td>₹32,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 5C</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Sai Heights, Lajpat Nagar</a></td><td>5</td><td>2</td><td>₹28,000</td><td><span class="badge badge-partial">Maintenance</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 7C</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Green Valley, Dwarka</a></td><td>7</td><td>2</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 9A</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Mayur Vihar Residency</a></td><td>9</td><td>3</td><td>₹35,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">Unit 11A</td><td><a href="property-detail.html" class="text-royal-blue hover:underline">Rohini Greens</a></td><td>1</td><td>1</td><td>₹14,000</td><td><span class="badge badge-closed">Retired</span></td></tr>
+          </tbody>
+        </table>
+        <div class="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
+          <div>Showing 1–8 of 120</div>
+          <div class="flex gap-1">
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm">‹</button>
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm">›</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="text-xs muted mt-4">Retired units are permanent and never reactivated — create a fresh unit if needed.</p>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="users.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Users</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

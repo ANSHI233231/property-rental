@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Log · Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="audit-log.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Admin · Raj Singh<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Audit Log</h1>
+          <div class="page-subtitle">All system actions · IST timezone · tamper-proof history</div>
+        </div>
+        <button class="btn btn-secondary !py-2 !text-sm">Export CSV</button>
+      </header>
+
+      <!-- Filters -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-5 gap-4">
+          <div>
+            <label class="label" for="event-type">Event type</label>
+            <select id="event-type" class="input">
+              <option>All events</option>
+              <option>USER_LOGIN</option>
+              <option>USER_LOGOUT</option>
+              <option>LEASE_CREATED</option>
+              <option>LEASE_TERMINATED</option>
+              <option>DEPOSIT_REFUND_PROCESSED</option>
+              <option>RENT_CHANGE_SCHEDULED</option>
+              <option>RENT_CHANGE_APPLIED</option>
+              <option>RENT_CHANGE_CANCELLED</option>
+              <option>MAINTENANCE_STATUS_CHANGED</option>
+              <option>CO_TENANT_CONSENT_GIVEN</option>
+              <option>CO_TENANT_CONSENT_REJECTED</option>
+              <option>PROPERTY_TRANSFERRED</option>
+              <option>ADMIN_RESET_PASSWORD</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="actor-role">Actor role</label>
+            <select id="actor-role" class="input">
+              <option>Any role</option><option>Admin</option><option>Property Manager</option><option>Maintenance</option><option>Tenant</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="from-date">From</label>
+            <input id="from-date" type="date" class="input" />
+          </div>
+          <div>
+            <label class="label" for="to-date">To</label>
+            <input id="to-date" type="date" class="input" />
+          </div>
+          <div>
+            <label class="label" for="actor-search">Actor name</label>
+            <input id="actor-search" class="input" placeholder="e.g. Sunita Arora" />
+          </div>
+        </div>
+        <div class="flex justify-end mt-4 gap-3">
+          <button class="btn btn-secondary !py-2 !text-sm">Clear</button>
+          <button class="btn btn-primary !py-2 !text-sm">Search</button>
+        </div>
+      </section>
+
+      <!-- Log table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>When (IST)</th>
+              <th>Actor</th>
+              <th>Role</th>
+              <th>Event</th>
+              <th>Target</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-xs whitespace-nowrap">14/05/2026 09:42</td>
+              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
+              <td>PM</td>
+              <td><span class="badge badge-renewed">RENT_CHANGE_SCHEDULED</span></td>
+              <td>Lease #L-2103 · Unit 1A · Green Valley</td>
+              <td class="text-xs">₹18,000 → ₹19,500 effective 15/07/2026</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">14/05/2026 09:11</td>
+              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
+              <td>Admin</td>
+              <td><span class="badge badge-prepaid">ADMIN_RESET_PASSWORD</span></td>
+              <td>User #U-148 · Raju Kumar</td>
+              <td class="text-xs">Password reset by Admin</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">14/05/2026 08:55</td>
+              <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+              <td>Tenant</td>
+              <td><span class="badge badge-paid">USER_LOGIN</span></td>
+              <td>User #U-204</td>
+              <td class="text-xs">IP 49.207.x.x · Mobile Safari</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">13/05/2026 17:30</td>
+              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
+              <td>PM</td>
+              <td><span class="badge badge-resolved">MAINTENANCE_STATUS_CHANGED</span></td>
+              <td>Ticket #MR-2990 · Unit 3A</td>
+              <td class="text-xs">Resolved → Closed</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">13/05/2026 11:02</td>
+              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
+              <td>PM</td>
+              <td><span class="badge badge-prepaid">LEASE_CREATED</span></td>
+              <td>Lease #L-2118 · Unit 4B · Sai Heights</td>
+              <td class="text-xs">11-mo lease · Anjali Verma · ₹32,000</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">12/05/2026 21:14</td>
+              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
+              <td>PM</td>
+              <td><span class="badge badge-partial">DEPOSIT_REFUND_PROCESSED</span></td>
+              <td>Lease #L-2086 · Unit 6D</td>
+              <td class="text-xs">₹54,000 refunded (full)</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">12/05/2026 16:00</td>
+              <td class="font-poppins font-semibold text-charcoal">Priya Patel</td>
+              <td>Tenant</td>
+              <td><span class="badge badge-prepaid">CO_TENANT_CONSENT_GIVEN</span></td>
+              <td>Lease #L-2095 · Unit 2A</td>
+              <td class="text-xs">Consented to termination request</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">12/05/2026 09:00</td>
+              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
+              <td>Admin</td>
+              <td><span class="badge badge-renewed">PROPERTY_TRANSFERRED</span></td>
+              <td>Rohini Greens</td>
+              <td class="text-xs">Anil Kapoor → Manoj Verma (interim)</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">11/05/2026 14:22</td>
+              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
+              <td>PM</td>
+              <td><span class="badge badge-closed">LEASE_TERMINATED</span></td>
+              <td>Lease #L-2086 · Unit 6D</td>
+              <td class="text-xs">Early termination · tenant relocating</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
+          <div>Showing 1–9 of 4,318</div>
+          <div class="flex gap-1">
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm">‹</button>
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm">›</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="text-xs muted mt-4">All timestamps are in Indian Standard Time (IST, UTC+5:30). The audit log is append-only — entries cannot be edited or deleted.</p>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="users.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Users</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

@@ -17,9 +17,11 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
         <a href="users.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-divider"></div>
         <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
       </nav>
@@ -61,7 +63,7 @@
               <td class="muted">All properties</td>
               <td>98xxxxxx12</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
             <tr>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
@@ -69,7 +71,7 @@
               <td class="muted">Green Valley, Dwarka</td>
               <td>98xxxxxx34</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
             <tr>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
@@ -77,15 +79,23 @@
               <td class="muted">Sai Heights, Lajpat Nagar</td>
               <td>98xxxxxx56</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
             <tr>
-              <td class="font-poppins font-semibold text-charcoal">Raju Kumar</td>
+              <td class="font-poppins font-semibold text-charcoal">Raju Kumar <span class="muted text-xs">(Plumber)</span></td>
               <td>Maintenance</td>
               <td class="muted">Read + Update only</td>
               <td>98xxxxxx78</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+            </tr>
+            <tr>
+              <td class="font-poppins font-semibold text-charcoal">Anil Bhardwaj <span class="muted text-xs">(Electrician)</span></td>
+              <td>Maintenance</td>
+              <td class="muted">Read + Update only</td>
+              <td>98xxxxxx79</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
             <tr>
               <td class="font-poppins font-semibold text-charcoal">Raj Sharma</td>
@@ -93,7 +103,7 @@
               <td class="muted">Unit 3A, Green Valley</td>
               <td>98xxxxxx90</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
             <tr>
               <td class="font-poppins font-semibold text-charcoal">Priya Sharma <span class="muted text-xs">(co-tenant)</span></td>
@@ -101,7 +111,7 @@
               <td class="muted">Unit 3A, Green Valley</td>
               <td>98xxxxxx91</td>
               <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
+              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="text-royal-blue font-poppins font-semibold">Edit</a></td>
             </tr>
           </tbody>
         </table>
@@ -117,43 +127,121 @@
       <h3>Add New User</h3>
       <p class="muted text-sm mt-1 mb-5">Tenants are normally created at lease signing — only add tenants here for manual onboarding.</p>
 
-      <label class="label" for="role">Role</label>
-      <select id="role" class="input">
-        <option>Property Manager</option>
-        <option>Maintenance Staff</option>
-        <option>Admin</option>
-      </select>
-
-      <div class="mt-4">
-        <label class="label" for="name">Full name</label>
-        <input id="name" class="input" required placeholder="e.g. Anil Kapoor" />
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <label class="label" for="phone">Phone</label>
-          <input id="phone" class="input" required pattern="[0-9]{10}" title="10-digit Indian mobile number" placeholder="98xxxxxxxx" />
-        </div>
-        <div>
-          <label class="label" for="email">Email</label>
-          <input id="email" class="input" placeholder="name@gharsetu.in" />
-        </div>
-      </div>
-
-      <div class="mt-4">
-        <label class="label" for="property">Assigned property (PM only)</label>
-        <select id="property" class="input">
-          <option>—</option>
-          <option>Green Valley Apartments, Dwarka</option>
-          <option>Sai Heights, Lajpat Nagar</option>
+      <form id="addUserForm" novalidate>
+        <label class="label" for="role">Role</label>
+        <select id="role" name="role" class="input" onchange="document.getElementById('specRow').style.display = this.value === 'MAINTENANCE' ? 'block' : 'none'">
+          <option value="PROPERTY_MANAGER">Property Manager</option>
+          <option value="MAINTENANCE">Maintenance Staff</option>
+          <option value="ADMIN">Admin</option>
+          <option value="TENANT">Tenant</option>
         </select>
-        <p class="text-xs muted mt-1">Each PM is assigned to exactly one property.</p>
-      </div>
 
-      <div class="flex justify-end gap-3 mt-6">
-        <button class="btn btn-secondary" onclick="document.getElementById('addUserModal').classList.remove('open')">Cancel</button>
-        <button class="btn btn-primary">Create Account</button>
-      </div>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="label" for="firstName">First name</label>
+            <input id="firstName" name="firstName" class="input" required placeholder="e.g. Anil" />
+            <div class="field-error"></div>
+          </div>
+          <div>
+            <label class="label" for="lastName">Last name</label>
+            <input id="lastName" name="lastName" class="input" required placeholder="e.g. Kapoor" />
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="label" for="phone">Phone</label>
+            <input id="phone" name="phone" class="input" required pattern="[0-9]{10}" title="10-digit Indian mobile number" placeholder="98xxxxxxxx" />
+            <div class="field-error"></div>
+          </div>
+          <div>
+            <label class="label" for="email">Email</label>
+            <input id="email" name="email" type="email" class="input" required placeholder="name@gharsetu.in" />
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label" for="password">Initial password</label>
+          <input id="password" name="password" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters, with a letter and a digit" />
+          <div class="field-error"></div>
+          <p class="text-xs muted mt-1">Share this password with the new user privately. They can change it after first login.</p>
+        </div>
+
+        <div class="mt-4" id="specRow" style="display:none">
+          <label class="label" for="specialization">Specialization</label>
+          <select id="specialization" name="specialization" class="input">
+            <option value="" disabled selected>Select a specialization</option>
+            <option value="Plumber">Plumber</option>
+            <option value="Electrician">Electrician</option>
+            <option value="Carpenter">Carpenter</option>
+            <option value="HVAC">HVAC</option>
+            <option value="Cleaner">Cleaner</option>
+            <option value="General">General</option>
+          </select>
+          <div class="field-error"></div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addUserModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal-backdrop" id="editUserModal">
+    <div class="modal">
+      <h3>Edit — Sunita Arora</h3>
+
+      <form id="editUserForm" novalidate class="mt-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label" for="editFirstName">First name</label>
+            <input id="editFirstName" name="firstName" class="input" required value="Sunita" />
+            <div class="field-error"></div>
+          </div>
+          <div>
+            <label class="label" for="editLastName">Last name</label>
+            <input id="editLastName" name="lastName" class="input" required value="Arora" />
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label" for="editPhone">Phone</label>
+          <input id="editPhone" name="phone" class="input" required pattern="[0-9]{10}" maxlength="10" value="9876543434" />
+          <div class="field-error"></div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label" for="editEmail">Email</label>
+          <input id="editEmail" name="email" type="email" class="input" required value="sunita@gharsetu.in" autocomplete="email" />
+          <div class="field-error"></div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('editUserModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+
+      <hr class="my-6 border-mid-gray" />
+
+      <form id="resetPasswordForm" novalidate>
+        <h4 class="font-poppins font-semibold text-charcoal text-sm">Reset Password</h4>
+        <p class="text-xs muted mt-1 mb-3">Sets a new password for this user. They can log in with it immediately. Share it with them privately — no email is sent.</p>
+
+        <label class="label" for="newPassword">New password</label>
+        <input id="newPassword" name="newPassword" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters, with a letter and a digit" />
+        <div class="field-error"></div>
+
+        <div class="flex justify-end mt-4">
+          <button type="submit" class="btn btn-secondary !py-2 !text-sm">Reset Password</button>
+        </div>
+      </form>
     </div>
   </div>
 

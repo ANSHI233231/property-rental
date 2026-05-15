@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Property · Green Valley · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">Admin · Raj Singh<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <div class="text-xs muted">
+            <a href="properties.html" class="hover:underline text-royal-blue">Properties</a> / Green Valley Apartments
+          </div>
+          <h1 class="page-title">Green Valley Apartments, Dwarka</h1>
+          <div class="page-subtitle">Sector 12, Dwarka · Apartment Complex · 40 units</div>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary !py-2 !text-sm">Transfer PM</button>
+          <button class="btn btn-primary !py-2 !text-sm">Edit Property</button>
+        </div>
+      </header>
+
+      <!-- KPI strip -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Total Units</div><div class="kpi-value">40</div></div>
+          <div class="kpi"><div class="kpi-label">Occupied</div><div class="kpi-value">36 <span class="text-sm muted font-normal">/ 40</span></div><div class="kpi-meta">90% occupancy</div></div>
+          <div class="kpi"><div class="kpi-label">Monthly Rent Roll</div><div class="kpi-value">₹7,80,000</div></div>
+          <div class="kpi"><div class="kpi-label">Open Maintenance</div><div class="kpi-value">3</div></div>
+        </div>
+      </section>
+
+      <!-- Details + Manager card row -->
+      <section class="section grid md:grid-cols-2 gap-6">
+        <div class="card">
+          <h3 class="section-title">Property Details</h3>
+          <table class="data-table">
+            <tbody>
+              <tr><td class="muted">Address</td><td class="text-right">Sector 12, Dwarka, New Delhi 110078</td></tr>
+              <tr><td class="muted">Type</td><td class="text-right">Apartment Complex</td></tr>
+              <tr><td class="muted">Total floors</td><td class="text-right">10</td></tr>
+              <tr><td class="muted">Total units</td><td class="text-right">40</td></tr>
+              <tr><td class="muted">Amenities</td><td class="text-right">Lift, Power backup, Parking, Security</td></tr>
+              <tr><td class="muted">Created</td><td class="text-right">14/03/2024</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Assigned Manager</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="avatar" style="width:48px;height:48px;font-size:18px">SA</div>
+            <div>
+              <div class="font-poppins font-semibold text-charcoal">Sunita Arora</div>
+              <div class="text-sm muted">PM since 14/03/2024 · 98xxxxxx34 · sunita@gharsetu.in</div>
+            </div>
+          </div>
+          <table class="data-table">
+            <tbody>
+              <tr><td class="muted">Open tickets</td><td class="text-right font-poppins font-semibold text-charcoal">3</td></tr>
+              <tr><td class="muted">Pending consents</td><td class="text-right">0</td></tr>
+              <tr><td class="muted">Last activity</td><td class="text-right text-xs">Today, 09:42 IST</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Units table -->
+      <section class="section">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title m-0">Units in this property</h3>
+          <a href="units.html" class="btn btn-secondary !py-2 !text-sm">View all units →</a>
+        </div>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Unit</th><th>Floor</th><th>Bedrooms</th><th>Area (sq ft)</th><th>Rent</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-poppins font-semibold text-charcoal">1A</td><td>1</td><td>2</td><td>820</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">2B</td><td>2</td><td>3</td><td>1,140</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">3A</td><td>3</td><td>2</td><td>820</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">7C</td><td>7</td><td>2</td><td>880</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Active leases -->
+      <section class="section">
+        <h3 class="section-title">Active Leases</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Lease</th><th>Tenant</th><th>Unit</th><th>Start</th><th>End</th><th>Rent</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-mono text-xs">#L-2103</td><td>Rohan Mehta</td><td>1A</td><td>15/04/2026</td><td>14/03/2027</td><td>₹18,000</td></tr>
+              <tr><td class="font-mono text-xs">#L-2095</td><td>Priya Patel</td><td>2B</td><td>01/03/2026</td><td>28/02/2027</td><td>₹24,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Open maintenance -->
+      <section class="section">
+        <h3 class="section-title">Open Maintenance</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Ticket</th><th>Unit</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-mono text-xs">#MR-3041</td><td>7C</td><td>Water leakage in kitchen ceiling</td><td><span class="badge badge-emergency">Emergency</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td></tr>
+              <tr><td class="font-mono text-xs">#MR-3018</td><td>2A</td><td>AC not cooling</td><td><span class="badge badge-partial">High</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="users.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Users</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>

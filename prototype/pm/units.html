@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Units · PM · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="units.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <div class="sidebar-divider"></div>
+        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+      </nav>
+      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Units</h1>
+          <div class="page-subtitle">Green Valley Apartments · 40 units</div>
+        </div>
+      </header>
+
+      <!-- Status summary -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Total Units</div><div class="kpi-value">40</div></div>
+          <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value">2</div></div>
+          <div class="kpi"><div class="kpi-label">Occupied</div><div class="kpi-value">36</div></div>
+          <div class="kpi"><div class="kpi-label">Maintenance</div><div class="kpi-value">1</div></div>
+          <div class="kpi"><div class="kpi-label">Listed</div><div class="kpi-value">1</div></div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="unit-status-filter">Status</label>
+            <select id="unit-status-filter" class="input">
+              <option>All</option>
+              <option>Available</option>
+              <option>Occupied</option>
+              <option>Maintenance</option>
+              <option>Listed</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="unit-search">Search</label>
+            <input id="unit-search" class="input" placeholder="Unit number, e.g. 1A" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Unit Number</th>
+              <th>Floor</th>
+              <th>Type</th>
+              <th>Tenant</th>
+              <th>Monthly Rent</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="font-poppins font-semibold text-charcoal">1A</td><td>1</td><td>2BHK</td><td>Rohan Mehta</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">2B</td><td>2</td><td>3BHK</td><td>Priya Patel</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">3A</td><td>3</td><td>2BHK</td><td class="muted">—</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td><td><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">List</a></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">5B</td><td>5</td><td>2BHK</td><td>Vikram Singh</td><td>₹19,500</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">7C</td><td>7</td><td>2BHK</td><td class="muted">—</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td><td><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">Unlist</a></td></tr>
+            <tr><td class="font-poppins font-semibold text-charcoal">8D</td><td>8</td><td>3BHK</td><td class="muted">—</td><td>₹25,000</td><td><span class="badge badge-partial">Maintenance</span></td><td><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <p class="text-xs muted mt-4">Only available or listed units can be assigned to a new lease. Retired units never come back — create a fresh unit instead.</p>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
+    <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Tenants</a>
+    <a href="leases.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+  </nav>
+  <script src="../assets/validation.js"></script>
+</body>
+</html>
