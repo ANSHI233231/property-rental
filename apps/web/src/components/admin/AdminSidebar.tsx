@@ -160,10 +160,14 @@ export function AdminSidebar() {
 // Bottom tab bar — mobile only (max 5 items, no hamburger)
 // ---------------------------------------------------------------------------
 
+// Admin has 8 desktop nav items — too many for the 5-slot mobile tab bar.
+// Properties and Audit Log are accessible via the desktop sidebar only.
+// Icons are kept identical to NAV_ITEMS so the same tile looks the same on
+// both desktop and mobile.
 const TAB_ITEMS: NavItem[] = [
   {
     href: "/admin/dashboard",
-    label: "Dashboard",
+    label: "Home",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M3 12 12 3l9 9" />
@@ -172,12 +176,13 @@ const TAB_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/admin/properties",
-    label: "Properties",
+    href: "/admin/units",
+    label: "Units",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18M9 21V9" />
+        <rect x="3" y="11" width="18" height="10" rx="1" />
+        <path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4" />
+        <path d="M9 21v-4M15 21v-4" />
       </svg>
     ),
   },
@@ -186,8 +191,10 @@ const TAB_ITEMS: NavItem[] = [
     label: "Users",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21a8 8 0 0 1 16 0" />
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
   },

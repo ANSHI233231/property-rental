@@ -14,6 +14,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
@@ -30,13 +31,14 @@
 
     <main class="app-main">
       <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
           <h1 class="page-title">Properties</h1>
           <div class="page-subtitle">18 buildings · 120 units</div>
         </div>
         <div class="flex gap-3">
-          <button class="btn btn-secondary !py-2 !text-sm">Export</button>
-          <button class="btn btn-primary !py-2 !text-sm">+ Add Property</button>
+          <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Export started. CSV will download shortly.')">Export</button>
+          <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('addPropertyModal').classList.add('open')">+ Add Property</button>
         </div>
       </header>
 
@@ -139,6 +141,69 @@
     </main>
   </div>
 
+  <!-- Add Property Modal -->
+  <div class="modal-backdrop" id="addPropertyModal">
+    <form class="modal" style="max-width:560px" novalidate onsubmit="event.preventDefault(); document.getElementById('addPropertyModal').classList.remove('open'); alert('Property created. The new building is now in the list.');">
+      <h3>Add New Property</h3>
+      <p class="muted text-sm mt-1 mb-5">Properties are created here. Once saved, units are added separately.</p>
+
+      <label class="label" for="add-prop-name">Property name</label>
+      <input id="add-prop-name" class="input" required placeholder="e.g. Sunshine Heights, Saket" />
+      <div class="field-error"></div>
+
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div>
+          <label class="label" for="add-prop-type">Type</label>
+          <select id="add-prop-type" class="input">
+            <option>Apartment Complex</option>
+            <option>Independent Building</option>
+            <option>Villa</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="add-prop-units">Total units</label>
+          <input id="add-prop-units" class="input" type="number" min="1" required placeholder="e.g. 24" />
+          <div class="field-error"></div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label" for="add-prop-addr">Address</label>
+        <input id="add-prop-addr" class="input" required placeholder="Street, sector, locality, pincode" />
+        <div class="field-error"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div>
+          <label class="label" for="add-prop-mgr">Assign Manager</label>
+          <select id="add-prop-mgr" class="input">
+            <option value="">—</option>
+            <option>Sunita Arora</option>
+            <option>Manoj Verma</option>
+            <option>Pooja Khanna</option>
+            <option>Anil Kapoor</option>
+          </select>
+          <p class="text-xs muted mt-1">PM can be assigned later. Each PM manages one property.</p>
+        </div>
+        <div>
+          <label class="label" for="add-prop-floors">Floors</label>
+          <input id="add-prop-floors" class="input" type="number" min="1" placeholder="e.g. 10" />
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label" for="add-prop-amenities">Amenities</label>
+        <input id="add-prop-amenities" class="input" placeholder="e.g. Lift, Power backup, Parking, Security" />
+        <p class="text-xs muted mt-1">Comma-separated list. Editable later.</p>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addPropertyModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Property</button>
+      </div>
+    </form>
+  </div>
+
   <nav class="tabbar">
     <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
     <a href="properties.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
@@ -146,6 +211,7 @@
     <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
     <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
   </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
 </body>
 </html>

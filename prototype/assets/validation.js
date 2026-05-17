@@ -114,3 +114,37 @@
     init();
   }
 })();
+
+/* ---------------------------------------------------------------------------
+ * Mobile drawer (sidebar slide-in on tablet/mobile)
+ * Exposed as global helpers so inline onclick handlers can call them.
+ * ------------------------------------------------------------------------ */
+function openDrawer() {
+  var s = document.querySelector('.sidebar');
+  var b = document.querySelector('.drawer-backdrop');
+  if (s) s.classList.add('open');
+  if (b) b.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  var s = document.querySelector('.sidebar');
+  var b = document.querySelector('.drawer-backdrop');
+  if (s) s.classList.remove('open');
+  if (b) b.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function toggleDrawer() {
+  var s = document.querySelector('.sidebar');
+  if (s && s.classList.contains('open')) closeDrawer(); else openDrawer();
+}
+/* Close drawer with Escape key */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeDrawer();
+});
+/* Close drawer when any link inside it is clicked (smooth nav UX) */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t) return;
+  var link = t.closest && t.closest('.sidebar a.sidebar-link');
+  if (link) closeDrawer();
+});

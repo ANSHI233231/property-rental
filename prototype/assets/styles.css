@@ -309,9 +309,63 @@ a.sidebar-brand:hover { opacity: 0.85; }
 .tab svg { width: 22px; height: 22px; }
 
 @media (max-width: 1023px) {
-  .sidebar { display: none; }
+  /* On tablet/mobile, sidebar becomes a slide-in drawer (still rendered, just transformed off-screen) */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease-out;
+    width: 280px;
+    z-index: 70;
+    overflow-y: auto;
+  }
+  .sidebar.open { transform: translateX(0); }
   .app-main { margin-left: 0; padding: 24px 16px 80px; max-width: 100%; }
   .tabbar { display: flex; }
+  .drawer-toggle { display: inline-flex; }
+}
+
+/* Hamburger toggle button — visible only on mobile */
+.drawer-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--color-mid-gray);
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--color-charcoal);
+  cursor: pointer;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.drawer-toggle:hover { background: var(--color-light-gray); }
+.drawer-toggle svg { width: 20px; height: 20px; display: block; }
+
+/* Backdrop behind the open drawer */
+.drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 60;
+}
+.drawer-backdrop.open { display: block; }
+
+/* Close (X) button inside the mobile drawer — hidden on desktop */
+.drawer-close {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  padding: 4px;
+}
+.drawer-close:hover { color: #fff; }
+.drawer-close svg { width: 20px; height: 20px; display: block; }
+@media (max-width: 1023px) {
+  .drawer-close { display: inline-flex; }
 }
 
 /* KPI cards */
