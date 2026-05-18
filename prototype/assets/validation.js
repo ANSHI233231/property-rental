@@ -148,3 +148,34 @@ document.addEventListener('click', function (e) {
   var link = t.closest && t.closest('.sidebar a.sidebar-link');
   if (link) closeDrawer();
 });
+
+/* ---------------------------------------------------------------------------
+ * "More" bottom sheet — opens from slot 5 of the mobile tab bar on Admin + PM
+ * pages. Mirrors apps/web/src/components/ui/MoreSheet.tsx behaviour.
+ * Exposed globally so inline onclick handlers can call them.
+ * ------------------------------------------------------------------------ */
+function openMore() {
+  var s = document.querySelector('.more-sheet');
+  var b = document.querySelector('.more-sheet-backdrop');
+  if (s) s.classList.add('open');
+  if (b) b.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMore() {
+  var s = document.querySelector('.more-sheet');
+  var b = document.querySelector('.more-sheet-backdrop');
+  if (s) s.classList.remove('open');
+  if (b) b.classList.remove('open');
+  document.body.style.overflow = '';
+}
+/* Close on Escape */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeMore();
+});
+/* Close when any link inside the sheet is clicked */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t) return;
+  var link = t.closest && t.closest('.more-sheet a.more-sheet-link');
+  if (link) closeMore();
+});

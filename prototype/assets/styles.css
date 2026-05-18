@@ -368,6 +368,73 @@ a.sidebar-brand:hover { opacity: 0.85; }
   .drawer-close { display: inline-flex; }
 }
 
+/* "More" bottom sheet — opens from slot 5 of the bottom tab bar on mobile
+   for Admin and PM roles. Holds overflow nav items + an explicit Logout. */
+.more-sheet-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 60;
+}
+.more-sheet-backdrop.open { display: block; }
+.more-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid var(--color-mid-gray);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 16px 16px 88px;
+  z-index: 65;
+  transform: translateY(100%);
+  transition: transform 0.25s ease-out;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.more-sheet.open { transform: translateY(0); }
+.more-sheet-handle {
+  width: 40px; height: 4px;
+  background: var(--color-mid-gray);
+  border-radius: 2px;
+  margin: 4px auto 12px;
+}
+.more-sheet-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: var(--color-charcoal);
+  font-size: 16px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+.more-sheet-link {
+  display: flex; align-items: center; width: 100%;
+  font-family: 'Poppins', sans-serif;
+  color: var(--color-charcoal);
+  text-decoration: none;
+  gap: 14px;
+  padding: 14px 8px;
+  font-size: 15px;
+  border: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--color-light-gray);
+  text-align: left;
+  cursor: pointer;
+}
+.more-sheet-link:last-child { border-bottom: none; }
+.more-sheet-link:hover { background: var(--color-off-white); }
+.more-sheet-link.active { color: var(--color-saffron); }
+.more-sheet-link svg {
+  width: 22px; height: 22px;
+  color: var(--color-slate);
+  flex-shrink: 0;
+}
+.more-sheet-link.active svg { color: var(--color-saffron); }
+
+/* "More" tab button inside the bottom tab bar — same look as other tabs. */
+.tab-more {
+  background: none; border: 0; cursor: pointer;
+}
+
 /* KPI cards */
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
 .kpi {
