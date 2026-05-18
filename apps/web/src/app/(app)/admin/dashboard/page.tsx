@@ -16,13 +16,19 @@
  */
 
 import { useAuth } from "@/lib/auth/context";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SkeletonKpi } from "@/components/ui/Skeleton";
 import { SkeletonTableRows } from "@/components/ui/Skeleton";
+import { Pagination } from "@/components/ui/Pagination";
 import { todayIST } from "@/lib/locale";
 import { formatINR, UnitStateEnum, MaintenanceStatusCodes } from "@gharsetu/shared";
 import { parseBigPaise } from "@/lib/rent/format";
 import Link from "next/link";
+
+// Property Snapshot — client-side slice. Match the project-wide default
+// (usePaginatedList → pageSize = 10) so this table behaves like every other
+// table in the app.
+const PROPERTY_SNAPSHOT_PAGE_SIZE = 10;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -171,6 +177,9 @@ export default function AdminDashboardPage() {
   const [kpis, setKpis] = useState<KpiState>(EMPTY_KPIS);
   const [loading, setLoading] = useState(true);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  // Property Snapshot pagination (client-side slice of kpis.propertyOccupancy).
+  const [propertyPage, setPropertyPage] = useState(1);
+  const propertyTableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -313,6 +322,17 @@ export default function AdminDashboardPage() {
       cancelled = true;
     };
   }, [apiFetch]);
+
+  // BUG-004: when the property occupancy list changes (or the page is now out
+  // of range because the list shrank), reset to page 1 so the user never lands
+  // on an empty page.
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil(kpis.propertyOccupancy.length / PROPERTY_SNAPSHOT_PAGE_SIZE),
+    );
+    if (propertyPage > totalPages) setPropertyPage(1);
+  }, [kpis.propertyOccupancy.length, propertyPage]);
 
   const initials = (name: string) =>
     name
@@ -529,55 +549,90 @@ export default function AdminDashboardPage() {
             View all →
           </Link>
         </div>
-        <div className="card p-0 overflow-x-auto">
-          <table className="data-table" aria-label="Per-property occupancy snapshot">
-            <caption className="sr-only">Occupancy breakdown by property</caption>
-            <thead>
-              <tr>
-                <th scope="col">Property</th>
-                <th scope="col" className="text-right">Occupied</th>
-                <th scope="col" className="text-right">Total</th>
-                <th scope="col" className="text-right">Occupancy</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && <SkeletonTableRows rows={5} cols={4} />}
+        {(() => {
+          // BUG-004: client-side slice + shared <Pagination>. Mirrors the
+          // pattern used by every other table in the app (page size 10).
+          const totalProps = kpis.propertyOccupancy.length;
+          const totalPropertyPages = Math.max(
+            1,
+            Math.ceil(totalProps / PROPERTY_SNAPSHOT_PAGE_SIZE),
+          );
+          const startIdx = (propertyPage - 1) * PROPERTY_SNAPSHOT_PAGE_SIZE;
+          const visibleProps = kpis.propertyOccupancy.slice(
+            startIdx,
+            startIdx + PROPERTY_SNAPSHOT_PAGE_SIZE,
+          );
+          // Scroll the table back to the top whenever the user changes page.
+          const goToPropertyPage = (n: number) => {
+            setPropertyPage(n);
+            propertyTableRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+          };
+          return (
+            <div ref={propertyTableRef} className="card p-0 overflow-x-auto">
+              <table className="data-table" aria-label="Per-property occupancy snapshot">
+                <caption className="sr-only">Occupancy breakdown by property</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Property</th>
+                    <th scope="col" className="text-right">Occupied</th>
+                    <th scope="col" className="text-right">Total</th>
+                    <th scope="col" className="text-right">Occupancy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading && <SkeletonTableRows rows={5} cols={4} />}
 
-              {!loading && kpis.propertyOccupancy.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="text-center muted py-8">
-                    No unit data available.
-                  </td>
-                </tr>
-              )}
-
-              {!loading &&
-                kpis.propertyOccupancy.map((p) => {
-                  const pct = p.total > 0 ? Math.round((p.occupied / p.total) * 100) : 0;
-                  return (
-                    <tr key={p.name}>
-                      <td className="font-poppins font-semibold text-charcoal">{p.name}</td>
-                      <td className="text-right">{p.occupied}</td>
-                      <td className="text-right">{p.total}</td>
-                      <td
-                        className="text-right font-poppins font-semibold"
-                        style={{
-                          color:
-                            pct >= 80
-                              ? "var(--color-status-paid)"
-                              : pct >= 50
-                              ? "var(--color-status-partial)"
-                              : "var(--color-status-overdue)",
-                        }}
-                      >
-                        {pct}%
+                  {!loading && totalProps === 0 && (
+                    <tr>
+                      <td colSpan={4} className="text-center muted py-8">
+                        No unit data available.
                       </td>
                     </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
+                  )}
+
+                  {!loading &&
+                    visibleProps.map((p) => {
+                      const pct = p.total > 0 ? Math.round((p.occupied / p.total) * 100) : 0;
+                      return (
+                        <tr key={p.name}>
+                          <td className="font-poppins font-semibold text-charcoal">{p.name}</td>
+                          <td className="text-right">{p.occupied}</td>
+                          <td className="text-right">{p.total}</td>
+                          <td
+                            className="text-right font-poppins font-semibold"
+                            style={{
+                              color:
+                                pct >= 80
+                                  ? "var(--color-status-paid)"
+                                  : pct >= 50
+                                  ? "var(--color-status-partial)"
+                                  : "var(--color-status-overdue)",
+                            }}
+                          >
+                            {pct}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+
+              {!loading && totalProps > 0 && (
+                <Pagination
+                  page={propertyPage}
+                  totalPages={totalPropertyPages}
+                  total={totalProps}
+                  pageSize={PROPERTY_SNAPSHOT_PAGE_SIZE}
+                  itemsOnPage={visibleProps.length}
+                  loading={loading}
+                  onPrev={() => goToPropertyPage(Math.max(1, propertyPage - 1))}
+                  onNext={() => goToPropertyPage(Math.min(totalPropertyPages, propertyPage + 1))}
+                  onGoToPage={goToPropertyPage}
+                />
+              )}
+            </div>
+          );
+        })()}
       </section>
     </>
   );

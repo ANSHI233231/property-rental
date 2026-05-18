@@ -167,6 +167,7 @@ const TAB_ITEMS: NavItem[] = [
 
 export function TenantTabBar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   function isActive(href: string): boolean {
     return pathname === href || pathname.startsWith(href + "/");
@@ -185,6 +186,21 @@ export function TenantTabBar() {
           {item.label}
         </Link>
       ))}
+      {/* Slot 5 — direct Logout (Tenant has only 4 nav items, so no More sheet
+          needed). Uses the same logout handler as the desktop sidebar footer. */}
+      <button
+        type="button"
+        className="tab"
+        aria-label="Logout"
+        onClick={() => void logout()}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <path d="m16 17 5-5-5-5" />
+          <path d="M21 12H9" />
+        </svg>
+        Logout
+      </button>
     </nav>
   );
 }

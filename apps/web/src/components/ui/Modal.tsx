@@ -38,10 +38,16 @@ interface ModalProps {
   title: string;
   /** Max width class — default "max-w-[480px]". */
   maxWidth?: string;
+  /**
+   * Optional pinned footer (action buttons). When provided, the footer stays
+   * fixed at the bottom of the modal while the body scrolls. When omitted,
+   * the modal still caps at 90vh and the entire body scrolls together.
+   */
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function Modal({ open, onClose, title, maxWidth = "max-w-[480px]", children }: ModalProps) {
+export function Modal({ open, onClose, title, maxWidth = "max-w-[480px]", footer, children }: ModalProps) {
   const backdropRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -126,7 +132,8 @@ export function Modal({ open, onClose, title, maxWidth = "max-w-[480px]", childr
         className={`modal ${maxWidth} w-full`}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex items-center justify-between mb-1">
+        {/* Fixed title row — flex-shrink keeps it visible while body scrolls. */}
+        <div className="flex items-center justify-between mb-1 flex-shrink-0">
           <h3 id={titleId} className="font-poppins font-semibold text-charcoal text-[20px] m-0">
             {title}
           </h3>
@@ -141,7 +148,9 @@ export function Modal({ open, onClose, title, maxWidth = "max-w-[480px]", childr
             </svg>
           </button>
         </div>
-        {children}
+        {/* Scrollable body — caps at modal max-height − header − footer. */}
+        <div className="modal-body">{children}</div>
+        {footer && <div className="modal-footer">{footer}</div>}
       </div>
     </div>
   );

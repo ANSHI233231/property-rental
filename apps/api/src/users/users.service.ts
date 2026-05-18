@@ -186,7 +186,12 @@ export class UsersService {
   async listUsers(role?: string, cursor?: number, limit = 20, page?: number, pageSize?: number) {
     const useOffset = page !== undefined;
     const ps = pageSize !== undefined ? Math.min(Math.max(pageSize, 1), 100) : undefined;
-    const take = useOffset ? (ps ?? 10) : Math.min(limit, 100);
+    // BUG-005: the cursor branch feeds picker-style dropdowns (e.g. the
+    // Transfer-PM modal). Older capped the cursor branch at 100 too, which
+    // truncated the newest users out of any DB with more than 100 matching
+    // rows. Bumping the cursor cap to 500 gives picker UIs ~4x headroom; the
+    // offset branch (used by paginated tables) keeps the lower cap of 100.
+    const take = useOffset ? (ps ?? 10) : Math.min(limit, 500);
     const currentPage = page ?? 1;
 
     // Build role filter — accept either int code string ("0") or name ("ADMIN")
@@ -216,7 +221,12 @@ export class UsersService {
       : this.prisma.user.findMany({
           where,
           select: USER_SAFE_SELECT,
-          orderBy: { created_at: "asc" },
+          // BUG-005: order DESC in the cursor branch so the most-recently-
+          // created users surface first. The Transfer-PM picker (and any
+          // similar "pick from all users" dropdown) was previously seeing
+          // only the 100 oldest @test.local seed accounts because the ASC
+          // ordering kept new users at the very end of the list.
+          orderBy: { created_at: "desc" },
           take: take + 1,
           ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
         });

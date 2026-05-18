@@ -278,6 +278,32 @@
     @apply bg-white rounded-modal;
     padding: 32px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    /* BUG-003: cap height at 90 % of the viewport and become a flex column so
+       the title row stays at top, the body scrolls when long, and an optional
+       footer (.modal-footer) stays pinned at the bottom. */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* Scrollable middle section — wraps {children} in Modal.tsx. */
+  .modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    /* min-height: 0 is required so flex children can shrink below their
+       intrinsic content size (otherwise overflow never kicks in). */
+    min-height: 0;
+    /* Pull the scroll edges out to the modal padding so the scrollbar sits
+       flush with the right edge instead of inside the inner content. */
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+  /* Pinned footer — action buttons live here so they never scroll away. */
+  .modal-footer {
+    flex-shrink: 0;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #ECEFF1;
   }
 
   /* Profile */
@@ -329,4 +355,61 @@
     .tabbar { display: flex; }
     .page-title { font-size: 24px; }
   }
+
+  /* "More" bottom sheet — opens from slot 5 of the tab bar on mobile/tablet.
+     Holds overflow nav items (Properties, Audit Log, etc.) + a direct Logout
+     action. Closed by tapping the backdrop, the close action, an item, or Escape. */
+  .more-sheet-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 60;
+  }
+  .more-sheet-backdrop.open { display: block; }
+  .more-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-top: 1px solid #CFD8DC;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 16px 16px 88px;
+    z-index: 65;
+    transform: translateY(100%);
+    transition: transform 0.25s ease-out;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .more-sheet.open { transform: translateY(0); }
+  .more-sheet-handle {
+    width: 40px; height: 4px;
+    background: #CFD8DC;
+    border-radius: 2px;
+    margin: 4px auto 12px;
+  }
+  .more-sheet-title {
+    @apply font-poppins font-semibold text-charcoal;
+    font-size: 16px; margin-bottom: 8px;
+    padding: 0 8px;
+  }
+  .more-sheet-link {
+    @apply flex items-center font-poppins text-charcoal no-underline w-full;
+    gap: 14px;
+    padding: 14px 8px;
+    font-size: 15px;
+    border: 0;
+    background: transparent;
+    border-bottom: 1px solid #ECEFF1;
+    text-align: left;
+    cursor: pointer;
+  }
+  .more-sheet-link:last-child { border-bottom: none; }
+  .more-sheet-link:hover { background: #F8F9FA; }
+  .more-sheet-link.active { color: #FF6F00; }
+  .more-sheet-link svg {
+    width: 22px; height: 22px;
+    color: #546E7A;
+    flex-shrink: 0;
+  }
+  .more-sheet-link.active svg { color: #FF6F00; }
 }

@@ -274,12 +274,49 @@ function SignLeaseModal({
 
   const watchStartDate = watch("startDate");
 
+  // BUG-003: action buttons live in <Modal footer={...}> so they stay pinned
+  // at the bottom while the body (tenant cards, possibly many) scrolls.
+  const stepFooter =
+    step === 1 ? (
+      <div className="flex justify-end gap-3">
+        <button type="button" className="btn btn-secondary" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="button" className="btn btn-primary" onClick={() => void goToStep2()}>
+          Next: Tenants →
+        </button>
+      </div>
+    ) : (
+      <div className="flex justify-between gap-3 flex-wrap">
+        <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>
+          ← Back
+        </button>
+        <div className="flex gap-3">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          {/* Submit lives OUTSIDE the form in the DOM. The HTML5 form="..."
+             attribute associates this button with the form by id so submit
+             still works. */}
+          <button
+            type="submit"
+            form="sign-lease-form"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating…" : "Create Lease"}
+          </button>
+        </div>
+      </div>
+    );
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={step === 1 ? "New Lease — Details" : "New Lease — Tenants"}
       maxWidth="max-w-[600px]"
+      footer={stepFooter}
     >
       <p className="muted text-sm mt-1 mb-5">
         Rent is locked at signing and cannot be changed mid-lease (BL-02).
@@ -357,17 +394,15 @@ function SignLeaseModal({
               />
             </Field>
           </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="button" className="btn btn-primary" onClick={() => void goToStep2()}>
-              Next: Tenants →
-            </button>
-          </div>
         </div>
       )}
 
       {step === 2 && (
-        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
+        <form
+          id="sign-lease-form"
+          onSubmit={(e) => void handleSubmit(onSubmit)(e)}
+          noValidate
+        >
           <div className="space-y-4">
             {fields.map((field, index) => (
               <div key={field.id} className="p-4 rounded border border-mid-gray">
@@ -501,18 +536,6 @@ function SignLeaseModal({
           {submitError && (
             <div className="field-error show mt-3">{submitError}</div>
           )}
-
-          <div className="flex justify-between gap-3 mt-6">
-            <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>
-              ← Back
-            </button>
-            <div className="flex gap-3">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                {isSubmitting ? "Creating…" : "Create Lease"}
-              </button>
-            </div>
-          </div>
         </form>
       )}
     </Modal>
