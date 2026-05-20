@@ -1,6 +1,9 @@
 # Third-party Claude skills (managed locally per-developer)
 # Install from upstream: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
-.claude/skills/
+# (use /* not / so project-owned skills below can be re-included)
+.claude/skills/*
+# Exception: project-owned skills (gharsetu-*) are checked in for the team
+!.claude/skills/gharsetu-*/
 
 # Stale prototype archives (extracted to prototype/ folder)
 prototype.zip
