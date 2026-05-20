@@ -167,10 +167,21 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
 
 ## 4. Installation & Setup
 
+> **This is a multi-repo setup.** The backend (`apps/api`) and frontend (`apps/web`) live in their own GitHub repos and are wired into this meta repo as **git submodules**. You **must** clone with `--recurse-submodules` (or run `git submodule update --init --recursive` afterwards), otherwise `apps/api` and `apps/web` will be empty folders.
+>
+> - Meta:     https://github.com/ANSHI233231/property-rental
+> - Backend:  https://github.com/ANSHI233231/property-rental-api  →  `apps/api`
+> - Frontend: https://github.com/ANSHI233231/property-rental-web  →  `apps/web`
+>
+> Day-2 workflow (editing a sub-repo, bumping the pointer in this meta repo, etc.) is documented in [MULTI_REPO_SETUP.md](MULTI_REPO_SETUP.md).
+
 ```bash
-# 1. Clone
-git clone <your-repo-url> property-rental
+# 1. Clone (note --recurse-submodules)
+git clone --recurse-submodules git@github.com:ANSHI233231/property-rental.git
 cd property-rental
+
+# If you forgot --recurse-submodules:
+#   git submodule update --init --recursive
 
 # 2. Install dependencies. The `postinstall` hook automatically builds
 #    @gharsetu/shared so apps/web and apps/api can resolve its dist/.
