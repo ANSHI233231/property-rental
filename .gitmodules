@@ -1,0 +1,6 @@
+[submodule "apps/api"]
+	path = apps/api
+	url = git@github.com:ANSHI233231/property-rental-api.git
+[submodule "apps/web"]
+	path = apps/web
+	url = git@github.com:ANSHI233231/property-rental-web.git
