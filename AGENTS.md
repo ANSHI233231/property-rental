@@ -1,6 +1,6 @@
 # GharSetu — Claude Agent Team
 
-Five specialized Claude Code subagents live in [.claude/agents/](.claude/agents/). They share the same source-of-truth documents ([SRS_Document.md](SRS_Document.md), [Test_Cases.md](Test_Cases.md), the [prototype/](prototype/)) and play distinct roles.
+Five specialized Claude Code subagents live in [.claude/agents/](.claude/agents/). They share the same source-of-truth documents ([docs/product/SRS_Document.md](docs/product/SRS_Document.md), [docs/testing/v1/Test_Cases.md](docs/testing/v1/Test_Cases.md), the [prototype/](prototype/)) and play distinct roles.
 
 | Agent | Model | Role | Invoke when… |
 |---|---|---|---|
@@ -55,12 +55,13 @@ Use gharsetu-security to VAPT the auth flow.
 
 ## Hard rules every agent follows
 
-- **The 23 business rules ([SRS Section 5](SRS_Document.md)) are non-negotiable.** Any code or test that violates one fails review.
+- **The 23 business rules ([SRS Section 5](docs/product/SRS_Document.md)) are non-negotiable.** Any code or test that violates one fails review.
 - **The prototype is the design contract.** Tokens in [prototype/assets/styles.css](prototype/assets/styles.css) port verbatim to `tailwind.config.ts`.
 - **Dates: DD/MM/YYYY. Currency: ₹ with Indian digit grouping. Timezone: Asia/Kolkata.**
 - **No public sign-up, no SMS/email/WhatsApp notifications, no file uploads, no payment gateway** — all explicitly out of scope for v1 (SRS Section 9).
 - **The custom validator ([prototype/assets/validation.js](prototype/assets/validation.js)) replaces native browser tooltips.** Errors render below the field, with the ⚠ glyph.
 - **Append-only state model.** Retire instead of delete; reverse instead of edit; audit log is immutable.
+- **Change log per task.** Every agent appends a `## Task N — <name>` entry to `agent-team-change-logs/<agent>-YYYY-MM-DD.md` at the end of each task, matching the [sample format](agent-team-change-logs/sample-log-format.md): Status (✅/⚠️/❌), Started + Completed + Duration in IST, Changes (bulleted), Files Changed (paths), plus Notes / Pending / Issue + Error Summary + Action Required as applicable. The orchestrator does NOT need to remind agents — it's baked into each agent's definition under `## Change log`.
 
 ## Roles & scopes (recap)
 
@@ -75,16 +76,17 @@ Use gharsetu-security to VAPT the auth flow.
 
 ```
 property-rental/
-├── AGENTS.md                       ← this file
+├── AGENTS.md                                ← this file
 ├── CLAUDE.md
-├── SRS_Document.md                 ← spec (incl. BL-01 → BL-23)
-├── Test_Cases.md                   ← ~110 test cases · traceability matrix
-├── prototype/                      ← 19 HTML pages · design tokens · validator
+├── docs/
+│   ├── product/SRS_Document.md              ← spec (incl. BL-01 → BL-23)
+│   └── testing/v1/Test_Cases.md             ← ~110 test cases · traceability matrix
+├── prototype/                               ← 19 HTML pages · design tokens · validator
 └── .claude/
     └── agents/
-        ├── gharsetu-lead.md        ← Opus 4.7
-        ├── gharsetu-frontend.md    ← Sonnet 4.6
-        ├── gharsetu-backend.md     ← Sonnet 4.6
-        ├── gharsetu-tester.md      ← Sonnet 4.6
-        └── gharsetu-security.md    ← Sonnet 4.6
+        ├── gharsetu-lead.md                 ← Opus 4.7
+        ├── gharsetu-frontend.md             ← Sonnet 4.6
+        ├── gharsetu-backend.md              ← Sonnet 4.6
+        ├── gharsetu-tester.md               ← Sonnet 4.6
+        └── gharsetu-security.md             ← Sonnet 4.6
 ```

@@ -27,7 +27,7 @@ A Delhi-first property rental management platform for a 120-unit / 18-building p
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT_HS256-000?logo=jsonwebtokens&logoColor=white)
 
-See [SRS_Document.md](SRS_Document.md) for the full spec and [docs/MASTER_PLAN.md](docs/MASTER_PLAN.md) for the phased build plan.
+See [docs/product/SRS_Document.md](docs/product/SRS_Document.md) for the full spec and [docs/planning/v1/MASTER_PLAN.md](docs/planning/v1/MASTER_PLAN.md) for the phased build plan.
 
 ---
 
@@ -64,10 +64,11 @@ property-rental/
 │       ├── src/                      # Consumed by both apps via compiled dist/
 │       └── package.json
 ├── prototype/                        # 19 static HTML pages — the design contract
-├── document/                         # .docx source-of-truth (blueprint, UI/UX, API)
-├── docs/                             # MASTER_PLAN.md, phase-0/, security/, testing/
-├── SRS_Document.md                   # SRS incl. the 23 business rules (BL-01..23)
-├── Test_Cases.md                     # ~110 test cases mapped to BL rules
+├── docs/                             # All spec + planning + product + security + testing
+│   ├── product/                      # SRS_Document.md + v1/ (blueprint, UI/UX, API spec .docx)
+│   ├── testing/v1/                   # Test_Cases.md + phase-1..8 test reports + bl-traceability
+│   ├── planning/                     # DOCUMENT_AGENT.md + v1/ (MASTER_PLAN, MULTI_REPO_SETUP, TODO, phase-0)
+│   └── security/                     # phase-1..8 security review reports
 ├── docker-compose.yml                # Local dev — Postgres 18 on host :5433
 ├── .env.example                      # Root env template (covers API + Web)
 ├── smoke.sh                          # Quick end-to-end API smoke test
@@ -173,7 +174,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
 > - Backend:  https://github.com/ANSHI233231/property-rental-api  →  `apps/api`
 > - Frontend: https://github.com/ANSHI233231/property-rental-web  →  `apps/web`
 >
-> Day-2 workflow (editing a sub-repo, bumping the pointer in this meta repo, etc.) is documented in [MULTI_REPO_SETUP.md](MULTI_REPO_SETUP.md).
+> Day-2 workflow (editing a sub-repo, bumping the pointer in this meta repo, etc.) is documented in [MULTI_REPO_SETUP.md](docs/planning/v1/MULTI_REPO_SETUP.md).
 
 ```bash
 # 1. Clone (note --recurse-submodules)
@@ -388,7 +389,7 @@ pnpm --filter @gharsetu/api exec prisma migrate status
 | Jobs | `/jobs/*` | Admin-triggered manual runs: `rent-accrual/run`, `maintenance-alert/run`, `rent-change-apply/run` |
 | Health | `/health` | Public liveness + DB ping |
 
-Full design + per-endpoint contract: see [`Design_Document.docx`](Design_Document.docx) §4 and [`document/GharSetu_Model_API_Spec.md`](document/GharSetu_Model_API_Spec.md).
+Full design + per-endpoint contract: see [`Design_Document.docx`](docs/product/v1/Design_Document.docx) §4 and [`docs/product/v1/GharSetu_Model_API_Spec.md`](docs/product/v1/GharSetu_Model_API_Spec.md).
 
 ---
 
@@ -495,7 +496,7 @@ pnpm --filter @gharsetu/web test
 ./smoke.sh
 ```
 
-For more on team workflow, postmortem template, and the agent collaboration model, see [`Agent_Collaboration_Handbook.docx`](Agent_Collaboration_Handbook.docx).
+For more on team workflow, postmortem template, and the agent collaboration model, see [`Agent_Collaboration_Handbook.docx`](docs/planning/v1/Agent_Collaboration_Handbook.docx).
 
 ---
 

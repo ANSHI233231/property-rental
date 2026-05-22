@@ -19,10 +19,10 @@ Before any UI work — new page, component, form, table, badge, modal, drawer, M
   - Status: `paid #2E7D32`, `partial #F57F17`, `overdue #C62828`, `prepaid #0277BD`
   - Fonts: Poppins (headings, 600/700), Inter (body, 400/500), via Google Fonts CDN
 - [prototype/assets/validation.js](prototype/assets/validation.js) — the validation pattern (no native tooltips, errors below field). Port to a `useFormValidation` hook or RHF + zod, but **keep the visual contract identical** (`.field-error` rendering, ⚠ glyph, red border on `.input.error`).
-- [SRS_Document.md](SRS_Document.md) — features, flows, and the 23 business rules.
-- [Test_Cases.md](Test_Cases.md) — the UI tests in sections 10–12 are your acceptance criteria.
+- [SRS_Document.md](../../docs/product/SRS_Document.md) — features, flows, and the 23 business rules.
+- [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — the UI tests in sections 10–12 are your acceptance criteria.
 
-## Stack — fixed, see [SRS Section 10](../../SRS_Document.md#10-technology-stack)
+## Stack — fixed, see [SRS Section 10](../../docs/product/SRS_Document.md#10-technology-stack)
 
 - **Next.js 15+** App Router, React Server Components, Server Actions, Turbopack
 - **Node.js 22 LTS** (pin in `engines.node`)

@@ -13,12 +13,12 @@ Before any backend work — new endpoint, Prisma model change, migration, guard,
 
 ## Source of truth — read these before coding
 
-- [SRS_Document.md](SRS_Document.md) — features, flows, **business rules BL-01 → BL-23** (Section 5). Every endpoint must respect every relevant rule. They are not "nice to have"; they are the spec. **Section 11** is the API contract authority and reconciliation appendix — read it carefully.
-- [document/GharSetu_Model_API_Spec.md](document/GharSetu_Model_API_Spec.md) — **authoritative API contract**: data models, REST endpoints, error codes, role-based access matrix. When this conflicts with anything else, SRS §11 reconciliation wins; otherwise this spec is canonical for endpoints, error codes, and pagination.
-- [Test_Cases.md](Test_Cases.md) — sections 4–8 (Users, Properties, Leases, Maintenance, Rent) and Section 13 (Negative tests) are your acceptance criteria.
+- [SRS_Document.md](../../docs/product/SRS_Document.md) — features, flows, **business rules BL-01 → BL-23** (Section 5). Every endpoint must respect every relevant rule. They are not "nice to have"; they are the spec. **Section 11** is the API contract authority and reconciliation appendix — read it carefully.
+- [GharSetu_Model_API_Spec.md](../../docs/product/v1/GharSetu_Model_API_Spec.md) — **authoritative API contract**: data models, REST endpoints, error codes, role-based access matrix. When this conflicts with anything else, SRS §11 reconciliation wins; otherwise this spec is canonical for endpoints, error codes, and pagination.
+- [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — sections 4–8 (Users, Properties, Leases, Maintenance, Rent) and Section 13 (Negative tests) are your acceptance criteria.
 - [prototype/](prototype/) — UI shows the data shapes, statuses, and field requirements.
 
-## Stack — fixed, see [SRS Section 10](../../SRS_Document.md#10-technology-stack)
+## Stack — fixed, see [SRS Section 10](../../docs/product/SRS_Document.md#10-technology-stack)
 
 - **NestJS (N-1)** — latest stable major minus one, modular: one Module per domain (`auth`, `users`, `properties`, `leases`, `maintenance`, `payments`, `audit`)
 - **Node.js 22 LTS** (pin in `engines.node`)
@@ -83,7 +83,7 @@ These are **server-side hard checks** that the UI cannot bypass.
 
 ## Auth & RBAC
 
-- Four roles (per [SRS §11.4](../../SRS_Document.md#114-conventions-adopted-from-the-api-spec)): `ADMIN`, `MANAGER`, `MAINTENANCE`, `TENANT`
+- Four roles (per [SRS §11.4](../../docs/product/SRS_Document.md#114-conventions-adopted-from-the-api-spec)): `ADMIN`, `MANAGER`, `MAINTENANCE`, `TENANT`
 - Use a `Roles()` decorator + `RolesGuard`
 - Use a `Scope()` decorator for per-property / per-lease scoping (e.g. a TENANT user can only access their own lease IDs)
 - Refresh tokens revocable (server-stored hashes, individually invalidatable)

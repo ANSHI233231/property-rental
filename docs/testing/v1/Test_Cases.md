@@ -1,6 +1,6 @@
 # GharSetu — Test Case Document
 **Version:** 1.0 · **Date:** May 2026
-**Refers to:** [SRS_Document.md](SRS_Document.md) (business rules BL-01 → BL-23)
+**Refers to:** [SRS_Document.md](../../product/SRS_Document.md) (business rules BL-01 → BL-23)
 
 ---
 
@@ -218,7 +218,7 @@ These cover the four-role boundary. The UI must not even *show* features the rol
 | TC-PROFILE-012 | Tenant cannot edit unit / lease via profile | Tenant → Profile → "Edit phone / email" | Only contact fields editable. Unit, Lease, Co-tenant rows are read-only. Footnote names the PM (Sunita Arora) as the contact for changes. | P1 |
 | TC-PROFILE-013 | PM cannot reassign their own property | PM → Profile | Assigned property displayed read-only. No "Change property" control. | P1 |
 
-> **Note:** TC-PROFILE-008 (sign-out-all-sessions), TC-PROFILE-009 (last sign-in display), and TC-PROFILE-011 (2FA setup) were **removed** in the v1 reconciliation. Multi-session UI and 2FA are out of scope for v1 — see [SRS §11.3](SRS_Document.md#113-endpoints-explicitly-removed-from-the-v1-plan). IDs are not reassigned (leave gaps) so existing references stay traceable.
+> **Note:** TC-PROFILE-008 (sign-out-all-sessions), TC-PROFILE-009 (last sign-in display), and TC-PROFILE-011 (2FA setup) were **removed** in the v1 reconciliation. Multi-session UI and 2FA are out of scope for v1 — see [SRS §11.3](../../product/SRS_Document.md#113-endpoints-explicitly-removed-from-the-v1-plan). IDs are not reassigned (leave gaps) so existing references stay traceable.
 
 ---
 

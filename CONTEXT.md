@@ -1,6 +1,6 @@
 # CONTEXT.md — GharSetu
 
-At-a-glance snapshot of the repository for anyone (human or agent) walking in cold. This file is descriptive, not aspirational: it describes what is **actually on disk today** (2026-05-20, HEAD `283a245`). For the developer-onboarding view (install, env vars, scripts, troubleshooting), see [README.md](README.md); for the spec, see [SRS_Document.md](SRS_Document.md).
+At-a-glance snapshot of the repository for anyone (human or agent) walking in cold. This file is descriptive, not aspirational: it describes what is **actually on disk today** (2026-05-20, HEAD `283a245`). For the developer-onboarding view (install, env vars, scripts, troubleshooting), see [README.md](README.md); for the spec, see [SRS_Document.md](docs/product/SRS_Document.md).
 
 > **Heads-up on stale doc.** [CLAUDE.md](CLAUDE.md) still describes this as a *greenfield* repo with "no application code". That is no longer true — the monorepo is built out through Phase 8 (security closeout). When the two disagree, trust this file and the live code over CLAUDE.md.
 
@@ -19,7 +19,7 @@ At-a-glance snapshot of the repository for anyone (human or agent) walking in co
 
 ---
 
-## 2. Tech stack (fixed — see [SRS §10](SRS_Document.md))
+## 2. Tech stack (fixed — see [SRS §10](docs/product/SRS_Document.md))
 
 | Layer | Choice |
 |---|---|
@@ -32,7 +32,7 @@ At-a-glance snapshot of the repository for anyone (human or agent) walking in co
 | Locale | `Asia/Kolkata` · DD/MM/YYYY · ₹ Indian digit grouping · `en-IN` |
 | Currency in DB | **paise as `BIGINT`** (₹18,000 → `1800000`). No floats |
 
-**Deliberately out of scope for v1:** payment gateway, SMS/WhatsApp, file uploads, charts, owner login, 2FA, multi-session UI. Transactional auth email (password reset) **is** in. See [SRS §9](SRS_Document.md) and §11.3.
+**Deliberately out of scope for v1:** payment gateway, SMS/WhatsApp, file uploads, charts, owner login, 2FA, multi-session UI. Transactional auth email (password reset) **is** in. See [SRS §9](docs/product/SRS_Document.md) and §11.3.
 
 ---
 
@@ -94,20 +94,29 @@ property-rental/
 │   ├── pm/      (9 pages)
 │   ├── tenant/  (4 pages)
 │   └── maintenance/ (3 pages)
-├── document/                         Source-of-truth specs (.docx + .md)
-│   ├── Blueprint_Property_Rental_Application_v8.docx
-│   ├── GharSetu_UIUX_Design_Document_updated.docx
-│   ├── GharSetu_Model_API_Spec.md    · canonical REST contract (authoritative for endpoints)
-│   └── GharSetu_Model_API_Spec_v2.docx
 ├── docs/
-│   ├── MASTER_PLAN.md                · Phase 0 → 8 plan (with acceptance gates per phase)
-│   ├── phase-0/SECURITY_REVIEW.md
-│   ├── security/phase-1..8-*.md      · 8 security review reports — phase-8-vapt-report.md is the final VAPT
-│   └── testing/phase-1..8-*.md       · per-phase test reports + bl-traceability-matrix.md + phase-8-final-regression-report.md
+│   ├── planning/
+│   │   ├── DOCUMENT_AGENT.md         · document agent briefing
+│   │   └── v1/
+│   │       ├── MASTER_PLAN.md        · Phase 0 → 8 plan (with acceptance gates per phase)
+│   │       ├── MULTI_REPO_SETUP.md   · submodule day-2 workflow
+│   │       ├── TODO_pm_to_manager_rename.md
+│   │       ├── Agent_Collaboration_Handbook.docx
+│   │       └── phase-0/SECURITY_REVIEW.md
+│   ├── product/
+│   │   ├── SRS_Document.md           · SRS incl. BL-01..23 (Section 5) and stack lock (Section 10)
+│   │   ├── Solution_Overview.docx
+│   │   └── v1/                       · source-of-truth specs (.docx + canonical API spec)
+│   │       ├── Blueprint_Property_Rental_Application_v8.docx
+│   │       ├── GharSetu_UIUX_Design_Document_updated.docx
+│   │       ├── GharSetu_Model_API_Spec.md    · canonical REST contract (authoritative for endpoints)
+│   │       └── GharSetu_Model_API_Spec_v2.docx
+│   ├── requirement/                  · PROJECT_REPORT.docx — v1 gap analysis (regenerable via doc-assets/templates/generate_project_report.js)
+│   └── testing/
+│       ├── v1/                       · per-phase test reports + bl-traceability-matrix.md + phase-8-final-regression-report.md + Test_Cases.md (~110 cases)
+│       └── security/phase-1..8-*.md  · 8 security review reports — phase-8-vapt-report.md is the final VAPT
 ├── .claude/agents/                   5 subagents — gharsetu-{lead,frontend,backend,tester,security}
 ├── backups/                          DB dumps (pre-refactor and dated snapshots) — do not commit, do not edit
-├── SRS_Document.md                   SRS incl. BL-01..23 (Section 5) and stack lock (Section 10)
-├── Test_Cases.md                     ~110 test cases mapped to BL rules
 ├── docker-compose.yml                Postgres 18 on host :5433 (intentionally non-default)
 ├── .env.example                      root template — copied to apps/api/.env
 ├── smoke.sh                          login + 4 list-endpoints smoke test
@@ -117,9 +126,9 @@ property-rental/
 
 ---
 
-## 4. The 23 hard business rules ([SRS §5](SRS_Document.md))
+## 4. The 23 hard business rules ([SRS §5](docs/product/SRS_Document.md))
 
-Every implementation **must enforce these at the API/DB layer**, not just in the UI. Most have direct test coverage in [Test_Cases.md](Test_Cases.md), and many have dedicated Playwright specs under `apps/web/e2e/bl-*.spec.ts`.
+Every implementation **must enforce these at the API/DB layer**, not just in the UI. Most have direct test coverage in [Test_Cases.md](docs/testing/v1/Test_Cases.md), and many have dedicated Playwright specs under `apps/web/e2e/bl-*.spec.ts`.
 
 | # | Rule (one-liner) |
 |---|---|
@@ -171,12 +180,12 @@ Every implementation **must enforce these at the API/DB layer**, not just in the
 
 ## 6. Build status (Phase 0 → 8)
 
-The [docs/MASTER_PLAN.md](docs/MASTER_PLAN.md) lays out 9 phases. Evidence on disk (migrations, security reports, test reports) shows all phases have landed through **Phase 8 closeout**:
+The [docs/planning/v1/MASTER_PLAN.md](docs/planning/v1/MASTER_PLAN.md) lays out 9 phases. Evidence on disk (migrations, security reports, test reports) shows all phases have landed through **Phase 8 closeout**:
 
 | Phase | Scope | Evidence |
 |---|---|---|
 | **0** | Monorepo scaffold, tooling | root `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, docker-compose.yml |
-| **1** | Auth + roles + RBAC | `auth/` module, migration `20260510121443_phase_1_auth`, `docs/security/phase-1-auth-review.md` |
+| **1** | Auth + roles + RBAC | `auth/` module, migration `20260510121443_phase_1_auth`, `docs/testing/security/phase-1-auth-review.md` |
 | **2** | Properties + Units + Admin user CRUD | migrations `…_phase_2_props_units_users`, `…_phase_2_db_level_guards`; admin pages |
 | **3** | Tenants + Leases + co-tenant flows | migration `…_phase_3_tenants_leases`, `pm/leases/[id]`, tenant approval UI |
 | **4** | Rent collection + late-fee accrual + cron | migration `…_phase_4_rent_payments`, `rent/` module, `jobs/`, `bl-13-late-fee-breakdown.spec.ts` |
@@ -202,11 +211,11 @@ f815655 docs: prototype + blueprint refresh
 
 When two documents disagree, this is the order of authority:
 
-1. **[SRS_Document.md](SRS_Document.md)** — single source of truth for product scope, business rules, and stack. §11 resolves any SRS-vs-API-spec conflict.
-2. **[document/GharSetu_Model_API_Spec.md](document/GharSetu_Model_API_Spec.md)** — authoritative for endpoint paths, DTO fields, error codes, role-access matrix.
+1. **[SRS_Document.md](docs/product/SRS_Document.md)** — single source of truth for product scope, business rules, and stack. §11 resolves any SRS-vs-API-spec conflict.
+2. **[docs/product/v1/GharSetu_Model_API_Spec.md](docs/product/v1/GharSetu_Model_API_Spec.md)** — authoritative for endpoint paths, DTO fields, error codes, role-access matrix.
 3. **[prototype/](prototype/)** — design contract. Live UI ports it 1:1; tokens in `prototype/assets/styles.css` are non-negotiable.
-4. **[Test_Cases.md](Test_Cases.md)** — ~110 test cases mapped back to BL rules (the BL traceability lives at [docs/testing/bl-traceability-matrix.md](docs/testing/bl-traceability-matrix.md)).
-5. **`.docx` files** in [document/](document/) — the original blueprint and UI/UX design docs. Binary — convert with `pandoc`/`docx2txt` or have the user excerpt before quoting.
+4. **[Test_Cases.md](docs/testing/v1/Test_Cases.md)** — ~110 test cases mapped back to BL rules (the BL traceability lives at [docs/testing/v1/bl-traceability-matrix.md](docs/testing/v1/bl-traceability-matrix.md)).
+5. **`.docx` files** in [docs/product/v1/](docs/product/v1/) — the original blueprint and UI/UX design docs. Binary — convert with `pandoc`/`docx2txt` or have the user excerpt before quoting.
 6. **[README.md](README.md)** — developer onboarding (install, env, scripts, troubleshooting).
 7. **CLAUDE.md** — **outdated**, see top of this file. Treat as historical until refreshed.
 
@@ -224,7 +233,7 @@ Five specialized subagents in [.claude/agents/](.claude/agents/) — invoke via 
 | `gharsetu-tester` | Sonnet 4.6 | Jest / Vitest / Playwright / `Test_Cases.md` runs |
 | `gharsetu-security` | Sonnet 4.6 | VAPT, OWASP, role-scope leak audits, CVE scans |
 
-Default entry point is **`gharsetu-lead`** for anything non-trivial. See [AGENTS.md](AGENTS.md) for the delivery flow and [Agent_Collaboration_Handbook.docx](Agent_Collaboration_Handbook.docx) for the postmortem template and handoff conventions.
+Default entry point is **`gharsetu-lead`** for anything non-trivial. See [AGENTS.md](AGENTS.md) for the delivery flow and [Agent_Collaboration_Handbook.docx](docs/planning/v1/Agent_Collaboration_Handbook.docx) for the postmortem template and handoff conventions.
 
 ---
 
@@ -236,5 +245,5 @@ Default entry point is **`gharsetu-lead`** for anything non-trivial. See [AGENTS
 - **Currency is paise `BIGINT`** — never store rupees as float. Use `paiseToRupees` / `formatINR` from `@gharsetu/shared`.
 - **Validator UX** — do not let `react-hook-form` fall back to native browser tooltips. Errors render below the field with the ⚠ glyph, matching the prototype.
 - **Auth tokens** — access JWT in `Authorization: Bearer …`, refresh token in `HttpOnly Secure SameSite=Strict` cookie at `/api/v1/auth`. Never put JWTs in localStorage.
-- **No public sign-up, no SMS/WhatsApp, no file uploads, no payment gateway, no 2FA, no session-management UI** — all explicitly descoped in [SRS §9](SRS_Document.md) and §11.3.
+- **No public sign-up, no SMS/WhatsApp, no file uploads, no payment gateway, no 2FA, no session-management UI** — all explicitly descoped in [SRS §9](docs/product/SRS_Document.md) and §11.3.
 - **`backups/`** holds raw Postgres dumps from before/around the int-ID refactor. Treat as read-only artefacts.

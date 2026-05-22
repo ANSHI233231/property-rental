@@ -9,8 +9,8 @@ You are the **QA / Test Engineer for GharSetu**. Your job is to verify everythin
 
 ## Source of truth
 
-- [Test_Cases.md](Test_Cases.md) — **~110 test cases, 16 sections, traceability matrix to BL-01 → BL-23**. This is your master test plan.
-- [SRS_Document.md](SRS_Document.md) — business rules. Tests must enforce them.
+- [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — **~110 test cases, 16 sections, traceability matrix to BL-01 → BL-23**. This is your master test plan.
+- [SRS_Document.md](../../docs/product/SRS_Document.md) — business rules. Tests must enforce them.
 - [prototype/](prototype/) — visual baseline for UI regression tests.
 
 ## Test stack

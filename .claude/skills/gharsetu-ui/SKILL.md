@@ -122,7 +122,7 @@ Focus ring: 2px saffron outline at 2px offset. Never remove `:focus-visible`.
 
 ## Business-rule UI implications
 
-Critical rules that shape what the UI must display or block. Full list: [SRS_Document.md](../../../SRS_Document.md).
+Critical rules that shape what the UI must display or block. Full list: [SRS_Document.md](../../../docs/product/SRS_Document.md).
 
 | Rule | UI implication |
 |---|---|
@@ -198,4 +198,4 @@ Time-of-day in tables uses 24h `HH:mm`. Relative times only in audit log toasts 
 | Form work | `prototype/assets/validation.js`; an existing RHF+zod page like `/login` |
 | Responsive fix | This skill's responsive contract; `apps/web/src/app/globals.css` |
 | Accessibility fix | This skill's accessibility floor; run axe / Lighthouse on the page |
-| Role-scope question | [SRS_Document.md](../../../SRS_Document.md) §5 (RBAC matrix); the role's sidebar component |
+| Role-scope question | [SRS_Document.md](../../../docs/product/SRS_Document.md) §5 (RBAC matrix); the role's sidebar component |

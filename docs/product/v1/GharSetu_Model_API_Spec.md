@@ -4,7 +4,7 @@
 **Data Models · Business Rules · API Contracts**
 **Version 1.0 · May 2026**
 
-> Markdown rendition of `document/GharSetu_Model_API_Spec.docx` for searchability and agent consumption. The `.docx` remains the human-readable canonical source. If the two ever diverge, **the `.docx` wins for visual layout; this `.md` wins for code-level decisions** (since this is what agents will grep).
+> Markdown rendition of `GharSetu_Model_API_Spec_v2.docx` (sibling file in this folder) for searchability and agent consumption. The `.docx` remains the human-readable canonical source. If the two ever diverge, **the `.docx` wins for visual layout; this `.md` wins for code-level decisions** (since this is what agents will grep).
 
 > **GharSetu reconciliation notes** (decisions made by the project lead after the spec was authored) are captured in [SRS_Document.md §11](../SRS_Document.md#11-api-contract-authority--spec-reconciliation). When the spec and the SRS conflict, the SRS reconciliation wins.
 

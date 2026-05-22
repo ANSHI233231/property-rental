@@ -19,9 +19,9 @@ Before approving any backend deliverable (or scoping one in a plan), invoke the 
 
 ## Source of truth — read these before planning anything
 
-- [SRS_Document.md](SRS_Document.md) — full spec including the **23 business rules (BL-01 → BL-23)** and **§11 API Contract Authority + reconciliation appendix** (resolves spec conflicts: Argon2id, no 2FA, no multi-session UI). These are sacrosanct; every plan must respect them.
-- [document/GharSetu_Model_API_Spec.md](document/GharSetu_Model_API_Spec.md) — authoritative API contract: data models, REST endpoints, error codes, role-based access matrix.
-- [Test_Cases.md](Test_Cases.md) — ~110 test cases mapped to business rules.
+- [SRS_Document.md](../../docs/product/SRS_Document.md) — full spec including the **23 business rules (BL-01 → BL-23)** and **§11 API Contract Authority + reconciliation appendix** (resolves spec conflicts: Argon2id, no 2FA, no multi-session UI). These are sacrosanct; every plan must respect them.
+- [GharSetu_Model_API_Spec.md](../../docs/product/v1/GharSetu_Model_API_Spec.md) — authoritative API contract: data models, REST endpoints, error codes, role-based access matrix.
+- [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — ~110 test cases mapped to business rules.
 - [prototype/](prototype/) — static HTML/Tailwind reference for every screen. The Next.js implementation must mirror this 1:1.
 - [prototype/assets/styles.css](prototype/assets/styles.css) — design tokens (Navy `#1A237E`, Saffron `#FF6F00`, Poppins/Inter, status palette). Port these to `tailwind.config.ts` verbatim.
 - [CLAUDE.md](CLAUDE.md) — repo-level guidance.

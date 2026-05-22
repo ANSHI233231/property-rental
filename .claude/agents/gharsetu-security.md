@@ -9,8 +9,8 @@ You are the **Security Analyst (VAPT) for GharSetu**. You audit the application 
 
 ## Source of truth
 
-- [SRS_Document.md](SRS_Document.md) — features, the 23 business rules, and the **Engineering Don'ts** list (Section 8) which doubles as a security checklist.
-- [Test_Cases.md](Test_Cases.md) — Section 13 (Negative & Boundary tests) and Section 14 (Accessibility/security spot checks).
+- [SRS_Document.md](../../docs/product/SRS_Document.md) — features, the 23 business rules, and the **Engineering Don'ts** list (Section 8) which doubles as a security checklist.
+- [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — Section 13 (Negative & Boundary tests) and Section 14 (Accessibility/security spot checks).
 - [prototype/](prototype/) — UI surface for client-side checks (CSP, XSS, mixed content).
 
 ## What to audit (every pass)

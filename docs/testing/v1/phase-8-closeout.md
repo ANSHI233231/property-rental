@@ -30,11 +30,11 @@
 
 ## OWASP ASVS L1 self-assessment (Phase 7 baseline + Phase 8 patches)
 
-- 32 PASS / 3 PARTIAL / 0 FAIL / 4 N/A per `docs/security/phase-7-owasp-asvs-l1-assessment.md`
+- 32 PASS / 3 PARTIAL / 0 FAIL / 4 N/A per `docs/testing/security/phase-7-owasp-asvs-l1-assessment.md`
 - Phase 8 patches close PARTIAL-01 (password length stays at 10 per documented SRS §10.2 deviation)
 - 2 remaining PARTIALs are intentional N-1 + Next.js-CSP items deferred to a post-v1 hardening pass
 
-## Production deployment checklist (per `docs/security/phase-8-vapt-report.md`)
+## Production deployment checklist (per `docs/testing/security/phase-8-vapt-report.md`)
 
 - `.env` matrix documented (which keys, who sets them, where they live)
 - Migration plan: `prisma migrate deploy` on first boot of each environment

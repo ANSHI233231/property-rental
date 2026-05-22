@@ -5,7 +5,7 @@ description: "GharSetu backend system — NestJS + Prisma + PostgreSQL contract 
 
 # GharSetu Backend System
 
-Authoritative backend contract for `apps/api`. Use this skill whenever you touch NestJS code, Prisma schema, migrations, guards, or business-rule enforcement. The **23 business rules (BL-01 → BL-23)** in [SRS_Document.md](../../../SRS_Document.md) §5 are sacrosanct — every endpoint must respect every applicable rule.
+Authoritative backend contract for `apps/api`. Use this skill whenever you touch NestJS code, Prisma schema, migrations, guards, or business-rule enforcement. The **23 business rules (BL-01 → BL-23)** in [SRS_Document.md](../../../docs/product/SRS_Document.md) §5 are sacrosanct — every endpoint must respect every applicable rule.
 
 ## Hard rules — never violate
 
@@ -20,7 +20,7 @@ Authoritative backend contract for `apps/api`. Use this skill whenever you touch
 9. **No 2FA / TOTP** for v1. No `/auth/2fa/*` endpoints.
 10. **Migrations are append-only and reversible.** Never edit a shipped migration. Add a new one.
 
-## Stack (fixed — see [SRS §10](../../../SRS_Document.md#10-technology-stack))
+## Stack (fixed — see [SRS §10](../../../docs/product/SRS_Document.md#10-technology-stack))
 
 - **NestJS 10** modular: one Module per domain (`auth`, `users`, `properties`, `units`, `leases`, `tenants`, `maintenance`, `rent`, `rent-change-schedule`, `audit`, `audit-log`, `notifications`, `jobs`, `health`, `common`)
 - **Node.js 22 LTS** (pin in `engines.node`). Local environments may run Node 20; warn but don't block.
@@ -164,7 +164,7 @@ Each rule MUST be enforced server-side at the listed layer. UI checks alone are 
 4. `pnpm --filter @gharsetu/api test:e2e` — phase tests (`phase*.test.ts`) cover the BL rules end-to-end
 5. New endpoint? Add a `*.spec.ts` covering: happy path, RBAC denial (each unauthorized role), BL violation (409), validation error (400), idempotent replay
 6. New migration? Verify `prisma migrate reset` + seed runs clean in a fresh DB
-7. Cross-check with [Test_Cases.md](../../../Test_Cases.md) sections 4–8 (Users, Properties, Leases, Maintenance, Rent) + §13 (Negative tests)
+7. Cross-check with [Test_Cases.md](../../../docs/testing/v1/Test_Cases.md) sections 4–8 (Users, Properties, Leases, Maintenance, Rent) + §13 (Negative tests)
 
 ## File-level conventions
 
@@ -202,7 +202,7 @@ Return under 250 words:
 2. **Endpoints added/changed** as `METHOD /path → response shape` table.
 3. **Business rules enforced** (cite BL-NN) and the test that proves it.
 4. **Open issues / known gaps**.
-5. **Test cases that should now pass** (cite IDs from [Test_Cases.md](../../../Test_Cases.md)).
+5. **Test cases that should now pass** (cite IDs from [Test_Cases.md](../../../docs/testing/v1/Test_Cases.md)).
 
 ## Where to start
 
@@ -211,7 +211,7 @@ Return under 250 words:
 | New endpoint | This skill's "Endpoint contract" + the existing module's `*.controller.ts`/`*.service.ts` |
 | New domain module | `apps/api/src/users/` as the canonical example |
 | Schema change | [apps/api/prisma/schema.prisma](../../../apps/api/prisma/schema.prisma) header comment + latest migration as template |
-| Business-rule question | [SRS_Document.md](../../../SRS_Document.md) §5 (BL-NN definitions) + this skill's enforcement table |
+| Business-rule question | [SRS_Document.md](../../../docs/product/SRS_Document.md) §5 (BL-NN definitions) + this skill's enforcement table |
 | Auth/security work | [apps/api/src/auth/security.spec.ts](../../../apps/api/src/auth/security.spec.ts) + [apps/api/src/common/guards/](../../../apps/api/src/common/guards/) |
 | Scheduled job | [apps/api/src/jobs/](../../../apps/api/src/jobs/) — existing BullMQ workers |
 | Audit-log addition | [apps/api/src/audit/](../../../apps/api/src/audit/) + this skill's "Audit log" section |

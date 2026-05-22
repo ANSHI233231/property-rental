@@ -57,7 +57,7 @@ None during Phase 6 acceptance. The one Phase 6 hygiene fix (`created_by_user_id
 
 ## Carry-over items (deferred to Phase 7)
 
-Per `docs/security/phase-6-pre-vapt-walkthrough.md` (commit `62b9218`):
+Per `docs/testing/security/phase-6-pre-vapt-walkthrough.md` (commit `62b9218`):
 - 0 NEW HIGH
 - 2 NEW MED — `POST /auth/reset-password` lacks dedicated rate-limit; integration tests share dev schema
 - 10 carry-over HIGH/MED — `@nestjs/core`, `path-to-regexp`, `lodash` (N-1 blocked); BL-03 / BL-19 / termination race-condition tightening; auth events missing from `audit_log`; `helmet()` not wired; `Idempotency-Key` on `POST /payments`

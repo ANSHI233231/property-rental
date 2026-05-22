@@ -3,7 +3,7 @@
 
 **Version:** 1.0
 **Date:** May 2026
-**Sources:** [Blueprint_Property_Rental_Application_v8](document/Blueprint_Property_Rental_Application_v8.docx), [GharSetu_UIUX_Design_Document_updated](document/GharSetu_UIUX_Design_Document_updated.docx)
+**Sources:** [Blueprint_Property_Rental_Application_v8](v1/Blueprint_Property_Rental_Application_v8.docx), [GharSetu_UIUX_Design_Document_updated](v1/GharSetu_UIUX_Design_Document_updated.docx)
 
 ---
 
@@ -351,7 +351,7 @@ The stack below is **fixed**. Any deviation requires explicit user approval.
 
 ## 11. API Contract Authority & Spec Reconciliation
 
-The detailed REST API contract — entities, fields, endpoints, error codes, role-based access matrix — lives in **[document/GharSetu_Model_API_Spec.md](document/GharSetu_Model_API_Spec.md)** (markdown rendition of the canonical `.docx` in the same folder).
+The detailed REST API contract — entities, fields, endpoints, error codes, role-based access matrix — lives in **[v1/GharSetu_Model_API_Spec.md](v1/GharSetu_Model_API_Spec.md)** (markdown rendition of the canonical `.docx` in the same folder).
 
 That spec is the **authoritative source** for backend implementation: field types, endpoint paths, error codes, and the role-based access matrix.
 
