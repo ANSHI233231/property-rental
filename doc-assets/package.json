@@ -4,6 +4,7 @@
   "description": "Document generators for GharSetu. Per Rule 28, every .docx under docs/product/ is regenerated from the JS source here — never hand-edited.",
   "scripts": {
     "build:solution": "node templates/generate_solution_overview.js",
+    "build:solution-overview": "node templates/generate_solution_overview.js",
     "build:project-report": "node templates/generate_project_report.js"
   },
   "dependencies": {
