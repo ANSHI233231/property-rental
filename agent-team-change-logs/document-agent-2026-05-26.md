@@ -46,12 +46,12 @@ Date: 2026-05-26
 - Duration: ~30m
 
 ### Context
-- User reversed Task 1 scope: bring SAAS layer + Super Admin role + Organisation Management back into scope. Master Data + Settings reframed as **missing modules** in the Fixes section (not new modules). Per-room leasing reframed as a new feature.
+- User reversed Task 1 scope: bring SAAS layer + Super Admin role + Organization Management back into scope. Master Data + Settings reframed as **missing modules** in the Fixes section (not new modules). Per-room leasing reframed as a new feature.
 
 ### Changes
 - Added Master Data Administration + Settings rows to `GAPS_IN_EXISTING_MODULES` array.
 - Dropped Per-room leasing bullet from Module 3 gaps (becoming a new feature).
-- Rewrote `NEW_FEATURES`: dropped Master Data + Settings; added Per-Room Leasing + Organisation Management (SAAS layer).
+- Rewrote `NEW_FEATURES`: dropped Master Data + Settings; added Per-Room Leasing + Organization Management (SAAS layer).
 - Replaced §New Roles body — re-introduced Super Admin with capability bullets.
 - Added 2 SAAS BRs to `NEW_BUSINESS_RULES` (NR-9 org isolation, NR-10 subscription plan cap).
 - Updated cover subtitle + header comment to reflect SAAS in scope.
@@ -156,7 +156,7 @@ Date: 2026-05-26
   - Rent Collection: dropped 2 bullets that duplicated Master Data + Settings new features ("Payment methods baked..." and "Late-fee rate, grace period... baked...").
   - Removed stray "Day 1" mention in PM dashboard fix; later replaced with "scope finalisation" then with specific metrics.
   - Removed "overdue" from Maintenance dashboard fix (overdue is a rent concept per BL-12, not maintenance).
-- **§4 NR-5 rewrite** — resolved the every-user-except-Super-Admin paradox: "Every user belongs to exactly one Organisation, with the sole exception of the Super Admin. The Super Admin is a platform-level role and sits above all organisations. No other role — including Admin — can read or write outside its own Organisation..."
+- **§4 NR-5 rewrite** — resolved the every-user-except-Super-Admin paradox: "Every user belongs to exactly one Organization, with the sole exception of the Super Admin. The Super Admin is a platform-level role and sits above all organizations. No other role — including Admin — can read or write outside its own Organization..."
 - **§3 New Features** — trimmed Impersonation row to 1 bullet (Login-as only) and Delegation row to 2 bullets (Delegate + Window-bounded rights) to remove word-for-word duplication with NR-7 / NR-8.
 - **§3 Master Data Administration** — tightened deactivate bullet to align with NR-4 ("deactivation is only permitted once no records reference them").
 - **§5 Details (new)** — 3 reference tables + 1 paragraph:
@@ -164,7 +164,7 @@ Date: 2026-05-26
   - Admin Impersonation Scope: 5-row × 3-col grid (PM/Maint/Tenant ✓ in own Org; Another Admin and Super Admin ✗)
   - Admin Task Delegation: broad-framing paragraph (any action the Admin is authorised to perform, to PM or Maintenance, for a defined date range)
   - Settings — Defaults and Tunable Ranges: late-fee 2% (0–10%), grace 5 days (0–15), notice 60 days (30–90)
-- **§6 Assumptions (new)** — initially 4 bullets, later trimmed to 3 (Sign-off cadence bullet removed at user request): Data migration to default Organisation (working name "GharSetu Solutions"), ID continuity, Email scope.
+- **§6 Assumptions (new)** — initially 4 bullets, later trimmed to 3 (Sign-off cadence bullet removed at user request): Data migration to default Organization (working name "GharSetu Solutions"), ID continuity, Email scope.
 - **§7 Risks (new)** — initially 3 bullets, later removed entirely at user request.
 - **Cleanup pass**: caught 3 day-N leaks I introduced in new sections ("before Day 1", "extend Day 1 planning", "during Day 4 testing") — all rewritten without day references.
 
@@ -201,3 +201,65 @@ Date: 2026-05-26
 
 ### Notes
 - Times in this file are session-approximate, not wall-clock precise — Claude doesn't have a continuous time-of-day reference across turns.
+
+---
+
+## Task 7 — Solution Overview polish + spelling sweep + UIUX Design Document
+
+- Status: ✅ Completed
+- Started: 2026-05-26 19:45 IST (approx.)
+- Completed: 2026-05-27 00:30 IST (approx.)
+- Duration: ~4h 45m
+
+### Solution Overview — copy edits + content moves
+
+- Replaced jargon in Rent Collection fix: "Late fee and total payable populated by overnight job — stale between runs" → "Late fee and outstanding amount only refresh once a day — figures on screen can be a day out of date between refreshes." (client-friendly language)
+- Dashboard PM bullet expanded to cover **both Admin and PM dashboards incomplete** with the same missing metrics.
+- Visitor Management pre-approval bullet: "expected time" → "expected date and time".
+- Master Data Administration: dropped the Sourcing bullet (already in NR-3, no duplication).
+- Removed the "Another Admin" row from the Admin Impersonation Scope table (single Admin per org today).
+- Added a sixth bullet to the Maintenance Requests fix row covering the missing 5+ alert on the Admin dashboard.
+
+### UIUX Design Document — generator created + iterated
+
+- Initial copy of `docs/product/v1/Design_Document.docx` (engineering) → `docs/product/Design_Document.docx` for working baseline.
+- Built first generator (`doc-assets/templates/generate_design_document.js`) as a merged UI/UX + system doc (Path C).
+- Client correction: rewrote as **UI/UX only** — stripped DB, API, Auth, Architecture, Modules, Frontend Structure, Known Issues, Future Improvements. Kept Design Tokens, Layout Foundations, Components, Accessibility; added Design Principles, Information Architecture, Page Layout Templates, Interaction Patterns.
+- Renamed output to `docs/product/UIUX_Design_Document.docx` (per client direction to add "UIUX" to filename). Removed the interim `Design_Document.docx`.
+- Color audit: caught 13 invented values (focus ring colour, primary-button colour, secondary-button spec, radii, shadows, modal max-width, backdrop rgba, table stripe). All replaced with verbatim values from `prototype/assets/styles.css`. Final hex allow-list (18 colours) matches prototype exactly.
+- Pulled missing content from `v1/GharSetu_UIUX_Design_Document_updated.docx`: desktop + mobile typography sizes, color usage rules, readability settings (line height 1.6 / 1.3 / 1.5, max line length 680 px), 7 wireframes (later refactored — see below), specific WCAG contrast ratios (Navy on white 15:1 AAA, Slate on off-white 8.4:1 AAA), launch checklist.
+- Made document explicitly responsive: added "Fluid from 320 px to 1440 px+" principle to §1, added a 14-row Component Responsive Transformations table to §3 (page chrome, dashboard, list/table, detail, form, modal, drawer, toast, sub-nav, filter bar, KPI card, touch targets, spacing).
+- Refactored wireframes from ASCII art to structured Zone / Content tables (7 per-screen tables). ASCII chars don't render consistently in Word; the table approach is scannable and maintainable.
+- Refactored Launch Checklist from one 25-row table to 7 per-Area sub-tables (Color · Typography · Layout · Roles · Behaviour · Accessibility · Testing) for scannability.
+
+### Routing model
+
+- Started with role-prefixed paths (`/admin/...`, `/pm/...`), pivoted to shared paths (`/dashboard`, `/users`, …), then pivoted again to the final three-class model:
+  - **Org-scoped** routes carry the org slug as first segment: `/:org/dashboard`, `/:org/users`, etc.
+  - **Platform** routes (Super Admin) carry no slug: `/dashboard`, `/organizations`, `/plans`, etc.
+  - **Public** routes (login, password reset, org sign-up) carry no slug.
+- Org sign-up route locked at `/organization-signup` (American spelling).
+
+### Spelling sweep
+
+- Client direction: standardize to American English ("organization") everywhere.
+- Sed sweep across active planning + generator files (AGENTS.md, CLAUDE.md, claude-progress.md, feature_list.json, three generator JS files, both 2026-05-26 change logs). Replaced both "Organisation" and "organisation". Re-generated Solution_Overview.docx, UIUX_Design_Document.docx, Timeline.xlsx.
+- Final state: zero "Organisation" remains in any active file; UIUX doc display label and URL both use American spelling.
+
+### Build:design script
+
+- Registered `build:design` in `doc-assets/package.json`.
+
+### Files Changed
+- `doc-assets/templates/generate_solution_overview.js` (copy edits + spelling)
+- `doc-assets/templates/generate_design_document.js` (new file — final v3 UIUX-only)
+- `doc-assets/templates/generate_timeline.js` (spelling)
+- `doc-assets/package.json` (+`build:design`)
+- `docs/product/Solution_Overview.docx` (regenerated)
+- `docs/product/UIUX_Design_Document.docx` (new file)
+- `docs/product/Timeline.xlsx` (regenerated)
+
+### Notes
+- All UIUX colours verified against `prototype/assets/styles.css` — zero invented.
+- All UIUX paths use `/:org/...` for tenant-scoped pages; Super Admin and public routes use flat paths.
+- Document size trajectory: UIUX 26 KB (engineering Path C) → 25 KB (UIUX-only) → 33 KB (after pulling old-doc content) → 35.5 KB (after responsive transforms + restructured wireframes/checklist).

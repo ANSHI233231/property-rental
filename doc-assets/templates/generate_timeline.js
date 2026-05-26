@@ -80,7 +80,7 @@ const SCHEDULE = [
   [10, 'Visitor Management',     'New Feature', 'Tenant pre-approval + PM approval/deny + check-in/out timestamps (per-property log).',                                                     'Plan', 'Proto', 'Build', 'Test', 'UAT', 'BE + FE'],
   [11, 'Master Data Administration', 'New Feature', 'Amenities, Maintenance Categories, Payment Methods, City, State — create/edit/deactivate by Admin; forms read live from Master Data.', 'Plan', 'Proto', 'Build', 'Test', 'UAT', 'BE + FE'],
   [12, 'Settings',               'New Feature', 'Tunable late-fee rate, grace period, rent-change notice window — Admin tunes from UI.',                                                    'Plan', 'Proto', 'Build', 'Test', 'UAT', 'BE + FE'],
-  [13, 'Organisation Management', 'New Feature', 'SAAS layer — public org sign-up + Super Admin approval; Subscription Plans (Basic/Standard/Premium) capping active users; org lifecycle.', 'Plan', 'Proto', 'Build', 'Test', 'UAT', 'BE + FE + DBA'],
+  [13, 'Organization Management', 'New Feature', 'SAAS layer — public org sign-up + Super Admin approval; Subscription Plans (Basic/Standard/Premium) capping active users; org lifecycle.', 'Plan', 'Proto', 'Build', 'Test', 'UAT', 'BE + FE + DBA'],
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

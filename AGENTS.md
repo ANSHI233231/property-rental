@@ -67,12 +67,12 @@ Use gharsetu-security to VAPT the auth flow.
 
 ## Hard rules every agent follows
 
-> **Scope:** these apply to the **current engagement** (Solution Overview v8 — final close 2026-05-26) and the v1 release that precedes it. The current engagement now includes the SAAS layer, Super Admin role, Admin Impersonation, and Admin Task Delegation. Only subscription billing and custom-domain branding remain deferred — see [docs/planning/v2-saas-roadmap.md](docs/planning/v2-saas-roadmap.md).
+> **Scope:** these apply to the **current engagement** (Solution Overview v8 — final close 2026-05-26) and the v1 release that precedes it. The current engagement now includes the SAAS layer, Super Admin role, Admin Impersonation, and Admin Task Delegation. Only subscription billing and custom-domain branding remain deferred — see [docs/product/Solution_Overview.docx](docs/product/Solution_Overview.docx) §Out of Scope and [feature_list.json](feature_list.json) `deferred_post_engagement`.
 
 - **The 23 business rules ([SRS §5](docs/product/SRS_Document.md)) are non-negotiable.** Any code or test that violates one fails review. All 23 are currently `passing` per [feature_list.json](feature_list.json).
 - **The prototype is the design contract.** Tokens in [prototype/assets/styles.css](prototype/assets/styles.css) port verbatim to `tailwind.config.ts`.
 - **Dates: DD/MM/YYYY. Currency: ₹ with Indian digit grouping. Timezone: Asia/Kolkata.** UTC in DB, IST on the wire.
-- **Scope guardrails** — Tenant self-signup remains forbidden (tenants come from leases only). No SMS/WhatsApp business notifications · no file uploads · no online payment gateway · no 2FA · no multi-session UI · no custom domains or per-organisation branding. Transactional auth email (password reset, rent-change notification) IS in. **Public organisation sign-up IS in scope** (per Solution Overview v8 — handled by Super Admin approval; tenant sign-up is still out). **Admin Impersonation and Admin Task Delegation are IN scope** for the current engagement. Subscription billing remains manual-invoice only.
+- **Scope guardrails** — Tenant self-signup remains forbidden (tenants come from leases only). No SMS/WhatsApp business notifications · no file uploads · no online payment gateway · no 2FA · no multi-session UI · no custom domains or per-organization branding. Transactional auth email (password reset, rent-change notification) IS in. **Public organization sign-up IS in scope** (per Solution Overview v8 — handled by Super Admin approval; tenant sign-up is still out). **Admin Impersonation and Admin Task Delegation are IN scope** for the current engagement. Subscription billing remains manual-invoice only.
 - **The custom validator ([prototype/assets/validation.js](prototype/assets/validation.js)) replaces native browser tooltips.** Errors render below the field, with the ⚠ glyph.
 - **Append-only state model.** Retire instead of delete; reverse instead of edit; audit log is immutable.
 - **Worker ≠ Checker.** No agent writes `state: "passing"` to `feature_list.json` for its own work. Only `gharsetu-lead`, only after verification.
@@ -124,7 +124,6 @@ property-rental/
 ├── docs/
 │   ├── product/SRS_Document.md              ← spec (incl. BL-01 → BL-23)
 │   ├── product/Solution_Overview.docx       ← current engagement scope (generated, v8)
-│   ├── planning/v2-saas-roadmap.md          ← deferred SAAS engagement
 │   ├── testing/v1/Test_Cases.md             ← ~110 test cases
 │   ├── testing/v1/bl-traceability-matrix.md ← human-readable BL → test mapping
 │   └── testing/security/*                   ← VAPT + OWASP ASVS L1 reports

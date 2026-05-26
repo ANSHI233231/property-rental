@@ -3,7 +3,7 @@
   "description": "Machine-readable state of every business rule and feature in GharSetu. Single source of truth for what is passing, in flight, blocked, or not started. Only gharsetu-lead writes state='passing', and only after the verification command exits 0 in a clean environment. See .claude/skills/harness-engineering/SKILL.md for the contract.",
   "updated": "2026-05-26",
   "head": "6a537a4",
-  "scope_note": "The 'current_engagement_features' bucket aligns with docs/product/Solution_Overview.docx v8 (2026-05-26 — final-close). The SAAS layer + Super Admin role + Admin Impersonation + Admin Task Delegation were all pulled forward into the current engagement on 2026-05-26 (previously deferred to v2). What remains under 'deferred' (in docs/planning/v2-saas-roadmap.md): subscription billing integration, custom domains + per-org branding only.",
+  "scope_note": "The 'current_engagement_features' bucket aligns with docs/product/Solution_Overview.docx v8 (2026-05-26 — final-close). The SAAS layer + Super Admin role + Admin Impersonation + Admin Task Delegation were all pulled forward into the current engagement on 2026-05-26 (previously deferred to v2). What remains under 'deferred' (see docs/product/Solution_Overview.docx §Out of Scope): subscription billing integration, custom domains + per-org branding only.",
   "legend": {
     "state": ["not_started", "in_progress", "blocked", "passing"],
     "layer": ["DB", "DB trigger", "Service unit", "Integration", "Serializable tx", "E2E", "Unit"]
@@ -321,9 +321,9 @@
     },
     {
       "id": "ENG-F06",
-      "behavior": "Organisation Management (SAAS layer): public organisation sign-up; Super Admin reviews + approves; on approval the organisation is provisioned and its first Admin auto-created. Subscription Plans catalogue (Basic / Standard / Premium) caps active users. Super Admin can view / deactivate / re-plan any organisation. Shared-schema multi-tenancy with organisation_id on every table + Postgres RLS.",
-      "verification": "pnpm --filter @gharsetu/api test -t 'organisation.*sign-up.*super admin approval'; pnpm --filter @gharsetu/api test -t 'RLS.*cross-org'",
-      "evidence": ["docs/product/Solution_Overview.docx §New Features → Organisation Management (SAAS layer)", "docs/planning/v2-saas-roadmap.md §Foundational decisions"],
+      "behavior": "Organization Management (SAAS layer): public organization sign-up; Super Admin reviews + approves; on approval the organization is provisioned and its first Admin auto-created. Subscription Plans catalogue (Basic / Standard / Premium) caps active users. Super Admin can view / deactivate / re-plan any organization. Shared-schema multi-tenancy with organization_id on every table + Postgres RLS.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'organization.*sign-up.*super admin approval'; pnpm --filter @gharsetu/api test -t 'RLS.*cross-org'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Features → Organization Management (SAAS layer)", "feature_list.json saas_design_decisions_locked"],
       "layer": "DB + Integration",
       "phase": "current",
       "state": "not_started",
@@ -332,8 +332,8 @@
     },
     {
       "id": "ENG-F07",
-      "behavior": "Super Admin role (platform-level, above all organisations). Sole role that crosses organisation boundaries. Capabilities: approve organisation sign-up, manage Subscription Plans, view / deactivate / re-plan any organisation. Admin role remains scoped to its own organisation.",
-      "verification": "pnpm --filter @gharsetu/api test -t 'super admin.*cross-organisation'; pnpm --filter @gharsetu/api test -t 'admin.*cannot.*cross-org'",
+      "behavior": "Super Admin role (platform-level, above all organizations). Sole role that crosses organization boundaries. Capabilities: approve organization sign-up, manage Subscription Plans, view / deactivate / re-plan any organization. Admin role remains scoped to its own organization.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'super admin.*cross-organization'; pnpm --filter @gharsetu/api test -t 'admin.*cannot.*cross-org'",
       "evidence": ["docs/product/Solution_Overview.docx §New Roles", "docs/product/Solution_Overview.docx §Business Rules NR-5"],
       "layer": "Integration",
       "phase": "current",
@@ -343,7 +343,7 @@
     },
     {
       "id": "ENG-F08",
-      "behavior": "Admin Impersonation — login-as. Admin starts an impersonation session as any Property Manager, Maintenance Team member or Tenant within own Organisation; session is end-able at any time. Audit attribution: every action recorded against the Admin, not the impersonated user. Boundary: cannot impersonate Super Admin; cannot impersonate users outside own Organisation; cannot impersonate other Admins.",
+      "behavior": "Admin Impersonation — login-as. Admin starts an impersonation session as any Property Manager, Maintenance Team member or Tenant within own Organization; session is end-able at any time. Audit attribution: every action recorded against the Admin, not the impersonated user. Boundary: cannot impersonate Super Admin; cannot impersonate users outside own Organization; cannot impersonate other Admins.",
       "verification": "pnpm --filter @gharsetu/api test -t 'impersonation.*audit.*admin'; pnpm --filter @gharsetu/api test -t 'impersonation.*boundary'",
       "evidence": ["docs/product/Solution_Overview.docx §New Features → Users & Access — Admin Impersonation", "docs/product/Solution_Overview.docx §Details → Admin Impersonation Scope", "docs/product/Solution_Overview.docx §Business Rules NR-7"],
       "layer": "Integration",
@@ -431,13 +431,13 @@
     },
     {
       "id": "LOCK-02",
-      "behavior": "SAAS-level entity named 'Organisation'. Existing TENANT role keeps that name. New column: organisation_id on every tenant-scoped table.",
+      "behavior": "SAAS-level entity named 'Organization'. Existing TENANT role keeps that name. New column: organization_id on every tenant-scoped table.",
       "state": "locked",
       "updated": "2026-05-24"
     },
     {
       "id": "LOCK-03",
-      "behavior": "Data isolation: shared schema + organisation_id on every table + Postgres Row-Level Security. Super Admin sits above this boundary.",
+      "behavior": "Data isolation: shared schema + organization_id on every table + Postgres Row-Level Security. Super Admin sits above this boundary.",
       "state": "locked",
       "updated": "2026-05-24"
     },
@@ -458,7 +458,7 @@
     },
     {
       "id": "DEF-02",
-      "behavior": "Custom domains and per-organisation branding (logo, colours).",
+      "behavior": "Custom domains and per-organization branding (logo, colours).",
       "state": "deferred",
       "source": "docs/product/Solution_Overview.docx §Out of Scope",
       "updated": "2026-05-26"

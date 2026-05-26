@@ -6,7 +6,8 @@
     "build:solution": "node templates/generate_solution_overview.js",
     "build:solution-overview": "node templates/generate_solution_overview.js",
     "build:project-report": "node templates/generate_project_report.js",
-    "build:timeline": "node templates/generate_timeline.js"
+    "build:timeline": "node templates/generate_timeline.js",
+    "build:design": "node templates/generate_design_document.js"
   },
   "dependencies": {
     "docx": "^9.5.0",

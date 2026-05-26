@@ -35,9 +35,8 @@ Every agent action must respect all five. The repo's current state of each is in
 1. Read claude-progress.md          ← what state are we actually in?
 2. Read feature_list.json           ← what's next / blocked / passing?
 3. Read CLAUDE.md + AGENTS.md       ← any rules I should know?
-4. Read docs/planning/v2-saas-roadmap.md if v2 work is mentioned
-5. git log -10                      ← what changed since last session?
-6. If anything in 1–5 contradicts what you remember, TRUST the files.
+4. git log -10                      ← what changed since last session?
+5. If anything in 1–4 contradicts what you remember, TRUST the files.
 ```
 
 Until those five reads are complete, do not delegate, do not write code, do not declare a plan.

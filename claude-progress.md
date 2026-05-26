@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-05-26 · final-close · maintained by `gharsetu-lead`
+**Last updated:** 2026-05-27 · session-close (with CLAUDE.md overhaul) · maintained by `gharsetu-lead`
 
 ---
 
@@ -11,12 +11,39 @@
 | Stream | Status | Notes |
 |---|---|---|
 | **v1** | ✅ **RELEASE-READY** pending user sign-off | Phase 8 closeout dated 2026-05-11 — all MUST-FIX closed, 967/967 unit+integration green, 74/74 Playwright green (serial), 23/23 BLs locked in [bl-traceability-matrix.md](docs/testing/v1/bl-traceability-matrix.md). |
-| **Current engagement** (was v3.1 / v6.5) | 🟡 **ACTIVE (not yet started)** | Per the [Solution_Overview.docx](docs/product/Solution_Overview.docx) v8 (final-close 2026-05-26): Fixes to 6 existing modules + 7 new features (**per-room leasing**, **Admin Impersonation**, **Admin Task Delegation**, **Visitor Management**, **Master Data Administration**, **Settings**, **Organisation Management / SAAS layer**) + **new Super Admin role** + 6 new business rules. Timeline lives in [Timeline.xlsx](docs/product/Timeline.xlsx). |
-| **Deferred** (post-current) | ⏸ **DEFERRED** | After all the scope pulls, only two items remain deferred per [docs/planning/v2-saas-roadmap.md](docs/planning/v2-saas-roadmap.md) and [Solution_Overview.docx §Out of Scope](docs/product/Solution_Overview.docx): **subscription billing integration** (manual invoicing only) and **custom domains + per-organisation branding**. |
+| **Current engagement** (was v3.1 / v6.5) | 🟡 **ACTIVE (not yet started)** | Per the [Solution_Overview.docx](docs/product/Solution_Overview.docx) v8 (final-close 2026-05-26): Fixes to 6 existing modules + 7 new features (**per-room leasing**, **Admin Impersonation**, **Admin Task Delegation**, **Visitor Management**, **Master Data Administration**, **Settings**, **Organization Management / SAAS layer**) + **new Super Admin role** + 6 new business rules. Timeline lives in [Timeline.xlsx](docs/product/Timeline.xlsx). |
+| **Deferred** (post-current) | ⏸ **DEFERRED** | After all the scope pulls, only two items remain deferred (per [Solution_Overview.docx §Out of Scope](docs/product/Solution_Overview.docx) + [feature_list.json](feature_list.json) `deferred_post_engagement`): **subscription billing integration** (manual invoicing only) and **custom domains + per-organization branding**. |
 
 ---
 
-## 2. Last session summary (2026-05-26 — final-close)
+## 2. Last session summary (2026-05-27 — CLAUDE.md overhaul + Feature Planning template)
+
+**CLAUDE.md rewrite.** Fixed: stale 2026-05-25 header; the Rule #2 vs Rule #12 contradiction on public sign-up (the v1 "No public sign-up" framing never updated for v8 SAAS scope); UIUX_Design_Document.docx missing from source-of-truth table; prototype page count (19 → actual 29). Restructured into clear bands: **Working rules** (11 process rules — never-commit-without-instruction, plan-first, lead-orchestrates, worker≠checker, per-task change log, submodule discipline, relative paths, CONTEXT.md mirror, prototype sync, JS-source-of-truth for binaries, line caps) + **Technical conventions** (6 code conventions — snake_case DB, no FK constraints with relations declared in Prisma, Prisma migrations append-only, audit_log on every mutation, FE/BE validation parity with no HTML5 native, sensitive files never in git) + renamed **Hard rules → Scope rules** (11 business/scope rules A–K). Added a Conflict-resolution section (JSON wins over markdown, CONTEXT.md wins over CLAUDE.md, ask user when working vs scope rules conflict). All internal links converted to relative `./` paths. Final size: 134 lines (under the 200 cap).
+
+**New artifact**: `docs/planning/FEATURE_PLANNING.md` (159 lines). Documents the per-feature planning file workflow: location (`docs/planning/features/<YYYY-MM-DD>-<short-slug>.md`), lifecycle (`proposed → in-progress → shipped` with four ship criteria — SRS row, test cases promoted, CHANGELOG bullet, prototype-changes row), the full 9-section template, and the reactivation discipline (grep before coding; extend existing files rather than fix silently). 9 sections: Requirement (verbatim) · Plan · Test cases up front · Sign-off · Execution log · **Files changed** · **Agents used** · Post-deploy · Cross-references.
+
+**Old session summaries** retained below for the audit trail of the v8 final-close and the UIUX Design Document delivery.
+
+---
+
+## 2a. Earlier session summary (2026-05-27 — UIUX Design Document delivered)
+
+This session continued past the earlier "final close" with a substantial new artifact and several scope refinements.
+
+**UIUX Design Document delivered** — new file at [docs/product/UIUX_Design_Document.docx](docs/product/UIUX_Design_Document.docx) (35.5 KB), generated by [doc-assets/templates/generate_design_document.js](doc-assets/templates/generate_design_document.js). 10 sections:
+1. Design Principles · 2. Design Tokens (brand + status + typography desktop+mobile + spacing + radius/shadow + readability + color usage rules) · 3. Layout Foundations (breakpoint contract + sidebar + tabbar + MoreSheet + responsive transformations) · 4. Information Architecture (Public · Platform · Org-scoped pages) · 5. Page Layout Templates · 6. Wireframes (7 zone-tables) · 7. Components · 8. Interaction Patterns · 9. Accessibility · 10. Launch Checklist (grouped by Area).
+
+**Routing model finalised**: three classes — Org-scoped (`/:org/...`), Platform (Super Admin, no prefix), Public (no prefix, no auth). The downstream `apps/web/src/app/(app)/<role>/...` route restructure is deferred to the v8 build phase.
+
+**Solution Overview polish**: rent-collection jargon removed ("overnight job" → plain language), Admin + PM dashboard incomplete (both mentioned), visitor pre-approval captures date + time, Master Data sourcing bullet removed (in NR-3), "Another Admin" row dropped from impersonation scope table, new fix bullet for the 5+ alert on Admin dashboard.
+
+**Spelling standardisation**: American English everywhere. Sed sweep across 10 active files: Organisation → Organization. All three artifacts regenerated. Old `/organisation-signup` URL → `/organization-signup`.
+
+**Colour audit**: every hex value in the UIUX doc verified against `prototype/assets/styles.css`. 13 invented values caught and replaced with prototype-accurate values. Final hex allow-list (18 colours) matches the prototype exactly. Focus ring corrected from navy to saffron; primary button from navy to saffron; modal radius 16→12 px; card radius 10→12 px; etc.
+
+**Visual / readability fixes**: §6 Wireframes refactored from ASCII art (fragile in Word) to structured Zone / Content tables. §10 Launch Checklist refactored from one big 25-row table to 7 per-Area sub-tables.
+
+**Old session summary (2026-05-26 — final-close)** — moved below for reference:
 
 Solution Overview was iterated end-to-end (v6.5 → v8) over a long single session. Major moves:
 
@@ -26,7 +53,7 @@ Solution Overview was iterated end-to-end (v6.5 → v8) over a long single sessi
 - **Audit pass** caught: one "Day 1" timeline leak, the Master Data deactivation contradiction (NR-4 vs feature bullet), word-for-word duplication of NR-7/NR-8 in the Impersonation + Delegation feature rows, NR-5 every-user-except-Super-Admin paradox, and a fabricated "overdue" concept in the Maintenance dashboard fix (overdue is rent-only per BL-12). All resolved.
 - **Cover**: dropped the long subtitle and version number; cover now reads title + saffron rule + bold-italic saffron "DRAFT" + date + Prepared by (with contact) + Prepared for.
 - **Final v8 section flow** (cover + 8 banners): Fixes · New Roles · New Features · Business Rules · Details · Assumptions · Out of Scope · Next Steps.
-- **Reconciled at final-close**: this file, `feature_list.json`, `AGENTS.md`, `docs/planning/v2-saas-roadmap.md`, `CLAUDE.md`, `README.md`.
+- **Reconciled at final-close**: this file, `feature_list.json`, `AGENTS.md`, `CLAUDE.md`, `README.md`.
 - **Change logs written retroactively** in [agent-team-change-logs/](agent-team-change-logs/) for `gharsetu-lead-2026-05-26.md` and `document-agent-2026-05-26.md` — flagged as a process violation; rule requires per-task append, was done at session close instead.
 
 ---
@@ -56,7 +83,7 @@ No BL or current-engagement feature is currently blocked.
 
 Two viable starting points — user picks:
 
-1. **Kick off current engagement.** Lead reads `Solution_Overview.docx` v8 + the 9 ENG-F* rows in `feature_list.json`. Strongest first candidates (independent — could run in parallel by FE/BE pairs): **ENG-F01 Per-Room Leasing** (biggest schema change, blocks the rest of the lease-touching work) and **ENG-F06 Organisation Management / SAAS layer** (biggest infra change, gates user-scoping for everything else).
+1. **Kick off current engagement.** Lead reads `Solution_Overview.docx` v8 + the 9 ENG-F* rows in `feature_list.json`. Strongest first candidates (independent — could run in parallel by FE/BE pairs): **ENG-F01 Per-Room Leasing** (biggest schema change, blocks the rest of the lease-touching work) and **ENG-F06 Organization Management / SAAS layer** (biggest infra change, gates user-scoping for everything else).
 2. **Address remaining post-v1 carry-over.** Best ROI: CARRY-03 (extract `formatDateIST` to `packages/shared`) — small, removes duplication surfaced during BUG-BL22-001, no scope risk.
 
 If the user has neither in mind: surface both options with this tradeoff and ask.
@@ -83,7 +110,9 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 
 | Date | HEAD | Agent | What changed |
 |---|---|---|---|
-| 2026-05-26 | _pending_ | gharsetu-lead + document-agent | Solution Overview v6.5 → v8 final-close · Timeline split into Timeline.xlsx · harness-engineering skill rolled out · sibling files reconciled · agent change logs written |
+| 2026-05-27 | _pending_ | gharsetu-lead                  | CLAUDE.md overhaul: Working rules + Technical conventions sections added · Hard rules renamed to Scope rules · UIUX doc in source-of-truth · stale rule #2 fixed · Conflict-resolution rules · prototype count 19→29 · new docs/planning/FEATURE_PLANNING.md (template + lifecycle + reactivation discipline) |
+| 2026-05-27 | _pending_ | gharsetu-lead + document-agent | UIUX Design Document v3 delivered (10 sections, responsive transformations, structured wireframes) · Solution Overview polish · routing model finalised (three classes) · American spelling sweep · prototype-color audit |
+| 2026-05-26 | `f26752f` | gharsetu-lead + document-agent | Solution Overview v6.5 → v8 final-close · Timeline split into Timeline.xlsx · harness-engineering skill rolled out · sibling files reconciled · agent change logs written |
 | 2026-05-25 | `6a537a4` | gharsetu-lead | Harness-engineering rollout: skill + feature_list.json + claude-progress.md + CLAUDE.md rewrite + AGENTS.md update |
 | 2026-05-22 | (multiple) | document-agent | Solution_Overview v6.5 draft committed (SAAS pivot, per-room leasing, subscription plans) |
 | 2026-05-11 | `d0805bc` | gharsetu-lead | Phase 8 closeout — release-ready verdict; all MUST-FIX closed |
@@ -98,9 +127,14 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 - **Playwright runs `--runInBand` / serial** in CI today — known limitation, not a bug.
 - **N+1 dependency overrides** in root `package.json` (`multer`, `file-type`, `path-to-regexp`, `lodash`, `postcss`, `uuid`) — keep these; they patch known CVEs without bumping majors.
 - **Submodule layout** (`apps/api`, `apps/web` as git submodules pointing at separate GitHub repos) — keep; see [MULTI_REPO_SETUP.md](docs/planning/v1/MULTI_REPO_SETUP.md).
-- **SAAS data isolation** locked to `shared schema + organisation_id + Postgres RLS` (2026-05-24).
+- **SAAS data isolation** locked to `shared schema + organization_id + Postgres RLS` (2026-05-24).
 - **Billing** locked to manual / out-of-scope. No payment gateway, ever.
-- **Sequencing pivot (2026-05-26)**: SAAS layer, Super Admin role, Admin Impersonation and Admin Task Delegation all pulled forward into the current engagement (originally deferred). Only subscription billing integration and custom domains + per-org branding remain deferred. See [docs/planning/v2-saas-roadmap.md](docs/planning/v2-saas-roadmap.md) for the supersession trail.
+- **Sequencing pivot (2026-05-26)**: SAAS layer, Super Admin role, Admin Impersonation and Admin Task Delegation all pulled forward into the current engagement (originally deferred). Only subscription billing integration and custom domains + per-org branding remain deferred — see [Solution_Overview.docx §Out of Scope](docs/product/Solution_Overview.docx) and [feature_list.json](feature_list.json) `deferred_post_engagement`.
+- **Routing model (2026-05-27)**: three route classes — Org-scoped (`/:org/...`), Platform (Super Admin only, no prefix), Public (no prefix). When the Next.js app is updated for v8, the existing `apps/web/src/app/(app)/<role>/...` folders need to collapse to shared paths under these three classes.
+- **Spelling (2026-05-27)**: American English everywhere — "Organization" (not Organisation). Locked across all 10 active files. Both display labels and URLs use American spelling.
+- **UIUX Design Document philosophy**: this is a UI/UX-only document — the spec the prototype builds against. Engineering / system design lives elsewhere. Every colour, radius, shadow, focus ring, font and spacing token in the doc must verify against `prototype/assets/styles.css` — never invent values.
+- **CLAUDE.md is partitioned into three rule bands (2026-05-27)**: Working rules (process — how we work), Technical conventions (code-level — DB / validation / audit), Scope rules (business — what the product is). Never let a Working / Scope rule contradict — if they appear to, the user is asked, not picked silently.
+- **Feature planning files (2026-05-27)**: every new feature gets `docs/planning/features/<YYYY-MM-DD>-<short-slug>.md` BEFORE coding. Lifecycle `proposed → in-progress → shipped`; `shipped` is terminal. Reactivation discipline = grep before coding, extend existing file rather than fix silently. Full template + process in [docs/planning/FEATURE_PLANNING.md](docs/planning/FEATURE_PLANNING.md).
 - **Solution Overview structure (final, v8)**: cover (DRAFT marker, no version number) + 8 banners — Fixes, New Roles, New Features, Business Rules, Details, Assumptions, Out of Scope, Next Steps. No timeline content in the .docx — that lives in `Timeline.xlsx`.
 - **Timeline lives in Excel**: [docs/product/Timeline.xlsx](docs/product/Timeline.xlsx), regenerated from [doc-assets/templates/generate_timeline.js](doc-assets/templates/generate_timeline.js). The Solution Overview should NOT mention `Timeline.xlsx` by name in customer-facing copy.
 

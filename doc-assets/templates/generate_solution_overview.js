@@ -6,7 +6,7 @@
 // v8 — Delta-style document. Cover marker now reads "DRAFT" (no version).
 // Scope: gap closure on existing modules + new features (per-room leasing,
 // Admin Impersonation, Task Delegation, Visitor Management, Master Data
-// Administration, Settings, SAAS / Organisation Management layer) +
+// Administration, Settings, SAAS / Organization Management layer) +
 // a new Super Admin role + the new business rules that come with them.
 //
 // The timeline (phase plan + module-by-module schedule) is no longer in
@@ -15,7 +15,7 @@
 //
 // Out of this document: impersonation and task delegation (still deferred);
 // subscription billing / payment processing (manual only); custom domains
-// and per-organisation branding.
+// and per-organization branding.
 //
 // Why the redesign (rejection feedback on v6.5):
 //   1. Too much repetition of v1 material already in prior Solution Overviews.
@@ -322,17 +322,18 @@ const GAPS_IN_EXISTING_MODULES = [
       'Admin cannot reassign across properties. Maintenance Team cannot change priority.',
       'PM-raised requests on a tenant’s unit do not appear on the tenant’s portal.',
       'Requests can be raised against vacant units (no active-lease gate); maintenance categories not modelled, no category field on the form.',
+      '5+ maintenance requests alert missing on the Admin dashboard — when a single lease (or a single room in shared accommodation) raises 5 or more requests in one calendar month, the Admin should see an alert on the dashboard; this is not surfaced today.',
     ],
   ],
   ['Rent Collection',
     [
       'Admin has no UI path to record a payment.',
-      'Late fee and total payable populated by overnight job — stale between runs.',
+      'Late fee and outstanding amount only refresh once a day — figures on screen can be a day out of date between refreshes.',
     ],
   ],
   ['Dashboard',
     [
-      'Property Manager dashboard incomplete — missing rent collection %, overdue tenant count, open maintenance by priority, and upcoming lease expirations.',
+      'Admin and Property Manager dashboards incomplete — missing rent collection %, overdue tenant count, open maintenance by priority, and upcoming lease expirations.',
       'Maintenance Team has no working dashboard — landing errors. Needs a daily queue (assigned tickets by priority and status).',
       'Tenant has no dashboard — only a lease snapshot today. Needs rent status, outstanding, recent payments and active maintenance in one place.',
     ],
@@ -352,7 +353,7 @@ const NEW_FEATURES = [
   ],
   ['Users & Access — Admin Impersonation',
     [
-      [bn('Login-as '), r('— Admin can start an impersonation session as any Property Manager, Maintenance Team member or Tenant within their own Organisation; the Admin can end the session at any time.')],
+      [bn('Login-as '), r('— Admin can start an impersonation session as any Property Manager, Maintenance Team member or Tenant within their own Organization; the Admin can end the session at any time.')],
     ],
   ],
   ['Users & Access — Task Delegation',
@@ -363,14 +364,13 @@ const NEW_FEATURES = [
   ],
   ['Visitor Management',
     [
-      [bn('Tenant pre-approval '), r('— name, phone, purpose, expected time.')],
+      [bn('Tenant pre-approval '), r('— name, phone, purpose, expected date and time.')],
       [bn('PM approval + check-in / out '), r('— approve or deny; arrival and departure timestamped.')],
     ],
   ],
   ['Master Data Administration',
     [
       [bn('Reference lists '), r('— Amenities, Maintenance Categories, Payment Methods, City, State; Admin creates, edits and deactivates them from the UI.')],
-      [bn('Sourcing '), r('— every form that needs one of these values reads from Master Data; nothing stays hardcoded.')],
       [bn('Deactivate '), r('— deactivated entries become unselectable on new records (deactivation is only permitted once no records reference them).')],
     ],
   ],
@@ -379,12 +379,12 @@ const NEW_FEATURES = [
       [bn('Tunable values '), r('— late-fee rate, grace period and rent-change notice window; Admin tunes them from the UI.')],
     ],
   ],
-  ['Organisation Management (SAAS layer)',
+  ['Organization Management (SAAS layer)',
     [
-      [bn('Public organisation sign-up '), r('— prospects submit an organisation application; the request queues for Super Admin review.')],
-      [bn('Super Admin approval '), r('— on approval the organisation is provisioned and its first Admin is auto-created.')],
+      [bn('Public organization sign-up '), r('— prospects submit an organization application; the request queues for Super Admin review.')],
+      [bn('Super Admin approval '), r('— on approval the organization is provisioned and its first Admin is auto-created.')],
       [bn('Subscription plans '), r('— Basic / Standard / Premium catalogue managed by Super Admin; the plan caps active users.')],
-      [bn('Organisation lifecycle '), r('— Super Admin can view, deactivate or change the plan on any organisation.')],
+      [bn('Organization lifecycle '), r('— Super Admin can view, deactivate or change the plan on any organization.')],
     ],
   ],
 ];
@@ -398,9 +398,9 @@ const NEW_BUSINESS_RULES = [
   ['NR-2', 'Shared (whole-unit) maintenance requests are visible to every room tenant on the unit, the Property Manager and the Maintenance Team. Room-specific requests are visible to that room’s tenant, the Property Manager and the Maintenance Team only.'],
   ['NR-3', 'Amenities, Maintenance Categories and Payment Methods are sourced from Master Data (Admin-managed). Forms read the active list from Master Data at the time of selection; values are no longer hardcoded anywhere in the system.'],
   ['NR-4', 'Master Data entries that are in use on active records cannot be deactivated until they are no longer referenced.'],
-  ['NR-5', 'Every user belongs to exactly one Organisation, with the sole exception of the Super Admin. The Super Admin is a platform-level role and sits above all organisations. No other role — including Admin — can read or write outside its own Organisation; the platform enforces this on every request.'],
-  ['NR-6', 'Each Organisation has exactly one Subscription Plan (Basic / Standard / Premium). The plan caps active users; the Super Admin can change an Organisation’s plan at any time, and the new cap applies immediately to subsequent user additions.'],
-  ['NR-7', 'During an Admin impersonation session, every action is recorded against the Admin in the audit log — never the impersonated user. The Admin cannot impersonate the Super Admin, and cannot impersonate users outside their own Organisation.'],
+  ['NR-5', 'Every user belongs to exactly one Organization, with the sole exception of the Super Admin. The Super Admin is a platform-level role and sits above all organizations. No other role — including Admin — can read or write outside its own Organization; the platform enforces this on every request.'],
+  ['NR-6', 'Each Organization has exactly one Subscription Plan (Basic / Standard / Premium). The plan caps active users; the Super Admin can change an Organization’s plan at any time, and the new cap applies immediately to subsequent user additions.'],
+  ['NR-7', 'During an Admin impersonation session, every action is recorded against the Admin in the audit log — never the impersonated user. The Admin cannot impersonate the Super Admin, and cannot impersonate users outside their own Organization.'],
   ['NR-8', 'A delegated task runs under the delegate (Property Manager or Maintenance Team) inside the Admin-defined date range. Actions during the delegation window are recorded against the delegate, not the Admin. Outside the window the delegate has no extra rights.'],
 ];
 
@@ -421,11 +421,10 @@ const SUBSCRIPTION_PLANS = [
 ];
 
 const IMPERSONATION_SCOPE = [
-  ['Target role',      'Within own Organisation', 'Cross-organisation'],
+  ['Target role',      'Within own Organization', 'Cross-organization'],
   ['Property Manager', '✓',                       '✗'],
   ['Maintenance Team', '✓',                       '✗'],
   ['Tenant',           '✓',                       '✗'],
-  ['Another Admin',    '✗',                       '✗'],
   ['Super Admin',      '✗',                       '✗'],
 ];
 
@@ -442,7 +441,7 @@ const SETTINGS_DEFAULTS = [
 // about data, IDs, communications and sign-off cadence.
 // ─────────────────────────────────────────────────────────────────────────────
 const ASSUMPTIONS = [
-  [bn('Data migration '), r('— existing v1 data (users, properties, units, leases, payments, audit log) is moved into a single default Organisation. Working name: '), r('GharSetu Solutions', { bold: true }), r(' — final name to be confirmed before kickoff.')],
+  [bn('Data migration '), r('— existing v1 data (users, properties, units, leases, payments, audit log) is moved into a single default Organization. Working name: '), r('GharSetu Solutions', { bold: true }), r(' — final name to be confirmed before kickoff.')],
   [bn('ID continuity '), r('— existing user, property, unit, lease and payment IDs are preserved through the migration; no external integration breaks.')],
   [bn('Email scope '), r('— existing transactional emails (password reset, rent-change notification) continue working unchanged.')],
 ];
@@ -622,10 +621,10 @@ const doc = new Document({
 
         // ────────────────────────────────────────────────────────────────────
         // §2 — New Roles
-        // One new role: Super Admin (platform-level, above all organisations).
+        // One new role: Super Admin (platform-level, above all organizations).
         // The four existing roles (Admin, Property Manager, Maintenance Team,
         // Tenant) continue unchanged — Admin remains scoped to its own
-        // organisation; only Super Admin crosses organisation boundaries.
+        // organization; only Super Admin crosses organization boundaries.
         // ────────────────────────────────────────────────────────────────────
         solidBanner('New Roles'),
 
@@ -645,10 +644,10 @@ const doc = new Document({
               children: [
                 bodyCell('Super Admin', 2400, { bold: true, color: COLOR.navy }),
                 multiCell([
-                  cellBullet('Review and approve organisation sign-up requests; on approval, provision the organisation and auto-create its first Admin.'),
-                  cellBullet('Manage the Subscription Plan catalogue (Basic / Standard / Premium) and assign or change the plan on any organisation.'),
-                  cellBullet('View, deactivate or reactivate any organisation on the platform.'),
-                  cellBullet('Cross-organisation visibility — the only role that reads across organisation boundaries.'),
+                  cellBullet('Review and approve organization sign-up requests; on approval, provision the organization and auto-create its first Admin.'),
+                  cellBullet('Manage the Subscription Plan catalogue (Basic / Standard / Premium) and assign or change the plan on any organization.'),
+                  cellBullet('View, deactivate or reactivate any organization on the platform.'),
+                  cellBullet('Cross-organization visibility — the only role that reads across organization boundaries.'),
                 ], 7680),
               ],
             }),
@@ -749,7 +748,7 @@ const doc = new Document({
         spacer(200),
 
         capsLabel('Admin Task Delegation'),
-        body('An Admin can delegate any action they themselves are authorised to perform, to a Property Manager or Maintenance Team member within their own Organisation, for a defined date range. Outside that window the delegate has no extra rights.', { after: 200 }),
+        body('An Admin can delegate any action they themselves are authorised to perform, to a Property Manager or Maintenance Team member within their own Organization, for a defined date range. Outside that window the delegate has no extra rights.', { after: 200 }),
 
         capsLabel('Settings — Defaults and Tunable Ranges'),
         new Table({
@@ -787,7 +786,7 @@ const doc = new Document({
         // ────────────────────────────────────────────────────────────────────
         solidBanner('Out of Scope'),
 
-        bullet('Custom domains and per-organisation branding (logo, colours) — not available in this engagement.'),
+        bullet('Custom domains and per-organization branding (logo, colours) — not available in this engagement.'),
         bullet('Billing for Subscription Plans — manual invoicing only; no payment-gateway integration.'),
         spacer(240),
 

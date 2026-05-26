@@ -43,7 +43,6 @@ Before approving any backend deliverable (or scoping one in a plan), invoke the 
 - [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — ~110 test cases mapped to business rules.
 - [docs/testing/v1/bl-traceability-matrix.md](../../docs/testing/v1/bl-traceability-matrix.md) — human-readable BL→test mapping (sync with feature_list.json).
 - [docs/product/Solution_Overview.docx](../../docs/product/Solution_Overview.docx) — current engagement (v3.1) scope; generated from `doc-assets/templates/generate_solution_overview.js`.
-- [docs/planning/v2-saas-roadmap.md](../../docs/planning/v2-saas-roadmap.md) — deferred SAAS engagement; locked decisions only.
 - [prototype/](../../prototype/) — static HTML/Tailwind reference for every screen.
 - [CONTEXT.md](../../CONTEXT.md) — descriptive snapshot of what's actually on disk today.
 - [CLAUDE.md](../../CLAUDE.md) — repo-level guidance.
