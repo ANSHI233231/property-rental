@@ -1,6 +1,18 @@
 # GharSetu — Claude Agent Team
 
-Five specialized Claude Code subagents live in [.claude/agents/](.claude/agents/). They share the same source-of-truth documents ([docs/product/SRS_Document.md](docs/product/SRS_Document.md), [docs/testing/v1/Test_Cases.md](docs/testing/v1/Test_Cases.md), the [prototype/](prototype/)) and play distinct roles.
+Five specialized Claude Code subagents live in [.claude/agents/](.claude/agents/) (plus `document-agent` for `.docx` work). They share the same source-of-truth documents ([docs/product/SRS_Document.md](docs/product/SRS_Document.md), [docs/testing/v1/Test_Cases.md](docs/testing/v1/Test_Cases.md), the [prototype/](prototype/)) and the same **state files** ([claude-progress.md](claude-progress.md), [feature_list.json](feature_list.json)) — and play distinct roles.
+
+## Operating contract — read first
+
+Every session runs against the **`harness-engineering`** skill ([.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md)). It defines:
+
+- **Session-start ritual** — read [claude-progress.md](claude-progress.md), [feature_list.json](feature_list.json), [CLAUDE.md](CLAUDE.md), `git log` before any action.
+- **Worker ≠ Checker** — no agent flips its own `feature_list.json` row to `passing`. Only `gharsetu-lead`, only after the verification command exits 0 in a clean environment and the tester confirms.
+- **Three-layer verification gates** — syntax → runtime → e2e. Do not skip levels.
+- **Session-exit clean-state checklist** — build/test/lint/typecheck green, state files updated, change log appended.
+- **L4 anti-monolith rule** — CLAUDE.md ≤ 200 lines, AGENTS.md ≤ 250 lines, topic docs split out.
+
+Any plan or review that skips the harness contract is wrong on its face — bounce it back.
 
 | Agent | Model | Role | Invoke when… |
 |---|---|---|---|
@@ -55,13 +67,38 @@ Use gharsetu-security to VAPT the auth flow.
 
 ## Hard rules every agent follows
 
-- **The 23 business rules ([SRS Section 5](docs/product/SRS_Document.md)) are non-negotiable.** Any code or test that violates one fails review.
+> **Scope:** these apply to the **current engagement** (Solution Overview v8 — final close 2026-05-26) and the v1 release that precedes it. The current engagement now includes the SAAS layer, Super Admin role, Admin Impersonation, and Admin Task Delegation. Only subscription billing and custom-domain branding remain deferred — see [docs/planning/v2-saas-roadmap.md](docs/planning/v2-saas-roadmap.md).
+
+- **The 23 business rules ([SRS §5](docs/product/SRS_Document.md)) are non-negotiable.** Any code or test that violates one fails review. All 23 are currently `passing` per [feature_list.json](feature_list.json).
 - **The prototype is the design contract.** Tokens in [prototype/assets/styles.css](prototype/assets/styles.css) port verbatim to `tailwind.config.ts`.
-- **Dates: DD/MM/YYYY. Currency: ₹ with Indian digit grouping. Timezone: Asia/Kolkata.**
-- **No public sign-up, no SMS/email/WhatsApp notifications, no file uploads, no payment gateway** — all explicitly out of scope for v1 (SRS Section 9).
+- **Dates: DD/MM/YYYY. Currency: ₹ with Indian digit grouping. Timezone: Asia/Kolkata.** UTC in DB, IST on the wire.
+- **Scope guardrails** — Tenant self-signup remains forbidden (tenants come from leases only). No SMS/WhatsApp business notifications · no file uploads · no online payment gateway · no 2FA · no multi-session UI · no custom domains or per-organisation branding. Transactional auth email (password reset, rent-change notification) IS in. **Public organisation sign-up IS in scope** (per Solution Overview v8 — handled by Super Admin approval; tenant sign-up is still out). **Admin Impersonation and Admin Task Delegation are IN scope** for the current engagement. Subscription billing remains manual-invoice only.
 - **The custom validator ([prototype/assets/validation.js](prototype/assets/validation.js)) replaces native browser tooltips.** Errors render below the field, with the ⚠ glyph.
 - **Append-only state model.** Retire instead of delete; reverse instead of edit; audit log is immutable.
+- **Worker ≠ Checker.** No agent writes `state: "passing"` to `feature_list.json` for its own work. Only `gharsetu-lead`, only after verification.
 - **Change log per task.** Every agent appends a `## Task N — <name>` entry to `agent-team-change-logs/<agent>-YYYY-MM-DD.md` at the end of each task, matching the [sample format](agent-team-change-logs/sample-log-format.md): Status (✅/⚠️/❌), Started + Completed + Duration in IST, Changes (bulleted), Files Changed (paths), plus Notes / Pending / Issue + Error Summary + Action Required as applicable. The orchestrator does NOT need to remind agents — it's baked into each agent's definition under `## Change log`.
+
+## Session-start checklist (initialization phase)
+
+Before delegating, coding, or declaring a plan:
+
+```
+1. Read claude-progress.md            ← what state are we in?
+2. Read feature_list.json             ← what's next / blocked / passing?
+3. Read CLAUDE.md + AGENTS.md         ← rules I should know?
+4. git log -10                        ← what changed since last session?
+5. Invoke harness-engineering skill   ← reminder of the contract
+```
+
+## Session-exit checklist (clean state)
+
+```
+[ ] pnpm build · pnpm test · pnpm lint · pnpm typecheck — all green
+[ ] feature_list.json updated for any state change (only lead writes "passing")
+[ ] claude-progress.md sections 2, 3, 4, 5 updated
+[ ] No stale debug / console.log / commented-out code
+[ ] agent-team-change-logs/<agent>-YYYY-MM-DD.md appended
+```
 
 ## Roles & scopes (recap)
 
@@ -76,17 +113,35 @@ Use gharsetu-security to VAPT the auth flow.
 
 ```
 property-rental/
-├── AGENTS.md                                ← this file
-├── CLAUDE.md
+├── AGENTS.md                                ← this file (operating model)
+├── CLAUDE.md                                ← repo-level guidance (≤ 200 lines)
+├── CONTEXT.md                               ← disk snapshot (descriptive, not aspirational)
+├── claude-progress.md                       ← rolling cross-session state memory
+├── feature_list.json                        ← machine-readable BL + feature state
+├── apps/api/                                ← NestJS API (git submodule)
+├── apps/web/                                ← Next.js Web (git submodule)
+├── packages/shared/                         ← @gharsetu/shared — enums, Zod, formatters
 ├── docs/
 │   ├── product/SRS_Document.md              ← spec (incl. BL-01 → BL-23)
-│   └── testing/v1/Test_Cases.md             ← ~110 test cases · traceability matrix
+│   ├── product/Solution_Overview.docx       ← current engagement scope (generated, v8)
+│   ├── planning/v2-saas-roadmap.md          ← deferred SAAS engagement
+│   ├── testing/v1/Test_Cases.md             ← ~110 test cases
+│   ├── testing/v1/bl-traceability-matrix.md ← human-readable BL → test mapping
+│   └── testing/security/*                   ← VAPT + OWASP ASVS L1 reports
 ├── prototype/                               ← 19 HTML pages · design tokens · validator
+├── doc-assets/templates/*.js                ← .docx generators (never hand-edit binaries)
+├── agent-team-change-logs/                  ← per-task append-only logs
 └── .claude/
-    └── agents/
-        ├── gharsetu-lead.md                 ← Opus 4.7
-        ├── gharsetu-frontend.md             ← Sonnet 4.6
-        ├── gharsetu-backend.md              ← Sonnet 4.6
-        ├── gharsetu-tester.md               ← Sonnet 4.6
-        └── gharsetu-security.md             ← Sonnet 4.6
+    ├── agents/
+    │   ├── gharsetu-lead.md                 ← Opus 4.7
+    │   ├── gharsetu-frontend.md             ← Sonnet 4.6
+    │   ├── gharsetu-backend.md              ← Sonnet 4.6
+    │   ├── gharsetu-tester.md               ← Sonnet 4.6
+    │   ├── gharsetu-security.md             ← Sonnet 4.6
+    │   └── document-agent.md                ← .docx generation specialist
+    └── skills/
+        ├── harness-engineering/             ← operating contract (read first)
+        ├── gharsetu-ui/                     ← frontend design system
+        ├── gharsetu-backend/                ← NestJS + Prisma contract
+        └── document-generation/             ← .docx generator workflow
 ```

@@ -69,12 +69,26 @@ property-rental/
 │   ├── testing/v1/                   # Test_Cases.md + phase-1..8 test reports + bl-traceability
 │   ├── planning/                     # DOCUMENT_AGENT.md + v1/ (MASTER_PLAN, MULTI_REPO_SETUP, TODO, phase-0)
 │   └── security/                     # phase-1..8 security review reports
+├── doc-assets/templates/             # .docx generators (JS source of truth)
+├── agent-team-change-logs/           # Per-task append-only logs (human + agent)
+├── .claude/
+│   ├── agents/                       # 6 subagents — lead, frontend, backend,
+│   │                                 #  tester, security, document-agent
+│   └── skills/                       # harness-engineering, gharsetu-ui,
+│                                     #  gharsetu-backend, document-generation
+├── CLAUDE.md                         # Repo guidance for Claude Code (≤ 200 lines)
+├── AGENTS.md                         # Agent team operating model
+├── CONTEXT.md                        # Disk-snapshot reference (descriptive)
+├── claude-progress.md                # Rolling cross-session state memory
+├── feature_list.json                 # Machine-readable BL + feature state
 ├── docker-compose.yml                # Local dev — Postgres 18 on host :5433
 ├── .env.example                      # Root env template (covers API + Web)
 ├── smoke.sh                          # Quick end-to-end API smoke test
 ├── pnpm-workspace.yaml               # pnpm workspaces config
 └── package.json                      # Root scripts: build / test / lint / dev:db
 ```
+
+> **Working with Claude Code in this repo?** Read [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) first. The agent team operates under the contract in [`.claude/skills/harness-engineering/SKILL.md`](.claude/skills/harness-engineering/SKILL.md): session-start ritual, worker-≠-checker verification gates, clean-state exit. State lives in [claude-progress.md](claude-progress.md) (rolling memory) and [feature_list.json](feature_list.json) (machine-readable BL + feature state — currently **23/23 BLs passing**, 5 v3.1 features `not_started`).
 
 ---
 

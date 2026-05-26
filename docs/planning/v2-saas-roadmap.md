@@ -1,8 +1,29 @@
 # GharSetu v2 — SAAS Platform Roadmap
 
-**Status:** Future engagement. Not active. Captured here so the foundational decisions made on 24 May 2026 don't get lost between now and when v2 work begins.
+> **⚠️ Status updated 2026-05-26 (final-close) — most streams superseded.**
+>
+> The **SAAS layer + Super Admin role + Subscription Plans + multi-org sign-up + Admin Impersonation + Admin Task Delegation** have all been **pulled forward into the current engagement** (see [Solution_Overview.docx](../product/Solution_Overview.docx) v8 final-close).
+>
+> **What's now in the current engagement** (Streams A, B, C from this document):
+> - Multi-organisation SAAS architecture
+> - Public organisation sign-up + Super Admin approval workflow
+> - Super Admin role (cross-organisation oversight)
+> - Subscription Plans (Basic / Standard / Premium) with active-user caps
+> - Shared-schema + `organisation_id` + Postgres RLS data isolation
+> - **Admin Impersonation** (Stream B — Session Injection)
+> - **Admin Task Delegation** (Stream C)
+>
+> **What still sits as deferred** (post-current-engagement):
+> - **Subscription billing integration** — manual invoicing only for now
+> - **Custom domains + per-organisation branding**
+>
+> Only those two items remain. The four foundational decisions in the table below remain valid; the *sequencing* lock was updated (see [feature_list.json](../../feature_list.json) → `saas_design_decisions_locked.LOCK-01`).
 
-**Current engagement (v3.1) ships first.** Per-room leasing, RentSchedule, Visitor Management, Master Data + Settings, gap closure, bug fixes — all per the 12-business-day plan in `docs/product/Solution_Overview.docx`. Only after v3.1 is signed off and delivered does this v2 scope come into play.
+---
+
+**Original status (superseded sections retained for context):** Future engagement, captured 2026-05-24.
+
+**Original framing — superseded.** ~~Current engagement (v3.1) ships first. Per-room leasing, RentSchedule, Visitor Management, Master Data + Settings, gap closure, bug fixes — all per the 12-business-day plan in `docs/product/Solution_Overview.docx`. Only after v3.1 is signed off and delivered does this v2 scope come into play.~~ Replaced 2026-05-26 — SAAS folded into current engagement.
 
 ---
 

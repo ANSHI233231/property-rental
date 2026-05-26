@@ -5,6 +5,7 @@
 # Exception: project-owned skills are checked in for the team
 !.claude/skills/gharsetu-*/
 !.claude/skills/document-generation/
+!.claude/skills/harness-engineering/
 
 # Stale prototype archives (extracted to prototype/ folder)
 prototype.zip
@@ -56,6 +57,10 @@ apps/api/prisma/migrations/dev.db*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Office lock files (Word/Excel create these while a file is open)
+~$*.docx
+~$*.xlsx
 
 # Editor
 .vscode/

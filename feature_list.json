@@ -1,0 +1,489 @@
+{
+  "$schema_version": "1.0",
+  "description": "Machine-readable state of every business rule and feature in GharSetu. Single source of truth for what is passing, in flight, blocked, or not started. Only gharsetu-lead writes state='passing', and only after the verification command exits 0 in a clean environment. See .claude/skills/harness-engineering/SKILL.md for the contract.",
+  "updated": "2026-05-26",
+  "head": "6a537a4",
+  "scope_note": "The 'current_engagement_features' bucket aligns with docs/product/Solution_Overview.docx v8 (2026-05-26 — final-close). The SAAS layer + Super Admin role + Admin Impersonation + Admin Task Delegation were all pulled forward into the current engagement on 2026-05-26 (previously deferred to v2). What remains under 'deferred' (in docs/planning/v2-saas-roadmap.md): subscription billing integration, custom domains + per-org branding only.",
+  "legend": {
+    "state": ["not_started", "in_progress", "blocked", "passing"],
+    "layer": ["DB", "DB trigger", "Service unit", "Integration", "Serializable tx", "E2E", "Unit"]
+  },
+  "business_rules": [
+    {
+      "id": "BL-01",
+      "behavior": "No two active leases on the same unit simultaneously.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'UNIT_HAS_ACTIVE_LEASE'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/prisma/migrations (partial unique index leases(unit_id) WHERE status='active')"],
+      "layer": "DB + Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-02",
+      "behavior": "Rent locked at lease signing; cannot change mid-lease.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'rent immutable mid-lease'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/test/phase7-hardening.spec.ts"],
+      "layer": "DB trigger + Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-03",
+      "behavior": "Rent editable only when unit is AVAILABLE or LISTED.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'UNIT_RENT_LOCKED'",
+      "evidence": ["apps/api/test/phase7-hardening.spec.ts", "apps/api/test/bl22-bl23-audit-ist.spec.ts"],
+      "layer": "Serializable tx + Integration",
+      "phase": 7,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-04",
+      "behavior": "Occupied unit cannot move to in-maintenance until lease ended.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'unit state machine'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/test/phase2-integration.spec.ts"],
+      "layer": "Integration",
+      "phase": 2,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-05",
+      "behavior": "Records never deleted; retired = permanent soft-delete. DELETE endpoints return 405.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'cannot un-retire'",
+      "evidence": ["apps/api/test/phase2-integration.spec.ts"],
+      "layer": "DB trigger + Integration",
+      "phase": 2,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-06",
+      "behavior": "Listed unit rent change instantly updates the listing.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TC-BL06'",
+      "evidence": ["apps/api/test/bl22-bl23-audit-ist.spec.ts"],
+      "layer": "Integration",
+      "phase": 7,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-07",
+      "behavior": "All co-tenants jointly liable for unpaid rent. Empty tenants[] on lease creation → 400 LEASE_NEEDS_TENANT.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'LEASE_NEEDS_TENANT'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/test/phase3-gaps.spec.ts"],
+      "layer": "Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-08",
+      "behavior": "One co-tenant cannot end lease alone; all must consent.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'Finalize blocked until all co-tenants APPROVE'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/test/phase3-security-fixes.spec.ts"],
+      "layer": "Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-09",
+      "behavior": "Termination stays pending until all consent or requester withdraws. No auto-timeout, no auto-approval.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'Requester can withdraw termination request'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts", "apps/api/test/phase3-gaps.spec.ts"],
+      "layer": "Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-10",
+      "behavior": "Only PROPERTY_MANAGER and ADMIN record payments. TENANT or MAINTENANCE POST /payments → 403 BL_10_TENANT_CANNOT_RECORD_PAYMENT.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'BL_10_TENANT_CANNOT_RECORD_PAYMENT'",
+      "evidence": ["apps/api/test/phase4-integration.spec.ts", "apps/api/test/phase6-role-matrix-full.spec.ts"],
+      "layer": "Integration",
+      "phase": 4,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-11",
+      "behavior": "Concurrent co-tenant payment: first closes period, second auto-prepaid; overpayment routes excess to PrepaidCredit.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'overpayment.*PrepaidCredit'",
+      "evidence": ["apps/api/test/phase4-integration.spec.ts", "apps/api/src/rent/rent.service.ts (serializable retry)"],
+      "layer": "Integration + Serializable tx",
+      "phase": 4,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-12",
+      "behavior": "Period becomes overdue exactly 5 calendar days past due date.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'BL-13 boundary'",
+      "evidence": ["apps/api/test/phase4-gaps.spec.ts", "apps/api/src/jobs/rent-accrual.processor.spec.ts"],
+      "layer": "Service unit + Integration",
+      "phase": 4,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-13",
+      "behavior": "Late fee = 2% × outstanding × full weeks overdue. Non-compounded — always on original outstanding.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TC-LATEFEE'",
+      "evidence": ["apps/api/test/phase4-gaps.spec.ts", "apps/api/test/phase4-integration.spec.ts"],
+      "layer": "Service unit + Integration",
+      "phase": 4,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-14",
+      "behavior": "Maintenance description ≥ 30 chars; resolution notes ≥ 20 chars.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'description length validation'",
+      "evidence": ["apps/api/test/phase5-integration.spec.ts", "apps/api/src/maintenance/dto/create-maintenance-request.dto.ts"],
+      "layer": "DTO + Integration",
+      "phase": 5,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-15",
+      "behavior": "Closed maintenance requests cannot be reopened. Invalid state transitions → 409 INVALID_TRANSITION.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'INVALID_TRANSITION'",
+      "evidence": ["apps/api/test/phase5-integration.spec.ts"],
+      "layer": "Integration",
+      "phase": 5,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-16",
+      "behavior": "Maintenance staff can read + update only; cannot create new requests.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'MAINTENANCE role matrix'",
+      "evidence": ["apps/api/test/phase6-role-matrix-full.spec.ts", "apps/api/test/phase5-integration.spec.ts"],
+      "layer": "Integration",
+      "phase": 5,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-17",
+      "behavior": "≥5 maintenance requests for same unit in one calendar IST month → Admin alert. Counts current month only.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'alert fires for current IST month only'",
+      "evidence": ["apps/api/test/phase5-gaps.spec.ts", "apps/api/src/jobs/maintenance-alert.processor.spec.ts"],
+      "layer": "Service unit + Integration",
+      "phase": 5,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-18",
+      "behavior": "Turnover gap (Fri-out → Mon-in): normal no-lease period. Not overdue, not double-bookable. Immediate re-lease → 409 TURNOVER_GAP_REQUIRED.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TURNOVER_GAP_REQUIRED'",
+      "evidence": ["apps/api/test/phase3-integration.spec.ts"],
+      "layer": "Integration",
+      "phase": 3,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-19",
+      "behavior": "Each Property Manager assigned to exactly one property. Reassigning an already-assigned PM → 409 PM_ALREADY_ASSIGNED.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'PM_ALREADY_ASSIGNED'",
+      "evidence": ["apps/api/test/phase2-integration.spec.ts", "apps/api/test/phase6-role-matrix-full.spec.ts"],
+      "layer": "Integration",
+      "phase": 2,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-20",
+      "behavior": "Previous PM keeps read-only access after property transfer.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'Property transfer-pm happy path'",
+      "evidence": ["apps/api/test/phase2-integration.spec.ts", "apps/api/test/phase6-role-matrix-full.spec.ts"],
+      "layer": "Integration",
+      "phase": 2,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-21",
+      "behavior": "Tenant (only the raiser) closes their own resolved maintenance requests. Tenant B (not raiser) → 403.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TC-MAINT-005'",
+      "evidence": ["apps/api/test/phase5-gaps.spec.ts", "apps/api/test/phase5-integration.spec.ts"],
+      "layer": "Integration",
+      "phase": 5,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-22",
+      "behavior": "All times stored UTC; displayed in Asia/Kolkata (IST). Midnight renders as 00:00, never 24:00.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TC-BL22'; pnpm --filter @gharsetu/web test -t 'TC-BL22-WEB'",
+      "evidence": ["apps/api/test/phase7-hardening.spec.ts", "apps/api/test/bl22-bl23-audit-ist.spec.ts", "apps/web/src/__tests__/phase7.test.ts", "apps/web/src/__tests__/bl22-bl23-locale-lockins.test.ts"],
+      "layer": "Integration + Unit",
+      "phase": 7,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "BL-23",
+      "behavior": "Dates rendered DD/MM/YYYY everywhere. en-IN locale, ₹ Indian digit grouping.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'TC-BL23'; pnpm --filter @gharsetu/web test -t 'TC-BL23-WEB'",
+      "evidence": ["apps/web/src/__tests__/phase7.test.ts", "apps/web/src/__tests__/bl22-bl23-locale-lockins.test.ts", "apps/api/test/bl22-bl23-audit-ist.spec.ts"],
+      "layer": "Unit + Integration",
+      "phase": 7,
+      "state": "passing",
+      "blocker": null,
+      "updated": "2026-05-11"
+    }
+  ],
+  "current_engagement_features": [
+    {
+      "id": "ENG-F01",
+      "behavior": "Per-room leasing: each room of a Room-based unit can carry its own active lease (independent rent, deposit, term, end date). A 4-BHK can hold up to 4 leases. BL-01 generalises to per-scope uniqueness.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'per-room.*active lease'",
+      "evidence": ["docs/requirement/Shared Accommodation (Per-Room Leasing).docx", "docs/product/Solution_Overview.docx §New Features → Per-Room Leasing"],
+      "layer": "DB + Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F02",
+      "behavior": "RentSchedule history: scheduled rent changes with 60-day minimum notice, tenant email notification, banner in tenant UI. Notice window tunable in Settings.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'rent-change.*60-day notice'",
+      "evidence": ["docs/requirement/Rent Increase Notification Period.docx", "docs/product/Solution_Overview.docx §Business Rules NR-6"],
+      "layer": "DB + Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F03",
+      "behavior": "Visitor Management: tenant pre-approves visitors; PM approves / denies and timestamps check-in / check-out. SMS / email notifications deferred to v1.1.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'visitor.*check-in'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Features → Visitor Management"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F04",
+      "behavior": "Master Data Administration: ADMIN can create / edit / deactivate Amenities, Maintenance Categories, Payment Methods, City, State via UI. Previously baked into code. (Gap closure — missing module.)",
+      "verification": "pnpm --filter @gharsetu/api test -t 'master-data.*admin only'",
+      "evidence": ["docs/product/Solution_Overview.docx §Gaps in Existing Modules → 7. Master Data Administration"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F05",
+      "behavior": "Settings: ADMIN tunes 3 values — late-fee rate (default 2%), grace period (default 5 days), rent-change notice window (default 60 days). Writes audit-log entry on every change. (Gap closure — missing module.)",
+      "verification": "pnpm --filter @gharsetu/api test -t 'settings.*audit-log'",
+      "evidence": ["docs/product/Solution_Overview.docx §Gaps in Existing Modules → 8. Settings"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F06",
+      "behavior": "Organisation Management (SAAS layer): public organisation sign-up; Super Admin reviews + approves; on approval the organisation is provisioned and its first Admin auto-created. Subscription Plans catalogue (Basic / Standard / Premium) caps active users. Super Admin can view / deactivate / re-plan any organisation. Shared-schema multi-tenancy with organisation_id on every table + Postgres RLS.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'organisation.*sign-up.*super admin approval'; pnpm --filter @gharsetu/api test -t 'RLS.*cross-org'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Features → Organisation Management (SAAS layer)", "docs/planning/v2-saas-roadmap.md §Foundational decisions"],
+      "layer": "DB + Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F07",
+      "behavior": "Super Admin role (platform-level, above all organisations). Sole role that crosses organisation boundaries. Capabilities: approve organisation sign-up, manage Subscription Plans, view / deactivate / re-plan any organisation. Admin role remains scoped to its own organisation.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'super admin.*cross-organisation'; pnpm --filter @gharsetu/api test -t 'admin.*cannot.*cross-org'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Roles", "docs/product/Solution_Overview.docx §Business Rules NR-5"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F08",
+      "behavior": "Admin Impersonation — login-as. Admin starts an impersonation session as any Property Manager, Maintenance Team member or Tenant within own Organisation; session is end-able at any time. Audit attribution: every action recorded against the Admin, not the impersonated user. Boundary: cannot impersonate Super Admin; cannot impersonate users outside own Organisation; cannot impersonate other Admins.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'impersonation.*audit.*admin'; pnpm --filter @gharsetu/api test -t 'impersonation.*boundary'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Features → Users & Access — Admin Impersonation", "docs/product/Solution_Overview.docx §Details → Admin Impersonation Scope", "docs/product/Solution_Overview.docx §Business Rules NR-7"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "ENG-F09",
+      "behavior": "Admin Task Delegation — Admin assigns any action they themselves are authorised to perform, to a Property Manager or Maintenance Team member, for a defined date range. Window-bounded rights: delegate has extra rights ONLY inside the window. Audit attribution: actions during the window recorded against the delegate (not the Admin) — asymmetric vs impersonation.",
+      "verification": "pnpm --filter @gharsetu/api test -t 'delegation.*audit.*delegate'; pnpm --filter @gharsetu/api test -t 'delegation.*window.*expired'",
+      "evidence": ["docs/product/Solution_Overview.docx §New Features → Users & Access — Task Delegation", "docs/product/Solution_Overview.docx §Details → Admin Task Delegation", "docs/product/Solution_Overview.docx §Business Rules NR-8"],
+      "layer": "Integration",
+      "phase": "current",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-26"
+    }
+  ],
+  "carry_over_v1_post_release": [
+    {
+      "id": "CARRY-01",
+      "behavior": "NestJS 10 → 11 migration to clear @nestjs/core GHSA-36xv. N-1 policy currently in force; no exploitable path per VAPT.",
+      "verification": "pnpm audit --prod --filter @gharsetu/api && grep '\"@nestjs/core\": \"^11' apps/api/package.json",
+      "evidence": ["docs/testing/security/phase-8-vapt-report.md"],
+      "layer": "n/a",
+      "phase": "post-v1",
+      "state": "not_started",
+      "blocker": "Awaiting user decision on N-1 vs latest policy",
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "CARRY-02",
+      "behavior": "Next.js Content-Security-Policy header via next.config.mjs headers() export.",
+      "verification": "pnpm --filter @gharsetu/web build && curl -sI http://localhost:3000 | grep -i 'content-security-policy'",
+      "evidence": ["docs/testing/security/phase-8-vapt-report.md"],
+      "layer": "E2E",
+      "phase": "post-v1",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "CARRY-03",
+      "behavior": "Extract shared formatDateIST / locale helpers to @gharsetu/shared (currently duplicated between api and web).",
+      "verification": "test -f packages/shared/src/locale/formatDateIST.ts && pnpm -r test -t 'formatDateIST'",
+      "evidence": ["docs/testing/v1/phase-8-closeout.md §Carry-over"],
+      "layer": "Unit",
+      "phase": "post-v1",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "CARRY-04",
+      "behavior": "Playwright spec isolation: either teach each spec to self-seed, or commit to --workers=1 in CI.",
+      "verification": "grep -E 'workers|fullyParallel' apps/web/playwright.config.ts",
+      "evidence": ["docs/testing/v1/phase-8-closeout.md §Carry-over"],
+      "layer": "E2E",
+      "phase": "post-v1",
+      "state": "not_started",
+      "blocker": null,
+      "updated": "2026-05-11"
+    },
+    {
+      "id": "CARRY-05",
+      "behavior": "Password minimum length 10 → 12 (ASVS L2 recommendation). Deferred per user; SRS §10.2 deviation documented.",
+      "verification": "grep -E 'MinLength\\(12|min\\(12' apps/api/src/auth apps/api/src/users",
+      "evidence": ["docs/testing/security/phase-7-owasp-asvs-l1-assessment.md", "docs/testing/v1/phase-8-closeout.md"],
+      "layer": "DTO",
+      "phase": "post-v1",
+      "state": "not_started",
+      "blocker": "Deferred by user; reopen only on explicit request",
+      "updated": "2026-05-11"
+    }
+  ],
+  "saas_design_decisions_locked": [
+    {
+      "id": "LOCK-01",
+      "behavior": "Sequencing: SAAS layer pulled forward into the current engagement (was previously deferred to a separate v2). What remains deferred: impersonation, task delegation, subscription billing, custom domains.",
+      "state": "locked",
+      "updated": "2026-05-26",
+      "supersedes": "Original 2026-05-24 lock that put v2 SAAS after v3.1"
+    },
+    {
+      "id": "LOCK-02",
+      "behavior": "SAAS-level entity named 'Organisation'. Existing TENANT role keeps that name. New column: organisation_id on every tenant-scoped table.",
+      "state": "locked",
+      "updated": "2026-05-24"
+    },
+    {
+      "id": "LOCK-03",
+      "behavior": "Data isolation: shared schema + organisation_id on every table + Postgres Row-Level Security. Super Admin sits above this boundary.",
+      "state": "locked",
+      "updated": "2026-05-24"
+    },
+    {
+      "id": "LOCK-04",
+      "behavior": "Billing / payment processing: forever out of scope. Plans + user-count enforcement are in scope; Razorpay/Stripe/PayPal are NOT — manual invoicing only.",
+      "state": "locked",
+      "updated": "2026-05-24"
+    }
+  ],
+  "deferred_post_engagement": [
+    {
+      "id": "DEF-01",
+      "behavior": "Subscription billing integration. Subscription Plans cap active users today; payment collection stays manual.",
+      "state": "deferred",
+      "source": "docs/product/Solution_Overview.docx §Out of Scope",
+      "updated": "2026-05-26"
+    },
+    {
+      "id": "DEF-02",
+      "behavior": "Custom domains and per-organisation branding (logo, colours).",
+      "state": "deferred",
+      "source": "docs/product/Solution_Overview.docx §Out of Scope",
+      "updated": "2026-05-26"
+    }
+  ],
+  "summary": {
+    "business_rules": {
+      "passing": 23,
+      "in_progress": 0,
+      "blocked": 0,
+      "not_started": 0,
+      "total": 23
+    },
+    "current_engagement_features": {
+      "passing": 0,
+      "in_progress": 0,
+      "blocked": 0,
+      "not_started": 9,
+      "total": 9
+    },
+    "carry_over": {
+      "blocked": 2,
+      "not_started": 3,
+      "total": 5
+    },
+    "release_status": "v1 RELEASE-READY pending user sign-off (phase-8-closeout 2026-05-11). All MUST-FIX closed, 967/967 unit+integration tests green, 74/74 Playwright green (serial), 23/23 BLs locked."
+  }
+}
