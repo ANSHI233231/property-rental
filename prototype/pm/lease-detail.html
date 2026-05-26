@@ -13,19 +13,42 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
-        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
         <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="leases.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
-        <div class="sidebar-divider"></div>
-        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
       </nav>
-      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">SA</div>
+            <div>
+              <div class="account-menu-name">Sunita</div>
+              <div class="account-menu-role">PM</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
     </aside>
 
     <main class="app-main">
@@ -34,7 +57,6 @@
         <div>
           <div class="text-xs muted"><a href="leases.html" class="hover:underline text-royal-blue">Leases</a> / #L-2103</div>
           <h1 class="page-title">Lease #L-2103 — Rohan Mehta</h1>
-          <div class="page-subtitle">Unit 1A · Green Valley, Dwarka · <span class="badge badge-active">Active</span></div>
         </div>
       </header>
 
@@ -133,11 +155,103 @@
         <p class="text-xs muted mt-3">Document storage is not part of v1 — links are placeholders.</p>
       </section>
 
+      <!-- Renewal section -->
+      <section class="card mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <h3 class="section-title m-0">Renew Lease</h3>
+          <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('renewLeaseDrawer').classList.add('open')">Renew Lease</button>
+        </div>
+        <p class="text-sm muted mt-3">Start a renewal to carry tenants forward. You can add or remove tenants on the renewed lease before creating it.</p>
+      </section>
+
       <!-- Termination -->
-      <section class="card mb-6 border-l-4" style="border-left-color: var(--color-status-overdue)">
+      <section class="card mb-6 border-l-4" style="border-left-color: var(--color-status-overdue)" id="terminateSection">
         <h3 class="section-title">Terminate Lease</h3>
-        <p class="text-sm muted mb-4">Early termination requires a recorded date and reason. Deposit refund is processed as a separate step.</p>
-        <button class="btn btn-danger !py-2 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) alert('Termination recorded. Deposit refund is a separate step.')">Terminate Early</button>
+        <p class="text-sm muted mb-4">Early termination requires all co-tenants' explicit consent. Deposit refund is a separate step.</p>
+
+        <!-- Step 1: Terminate Early button -->
+        <div id="termStep1">
+          <button class="btn btn-danger !py-2 !text-sm" onclick="showTermStep1Form()">Terminate Early</button>
+        </div>
+
+        <!-- Step 1 form (hidden initially) -->
+        <div id="termStep1Form" style="display:none">
+          <form novalidate onsubmit="event.preventDefault(); submitTermStep1();">
+            <div class="mb-4">
+              <label class="label" for="termReason">Reason for termination (min 20 characters)</label>
+              <textarea id="termReason" class="input" rows="4" placeholder="e.g. Tenant vacating city for employment. Request for early termination submitted in writing." oninput="updateTermCounter()"></textarea>
+              <div class="counter error" id="termCounter">0/20</div>
+              <div class="field-error" id="termReasonError"></div>
+            </div>
+            <div class="mb-4">
+              <label class="label" for="termDate">Proposed effective date (DD/MM/YYYY)</label>
+              <input id="termDate" class="input" type="text" placeholder="e.g. 08/06/2026" value="08/06/2026" />
+              <p class="text-xs muted mt-1">Must be today or later (at least 30 days recommended).</p>
+              <div class="field-error" id="termDateError"></div>
+            </div>
+            <div class="flex gap-3 flex-wrap">
+              <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="cancelTermination()">Cancel</button>
+              <button type="submit" class="btn btn-danger !py-2 !text-sm" id="termStep1Submit" disabled>Submit termination request</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 2: Per-co-tenant consent panel (hidden initially) -->
+        <div id="termStep2" style="display:none">
+          <div class="alert mb-4" role="status" aria-live="polite">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Termination request submitted. Record each co-tenant's consent below before finalizing.</span>
+          </div>
+          <h4 class="font-poppins font-semibold text-charcoal mb-3">Co-tenant consent</h4>
+          <div class="card p-0 overflow-x-auto mb-4">
+            <table class="data-table" id="consentTable">
+              <thead>
+                <tr><th>Tenant</th><th>Role</th><th>Consent</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+                  <td>Primary</td>
+                  <td>
+                    <select class="input" style="min-height:36px;padding:6px 10px" data-consent="0" onchange="updateFinalizeBtn()">
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="declined">Declined</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-poppins font-semibold text-charcoal">Priya Sharma <span class="muted text-xs">(co-tenant)</span></td>
+                  <td>Co-tenant</td>
+                  <td>
+                    <select class="input" style="min-height:36px;padding:6px 10px" data-consent="1" onchange="updateFinalizeBtn()">
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="declined">Declined</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Emergency alert shown when any decline -->
+          <div id="declineAlert" class="alert alert-emergency mb-4" style="display:none" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>One or more co-tenants declined termination. The lease remains active. Open a new request after addressing concerns. (BL-08 / BL-09)</span>
+          </div>
+          <div class="flex gap-3 flex-wrap">
+            <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="cancelTermination()">Cancel</button>
+            <button type="button" class="btn btn-danger !py-2 !text-sm" id="finalizeTermBtn" disabled onclick="openFinalizeModal()">Finalize termination</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Success state (hidden initially) -->
+        <div id="termStep3" style="display:none">
+          <div class="alert" style="background:var(--bg-paid);border-left-color:var(--color-status-paid);color:#1b5e20" role="status">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Lease terminated. Status updated. Deposit refund is processed as a separate step.</span>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -179,15 +293,270 @@
     </div>
   </div>
 
+  <!-- Renew Lease Drawer -->
+  <div class="modal-backdrop" id="renewLeaseDrawer" role="dialog" aria-modal="true" aria-labelledby="renewLeaseTitle">
+    <div class="modal" style="max-width:600px;max-height:90vh;overflow-y:auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="renewLeaseTitle" class="m-0">Renew Lease — #L-2103</h3>
+        <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="document.getElementById('renewLeaseDrawer').classList.remove('open')">Cancel</button>
+      </div>
+
+      <form id="renewLeaseForm" novalidate onsubmit="event.preventDefault(); submitRenewal();">
+        <!-- New term -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="label" for="rl-start">New Start Date</label>
+            <input id="rl-start" class="input" type="text" placeholder="DD/MM/YYYY" value="15/03/2027" />
+          </div>
+          <div>
+            <label class="label" for="rl-end">New End Date</label>
+            <input id="rl-end" class="input" type="text" placeholder="DD/MM/YYYY" value="14/03/2028" />
+          </div>
+        </div>
+
+        <!-- Rent -->
+        <div class="mb-4">
+          <label class="label" for="rl-rent">Monthly Rent (₹) <span class="muted text-xs font-normal">(current: ₹18,000)</span></label>
+          <input id="rl-rent" class="input" type="number" min="1" value="18000" oninput="checkRenewalRent()" />
+          <div class="field-error" id="rl-rent-error"></div>
+        </div>
+
+        <!-- BL-11 banner -->
+        <div id="renewalRentBanner" class="alert mb-4" role="status" aria-live="polite" style="display:none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="renewalRentBannerText">Tenants must be notified at least 60 days before this rent takes effect.</span>
+        </div>
+
+        <!-- Tenants on the new lease -->
+        <div class="mb-4">
+          <label class="label">Tenants on the new lease</label>
+          <div id="renewTenantList" class="space-y-2 mb-3">
+            <div class="flex items-center justify-between card p-3" data-primary="true" id="rt-0">
+              <div>
+                <span class="font-poppins font-semibold text-charcoal">Rohan Mehta</span>
+                <span class="badge badge-prepaid text-xs ml-2">Primary</span>
+              </div>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" onclick="removeTenant(0)" disabled title="Cannot remove last primary tenant">Remove</button>
+            </div>
+          </div>
+          <p id="minPrimaryNote" class="text-xs muted mb-3" style="display:none">At least one primary tenant is required. Remove is disabled for the last primary tenant.</p>
+
+          <!-- Add Tenant inline form -->
+          <div id="addTenantForm" style="display:none" class="card p-4 mb-3">
+            <h4 class="font-poppins font-semibold text-charcoal mb-3">Add Tenant</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="label" for="nt-name">Full Name</label>
+                <input id="nt-name" class="input" placeholder="Full name" />
+              </div>
+              <div>
+                <label class="label" for="nt-phone">Phone</label>
+                <input id="nt-phone" class="input" placeholder="10-digit mobile" />
+              </div>
+            </div>
+            <div class="mt-3">
+              <label class="label" for="nt-email">Email (optional)</label>
+              <input id="nt-email" class="input" placeholder="Email" />
+            </div>
+            <div class="mt-3">
+              <label class="label" for="nt-type">Type</label>
+              <select id="nt-type" class="input">
+                <option value="primary">Primary</option>
+                <option value="co" selected>Co-tenant</option>
+              </select>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('addTenantForm').style.display='none'">Cancel</button>
+              <button type="button" class="btn btn-primary !py-2 !text-sm" onclick="addTenantToRenewal()">Add Tenant</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('addTenantForm').style.display='block'">+ Add Tenant</button>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('renewLeaseDrawer').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="createRenewalBtn">Create Renewal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Finalize Termination Confirm Modal -->
+  <div class="modal-backdrop" id="finalizeTermModal" role="dialog" aria-modal="true" aria-labelledby="finalizeTermTitle">
+    <div class="modal" style="max-width:440px">
+      <h3 id="finalizeTermTitle">Confirm termination</h3>
+      <div id="finalizeTermSummary" class="text-sm text-charcoal mt-3 mb-5">
+        <!-- populated by JS -->
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('finalizeTermModal').classList.remove('open')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="confirmFinalizeTermination()">Finalize termination</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Termination flow ----
+    function showTermStep1Form() {
+      document.getElementById('termStep1').style.display = 'none';
+      document.getElementById('termStep1Form').style.display = 'block';
+    }
+    function cancelTermination() {
+      document.getElementById('termStep1').style.display = 'block';
+      document.getElementById('termStep1Form').style.display = 'none';
+      document.getElementById('termStep2').style.display = 'none';
+      document.getElementById('termStep3').style.display = 'none';
+      document.getElementById('declineAlert').style.display = 'none';
+    }
+    function updateTermCounter() {
+      var v = document.getElementById('termReason').value.length;
+      var c = document.getElementById('termCounter');
+      c.textContent = v + '/20';
+      c.classList.toggle('error', v < 20);
+      document.getElementById('termStep1Submit').disabled = v < 20;
+    }
+    function submitTermStep1() {
+      var reason = document.getElementById('termReason').value.trim();
+      var errEl = document.getElementById('termReasonError');
+      if (reason.length < 20) {
+        errEl.textContent = 'Reason must be at least 20 characters.';
+        errEl.classList.add('show');
+        return;
+      }
+      errEl.classList.remove('show');
+      document.getElementById('termStep1Form').style.display = 'none';
+      document.getElementById('termStep2').style.display = 'block';
+    }
+    function updateFinalizeBtn() {
+      var selects = document.querySelectorAll('#consentTable select');
+      var anyPending = false;
+      var anyDeclined = false;
+      selects.forEach(function(s) {
+        if (s.value === 'pending') anyPending = true;
+        if (s.value === 'declined') anyDeclined = true;
+      });
+      var btn = document.getElementById('finalizeTermBtn');
+      var declineAlert = document.getElementById('declineAlert');
+      if (anyDeclined) {
+        declineAlert.style.display = 'flex';
+        btn.disabled = true;
+      } else if (anyPending) {
+        declineAlert.style.display = 'none';
+        btn.disabled = true;
+      } else {
+        declineAlert.style.display = 'none';
+        btn.disabled = false;
+      }
+    }
+    function openFinalizeModal() {
+      var selects = document.querySelectorAll('#consentTable select');
+      var approved = 0, declined = 0;
+      selects.forEach(function(s) {
+        if (s.value === 'approved') approved++;
+        if (s.value === 'declined') declined++;
+      });
+      document.getElementById('finalizeTermSummary').innerHTML =
+        '<p>Approvals: <strong>' + approved + '</strong> &nbsp; Declines: <strong>' + declined + '</strong></p>' +
+        '<p class="mt-2">Effective date: <strong>' + document.getElementById('termDate').value + '</strong></p>' +
+        '<p class="muted text-xs mt-3">This action cannot be undone. Deposit refund is a separate step.</p>';
+      document.getElementById('finalizeTermModal').classList.add('open');
+    }
+    function confirmFinalizeTermination() {
+      document.getElementById('finalizeTermModal').classList.remove('open');
+      document.getElementById('termStep2').style.display = 'none';
+      document.getElementById('termStep3').style.display = 'block';
+      // Update badge to terminated
+      var badges = document.querySelectorAll('.badge-active');
+      badges.forEach(function(b) {
+        b.className = b.className.replace('badge-active','badge-terminated');
+        b.textContent = 'Terminated';
+      });
+    }
+
+    // ---- Renewal flow ----
+    var renewalTenants = [{ name: 'Rohan Mehta', primary: true }];
+
+    function checkRenewalRent() {
+      var v = parseInt(document.getElementById('rl-rent').value, 10);
+      var prev = 18000;
+      var banner = document.getElementById('renewalRentBanner');
+      if (v && v !== prev) {
+        var d = new Date(); d.setDate(d.getDate() + 60);
+        var dd = ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
+        document.getElementById('renewalRentBannerText').textContent =
+          'Tenants must be notified by ' + dd + ' before this rent takes effect. Effective date: ' + dd + ' (60 days from today). (BL-11)';
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    function addTenantToRenewal() {
+      var name = document.getElementById('nt-name').value.trim();
+      var phone = document.getElementById('nt-phone').value.trim();
+      var isPrimary = document.getElementById('nt-type').value === 'primary';
+      if (!name) return;
+      var idx = renewalTenants.length;
+      renewalTenants.push({ name: name, primary: isPrimary });
+      var list = document.getElementById('renewTenantList');
+      var div = document.createElement('div');
+      div.className = 'flex items-center justify-between card p-3';
+      div.id = 'rt-' + idx;
+      div.dataset.primary = isPrimary ? 'true' : 'false';
+      div.innerHTML = '<div><span class="font-poppins font-semibold text-charcoal">' + name + '</span>' +
+        (isPrimary ? '<span class="badge badge-prepaid text-xs ml-2">Primary</span>' : '<span class="badge badge-closed text-xs ml-2">Co-tenant</span>') +
+        '</div><button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" onclick="removeTenant(' + idx + ')">Remove</button>';
+      list.appendChild(div);
+      document.getElementById('nt-name').value = '';
+      document.getElementById('nt-phone').value = '';
+      document.getElementById('nt-email').value = '';
+      document.getElementById('addTenantForm').style.display = 'none';
+      updateRemoveButtons();
+    }
+
+    function removeTenant(idx) {
+      var el = document.getElementById('rt-' + idx);
+      if (el) el.remove();
+      renewalTenants[idx] = null;
+      updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+      var primaryRows = document.querySelectorAll('#renewTenantList [data-primary="true"]');
+      if (primaryRows.length === 1) {
+        primaryRows[0].querySelector('button').disabled = true;
+        document.getElementById('minPrimaryNote').style.display = 'block';
+      } else {
+        primaryRows.forEach(function(r){ r.querySelector('button').disabled = false; });
+        document.getElementById('minPrimaryNote').style.display = 'none';
+      }
+    }
+
+    function submitRenewal() {
+      document.getElementById('renewLeaseDrawer').classList.remove('open');
+      alert('Renewal lease created successfully. The renewed lease appears in the Leases list.');
+    }
+
+    // Backdrop close
+    document.getElementById('renewLeaseDrawer').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    document.getElementById('finalizeTermModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+  </script>
+
   <nav class="tabbar" aria-label="PM navigation (mobile)">
-    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
-    <a href="units.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
     <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
     <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -195,8 +564,29 @@
     <div class="more-sheet-title">More options</div>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
-    <button type="button" class="more-sheet-link" onclick="closeMore(); window.location='../login.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Logout</button>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">SA</div>
+      <div>
+        <div class="account-menu-name">Sunita</div>
+        <div class="account-menu-role">PM</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
   </div>
 </body>
 </html>

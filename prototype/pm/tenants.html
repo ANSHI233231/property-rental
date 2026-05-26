@@ -13,19 +13,42 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
-        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
         <a href="tenants.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
-        <div class="sidebar-divider"></div>
-        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
       </nav>
-      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">SA</div>
+            <div>
+              <div class="account-menu-name">Sunita</div>
+              <div class="account-menu-role">PM</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
     </aside>
 
     <main class="app-main">
@@ -33,83 +56,125 @@
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
           <h1 class="page-title">Tenants</h1>
-          <div class="page-subtitle">Green Valley Apartments · 36 active tenants across 36 units</div>
         </div>
         <button class="btn btn-primary !py-2 !text-sm">+ Add Tenant</button>
       </header>
 
       <section class="card mb-6">
         <div class="grid md:grid-cols-3 gap-4">
-          <div><label class="label" for="search">Search</label><input id="search" class="input" placeholder="Tenant name, phone, unit"/></div>
+          <div><label class="label" for="search">Search</label><input id="search" class="input" data-pg-search="tbl-pm-tenants" placeholder="Tenant name, phone, unit"/></div>
           <div><label class="label" for="status">Status</label><select id="status" class="input"><option>Any</option><option>Active</option><option>Notice given</option></select></div>
           <div><label class="label" for="sort">Sort</label><select id="sort" class="input"><option>Unit number</option><option>Lease end date</option><option>Rent status</option></select></div>
         </div>
       </section>
 
       <section class="card p-0 overflow-x-auto">
-        <table class="data-table">
+        <table class="data-table" id="tbl-pm-tenants">
           <thead>
             <tr><th>Tenant(s)</th><th>Unit</th><th>Lease</th><th>Rent</th><th>Phone</th><th>Status</th><th></th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>
-                <div class="font-poppins font-semibold text-charcoal">Raj Sharma</div>
-                <div class="text-xs muted">+ Priya Sharma (co-tenant)</div>
-              </td>
-              <td>3A</td>
-              <td>01/04/2025 → 31/03/2026</td>
-              <td>₹18,000/mo</td>
-              <td>98xxxxxx90</td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Rohan Mehta</div><div class="text-xs muted">+ Priya Mehta (co-tenant)</div></td>
+              <td>3A</td><td>01/04/2025 → 31/03/2026</td><td>₹18,000/mo</td><td>98xxxxxx90</td>
               <td><span class="badge badge-overdue">Overdue</span></td>
               <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
             </tr>
-            <tr>
+            <tr data-status="active">
               <td><div class="font-poppins font-semibold text-charcoal">Gupta family</div><div class="text-xs muted">3 co-tenants</div></td>
-              <td>1B</td>
-              <td>01/06/2024 → 25/05/2026</td>
-              <td>₹22,000/mo</td>
-              <td>98xxxxxx32</td>
+              <td>1B</td><td>01/06/2024 → 25/05/2026</td><td>₹22,000/mo</td><td>98xxxxxx32</td>
               <td><span class="badge badge-paid">Paid</span></td>
               <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
             </tr>
-            <tr>
+            <tr data-status="active">
               <td><div class="font-poppins font-semibold text-charcoal">Vikram Mehta</div></td>
-              <td>2B</td>
-              <td>01/01/2025 → 31/12/2025</td>
-              <td>₹22,000/mo</td>
-              <td>98xxxxxx41</td>
+              <td>2B</td><td>01/01/2025 → 31/12/2025</td><td>₹22,000/mo</td><td>98xxxxxx41</td>
               <td><span class="badge badge-partial">Partial</span></td>
               <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
             </tr>
-            <tr>
+            <tr data-status="active">
               <td><div class="font-poppins font-semibold text-charcoal">Akash Joshi</div></td>
-              <td>4A</td>
-              <td>01/02/2026 → 31/01/2027</td>
-              <td>₹20,000/mo</td>
-              <td>98xxxxxx55</td>
+              <td>4A</td><td>01/02/2026 → 31/01/2027</td><td>₹20,000/mo</td><td>98xxxxxx55</td>
               <td><span class="badge badge-prepaid">Prepaid</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="notice">
+              <td><div class="font-poppins font-semibold text-charcoal">Sneha Reddy</div></td>
+              <td>5C</td><td>01/03/2025 → 28/02/2026</td><td>₹19,500/mo</td><td>98xxxxxx67</td>
+              <td><span class="badge badge-partial">Notice given</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Imran Khan</div></td>
+              <td>6A</td><td>15/05/2025 → 14/05/2026</td><td>₹21,000/mo</td><td>98xxxxxx78</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Lakshmi Iyer</div><div class="text-xs muted">+ Suresh Iyer (co-tenant)</div></td>
+              <td>7B</td><td>01/07/2025 → 30/06/2026</td><td>₹24,000/mo</td><td>98xxxxxx89</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Deepak Nair</div></td>
+              <td>8A</td><td>01/02/2025 → 31/01/2026</td><td>₹18,500/mo</td><td>98xxxxxx12</td>
+              <td><span class="badge badge-overdue">Overdue</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Ananya Bose</div></td>
+              <td>9C</td><td>01/04/2025 → 31/03/2026</td><td>₹20,500/mo</td><td>98xxxxxx23</td>
+              <td><span class="badge badge-paid">Paid</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="notice">
+              <td><div class="font-poppins font-semibold text-charcoal">Rahul Verma</div></td>
+              <td>2C</td><td>01/05/2025 → 30/04/2026</td><td>₹19,000/mo</td><td>98xxxxxx34</td>
+              <td><span class="badge badge-partial">Notice given</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Meera Pillai</div></td>
+              <td>10A</td><td>01/06/2025 → 31/05/2026</td><td>₹23,000/mo</td><td>98xxxxxx45</td>
+              <td><span class="badge badge-prepaid">Prepaid</span></td>
+              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+            </tr>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Karan Malhotra</div></td>
+              <td>11B</td><td>01/03/2025 → 28/02/2026</td><td>₹21,500/mo</td><td>98xxxxxx56</td>
+              <td><span class="badge badge-paid">Paid</span></td>
               <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
             </tr>
           </tbody>
         </table>
-        <div class="flex items-center justify-between p-4 border-t border-light-gray text-sm muted">
-          <div>Showing 1–4 of 36</div>
-          <div class="flex gap-1"><button class="btn btn-secondary !py-1 !px-3 !text-sm">‹</button><button class="btn btn-secondary !py-1 !px-3 !text-sm">›</button></div>
+        <div class="pagination" data-paginate-for="tbl-pm-tenants" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>10</span> of <span data-pg-total>12</span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+          </div>
+          <div class="pagination-per-page">
+            <label for="per-page-tbl-pm-tenants" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-pm-tenants" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
+          </div>
         </div>
       </section>
     </main>
   </div>
 
   <nav class="tabbar" aria-label="PM navigation (mobile)">
-    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
-    <a href="units.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="tenants.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
     <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
     <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -117,8 +182,29 @@
     <div class="more-sheet-title">More options</div>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
-    <button type="button" class="more-sheet-link" onclick="closeMore(); window.location='../login.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Logout</button>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">SA</div>
+      <div>
+        <div class="account-menu-name">Sunita</div>
+        <div class="account-menu-role">PM</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
   </div>
 </body>
 </html>

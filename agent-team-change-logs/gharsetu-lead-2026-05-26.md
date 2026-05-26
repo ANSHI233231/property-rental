@@ -56,7 +56,7 @@ Date: 2026-05-26
 - Updated `AGENTS.md` Hard rules — re-scoped guardrails to allow public Organization sign-up while keeping Tenant self-signup out; flagged impersonation + delegation as in scope (later session reaffirmed this).
 - Updated `claude-progress.md` §1 phase table — renamed "v3.1" stream to "Current engagement" and narrowed "Deferred" to what truly remains post-current (impersonation, delegation, billing, custom domains were all initially listed; later impersonation + delegation came back into scope).
 - Updated `feature_list.json` — renamed bucket `v3_1_features` → `current_engagement_features`, added `ENG-F06` (SAAS) and `ENG-F07` (Super Admin); rewrote `LOCK-01` to record the sequencing reversal; added `deferred_post_engagement` bucket.
-- Updated the (now-retired) planning roadmap with a supersession banner — file was later removed entirely on 2026-05-27 since all content was duplicated in Solution Overview §Out of Scope + feature_list.json.
+- Updated the (now-retired) planning roadmap with a supersession banner — file was later removed entirely on 2026-05-26 since all content was duplicated in Solution Overview §Out of Scope + feature_list.json.
 
 ### Files Changed
 - `AGENTS.md`
@@ -142,7 +142,7 @@ Date: 2026-05-26
 
 - Status: ✅ Completed
 - Started: 2026-05-26 20:00 IST (approx.)
-- Completed: 2026-05-27 00:30 IST (approx.)
+- Completed: 2026-05-26 00:30 IST (approx.)
 - Duration: ~4h 30m
 
 ### Scope corrections during the design doc build
@@ -184,13 +184,13 @@ Date: 2026-05-26
 ## Task 7 — CLAUDE.md overhaul + Working / Technical rules + Feature Planning template
 
 - Status: ✅ Completed
-- Started: 2026-05-27 06:15 IST (approx.)
-- Completed: 2026-05-27 07:30 IST (approx.)
+- Started: 2026-05-26 06:15 IST (approx.)
+- Completed: 2026-05-26 07:30 IST (approx.)
 - Duration: ~1h 15m
 
 ### Context
 User flagged that CLAUDE.md "is not what it should be." Audit surfaced:
-- Stale header date (2026-05-25 vs current 2026-05-27).
+- Stale header date (2026-05-25 vs current 2026-05-26).
 - Old Rule #2 ("No public sign-up") directly contradicted Rule #12 ("Public organization sign-up IS in scope") — the v1 framing of Rule #2 was never updated for the v8 SAAS scope.
 - UIUX_Design_Document.docx missing from the source-of-truth table.
 - Prototype page count outdated (19 → actual 29).
@@ -198,7 +198,7 @@ User flagged that CLAUDE.md "is not what it should be." Audit surfaced:
 
 ### Changes
 - Rewrote CLAUDE.md end-to-end. New section structure:
-  - Repository status (date updated to 2026-05-27)
+  - Repository status (date updated to 2026-05-26)
   - Operating contract
   - Source-of-truth documents (added UIUX_Design_Document.docx, FEATURE_PLANNING.md, prototype page count fixed to 29)
   - Agent team
@@ -229,3 +229,133 @@ User followed up asking for two more sections: "Files changed" and "Agents used"
 - Three rules from the old "Hard rules (15)" section moved to Working rules (Worker≠Checker, change-log, line caps) because they're process not scope.
 - "No public sign-up" rule removed entirely; replaced with the more accurate "Public Organization sign-up IS in scope (Super Admin gate); tenant self-signup is out" in the Scope rules section (Rule B).
 - All internal paths in CLAUDE.md now use `./` prefix; will need same treatment in AGENTS.md and other top-level .md files at a future tidy pass.
+---
+
+## Task 1 — Plan: Landing Page (public SAAS marketing entry)
+
+- Status: ✅ Completed
+- Started: 2026-05-26 (planning session)
+- Completed: 2026-05-26
+- Duration: ~1 session
+
+### Brief
+User requested a planning file for a full rewrite of `prototype/index.html` into the actual public landing page for GharSetu's SAAS pivot: two CTAs (`Register Your Organization` primary saffron, `Login` secondary), no role-preview cards (those already live as buttons on `prototype/login.html` step-2), and v1's "120 units / 18 buildings" framing replaced with generic SAAS positioning. Lead-only task; implementation deferred to the user.
+
+### What I did
+- Read `docs/planning/FEATURE_PLANNING.md` template + lifecycle + reactivation discipline.
+- Read current `prototype/index.html` to inventory what gets removed (role cards, modules strip, page directory, operator-specific framing).
+- Verified `prototype/login.html` already exposes the 4 role-preview buttons via the step-2 role-picker — confirms it's safe to drop role exposure from the landing.
+- Read `prototype/assets/styles.css` end-to-end and inventoried the tokens the landing must use verbatim (navy, saffron, royal-blue, slate, off-white, light-gray, mid-gray, .btn .btn-primary / .btn-secondary, .card, 8 px spacing scale, `*:focus-visible` saffron ring, `@media max-width: 1023px` / `max-width: 767px`).
+- Read `doc-assets/templates/generate_design_document.js` for the §3 responsive transformations table + §4 Information Architecture; confirmed `/organization-signup` is a public route with no `:org` prefix.
+- Produced `docs/planning/features/2026-05-26-landing-page-saas.md` (168 lines, all 9 template sections populated):
+  - §2 Plan: 8-section layout (Top nav · Hero · Problem · Capabilities · Roles · Plans · Final CTA · Footer), token-by-token sourcing, responsive map at 320/360/768/1024/1440 px, accessibility floor, files-to-touch.
+  - §3 Test cases: TC-LAND-001..018 covering section rendering, CTA wiring, no-role-card guard, locale rule, a11y (Tab order + saffron focus + no native tooltips), and all 5 responsive breakpoints.
+  - §4 Sign-off: 5 questions — Q3/Q4/Q5 defaulted with rationale, Q1 (hero visual) + Q2 (headline) flagged as needing user call before implementation can start.
+
+### Files Changed
+- `docs/planning/features/2026-05-26-landing-page-saas.md` (new, 168 lines)
+- `docs/planning/features/` directory created (was missing)
+- `agent-team-change-logs/gharsetu-lead-2026-05-26.md` (this file, new)
+
+### Open decisions blocking implementation
+- Q1 — Hero right-side visual: text-only (recommended) vs stat cards vs illustration.
+- Q2 — Hero headline wording: "Run your rental business from one place." (recommended) vs alternatives.
+
+Q3/Q4/Q5 (Plans copy, CTA repetition, footer scope) proceed on lead-defaulted answers unless the user overrides.
+
+### Notes
+- No code written. No `prototype/index.html` edits. Implementation is the user's task per the brief.
+- No invented design values — every color / radius / shadow / spacing / font referenced in §2.4 verifies against `prototype/assets/styles.css`.
+- Routing model respected: `Register Your Organization` → `organization-signup.html` (stub, file not created in this task); `Login` → existing `login.html`. No role-prefixed paths leak into the landing.
+- American English used throughout ("Organization", "organize", "organized").
+
+---
+
+## Task 2 — Plan: Organization Sign-up (public SAAS application form)
+
+- Status: ✅ Completed
+- Started: 2026-05-26 (planning session)
+- Completed: 2026-05-26
+- Duration: ~1 session
+
+### Brief
+User requested a planning file for `prototype/organization-signup.html` — the public application form that the landing page's primary CTA (`Register Your Organization`) routes to. Public route `/organization-signup`, no auth, no `:org` prefix. On submit (live): queues for Super Admin approval; on approval, the first Admin account is auto-provisioned. Lead-only task; implementation deferred to the user.
+
+### What I did
+- Read the upstream landing plan (`docs/planning/features/2026-05-26-landing-page-saas.md`) and confirmed the link wiring contract: TC-LAND-002 / TC-LAND-004 / TC-LAND-009 all target `organization-signup.html`.
+- Read `prototype/login.html` + `prototype/forgot-password.html` to inherit the public-page chrome family (`.auth-shell`, `.auth-card`, `.auth-brand`, `.auth-tagline`, password eye-toggle, success-state pattern).
+- Re-read `prototype/assets/styles.css` end-to-end to confirm every token referenced exists; cross-referenced line numbers in §2.6 of the plan so the implementer can verify each value against the source.
+- Decided single-page-with-sections over 2-step (rationale in §2.2) and plan-selection-in-form over deferred (rationale in §2.3).
+- Sized the auth-card to 560 px max-width (vs login's 480 px) to host the 3 plan tiles legibly.
+- Field inventory: 11 form fields across 3 sections + Terms checkbox + Submit. Documented per-field type / required / validation rule so backend class-validator can mirror exactly (Technical convention #16).
+- Plan tile selection: radio-group pattern with visually-hidden inputs and `.card`-based tile visuals; selected state = 2 px saffron border. Includes user caps (5 / 20 / unlimited) per UIUX Design Document §5.
+- Validation discipline: no `required` / `pattern` HTML5 attributes → no native browser tooltips → `.field-error` + ⚠ glyph + `.input.error` red border, all already defined in `styles.css` lines 142–160 / 139.
+- Produced `docs/planning/features/2026-05-26-organization-signup.html.md` (252 lines, all 9 template sections populated):
+  - §2 Plan: layout decision tables (single vs 2-step, plan-selection-in-form vs deferred), 9-zone structure, full field validation table, design-token sourcing with `styles.css` line numbers, responsive map at 320 / 360 / 768 / 1024 / 1440 px, a11y floor.
+  - §3 Test cases: TC-ORGSIGN-001..039 — public route, link wiring, every field validation pass + fail, plan-tile selection mutual exclusion, Terms-gates-submit, success state, responsive at all 5 widths, accessibility (Tab order + saffron focus + no native tooltips), locale, American spelling.
+  - §4 Sign-off: 8 questions — Q1/Q2/Q3/Q6/Q8 defaulted; Q4 (duplicate-email handling) flagged for backend phase; Q5 (login.html copy update) flagged as follow-up plan; Q7 (validation.js extension) flagged for implementation time.
+
+### Files Changed
+- `docs/planning/features/2026-05-26-organization-signup.html.md` (new, 252 lines)
+- `agent-team-change-logs/gharsetu-lead-2026-05-26.md` (this append)
+
+### Open decisions / follow-ups
+- **Q4** (live build): duplicate email or phone handling on the backend — recommend 409 with field-targeted error.
+- **Q5** (separate prototype-changes row): update `prototype/login.html` line 59 to drop the stale "No public sign-up" copy and add a "Don't have an account? Register your organization" link to `organization-signup.html`. Track outside this planning file.
+- **Q7** (implementation time): decide whether `validateRadioGroup` helper lives inline in the page or promoted to `prototype/assets/validation.js`.
+
+### Notes
+- No code written. No prototype HTML produced.
+- No invented design values — every color / radius / shadow / spacing / font / line-number in §2.6 verifies against `prototype/assets/styles.css`. Card max-width 560 px is the only non-`styles.css` value, applied inline because login's 480 px would crowd the plan tiles.
+- American English used throughout ("Organization", "organize", "organizations") — TC-ORGSIGN-038 explicitly checks this.
+- Routing model respected: public route, no `:org` prefix, no auth gate.
+- Field types align with future backend smallint enum mapping (Scope rule G): A2 type-of-business (5 values), A3 unit-count bucket (4 values), C1 plan (3 values), A4 state (36 IN states / UTs).
+- Password min length stays at 10 per the locked cross-session CARRY-05 deferred decision in `claude-progress.md` §8.
+
+## Task 3 — v8 prototype build-out orchestration (continuation)
+
+- Status: ✅ Completed
+- Started: 2026-05-26 18:00 IST
+- Completed: 2026-05-27 03:30 IST
+- Duration: ~9 h 30 m
+
+### Changes
+
+**Orchestration scope** — implement the Option C plan (public auth refresh + Per-Room Leasing planning + Admin Impersonation + v8 gap closures) and dispatch all v8 prototype features per the eight planning files dated 2026-05-26.
+
+**Dispatches**:
+1. ✅ `gharsetu-frontend` — Per-Room Leasing planning file (589 lines, 42 TCs across 5 namespaces)
+2. ⚠️ `gharsetu-frontend` — Visitor Management implementation (stalled at 600 s; recovered — 2 new pages + nav rollout complete; manual patch for tenant/maintenance + tenant/profile nav)
+3. ⚠️ `gharsetu-frontend` — Admin Module Additions implementation (stalled at 600 s; recovered — 3 new pages complete; manual patch for sidebar + MoreSheet across 9 existing admin pages)
+4. ✅ `gharsetu-frontend` — Admin Impersonation implementation (banner JS + 153 lines CSS + 29-page script injection)
+5. ⚠️ `gharsetu-frontend` — v8 gap closures (stalled at 600 s after Modules 1-3; continuation dispatched)
+6. ✅ `gharsetu-frontend` — v8 gap closures Modules 4-6 continuation (Maintenance detail pages, Rent admin record, Dashboards rebuild)
+
+**Manual orchestrator interventions** (non-code coordination):
+- Verified intact state of stalled-agent outputs before re-dispatch (no duplicate work)
+- Patched sidebar account-menu refactor globally (37 pages) — CSS + JS + markup
+- Patched planning-file §5 execution logs that stalled agents missed (visitor-management.md, admin-module-additions.md)
+- Audited admin nav consistency on all 12 admin pages after master-data/settings/delegations rollout
+- Verified sidebar refactor survived all subsequent agent edits
+
+### Files Changed
+- agent-team-change-logs/gharsetu-frontend-2026-05-26.md (Task 2 appended)
+- agent-team-change-logs/gharsetu-lead-2026-05-26.md (this entry)
+- claude-progress.md (session-3 update)
+- prototype/assets/styles.css (sidebar account-menu block)
+- prototype/assets/validation.js (account-menu toggle)
+- prototype/**/*.html (37 files — sidebar refactor)
+- prototype/admin/*.html (9 pages — nav consistency patch)
+- prototype/tenant/maintenance.html + profile.html (Visitors nav)
+- docs/planning/features/2026-05-26-{visitor-management,admin-module-additions}.md (§5 execution log)
+
+### Notes / Pending
+
+- Per-Room Leasing HTML iteration deferred to next session
+- `feature_list.json` state changes — none flipped this pass; all new work remains in `proposed` until verification command (currently the prototype-only iteration has no command — feature_list rows pending creation)
+- `prototype-changes.md` ledger row pending (deferred to ship)
+- No commits or pushes (per Working rule §1 — user instruction required)
+- Two open decisions on Impersonation (active-org gate, nested-impersonation backend block) — surfaced for next sprint
+- Five open decisions on Per-Room Leasing planning file — awaiting user sign-off
+
+---

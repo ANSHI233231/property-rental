@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+        </a>
+        <a href="organizations.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+        </a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">AK</div>
+            <div>
+              <div class="account-menu-name">Aayush</div>
+              <div class="account-menu-role">Super Admin</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 class="page-title">My Profile</h1>
+        </div>
+      </header>
+
+      <div class="profile-grid">
+        <!-- Account card -->
+        <section class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar-lg">AK</div>
+            <div class="profile-name">Aayush Kumar</div>
+            <span class="profile-role">Super Admin</span>
+          </div>
+
+          <h3>Account</h3>
+          <div class="profile-row"><span class="field">Name</span><span class="value">Aayush Kumar</span></div>
+          <div class="profile-row"><span class="field">Email</span><span class="value">aayush@gharsetu.in</span></div>
+          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx00</span></div>
+          <div class="profile-row"><span class="field">Role</span><span class="value">Super Admin · Platform</span></div>
+          <div class="profile-row"><span class="field">Scope</span><span class="value">All organizations · Platform-level</span></div>
+          <div class="profile-row"><span class="field">Member since</span><span class="value">01/01/2025</span></div>
+          <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active" aria-label="Status: Active">Active</span></span></div>
+
+          <div class="mt-6 flex gap-2 flex-wrap">
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Edit details — read-only in prototype.')">Edit details</button>
+          </div>
+          <p class="text-xs muted mt-3">Email and role changes are audited and require platform-level confirmation.</p>
+        </section>
+
+        <!-- Security card -->
+        <section class="profile-card">
+          <h3>Security</h3>
+
+          <form class="mt-2" id="pw-form" novalidate onsubmit="submitPasswordChange(event)">
+            <div class="mb-4">
+              <label class="label" for="cur-pw">Current password</label>
+              <input id="cur-pw" type="password" class="input" placeholder="••••••••" minlength="10" required />
+              <div class="field-error" id="cur-pw-error"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="label" for="new-pw">New password</label>
+                <input id="new-pw" type="password" class="input" placeholder="At least 10 characters" minlength="10" required oninput="syncConfirmValidation()" onblur="validateNewPw()" />
+                <div class="field-error" id="new-pw-error"></div>
+              </div>
+              <div>
+                <label class="label" for="conf-pw">Confirm new</label>
+                <input id="conf-pw" type="password" class="input" placeholder="Repeat new password" minlength="10" required oninput="clearConfirmError()" onblur="validateConfirmPw()" />
+                <div class="field-error" id="conf-pw-error"></div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-disabled !py-2 !text-sm" id="change-pw-btn" disabled>Change password</button>
+          </form>
+
+          <hr class="divider"/>
+
+          <a href="../login.html" class="btn btn-danger !py-2 !text-sm">Sign out</a>
+        </section>
+      </div>
+
+      <!-- Recent Activity -->
+      <section class="section mt-8">
+        <h3 class="section-title">Recent Activity</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>When</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
+            <tbody>
+              <tr><td>26/05/2026 09:14</td><td>Approved organization</td><td>Saffron Stays Pvt Ltd</td><td>106.51.xx.xx</td></tr>
+              <tr><td>25/05/2026 17:02</td><td>Changed plan Basic → Standard</td><td>Green Valley Co-living</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 11:30</td><td>Approved organization</td><td>Green Valley Co-living</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 09:00</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mobile tab bar — 4 items, no MoreSheet -->
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+    </a>
+    <a href="organizations.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs
+    </a>
+    <a href="plans.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+    </a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
+    </button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script>
+    // Password validation — uses validation.js patterns, no HTML5 native tooltips
+    // The form already has novalidate (set above). validation.js auto-attaches.
+    // We also layer custom equality check for confirm password.
+
+    function validateNewPw() {
+      var input = document.getElementById('new-pw');
+      var err = document.getElementById('new-pw-error');
+      var val = input.value;
+      if (val.length > 0 && val.length < 10) {
+        err.textContent = 'At least 10 characters required (' + val.length + ' so far).';
+        err.classList.add('show');
+        input.classList.add('error');
+        return false;
+      }
+      err.textContent = ''; err.classList.remove('show');
+      input.classList.remove('error');
+      return true;
+    }
+
+    function validateConfirmPw() {
+      var newPw = document.getElementById('new-pw').value;
+      var conf = document.getElementById('conf-pw');
+      var err = document.getElementById('conf-pw-error');
+      if (conf.value && conf.value !== newPw) {
+        err.textContent = 'Passwords don\'t match.';
+        err.classList.add('show');
+        conf.classList.add('error');
+        return false;
+      }
+      err.textContent = ''; err.classList.remove('show');
+      conf.classList.remove('error');
+      return true;
+    }
+
+    function clearConfirmError() {
+      var conf = document.getElementById('conf-pw');
+      var err = document.getElementById('conf-pw-error');
+      err.textContent = ''; err.classList.remove('show');
+      conf.classList.remove('error');
+      updateSubmitBtn();
+    }
+
+    function syncConfirmValidation() {
+      validateNewPw();
+      updateSubmitBtn();
+    }
+
+    function updateSubmitBtn() {
+      var cur = document.getElementById('cur-pw').value;
+      var newPw = document.getElementById('new-pw').value;
+      var conf = document.getElementById('conf-pw').value;
+      var btn = document.getElementById('change-pw-btn');
+      var valid = cur.length >= 1 && newPw.length >= 10 && conf === newPw;
+      if (valid) {
+        btn.classList.remove('btn-disabled'); btn.classList.add('btn-primary'); btn.disabled = false;
+      } else {
+        btn.classList.add('btn-disabled'); btn.classList.remove('btn-primary'); btn.disabled = true;
+      }
+    }
+
+    ['cur-pw','new-pw','conf-pw'].forEach(function(id) {
+      document.getElementById(id).addEventListener('input', updateSubmitBtn);
+    });
+
+    function submitPasswordChange(e) {
+      e.preventDefault();
+      var okNew = validateNewPw();
+      var okConf = validateConfirmPw();
+      if (!okNew || !okConf) return;
+      alert('Password changed successfully.');
+      document.getElementById('pw-form').reset();
+      updateSubmitBtn();
+    }
+  </script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">AK</div>
+      <div>
+        <div class="account-menu-name">Aayush</div>
+        <div class="account-menu-role">Super Admin</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+</body>
+</html>

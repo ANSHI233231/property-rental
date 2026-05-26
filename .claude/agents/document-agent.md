@@ -22,7 +22,7 @@ Read it once per session.
 **Always read `docs/planning/DOCUMENT_AGENT.md` first** (repo-root-relative per CLAUDE.md Rule 30) before doing anything. That file is your full briefing:
 
 - Client profile + communication rules (non-technical client, plain business language, no filler)
-- Project context (4 roles, 6 modules, ~120 units / 18 buildings)
+- Project context (5 roles incl. Super Admin platform-level role; multi-tenant SAAS layer; ~120 units / 18 buildings in the original anchor organization)
 - Critical rent-collection logic (late fee 2% per full week non-compounding, overdue at 5 days, 31st edge case, payments per lease not per tenant)
 - Every document created so far with its purpose, structure, and design decisions
 - Design patterns (Solution Overview navy palette + UI Guidelines platform palette)

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Server Logs · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    .log-viewer {
+      background: #0F172A;
+      color: #E2E8F0;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 16px;
+      border-radius: 8px;
+      max-height: 420px;
+      overflow: auto;
+      white-space: pre;
+    }
+    .log-line { display: block; padding: 2px 0; }
+    .log-line .lvl-info  { color: #38BDF8; }
+    .log-line .lvl-warn  { color: #FACC15; }
+    .log-line .lvl-error { color: #F87171; }
+    .log-line .lvl-debug { color: #94A3B8; }
+    .log-line .ts        { color: #94A3B8; }
+    .log-line .req       { color: #C4B5FD; }
+    .meta-strip {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      font-family: 'Inter', sans-serif; font-size: 13px; color: var(--color-slate);
+      margin: 8px 0 16px;
+    }
+    .meta-strip strong { color: var(--color-charcoal); font-family: 'Poppins', sans-serif; font-weight: 600; }
+    @media (max-width: 480px) {
+      .modal--mobile-full { width:100%;height:100%;border-radius:0;max-width:none;padding:24px;overflow-y:auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="organizations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations</a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans</a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header"><div class="account-menu-avatar">AK</div><div><div class="account-menu-name">Aayush</div><div class="account-menu-role">Super Admin</div></div></div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div id="liveRegion" role="status" aria-live="polite" class="sr-only" style="position:absolute;left:-9999px;"></div>
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <h1 class="page-title">Server Logs</h1>
+        </div>
+        <button class="btn btn-secondary !py-2 !text-sm" onclick="refreshLogs()">Refresh</button>
+      </header>
+
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="logSearch">Search file name</label>
+            <input id="logSearch" class="input" placeholder="e.g. api-2026-05-27" oninput="filterLogs()" />
+          </div>
+          <div>
+            <label class="label" for="logRange">Date range</label>
+            <select id="logRange" class="input" onchange="filterLogs()">
+              <option value="">All days</option>
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table" id="tbl-logs">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Date</th>
+              <th>Size</th>
+              <th>Lines</th>
+              <th>Last modified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logRows">
+            <!-- rows injected on load -->
+          </tbody>
+        </table>
+        <div class="pagination" data-paginate-for="tbl-logs" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>10</span> of <span data-pg-total>10</span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+          </div>
+          <div class="pagination-per-page">
+            <label for="per-page-tbl-logs" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-logs" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- View Log Modal -->
+  <div class="modal-backdrop" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+    <div class="modal modal--mobile-full" style="max-width:880px;width:90%;">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 id="viewModalTitle">Log file</h3>
+          <div class="meta-strip" id="viewModalMeta"></div>
+        </div>
+        <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="closeViewModal()" aria-label="Close">Close</button>
+      </div>
+
+      <div class="log-viewer" id="viewModalContent" tabindex="0" aria-label="Log file contents"></div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="closeViewModal()">Close</button>
+        <button type="button" class="btn btn-primary" id="viewModalDownloadBtn">Download full file</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+    </a>
+    <a href="organizations.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs
+    </a>
+    <a href="plans.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+    </a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
+    </button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header"><div class="account-menu-avatar">AK</div><div><div class="account-menu-name">Aayush</div><div class="account-menu-role">Super Admin</div></div></div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+
+  <script>
+    // -------------------- Mock data --------------------
+    // Today is 27/05/2026 in the prototype's mock world. Build 10 days back.
+    var TODAY = new Date(2026, 4, 27);  // month is 0-indexed
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function fmtIso(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+    function fmtIN(d) { return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear(); }
+
+    function buildMockFiles() {
+      var files = [];
+      for (var i = 0; i < 10; i++) {
+        var d = new Date(TODAY); d.setDate(d.getDate() - i);
+        var iso = fmtIso(d);
+        var sizes = [1284, 1097, 943, 1521, 856, 1342, 1187, 991, 1208, 1054]; // KB
+        var lines = [12484, 10843, 9217, 14982, 8401, 13186, 11657, 9743, 11873, 10328];
+        files.push({
+          name: 'api-' + iso + '.log',
+          dateIN: fmtIN(d),
+          dateISO: iso,
+          sizeKB: sizes[i],
+          lines: lines[i],
+          mtime: i === 0 ? '27/05/2026 23:59 IST' : fmtIN(d) + ' 23:59 IST',
+          // level distribution for the view modal meta
+          levels: { info: Math.round(lines[i]*0.79), debug: Math.round(lines[i]*0.15), warn: Math.round(lines[i]*0.05), error: Math.round(lines[i]*0.01) },
+        });
+      }
+      return files;
+    }
+
+    var FILES = buildMockFiles();
+
+    function fmtSize(kb) { return kb >= 1024 ? (kb/1024).toFixed(1) + ' MB' : kb + ' KB'; }
+    function fmtNum(n) { return n.toLocaleString('en-IN'); }
+
+    function renderRows(files) {
+      var tbody = document.getElementById('logRows');
+      tbody.innerHTML = files.map(function(f, i) {
+        return '<tr data-name="' + f.name + '" data-date="' + f.dateISO + '">' +
+          '<td class="font-poppins font-semibold text-charcoal" style="font-family:\'JetBrains Mono\',monospace;font-size:13px;">' + f.name + '</td>' +
+          '<td>' + f.dateIN + '</td>' +
+          '<td>' + fmtSize(f.sizeKB) + '</td>' +
+          '<td>' + fmtNum(f.lines) + '</td>' +
+          '<td class="text-xs">' + f.mtime + '</td>' +
+          '<td><div class="flex items-center gap-2 flex-wrap">' +
+          '  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openViewModal(' + i + ')">View</button>' +
+          '  <button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="downloadLog(' + i + ')">Download</button>' +
+          '</div></td>' +
+          '</tr>';
+      }).join('');
+    }
+    renderRows(FILES);
+    if (window.Paginator) Paginator.refresh("tbl-logs");
+
+    // -------------------- Filtering --------------------
+    function filterLogs() {
+      var q = (document.getElementById('logSearch').value || '').toLowerCase();
+      var range = document.getElementById('logRange').value;
+      var filtered = FILES.filter(function(f) {
+        if (q && f.name.toLowerCase().indexOf(q) === -1) return false;
+        if (range) {
+          var cutoff = new Date(TODAY); cutoff.setDate(cutoff.getDate() - parseInt(range, 10));
+          if (new Date(f.dateISO) < cutoff) return false;
+        }
+        return true;
+      });
+      renderRows(filtered);
+      if (window.Paginator) Paginator.refresh("tbl-logs");
+    }
+
+    // -------------------- View modal --------------------
+    var lastFocusTrigger = null;
+    function openViewModal(idx) {
+      lastFocusTrigger = document.activeElement;
+      var f = FILES[idx];
+      document.getElementById('viewModalTitle').textContent = f.name + ' · ' + f.dateIN;
+      document.getElementById('viewModalMeta').innerHTML =
+        '<span><strong>' + fmtSize(f.sizeKB) + '</strong> · <strong>' + fmtNum(f.lines) + '</strong> lines</span>' +
+        '<span>Levels — INFO: <strong>' + fmtNum(f.levels.info) + '</strong> · DEBUG: <strong>' + fmtNum(f.levels.debug) + '</strong> · WARN: <strong>' + fmtNum(f.levels.warn) + '</strong> · ERROR: <strong>' + fmtNum(f.levels.error) + '</strong></span>' +
+        '<span>Showing first 30 lines</span>';
+      document.getElementById('viewModalContent').innerHTML = mockLogLines(f).map(function(line) {
+        return '<span class="log-line">' + line + '</span>';
+      }).join('');
+      document.getElementById('viewModalDownloadBtn').onclick = function() { downloadLog(idx); };
+      document.getElementById('viewModal').classList.add('open');
+      document.getElementById('viewModalContent').focus();
+    }
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.remove('open');
+      if (lastFocusTrigger) lastFocusTrigger.focus();
+    }
+
+    // Mock 30 lines of log output for the modal preview.
+    function mockLogLines(f) {
+      var base = f.dateIN;
+      var entries = [
+        { t: '00:00:01.103', lvl: 'INFO',  req: 'req-0001', msg: 'Cron job rent.compute.daily started' },
+        { t: '00:00:02.842', lvl: 'INFO',  req: 'req-0001', msg: 'Computed rent status for 120 leases · 4 newly overdue · 7 new late-fee accruals' },
+        { t: '00:00:14.220', lvl: 'INFO',  req: 'req-0002', msg: 'Cron job maintenance.escalate.daily started' },
+        { t: '00:00:14.998', lvl: 'INFO',  req: 'req-0002', msg: 'Escalated 0 maintenance requests' },
+        { t: '06:42:18.501', lvl: 'INFO',  req: 'req-0184', msg: 'POST /api/v1/auth/login 200 124ms' },
+        { t: '06:42:18.622', lvl: 'DEBUG', req: 'req-0184', msg: 'JWT issued · subject=user_7 · ttl=900s' },
+        { t: '08:01:33.014', lvl: 'INFO',  req: 'req-0392', msg: 'POST /api/v1/leases/2103/payments 201 218ms' },
+        { t: '08:01:33.087', lvl: 'INFO',  req: 'req-0392', msg: 'Payment recorded · lease=2103 · amount=1800000p · method=UPI' },
+        { t: '09:14:02.840', lvl: 'INFO',  req: 'req-0451', msg: 'GET /api/v1/properties 200 41ms' },
+        { t: '10:22:51.612', lvl: 'WARN',  req: 'req-0598', msg: 'Rate limit threshold approached for IP 106.51.x.x · remaining=3' },
+        { t: '10:33:09.001', lvl: 'INFO',  req: 'req-0612', msg: 'POST /api/v1/maintenance 201 132ms' },
+        { t: '10:33:09.072', lvl: 'DEBUG', req: 'req-0612', msg: 'Created maintenance request MR-3041 · category=Plumbing · priority=Emergency' },
+        { t: '11:05:44.230', lvl: 'INFO',  req: 'req-0701', msg: 'PATCH /api/v1/maintenance/MR-3041 200 78ms' },
+        { t: '11:05:44.281', lvl: 'INFO',  req: 'req-0701', msg: 'Status transition · MR-3041 · OPEN → IN_PROGRESS · actor=user_4(MAINTENANCE)' },
+        { t: '11:42:18.611', lvl: 'ERROR', req: 'req-0820', msg: 'Failed to record payment · duplicate request_id · attempt blocked · lease=2118' },
+        { t: '11:42:19.044', lvl: 'INFO',  req: 'req-0820', msg: 'POST /api/v1/leases/2118/payments 409 12ms' },
+        { t: '13:05:01.500', lvl: 'INFO',  req: 'req-0941', msg: 'GET /api/v1/dashboard 200 88ms' },
+        { t: '14:18:42.001', lvl: 'INFO',  req: 'req-1102', msg: 'POST /api/v1/visitors/pre-approve 201 56ms' },
+        { t: '14:18:42.072', lvl: 'DEBUG', req: 'req-1102', msg: 'Visitor pre-approval · visitor=Anita Mehta · expected=27/05/2026 18:00 · purpose="Personal visit"' },
+        { t: '15:33:09.812', lvl: 'INFO',  req: 'req-1230', msg: 'PATCH /api/v1/maintenance/MR-3041 200 102ms' },
+        { t: '15:33:09.875', lvl: 'INFO',  req: 'req-1230', msg: 'Status transition · MR-3041 · IN_PROGRESS → RESOLVED · actor=user_4(MAINTENANCE)' },
+        { t: '16:47:21.118', lvl: 'WARN',  req: 'req-1342', msg: 'Slow query · /api/v1/rent/aggregate · 1240ms' },
+        { t: '17:02:18.500', lvl: 'INFO',  req: 'req-1401', msg: 'POST /api/v1/auth/login 200 132ms' },
+        { t: '17:02:18.580', lvl: 'DEBUG', req: 'req-1401', msg: 'JWT issued · subject=user_3(ADMIN) · ttl=900s' },
+        { t: '17:14:55.030', lvl: 'INFO',  req: 'req-1418', msg: 'POST /api/v1/leases/2103/terminate-init 201 187ms' },
+        { t: '18:21:09.412', lvl: 'INFO',  req: 'req-1502', msg: 'GET /api/v1/audit-log 200 64ms · q=ADMIN' },
+        { t: '19:40:11.220', lvl: 'INFO',  req: 'req-1611', msg: 'POST /api/v1/auth/refresh 200 18ms' },
+        { t: '20:55:42.001', lvl: 'DEBUG', req: 'req-1720', msg: 'Cron job audit-log.archive.weekly skipped — runs Sundays only' },
+        { t: '22:18:33.500', lvl: 'INFO',  req: 'req-1818', msg: 'POST /api/v1/auth/logout 204 9ms' },
+        { t: '23:59:59.999', lvl: 'INFO',  req: 'req-0000', msg: 'Daily log file rotated · next file: api-' + nextDate(f.dateISO) + '.log' },
+      ];
+      return entries.map(function(e) {
+        var cls = e.lvl === 'INFO' ? 'lvl-info' : e.lvl === 'WARN' ? 'lvl-warn' : e.lvl === 'ERROR' ? 'lvl-error' : 'lvl-debug';
+        return '<span class="ts">[' + base + ' ' + e.t + ']</span> <span class="' + cls + '">' + e.lvl.padEnd(5) + '</span> <span class="req">' + e.req + '</span> ' + escHtml(e.msg);
+      });
+    }
+    function nextDate(iso) {
+      var d = new Date(iso); d.setDate(d.getDate() + 1);
+      return fmtIso(d);
+    }
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // -------------------- Download --------------------
+    function downloadLog(idx) {
+      var f = FILES[idx];
+      // Build a plain text body — strip HTML coloring, output one record per line.
+      var body = mockLogLines(f).map(function(line) {
+        return line.replace(/<[^>]+>/g, '');
+      }).join('\n') + '\n';
+      var blob = new Blob([body], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = f.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      announce('Download started: ' + f.name);
+    }
+
+    // -------------------- Refresh (mock) --------------------
+    function refreshLogs() {
+      announce('Log list refreshed.');
+    }
+
+    // -------------------- Misc --------------------
+    function announce(msg) {
+      var lr = document.getElementById('liveRegion');
+      lr.textContent = '';
+      setTimeout(function() { lr.textContent = msg; }, 50);
+    }
+
+    // Close modal on Escape / backdrop click
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeViewModal();
+    });
+    document.getElementById('viewModal').addEventListener('click', function(e) {
+      if (e.target === this) closeViewModal();
+    });
+  </script>
+</body>
+</html>

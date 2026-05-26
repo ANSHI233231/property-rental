@@ -34,7 +34,7 @@ Before approving any backend deliverable (or scoping one in a plan), invoke the 
 **State files (read FIRST, every session):**
 
 - [claude-progress.md](../../claude-progress.md) — rolling cross-session memory: where we are, what's in flight, what's blocked, what's next.
-- [feature_list.json](../../feature_list.json) — machine-readable state for all 23 BLs + v3.1 features. State transitions are gated here.
+- [feature_list.json](../../feature_list.json) — machine-readable state for all 23 BLs + 9 current-engagement features + carry-over + deferred items. State transitions are gated here.
 
 **Spec / contract (read for the work in hand):**
 
@@ -42,7 +42,7 @@ Before approving any backend deliverable (or scoping one in a plan), invoke the 
 - [GharSetu_Model_API_Spec.md](../../docs/product/v1/GharSetu_Model_API_Spec.md) — authoritative API contract: data models, REST endpoints, error codes, role-based access matrix.
 - [Test_Cases.md](../../docs/testing/v1/Test_Cases.md) — ~110 test cases mapped to business rules.
 - [docs/testing/v1/bl-traceability-matrix.md](../../docs/testing/v1/bl-traceability-matrix.md) — human-readable BL→test mapping (sync with feature_list.json).
-- [docs/product/Solution_Overview.docx](../../docs/product/Solution_Overview.docx) — current engagement (v3.1) scope; generated from `doc-assets/templates/generate_solution_overview.js`.
+- [docs/product/Solution_Overview.docx](../../docs/product/Solution_Overview.docx) — current engagement scope (v8); generated from `doc-assets/templates/generate_solution_overview.js`.
 - [prototype/](../../prototype/) — static HTML/Tailwind reference for every screen.
 - [CONTEXT.md](../../CONTEXT.md) — descriptive snapshot of what's actually on disk today.
 - [CLAUDE.md](../../CLAUDE.md) — repo-level guidance.

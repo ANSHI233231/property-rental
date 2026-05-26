@@ -1,6 +1,6 @@
 ---
 name: gharsetu-backend
-description: "GharSetu backend system — NestJS + Prisma + PostgreSQL contract for the property-rental platform. Use when adding/modifying any REST endpoint, Prisma model, migration, guard, DTO, service, business-rule enforcement, audit-log write, scheduled job, or auth flow in apps/api; when wiring tenants/leases/units/rent/maintenance/payments; when debugging role-scope leaks or 401/403/409 responses; when designing idempotent writes; when adding append-only audit entries. Covers: 4-role RBAC (ADMIN=0, PROPERTY_MANAGER=1, MAINTENANCE=2, TENANT=3), numeric smallint enums for all states, int autoincrement IDs (no CUIDs), Argon2id hashing, JWT 15min + opaque refresh in HttpOnly cookie at /api/v1/auth (7d), BL-01..BL-23 enforcement points, BullMQ jobs (daily overdue / weekly late-fee / 5+-alert), Prisma migrations (append-only, reversible), DD/MM/YYYY ISO boundary, en-IN locale, ₹ currency. Out-of-scope: 2FA, multi-session UI, public sign-up, online payments, SMS/Email/WhatsApp business notifications, file uploads, owner/vendor logins."
+description: "GharSetu backend system — NestJS + Prisma + PostgreSQL contract for the multi-tenant property-rental SAAS platform. Use when adding/modifying any REST endpoint, Prisma model, migration, guard, DTO, service, business-rule enforcement, audit-log write, scheduled job, or auth flow in apps/api; when wiring organizations/tenants/leases/units/rent/maintenance/payments/visitors/master-data/settings/impersonation/delegation; when debugging role-scope leaks or 401/403/409 responses; when designing idempotent writes; when adding append-only audit entries. Covers: 5-role RBAC (ADMIN=0, PROPERTY_MANAGER=1, MAINTENANCE=2, TENANT=3, SUPER_ADMIN=4), numeric smallint enums for all states, int autoincrement IDs (no CUIDs), shared-schema multi-tenancy with organization_id + Postgres RLS, Argon2id hashing, JWT 15min + opaque refresh in HttpOnly cookie at /api/v1/auth (7d), BL-01..BL-23 enforcement points + NR-1..NR-6 v8 additions, BullMQ jobs (daily overdue / weekly late-fee / 5+-alert), Prisma migrations (append-only, reversible), DD/MM/YYYY ISO boundary, en-IN locale, ₹ currency. Out-of-scope: 2FA, multi-session UI, tenant self-signup, online payment gateway, SMS/Email/WhatsApp business notifications, file uploads, owner/vendor logins, custom domains, per-org branding."
 ---
 
 # GharSetu Backend System
@@ -9,7 +9,7 @@ Authoritative backend contract for `apps/api`. Use this skill whenever you touch
 
 ## Hard rules — never violate
 
-1. **No public sign-up.** No `POST /auth/register` for self-service. Accounts created only by ADMIN (any role) or PROPERTY_MANAGER (TENANT/MAINTENANCE only).
+1. **Public Organization sign-up IS in scope** (Super Admin approval gate at `/auth/register-organization`). Tenant self-signup remains **out of scope** — tenant accounts auto-create at lease signing. Admin / PM / Maintenance accounts are created internally by Admin within an organization.
 2. **No DELETE.** Use status/state columns for soft-retire (`retired`, `closed`, `terminated`). Audit log is permanent — no UPDATE, no DELETE on `audit_log`.
 3. **Tenants cannot write payments.** **BL-10** is non-negotiable: only PROPERTY_MANAGER (and ADMIN) can `POST /payments`.
 4. **No auto-approval timers.** **BL-08/BL-09**: termination requires explicit consent rows from every co-tenant. Never implement an `if created_at + N days then approve` fallback.
@@ -36,14 +36,17 @@ Authoritative backend contract for `apps/api`. Use this skill whenever you touch
 ## Domain model (numeric enum contract — permanent)
 
 ```
-Role:                      ADMIN=0       PROPERTY_MANAGER=1  MAINTENANCE=2  TENANT=3
+Role:                      ADMIN=0       PROPERTY_MANAGER=1  MAINTENANCE=2  TENANT=3        SUPER_ADMIN=4
 UnitState:                 AVAILABLE=0   LISTED=1            OCCUPIED=2     MAINTENANCE=3
 LeaseStatus:               ACTIVE=0      EXPIRED=1           RENEWED=2      TERMINATED=3
-RentPeriodStatus:          UPCOMING=0    DUE=1               PARTIAL=2      PAID=3         OVERDUE=4   PREPAID=5
-MaintenanceStatus:         OPEN=0        ASSIGNED=1          IN_PROGRESS=2  RESOLVED=3     CLOSED=4
+RentPeriodStatus:          UPCOMING=0    DUE=1               PARTIAL=2      PAID=3          OVERDUE=4       PREPAID=5
+MaintenanceStatus:         OPEN=0        ASSIGNED=1          IN_PROGRESS=2  RESOLVED=3      CLOSED=4
 MaintenancePriority:       LOW=0         NORMAL=1            HIGH=2         EMERGENCY=3
-PaymentMethod:             CASH=0        BANK_TRANSFER=1     UPI=2          CHEQUE=3       OTHER=4
+PaymentMethod:             (sourced from Master Data — no fixed enum; v1 had CASH=0 / BANK_TRANSFER=1 / UPI=2 / CHEQUE=3 / OTHER=4)
 TerminationApprovalStatus: PENDING=0     APPROVED=1          REJECTED=2
+SubscriptionPlan:          BASIC=0       STANDARD=1          PREMIUM=2
+OrganizationStatus:        PENDING=0     ACTIVE=1            DEACTIVATED=2
+VisitorStatus:             PENDING=0     APPROVED=1          DENIED=2       CHECKED_IN=3    CHECKED_OUT=4
 ```
 
 These codes are **wire-stable**. Never renumber. New states get the next free integer.
@@ -60,7 +63,7 @@ These codes are **wire-stable**. Never renumber. New states get the next free in
 - **Refresh token**: opaque random string, server-stored as Argon2id hash with `revoked_at`/`replaced_by` columns. 7-day TTL.
 - **Cookie**: `Set-Cookie: refresh=...; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=604800`.
 - **Rotation**: every `/auth/refresh` call issues a new refresh token and revokes the old one (`replaced_by`).
-- **Roles**: `ADMIN=0`, `PROPERTY_MANAGER=1`, `MAINTENANCE=2`, `TENANT=3`. Use the `@Roles(0,1)` decorator + `RolesGuard` ([apps/api/src/common/guards/](../../../apps/api/src/common/guards/)).
+- **Roles**: `ADMIN=0`, `PROPERTY_MANAGER=1`, `MAINTENANCE=2`, `TENANT=3`, `SUPER_ADMIN=4`. Use the `@Roles(0,1)` decorator + `RolesGuard` ([apps/api/src/common/guards/](../../../apps/api/src/common/guards/)). Super Admin (4) is platform-level — does NOT belong to any organization; bypass `OrganizationGuard` and access cross-org resources. Admin (0) is org-scoped — never appears in `@Roles(4)` routes.
 - **Scope guards**: `@Scope('property'|'lease'|'unit')` — a TENANT can only access their own lease IDs; a PM can only access properties they manage. Verify at service layer too, never trust controller-level RBAC alone.
 - **Password reset**: single-use opaque token, 30-min TTL, no PII in token, issuing a new one invalidates previous tokens.
 - **Login throttle**: 5 attempts / 15 min per email; return `429` after exceed. Don't leak account existence — same error message for wrong-password vs unknown-email.

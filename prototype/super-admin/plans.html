@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Plans · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+        </a>
+        <a href="organizations.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+        </a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">AK</div>
+            <div>
+              <div class="account-menu-name">Aayush</div>
+              <div class="account-menu-role">Super Admin</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 class="page-title">Subscription Plans</h1>
+        </div>
+      </header>
+
+      <!-- Info banner -->
+      <section class="section">
+        <div class="alert" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;color:var(--color-status-partial)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>Plans are platform-wide. Cap changes take effect immediately for new user additions; existing users above the cap are not removed.</div>
+        </div>
+      </section>
+
+      <!-- Plan cards — 3-up grid -->
+      <section class="section">
+        <div class="grid lg:grid-cols-3 gap-6" id="plan-cards">
+
+          <!-- Basic -->
+          <div class="card" id="card-basic">
+            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Basic</h2>
+            <div class="kpi-value" id="cap-basic">5</div>
+            <div class="kpi-meta mb-4">active users cap</div>
+            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
+              <li>· Up to 5 active users</li>
+              <li>· 1 property</li>
+              <li>· Core rent + maintenance flows</li>
+              <li>· Manual visitor management</li>
+            </ul>
+            <div class="text-sm mb-4">
+              <span class="muted">4 organizations on this plan.</span>
+              <a href="organizations.html?plan=basic" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
+            </div>
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('basic', 5, 4, 'Urban Nest Homes')">Edit cap</button>
+          </div>
+
+          <!-- Standard -->
+          <div class="card" id="card-standard">
+            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Standard</h2>
+            <div class="kpi-value" id="cap-standard">20</div>
+            <div class="kpi-meta mb-4">active users cap</div>
+            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
+              <li>· Up to 20 active users</li>
+              <li>· Unlimited properties</li>
+              <li>· Per-room leasing</li>
+              <li>· Admin Impersonation</li>
+              <li>· Task Delegations</li>
+            </ul>
+            <div class="text-sm mb-4">
+              <span class="muted">5 organizations on this plan.</span>
+              <a href="organizations.html?plan=standard" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
+            </div>
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('standard', 20, 12, 'Saffron Stays Pvt Ltd')">Edit cap</button>
+          </div>
+
+          <!-- Premium -->
+          <div class="card" id="card-premium">
+            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Premium</h2>
+            <div class="kpi-value" id="cap-premium">∞</div>
+            <div class="kpi-meta mb-4">unlimited active users</div>
+            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
+              <li>· Unlimited active users</li>
+              <li>· All Standard features</li>
+              <li>· Master Data customization</li>
+              <li>· Settings tuning</li>
+              <li>· Priority support</li>
+            </ul>
+            <div class="text-sm mb-4">
+              <span class="muted">1 organization on this plan.</span>
+              <a href="organizations.html?plan=premium" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
+            </div>
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('premium', null, null, null)">Edit cap</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Deferred notice -->
+      <section class="section">
+        <p class="text-sm muted">Feature scope per plan is a v8 design decision and not editable from the catalogue in this prototype.</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Edit Cap Modal (shared, populated by JS) -->
+  <div class="modal-backdrop" id="editCapModal" role="dialog" aria-modal="true" aria-labelledby="editCapTitle">
+    <div class="modal">
+      <h3 id="editCapTitle">Edit plan cap</h3>
+      <form novalidate onsubmit="event.preventDefault();saveCapChange()">
+        <div class="mt-4">
+          <label class="label" for="new-cap" id="cap-label">Active-user cap</label>
+          <input id="new-cap" type="number" class="input" min="1" max="999" placeholder="e.g. 10" oninput="checkCapValid()" onblur="blurCapValidate()" />
+          <div class="field-error" id="cap-error"></div>
+          <p class="text-xs muted mt-2" id="cap-helper"></p>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" id="editCapCancelBtn" onclick="closeModal('editCapModal')">Cancel</button>
+          <button type="submit" class="btn btn-disabled" id="saveCapBtn" disabled>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile tab bar — 4 items, no MoreSheet -->
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+    </a>
+    <a href="organizations.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs
+    </a>
+    <a href="plans.html" class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+    </a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
+    </button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script>
+    var editingPlan = null;
+    var editingCurrentCap = null;
+    var editingHighest = null;
+    var editingHighestOrg = null;
+
+    function openEditCapModal(plan, currentCap, highest, highestOrg) {
+      editingPlan = plan;
+      editingCurrentCap = currentCap;
+      editingHighest = highest;
+      editingHighestOrg = highestOrg;
+
+      var title = document.getElementById('editCapTitle');
+      var input = document.getElementById('new-cap');
+      var helper = document.getElementById('cap-helper');
+      var label = document.getElementById('cap-label');
+      var saveBtn = document.getElementById('saveCapBtn');
+      var capErr = document.getElementById('cap-error');
+
+      // Reset
+      capErr.textContent = '';
+      capErr.classList.remove('show');
+      input.classList.remove('error');
+      saveBtn.classList.add('btn-disabled');
+      saveBtn.classList.remove('btn-primary');
+      saveBtn.disabled = true;
+
+      title.textContent = 'Edit ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan cap';
+      label.textContent = 'Active-user cap';
+
+      if (plan === 'premium') {
+        input.value = 'Unlimited';
+        input.disabled = true;
+        input.classList.add('btn-disabled');
+        helper.textContent = 'Premium is uncapped — change requires platform-level engineering review.';
+      } else {
+        input.value = currentCap;
+        input.disabled = false;
+        input.classList.remove('btn-disabled');
+        input.type = 'number';
+        helper.textContent = highest ? 'Current highest: ' + highest + ' users on ' + highestOrg + '.' : '';
+      }
+
+      openModal('editCapModal');
+    }
+
+    function checkCapValid() {
+      var input = document.getElementById('new-cap');
+      var saveBtn = document.getElementById('saveCapBtn');
+      var capErr = document.getElementById('cap-error');
+      var val = parseInt(input.value, 10);
+
+      if (isNaN(val) || val < 1) {
+        capErr.textContent = 'Cap must be at least 1.';
+        capErr.classList.add('show');
+        input.classList.add('error');
+        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
+        return;
+      }
+      if (editingHighest && val < editingHighest) {
+        capErr.textContent = 'Cap must be ≥ ' + editingHighest + ' (current highest on ' + editingHighestOrg + ').';
+        capErr.classList.add('show');
+        input.classList.add('error');
+        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
+        return;
+      }
+      capErr.textContent = ''; capErr.classList.remove('show');
+      input.classList.remove('error');
+
+      if (val !== editingCurrentCap) {
+        saveBtn.classList.remove('btn-disabled'); saveBtn.classList.add('btn-primary'); saveBtn.disabled = false;
+      } else {
+        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
+      }
+    }
+
+    function blurCapValidate() {
+      var input = document.getElementById('new-cap');
+      if (input.value && !input.checkValidity()) checkCapValid();
+    }
+
+    function saveCapChange() {
+      var input = document.getElementById('new-cap');
+      var newCap = parseInt(input.value, 10);
+      closeModal('editCapModal');
+      document.getElementById('cap-' + editingPlan).textContent = newCap;
+      editingCurrentCap = newCap;
+      alert('Cap for ' + editingPlan + ' plan updated to ' + newCap + ' users.');
+    }
+
+    function openModal(id) {
+      var m = document.getElementById(id);
+      m.classList.add('open');
+      var cancel = m.querySelector('.btn-secondary');
+      if (cancel) setTimeout(function () { cancel.focus(); }, 50);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+      backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeModal(backdrop.id);
+      });
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(function(m) { closeModal(m.id); });
+      }
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+      backdrop.addEventListener('keydown', function(e) {
+        if (e.key !== 'Tab') return;
+        var focusable = backdrop.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], select, textarea, [tabindex]:not([tabindex="-1"])');
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (!first) return;
+        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+        else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+      });
+    });
+  </script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">AK</div>
+      <div>
+        <div class="account-menu-name">Aayush</div>
+        <div class="account-menu-role">Super Admin</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+</body>
+</html>

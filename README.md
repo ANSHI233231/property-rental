@@ -47,7 +47,7 @@ property-rental/
 │   │   │   └── seed.ts               # Bootstrap admin + 6 demo users
 │   │   ├── .env.example              # API env template
 │   │   └── package.json
-│   └── web/                          # Next.js 15 App Router — UI for all 4 roles
+│   └── web/                          # Next.js 15 App Router — UI for all 5 roles (Super Admin · Admin · PM · Maintenance · Tenant)
 │       ├── src/
 │       │   ├── app/(public)/         # /login, /forgot-password, /reset-password
 │       │   ├── app/(app)/admin/      # Admin pages

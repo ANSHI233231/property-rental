@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GharSetu — Property Rental Management</title>
+  <title>GharSetu — Property Rental Management Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -22,184 +22,346 @@
   </script>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body class="bg-off-white">
+<body>
 
-  <!-- Hero -->
-  <header class="bg-navy text-white">
+  <!-- ========================================================
+       SECTION 1 — Top nav
+       White bar, 1px bottom mid-gray border, logo left + Login right
+       ======================================================== -->
+  <nav style="background:#fff; border-bottom:1px solid #CFD8DC; position:sticky; top:0; z-index:40;">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="font-poppins font-bold text-xl tracking-wide">Ghar<span class="text-saffron">Setu</span></div>
-      <a href="login.html" class="btn btn-primary !py-2 !px-5 !text-sm">Login</a>
+      <a href="index.html" class="font-poppins font-bold text-2xl text-navy tracking-wide" style="text-decoration:none;">
+        Ghar<span class="text-saffron">Setu</span>
+      </a>
+      <a href="login.html" class="font-poppins font-semibold text-sm text-royal-blue" style="text-decoration:none;">
+        Login
+      </a>
     </div>
-  </header>
+  </nav>
 
-  <section class="bg-navy text-white">
-    <div class="max-w-6xl mx-auto px-6 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
-      <div>
-        <p class="font-poppins text-saffron font-semibold uppercase tracking-widest text-sm mb-3">Delhi-First Property Management</p>
-        <h1 class="text-white !text-white" style="color:#fff; font-size:44px; line-height:1.1;">Stop Losing Track. Start Running Smoothly.</h1>
-        <p class="text-white/80 mt-5 text-lg">Replace paper folders, spreadsheets and WhatsApp groups. Manage <strong>120 units across 18 buildings</strong> from a single role-scoped dashboard.</p>
-        <div class="flex gap-3 mt-8 flex-wrap">
-          <a href="login.html" class="btn btn-primary">Login to GharSetu</a>
-          <a href="#roles" class="btn btn-secondary !text-white !border-white">Explore by role</a>
+  <!-- ========================================================
+       SECTION 2 — Hero
+       Navy background, eyebrow + H1 + sub-headline + two CTAs
+       Text-only (no right-side panel per Q1 default)
+       ======================================================== -->
+  <section id="hero" aria-labelledby="hero-heading" style="background:#1A237E;" class="text-white">
+    <div class="max-w-6xl mx-auto px-6 py-16" style="padding-top:80px; padding-bottom:80px;">
+      <!-- Eyebrow -->
+      <p class="font-poppins font-semibold uppercase tracking-widest text-saffron mb-4" style="font-size:13px; letter-spacing:0.12em;">
+        Multi-tenant Property Rental Management
+      </p>
+      <!-- H1 headline -->
+      <h1 id="hero-heading" class="text-white" style="color:#fff; font-size:44px; line-height:1.15; max-width:700px;">
+        Run your rental business from one place.
+      </h1>
+      <!-- Sub-headline -->
+      <p class="mt-5 text-white" style="color:rgba(255,255,255,0.82); font-size:18px; line-height:1.6; max-width:620px;">
+        Multi-property rental management — leases, rent, maintenance, visitors, all role-scoped.
+        Sign your organization up in minutes.
+      </p>
+      <!-- CTAs -->
+      <div class="flex gap-4 mt-8 flex-wrap">
+        <a href="organization-signup.html" class="btn btn-primary" style="font-size:15px; padding:12px 28px;">
+          Register Your Organization
+        </a>
+        <a href="login.html" class="btn btn-secondary" style="color:#fff; border-color:#fff; padding:10px 26px;">
+          Login
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 3 — Problem
+       Off-white background, three 1-line pain points in a 3-up grid
+       ======================================================== -->
+  <section id="problem" aria-labelledby="problem-heading" style="background:#F8F9FA; padding:64px 0;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2 id="problem-heading">Paper folders, spreadsheets, and WhatsApp groups don't scale.</h2>
+        <p class="muted mt-3" style="font-size:16px;">When your portfolio grows, manual tracking fails. GharSetu replaces the chaos.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;" class="problem-grid">
+        <div class="card" style="text-align:center; padding:28px 24px;">
+          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">Lost receipts &amp; payment gaps</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Rent payments recorded in notebooks get lost. Disputes arise with no audit trail.</p>
+        </div>
+        <div class="card" style="text-align:center; padding:28px 24px;">
+          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">Forgotten lease renewals</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Lease end dates buried in spreadsheets mean costly holdovers and unprepared tenants.</p>
+        </div>
+        <div class="card" style="text-align:center; padding:28px 24px;">
+          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">No audit trail</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Who approved the maintenance request? Who changed the rent? Without logs, there's no accountability.</p>
         </div>
       </div>
-      <div class="hidden md:block">
-        <div class="card bg-white/10 border-white/10 backdrop-blur p-6">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Buildings</div><div class="kpi-value !text-white">18</div></div>
-            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Units</div><div class="kpi-value !text-white">120</div></div>
-            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Occupancy</div><div class="kpi-value !text-white">94%</div></div>
-            <div class="kpi !bg-white/5 !border-white/10"><div class="kpi-label !text-white/70">Roles</div><div class="kpi-value !text-white">4</div></div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 4 — Solution capabilities
+       White background, 4 capability cards
+       Desktop 4-col → tablet 2-col → mobile 1-col
+       ======================================================== -->
+  <section id="capabilities" aria-labelledby="capabilities-heading" style="background:#fff; padding:64px 0;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2 id="capabilities-heading">Everything your rental business needs</h2>
+        <p class="muted mt-3" style="font-size:16px;">One integrated platform — no juggling apps, no data silos.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;" class="capabilities-grid">
+        <div class="card">
+          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Rent Collection</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Track monthly rent, mark payments, handle partial and prepaid amounts. Overdue alerts automatically.</p>
+        </div>
+        <div class="card">
+          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Maintenance</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Replace WhatsApp threads with structured requests — assign staff, track status, close with accountability.</p>
+        </div>
+        <div class="card">
+          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Leases</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Create, manage and renew leases with rent-lock logic, co-tenant support, and scheduled rent changes.</p>
+        </div>
+        <div class="card">
+          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenants &amp; Visitors</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Tenant onboarding, visitor logs, and self-service portals — one place for every person in your building.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 5 — Roles
+       Light-gray background, 4 marketing role cards (no links)
+       Desktop 4-col → tablet 2-col → mobile 1-col
+       ======================================================== -->
+  <section id="roles" aria-labelledby="roles-heading" style="background:#ECEFF1; padding:64px 0;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2 id="roles-heading">Built for the four people who run a rental business</h2>
+        <p class="muted mt-3" style="font-size:16px;">Every role gets exactly the view they need — nothing more, nothing less.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;" class="roles-grid">
+        <div class="card">
+          <div class="role-icon" style="background:#1A237E; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Admin</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Full system control across all properties, users, and alerts. Highest privilege, complete visibility.</p>
+        </div>
+        <div class="card">
+          <div class="role-icon" style="background:#1565C0; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Property Manager</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Manages one assigned property — leases, rent collection, tenants, and maintenance coordination.</p>
+        </div>
+        <div class="card">
+          <div class="role-icon" style="background:#546E7A; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Maintenance Staff</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Sees only the requests assigned to them. No access to rent or lease data — scoped by design.</p>
+        </div>
+        <div class="card">
+          <div class="role-icon" style="background:#FF6F00; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
+          </div>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenant</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Views their lease, tracks rent status, and raises maintenance requests from a self-service portal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 6 — Subscription Plans
+       White background, 3 cards: Basic · Standard (highlighted) · Premium
+       Each links to organization-signup.html
+       ======================================================== -->
+  <section id="plans" aria-labelledby="plans-heading" style="background:#fff; padding:64px 0;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2 id="plans-heading">Plans for every size</h2>
+        <p class="muted mt-3" style="font-size:16px;">From a single landlord to a large property management firm — GharSetu scales with you.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:900px; margin:0 auto;" class="plans-grid">
+
+        <!-- Basic -->
+        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; transition:transform 200ms, box-shadow 200ms; padding:32px 24px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Basic</div>
+          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Up to 5 active users</div>
+          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
+          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Property &amp; lease management
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Rent collection &amp; tracking
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Maintenance request tracking
+            </li>
+          </ul>
+          <div class="font-poppins font-semibold text-royal-blue" style="font-size:14px;">Get started →</div>
+        </a>
+
+        <!-- Standard (highlighted) -->
+        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; border:2px solid #FF6F00; transition:transform 200ms, box-shadow 200ms; padding:32px 24px; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(255,111,0,0.2)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+          <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#FF6F00; color:#fff; font-family:'Poppins',sans-serif; font-weight:600; font-size:11px; padding:3px 12px; border-radius:999px; white-space:nowrap; letter-spacing:0.5px; text-transform:uppercase;">Most Popular</div>
+          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Standard</div>
+          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Up to 20 active users</div>
+          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
+          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Basic
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Per-room leasing &amp; visitor management
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Multi-property management
+            </li>
+          </ul>
+          <div class="font-poppins font-semibold text-saffron" style="font-size:14px;">Get started →</div>
+        </a>
+
+        <!-- Premium -->
+        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; transition:transform 200ms, box-shadow 200ms; padding:32px 24px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Premium</div>
+          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Unlimited active users</div>
+          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
+          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Standard
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Advanced reports &amp; analytics
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Priority support &amp; Admin impersonation
+            </li>
+          </ul>
+          <div class="font-poppins font-semibold text-royal-blue" style="font-size:14px;">Get started →</div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 7 — Final CTA
+       Full-width navy band, H2 + saffron primary + text-link
+       ======================================================== -->
+  <section id="final-cta" aria-labelledby="final-cta-heading" style="background:#1A237E; padding:80px 0; text-align:center;">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 id="final-cta-heading" class="text-white" style="color:#fff; font-size:32px; margin-bottom:16px;">Ready to organize your rental business?</h2>
+      <p style="color:rgba(255,255,255,0.78); font-size:17px; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto;">Join organizations that have replaced paper chaos with GharSetu. Sign up takes minutes.</p>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <a href="organization-signup.html" class="btn btn-primary" style="font-size:16px; padding:14px 36px; min-width:260px;">
+          Register Your Organization
+        </a>
+        <a href="login.html" class="font-poppins font-semibold" style="color:rgba(255,255,255,0.78); font-size:14px; text-decoration:none;">
+          Already have an account? <span style="color:#fff; text-decoration:underline;">Login</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION 8 — Footer
+       Navy, white/70 text, logo + tagline left, stub links right
+       ======================================================== -->
+  <footer style="background:#1A237E; padding:48px 0 32px; border-top:1px solid rgba(255,255,255,0.08);">
+    <div class="max-w-6xl mx-auto px-6">
+      <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:32px; margin-bottom:32px;">
+        <!-- Logo + tagline -->
+        <div>
+          <a href="index.html" class="font-poppins font-bold" style="font-size:22px; color:#fff; text-decoration:none; letter-spacing:0.5px;">
+            Ghar<span style="color:#FF6F00;">Setu</span>
+          </a>
+          <p style="color:rgba(255,255,255,0.65); font-size:14px; margin-top:8px; max-width:220px; line-height:1.6;">Multi-tenant property rental management — organized, role-scoped, auditable.</p>
+        </div>
+        <!-- Stub links -->
+        <div style="display:flex; gap:48px; flex-wrap:wrap;">
+          <div>
+            <div class="font-poppins font-semibold" style="color:rgba(255,255,255,0.85); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">Company</div>
+            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
+              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">About</a></li>
+              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="font-poppins font-semibold" style="color:rgba(255,255,255,0.85); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">Legal</div>
+            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
+              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Privacy</a></li>
+              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Terms</a></li>
+            </ul>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Roles -->
-  <section id="roles" class="max-w-6xl mx-auto px-6 py-16">
-    <div class="text-center max-w-2xl mx-auto mb-10">
-      <h2>Four roles. Four scoped dashboards.</h2>
-      <p class="muted mt-2">Each user sees only what they need — no clutter, no confusion.</p>
-    </div>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <a href="admin/dashboard.html" class="card role-card">
-        <div class="role-icon" style="background:#1A237E;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
-        </div>
-        <h3 class="mt-4">Admin</h3>
-        <p class="text-sm muted mt-1">Full system control across all 18 properties, users and alerts.</p>
-        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
-      </a>
-
-      <a href="pm/dashboard.html" class="card role-card">
-        <div class="role-icon" style="background:#1565C0;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
-        </div>
-        <h3 class="mt-4">Property Manager</h3>
-        <p class="text-sm muted mt-1">Run one assigned property — leases, rent, tenants and maintenance.</p>
-        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
-      </a>
-
-      <a href="maintenance/dashboard.html" class="card role-card">
-        <div class="role-icon" style="background:#546E7A;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
-        </div>
-        <h3 class="mt-4">Maintenance Staff</h3>
-        <p class="text-sm muted mt-1">Just the requests assigned to you. No rent or lease data.</p>
-        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
-      </a>
-
-      <a href="tenant/dashboard.html" class="card role-card">
-        <div class="role-icon" style="background:#FF6F00;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
-        </div>
-        <h3 class="mt-4">Tenant</h3>
-        <p class="text-sm muted mt-1">View your lease, rent status and raise maintenance requests.</p>
-        <div class="mt-4 text-saffron font-poppins font-semibold text-sm">Open dashboard →</div>
-      </a>
-    </div>
-  </section>
-
-  <!-- Modules strip -->
-  <section class="bg-light-gray py-16">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <h2>Five modules. One platform.</h2>
-        <p class="muted mt-2">People · Places · Contracts · Complaints · Money</p>
+      <!-- Copyright -->
+      <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:20px; color:rgba(255,255,255,0.5); font-size:13px;">
+        &copy; 2026 GharSetu. All rights reserved.
       </div>
-      <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="card text-center">
-          <div class="font-poppins font-semibold text-charcoal">Users &amp; Access</div>
-          <p class="text-sm muted mt-2">Role-scoped logins. No public sign-up.</p>
-        </div>
-        <div class="card text-center">
-          <div class="font-poppins font-semibold text-charcoal">Properties &amp; Units</div>
-          <p class="text-sm muted mt-2">18 buildings, 120 units, 5 unit states.</p>
-        </div>
-        <div class="card text-center">
-          <div class="font-poppins font-semibold text-charcoal">Leases &amp; Tenants</div>
-          <p class="text-sm muted mt-2">Co-tenant safe. Rent locked at signing.</p>
-        </div>
-        <div class="card text-center">
-          <div class="font-poppins font-semibold text-charcoal">Maintenance</div>
-          <p class="text-sm muted mt-2">Replaces WhatsApp. Nothing gets lost.</p>
-        </div>
-        <div class="card text-center">
-          <div class="font-poppins font-semibold text-charcoal">Rent Collection</div>
-          <p class="text-sm muted mt-2">Auto overdue, late fees, prepaid handling.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Page directory -->
-  <section class="max-w-6xl mx-auto px-6 py-12">
-    <div class="text-center max-w-2xl mx-auto mb-8">
-      <h2>Page directory</h2>
-      <p class="muted mt-2">Every screen in the v1 prototype.</p>
-    </div>
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="card">
-        <h3 class="section-title">Admin</h3>
-        <ul class="text-sm space-y-1">
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/dashboard.html">Dashboard</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/properties.html">Properties</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/property-detail.html">Property detail</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/units.html">Units</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/users.html">Users</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/maintenance.html">Maintenance</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/rent.html">Rent</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/audit-log.html">Audit Log</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="admin/profile.html">My Profile</a></li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3 class="section-title">Property Manager</h3>
-        <ul class="text-sm space-y-1">
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/dashboard.html">Dashboard</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/units.html">Units</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/tenants.html">Tenants</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/tenant-detail.html">Tenant detail</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/leases.html">Leases</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/lease-detail.html">Lease detail (with Rent Change Schedule)</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/rent-collection.html">Rent Collection</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/maintenance.html">Maintenance</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="pm/profile.html">My Profile</a></li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3 class="section-title">Maintenance · Tenant</h3>
-        <ul class="text-sm space-y-1">
-          <li><a class="text-royal-blue font-poppins font-semibold" href="maintenance/dashboard.html">Maint. — My Requests</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="maintenance/all-open.html">Maint. — All Open</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="maintenance/profile.html">Maint. — My Profile</a></li>
-          <li class="pt-2 border-t border-light-gray"></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="tenant/dashboard.html">Tenant — My Lease</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="tenant/rent.html">Tenant — Rent</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="tenant/maintenance.html">Tenant — Maintenance</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="tenant/profile.html">Tenant — My Profile</a></li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3 class="section-title">Auth</h3>
-        <ul class="text-sm space-y-1">
-          <li><a class="text-royal-blue font-poppins font-semibold" href="login.html">Login</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="forgot-password.html">Forgot password</a></li>
-          <li><a class="text-royal-blue font-poppins font-semibold" href="reset-password.html">Reset password</a></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <footer class="bg-navy text-white/70 py-8">
-    <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-3 text-sm">
-      <div>© 2026 GharSetu · Trustworthy · Simple · Delhi-First</div>
-      <div class="font-poppins">Prototype · v1</div>
     </div>
   </footer>
 
-  <script src="assets/validation.js"></script>
+  <!-- Responsive styles for single 1024px breakpoint -->
+  <style>
+    /* Tablet and mobile (≤ 1023px) */
+    @media (max-width: 1023px) {
+      .capabilities-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .roles-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .plans-grid { grid-template-columns: 1fr !important; max-width: 480px !important; }
+    }
+    /* Mobile (≤ 767px) */
+    @media (max-width: 767px) {
+      .problem-grid { grid-template-columns: 1fr !important; }
+      .capabilities-grid { grid-template-columns: 1fr !important; }
+      .roles-grid { grid-template-columns: 1fr !important; }
+      .plans-grid { grid-template-columns: 1fr !important; max-width: 100% !important; }
+      #hero h1 { font-size: 28px !important; }
+      #hero p { font-size: 16px !important; }
+      #hero .flex { flex-direction: column; }
+      #hero .btn { width: 100%; justify-content: center; }
+      #final-cta h2 { font-size: 24px !important; }
+    }
+    /* Minimum 320px — prevent horizontal scroll */
+    @media (max-width: 359px) {
+      .max-w-6xl { padding-left: 16px !important; padding-right: 16px !important; }
+    }
+  </style>
+
 </body>
 </html>

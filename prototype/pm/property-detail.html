@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Property Detail · PM · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">SA</div>
+            <div>
+              <div class="account-menu-name">Sunita</div>
+              <div class="account-menu-role">PM</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <div class="text-xs muted">
+            <a href="properties.html" class="hover:underline text-royal-blue">Properties</a> / Green Valley Apartments
+          </div>
+          <h1 class="page-title">Green Valley Apartments, Dwarka</h1>
+        </div>
+      </header>
+
+      <!-- Historical view banner — shown only when ?tenure= param is in URL -->
+      <div id="historicalBanner" class="alert mb-6" role="status" style="display:none; background:var(--color-light-gray); border-left-color:var(--color-slate);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0" style="width:18px;height:18px;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <div id="historicalBannerText" class="text-sm" style="color:var(--color-charcoal);">
+          You managed this property from 09/2024 to 03/2025. Read-only — current data is managed by Manoj Verma (PM).
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Occupancy</div><div class="kpi-value" style="color:var(--color-status-paid)">90%</div><div class="kpi-meta">36 of 40 units</div></div>
+          <div class="kpi"><div class="kpi-label">Rent Collected</div><div class="kpi-value">₹5,40,000</div><div class="kpi-meta">of ₹6,00,000 billed</div></div>
+          <div class="kpi"><div class="kpi-label">Open Maintenance</div><div class="kpi-value">3</div></div>
+          <div class="kpi"><div class="kpi-label">Overdue Tenants</div><div class="kpi-value" style="color:var(--color-status-overdue)">2</div></div>
+        </div>
+      </section>
+
+      <!-- Property Details + your tenure card -->
+      <section class="section grid md:grid-cols-2 gap-6">
+        <div class="card">
+          <h3 class="section-title">Property Details</h3>
+          <table class="data-table">
+            <tbody>
+              <tr><td class="muted">Address</td><td class="text-right">Sector 12, Dwarka, New Delhi 110078</td></tr>
+              <tr><td class="muted">Type</td><td class="text-right">Apartment Complex</td></tr>
+              <tr><td class="muted">Total floors</td><td class="text-right">10</td></tr>
+              <tr><td class="muted">Total units</td><td class="text-right">40</td></tr>
+              <tr><td class="muted">Amenities</td><td class="text-right">Lift, Power backup, Parking, Security</td></tr>
+              <tr><td class="muted">Your tenure</td><td class="text-right">01/06/2024 – Present</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Your Assignment</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="avatar" style="width:48px;height:48px;font-size:18px">SA</div>
+            <div>
+              <div class="font-poppins font-semibold text-charcoal">Sunita Arora</div>
+              <div class="text-sm muted">Property Manager · since 01/06/2024</div>
+            </div>
+          </div>
+          <table class="data-table">
+            <tbody>
+              <tr><td class="muted">Open tickets</td><td class="text-right font-poppins font-semibold text-charcoal">3</td></tr>
+              <tr><td class="muted">Pending consents</td><td class="text-right">0</td></tr>
+              <tr><td class="muted">Last activity</td><td class="text-right text-xs">Today, 09:42 IST</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Units table -->
+      <section class="section">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title m-0">Units in this property</h3>
+        </div>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Unit</th><th>Floor</th><th>Bedrooms</th><th>Area (sq ft)</th><th>Rent</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-poppins font-semibold text-charcoal">1A</td><td>1</td><td>2</td><td>820</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="unit-detail.html?unit=1A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">2B</td><td>2</td><td>3</td><td>1,140</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="unit-detail.html?unit=2B&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">3A</td><td>3</td><td>2</td><td>820</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td><td><a href="unit-detail.html?unit=3A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">7C</td><td>7</td><td>2</td><td>880</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td><td><a href="unit-detail.html?unit=7C&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Active leases -->
+      <section class="section">
+        <h3 class="section-title">Active Leases</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Lease</th><th>Tenant</th><th>Unit</th><th>Start</th><th>End</th><th>Rent</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono text-xs">#L-2103</td>
+                <td>Rohan Mehta</td>
+                <td>1A</td>
+                <td>15/04/2026</td>
+                <td>14/03/2027</td>
+                <td>₹18,000</td>
+                <td><a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono text-xs">#L-2095</td>
+                <td>Priya Patel</td>
+                <td>2B</td>
+                <td>01/03/2026</td>
+                <td>28/02/2027</td>
+                <td>₹24,000</td>
+                <td><a href="lease-detail.html?id=L-2095" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Open maintenance -->
+      <section class="section">
+        <h3 class="section-title">Open Maintenance</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Ticket</th><th>Unit</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono text-xs">#MR-3041</td>
+                <td>7C</td>
+                <td>Water leakage in kitchen ceiling</td>
+                <td><span class="badge badge-emergency">Emergency</span></td>
+                <td><span class="badge badge-progress">In-Progress</span></td>
+                <td>Raju Kumar</td>
+                <td><a href="maintenance-detail.html?id=MR-3041" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono text-xs">#MR-3018</td>
+                <td>2A</td>
+                <td>AC not cooling</td>
+                <td><span class="badge badge-partial">High</span></td>
+                <td><span class="badge badge-progress">In-Progress</span></td>
+                <td>Raju Kumar</td>
+                <td><a href="maintenance-detail.html?id=MR-3018" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="PM navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
+    <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <!-- More bottom sheet (PM overflow nav) -->
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">SA</div>
+      <div>
+        <div class="account-menu-name">Sunita</div>
+        <div class="account-menu-role">PM</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+
+  <script>
+    // Show historical banner if ?tenure= param present
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var tenure = params.get('tenure');
+      if (tenure) {
+        // Parse range: YYYY-MM-DD..YYYY-MM-DD
+        var parts = tenure.split('..');
+        var banner = document.getElementById('historicalBanner');
+        var textEl = document.getElementById('historicalBannerText');
+        if (parts.length === 2) {
+          var from = parts[0]; // YYYY-MM-DD
+          var to   = parts[1];
+          function fmtMonthYear(d) {
+            var bits = d.split('-');
+            return bits[1] + '/' + bits[0]; // MM/YYYY
+          }
+          textEl.textContent = 'You managed this property from ' + fmtMonthYear(from) + ' to ' + fmtMonthYear(to) + '. Read-only — current data is managed by Manoj Verma (PM).';
+        }
+        banner.style.display = 'flex';
+        // Disable write actions for historical view
+        document.querySelectorAll('.btn-primary, .btn-danger').forEach(function(btn) {
+          btn.disabled = true;
+          btn.title = 'Not available in historical view';
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

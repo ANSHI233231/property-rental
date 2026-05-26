@@ -1,6 +1,6 @@
 ---
 name: gharsetu-ui
-description: "GharSetu frontend UI/UX system — design tokens, component patterns, responsive rules, validation contract, and accessibility gates. Use when building or reviewing any screen, component, form, table, modal, drawer, tabbar, MoreSheet, badge, or button in apps/web; when porting from prototype/ to Next.js; when wiring forms; when fixing UI bugs or responsive issues; when checking role-scoped navigation (admin/pm/maintenance/tenant); when adding new screens that must match the static prototype 1:1. Covers: brand colors (navy/royal-blue/saffron/charcoal/slate), status colors (paid/partial/overdue/prepaid), Poppins+Inter typography, single ≤1023px breakpoint, sidebar→drawer collapse, bottom tabbar + MoreSheet pattern, no-hamburger-menu rule, role-tabbar contents per role, form validation (RHF+zod with errors below field, ⚠ glyph, no native tooltips), WCAG AA, BL-01..BL-23 UI implications, DD/MM/YYYY + en-IN locale, ₹ currency formatting."
+description: "GharSetu frontend UI/UX system — design tokens, component patterns, responsive rules, validation contract, and accessibility gates. Use when building or reviewing any screen, component, form, table, modal, drawer, tabbar, MoreSheet, badge, or button in apps/web; when porting from prototype/ to Next.js; when wiring forms; when fixing UI bugs or responsive issues; when checking role-scoped navigation (super-admin/admin/pm/maintenance/tenant — 5 roles); when adding new screens that must match the static prototype 1:1. Covers: brand colors (navy/royal-blue/saffron/charcoal/slate), status colors (paid/partial/overdue/prepaid/closed), Poppins+Inter typography, single ≤1023px breakpoint, sidebar→drawer collapse, bottom tabbar + MoreSheet pattern, no-hamburger-menu rule, role-tabbar contents per role (incl. Super Admin platform-level), three-class routing (org-scoped `/:org/*`, platform, public), public organization sign-up flow + impersonation banner, form validation (RHF+zod with errors below field, ⚠ glyph, no native tooltips), WCAG AA, BL-01..BL-23 + NR-1..NR-6 UI implications, DD/MM/YYYY + en-IN locale, ₹ currency formatting."
 ---
 
 # GharSetu UI/UX System
@@ -11,8 +11,8 @@ Authoritative UI rules for the GharSetu Next.js frontend. The static prototype i
 
 1. **No hamburger menus.** Source-level test (`phase6.test.ts`) blocks: the `≡` glyph, `MenuIcon` / `HamburgerMenuIcon` imports, and any `aria-label` containing "open menu", "toggle menu", or "hamburger". Use **MoreSheet** (three-dot icon, `aria-label="More options"`) for overflow nav.
 2. **Single breakpoint at `max-width: 1023px`.** Mobile and tablet are the same layout; sidebar only appears at ≥1024px. Defined in [apps/web/src/app/globals.css](../../../apps/web/src/app/globals.css) and [prototype/assets/styles.css](../../../prototype/assets/styles.css).
-3. **No public sign-up.** Login screen says so explicitly. Accounts created by Admin or PM only.
-4. **Role-scoped navigation** — never show a tab or sidebar link the role cannot use. Maintenance cannot see rent / lease / tenant financial data. Tenant cannot see other tenants.
+3. **Public Organization sign-up IS in scope** — the `/organization-signup` page is public and queues for Super Admin approval. Tenant self-signup remains out of scope (tenant accounts auto-create at lease signing). PM / Maintenance accounts are created by Admin.
+4. **Role-scoped navigation** — never show a tab or sidebar link the role cannot use. Five roles total: Super Admin (platform-level, cross-org), Admin (own org), PM (assigned properties), Maintenance (assigned requests only — no rent / lease / financial), Tenant (own lease only).
 5. **DD/MM/YYYY** date format everywhere, **en-IN** locale, **₹** currency, Indian numbering (`₹1,80,000` style — `Intl.NumberFormat('en-IN')`).
 6. **Form validation: never use native browser tooltips.** Errors render below the field via `.field-error.show` with a ⚠ glyph; the input gets `.input.error` (red border + light-red bg). See [prototype/assets/validation.js](../../../prototype/assets/validation.js).
 7. **Touch targets ≥ 44×44px** on mobile. Tabbar tabs, More button, drawer toggle, and avatar all conform.
@@ -65,12 +65,13 @@ Anatomy:
 
 | Role | Tabs (5 max) | Overflow |
 |---|---|---|
-| Admin | Home · Units · Maint. · Rent · **More** | MoreSheet: Users, Properties, Audit Log, My Profile, Logout |
-| PM | Home · Units · Tenants · Rent · **More** | MoreSheet: Leases, Maintenance, My Profile, Logout |
+| Super Admin | Dashboard · Organizations · Plans · Profile | — (4 items fit; no MoreSheet — platform role) |
+| Admin | Dashboard · Properties · Users · Maintenance · **More** | MoreSheet: Rent, Master Data, Settings, Delegations, Audit Log, Profile, Logout |
+| PM | Dashboard · Tenants · Leases · Rent · **More** | MoreSheet: Maintenance, Units, Visitors, Profile, Logout |
 | Maintenance | My Requests · All Open · Profile · Logout | — (4 items fit; no MoreSheet) |
-| Tenant | Lease · Rent · Maint. · Profile · Logout | — (5 items fit; no MoreSheet) |
+| Tenant | My Lease · Rent · Maintenance · Visitors · Profile | — (5 items fit; no MoreSheet — Logout reached via Profile or drawer footer) |
 
-The Logout button on Maintenance/Tenant routes to `/login`. On Admin/PM, Logout lives inside the MoreSheet.
+The Logout button on Maintenance routes to `/login`. On Admin / PM / Super Admin, Logout lives inside the MoreSheet or sidebar footer.
 
 ### MoreSheet pattern
 - Trigger: `<button class="tab tab-more" aria-label="More options">` with three-dot SVG (3 circles in a row).
@@ -80,7 +81,8 @@ The Logout button on Maintenance/Tenant routes to `/login`. On Admin/PM, Logout 
 
 ## Sidebar
 
-Each role has its own sidebar component:
+Each role has its own sidebar component (five total — Super Admin's sidebar is platform-level, the other four are org-scoped):
+- [apps/web/src/components/sidebar/SuperAdminSidebar.tsx](../../../apps/web/src/components/sidebar/SuperAdminSidebar.tsx)
 - [apps/web/src/components/sidebar/AdminSidebar.tsx](../../../apps/web/src/components/sidebar/AdminSidebar.tsx)
 - [apps/web/src/components/sidebar/PMSidebar.tsx](../../../apps/web/src/components/sidebar/PMSidebar.tsx)
 - [apps/web/src/components/sidebar/MaintenanceSidebar.tsx](../../../apps/web/src/components/sidebar/MaintenanceSidebar.tsx)

@@ -19,14 +19,15 @@ GharSetu replaces paper folders, spreadsheets, and WhatsApp groups for a Delhi-b
 
 ## 2. Stakeholders & Roles
 
-The platform has **exactly four roles**. There is no public sign-up — accounts are created internally.
+The platform has **five roles** — four operational roles inside each organization plus one platform-level role. **Public Organization sign-up is in scope** (Super Admin approval gate). Tenant self-signup is not in scope (tenant accounts auto-create at lease signing). Admin / PM / Maintenance accounts are created internally by Admin within an organization.
 
 | Role | Scope | Can Do | Cannot Do |
 |---|---|---|---|
-| **Admin** | All properties, all users | Manage properties/users/settings, view all alerts, run reports | — |
-| **Property Manager (PM)** | One assigned property | Create tenants & leases, record rent payments, raise maintenance requests, manage day-to-day ops | View other PMs' properties; record payments outside their property |
-| **Maintenance Staff** | Their assigned requests only | Read + update existing maintenance requests; move to In-Progress; mark Resolved | Create new requests; see rent / lease / financial data |
-| **Tenant** | Their own lease + unit | View own lease, view payment history, raise maintenance requests, close resolved requests | Record payments; see other tenants/units; reopen closed requests |
+| **Super Admin** | Platform-level — cross-organization | Approve / deactivate organizations · manage Subscription Plans (Basic / Standard / Premium) · view audit log across all organizations · only role that crosses organization boundaries | Operate inside any single organization · record payments · be impersonated · be assigned to a single org |
+| **Admin** | All properties + users within own organization | Manage properties, users, settings, Master Data; view all alerts and reports; impersonate PM / Maintenance / Tenant within own organization; delegate tasks within a window | Cross-organization reads or writes · impersonate Super Admin or another Admin |
+| **Property Manager (PM)** | Assigned properties within an organization | Create tenants & leases, record rent payments, raise and assign maintenance, manage visitors, manage day-to-day ops | View other PMs' properties · record payments outside their assigned scope · cross-organization access |
+| **Maintenance Staff** | Their assigned requests only | Read + update existing maintenance requests; move to In-Progress; mark Resolved | Create new requests · see rent / lease / financial data · cross-property reads |
+| **Tenant** | Their own lease + unit | View own lease, view payment history, raise maintenance requests, close own resolved requests, pre-approve visitors | Record payments · see other tenants/units · reopen closed requests |
 
 ---
 

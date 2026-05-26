@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delegations · Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* Mobile full-screen modal */
+    @media (max-width: 480px) {
+      .modal--mobile-full {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+        max-width: none !important;
+        padding: 24px !important;
+        overflow-y: auto;
+      }
+      .modal-backdrop.modal--mobile-full-wrap {
+        padding: 0;
+        align-items: stretch;
+      }
+    }
+    .deleg-panel { display: none; }
+    .deleg-panel.active { display: block; }
+    /* Task chip */
+    .task-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      background: var(--bg-prepaid); color: var(--color-status-prepaid);
+      border-radius: 999px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600; font-size: 11px;
+      letter-spacing: 0.3px;
+    }
+    /* View-detail drawer */
+    .detail-drawer-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); z-index: 90;
+    }
+    .detail-drawer-backdrop.open { display: block; }
+    .detail-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 440px; max-width: 100%;
+      background: #fff;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.12);
+      z-index: 95;
+      transform: translateX(100%);
+      transition: transform 0.25s ease-out;
+      overflow-y: auto;
+      padding: 32px;
+    }
+    .detail-drawer.open { transform: translateX(0); }
+    @media (max-width: 480px) {
+      .detail-drawer { width: 100%; }
+    }
+    /* Role chip inside table */
+    .role-chip-pm   { display:inline-block;padding:2px 8px;border-radius:999px;font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;background:var(--bg-prepaid);color:var(--color-status-prepaid); }
+    .role-chip-maint{ display:inline-block;padding:2px 8px;border-radius:999px;font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;background:var(--bg-partial);color:var(--color-status-partial); }
+    /* Checkbox group */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 900px) { .checkbox-group { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .checkbox-group { grid-template-columns: 1fr; } }
+    .checkbox-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 150ms, background 150ms;
+    }
+    .checkbox-item:hover { border-color: var(--color-royal-blue); background: var(--color-off-white); }
+    .checkbox-item:has(input:checked) { border-color: var(--color-saffron); background: rgba(255,111,0,0.04); }
+    .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--color-saffron); cursor: pointer; }
+    .checkbox-item-label { display: flex; flex-direction: column; gap: 2px; }
+    .checkbox-item-label strong { font-family:'Poppins',sans-serif; font-weight:600; font-size:13px; color: var(--color-charcoal); }
+    .checkbox-item-label span  { font-size:11px; color: var(--color-slate); line-height: 1.4; }
+    /* Task chips in modal (selected chips preview) */
+    .chips-preview { display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
+          <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
+        </div>
+        <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+        <a href="delegations.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">RS</div>
+            <div>
+              <div class="account-menu-name">Raj</div>
+              <div class="account-menu-role">Admin</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <!-- Live region -->
+      <div id="liveRegion" role="status" aria-live="polite" style="position:absolute;left:-9999px;"></div>
+
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <h1 class="page-title">Delegations</h1>
+        </div>
+        <button class="btn btn-primary !py-2 !text-sm" id="newDelegBtn" onclick="openNewDelegModal()">+ New Delegation</button>
+      </header>
+
+      <!-- Status tabs -->
+      <section class="section">
+        <div class="overflow-x-auto">
+          <div role="tablist" aria-label="Delegation status" class="filter-tiles">
+            <button type="button" class="filter-tile active" role="tab" id="dtab-active" aria-selected="true" aria-controls="dpanel-active" onclick="switchDelegTab('active', this)"><span class="filter-tile-count">3</span><span class="filter-tile-label">Active</span></button>
+            <button type="button" class="filter-tile" role="tab" id="dtab-upcoming" aria-selected="false" aria-controls="dpanel-upcoming" onclick="switchDelegTab('upcoming', this)"><span class="filter-tile-count">1</span><span class="filter-tile-label">Upcoming</span></button>
+            <button type="button" class="filter-tile" role="tab" id="dtab-expired" aria-selected="false" aria-controls="dpanel-expired" onclick="switchDelegTab('expired', this)"><span class="filter-tile-count">12</span><span class="filter-tile-label">Expired</span></button>
+            <button type="button" class="filter-tile" role="tab" id="dtab-revoked" aria-selected="false" aria-controls="dpanel-revoked" onclick="switchDelegTab('revoked', this)"><span class="filter-tile-count">2</span><span class="filter-tile-label">Revoked</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="delegSearch">Search delegate</label>
+            <input id="delegSearch" class="input" placeholder="e.g. Sunita Arora" />
+          </div>
+          <div>
+            <label class="label" for="delegRole">Delegate role</label>
+            <select id="delegRole" class="input">
+              <option value="">All</option>
+              <option value="PM">PM</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="delegDate">Window contains date</label>
+            <input id="delegDate" type="date" class="input" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Active delegations panel -->
+      <div id="dpanel-active" role="tabpanel" aria-labelledby="dtab-active" class="deleg-panel active">
+        <section class="card p-0 overflow-x-auto">
+          <table class="data-table" id="tbl-deleg-active">
+            <thead>
+              <tr><th>Delegate</th><th>Tasks granted</th><th>Window</th><th>Status</th><th>Created by</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Sunita Arora</div>
+                  <span class="role-chip-pm">PM</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Add Property</span>
+                    <span class="task-chip">Add Unit</span>
+                    <span class="task-chip">Edit Unit Rent</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 01/05/2026</div>
+                  <div>Ends 31/05/2026</div>
+                </td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">28/04/2026 09:30</div>
+                </td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Revoke delegation for Sunita Arora" onclick="openRevokeConfirm(this, 'Sunita Arora')">Revoke</button>
+                    <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('sunita')">View</a>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Manoj Verma</div>
+                  <span class="role-chip-pm">PM</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Record Payment</span>
+                    <span class="task-chip">Edit Lease</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 15/05/2026</div>
+                  <div>Ends 15/06/2026</div>
+                </td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">12/05/2026 14:00</div>
+                </td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Revoke delegation for Manoj Verma" onclick="openRevokeConfirm(this, 'Manoj Verma')">Revoke</button>
+                    <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('manoj')">View</a>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Raju Kumar</div>
+                  <span class="role-chip-maint">Maintenance</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Close Maintenance Request</span>
+                    <span class="task-chip">Create Maintenance Request</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 20/05/2026</div>
+                  <div>Ends 20/06/2026</div>
+                </td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">19/05/2026 11:15</div>
+                </td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Revoke delegation for Raju Kumar" onclick="openRevokeConfirm(this, 'Raju Kumar')">Revoke</button>
+                    <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('raju')">View</a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" data-paginate-for="tbl-deleg-active" data-per-page="10" aria-label="Pagination">
+            <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+              <div class="pagination-pages" data-pg-pages></div>
+              <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+            </div>
+            <div class="pagination-per-page">
+              <label for="per-page-tbl-deleg-active" class="sr-only">Rows per page</label>
+              <select id="per-page-tbl-deleg-active" data-pg-per-page>
+                <option value="10" selected>10 / page</option>
+                <option value="25">25 / page</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Upcoming panel -->
+      <div id="dpanel-upcoming" role="tabpanel" aria-labelledby="dtab-upcoming" class="deleg-panel">
+        <section class="card p-0 overflow-x-auto">
+          <table class="data-table" id="tbl-deleg-upcoming">
+            <thead>
+              <tr><th>Delegate</th><th>Tasks granted</th><th>Window</th><th>Status</th><th>Created by</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Pooja Khanna</div>
+                  <span class="role-chip-pm">PM</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Add User (PM/Maintenance)</span>
+                    <span class="task-chip">Edit Property Settings</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 15/06/2026</div>
+                  <div>Ends 30/06/2026</div>
+                </td>
+                <td><span class="badge badge-prepaid">Upcoming</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">25/05/2026 16:45</div>
+                </td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Revoke delegation for Pooja Khanna" onclick="openRevokeConfirm(this, 'Pooja Khanna')">Revoke</button>
+                    <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('pooja')">View</a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" data-paginate-for="tbl-deleg-upcoming" data-per-page="10" aria-label="Pagination">
+            <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+              <div class="pagination-pages" data-pg-pages></div>
+              <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+            </div>
+            <div class="pagination-per-page">
+              <label for="per-page-tbl-deleg-upcoming" class="sr-only">Rows per page</label>
+              <select id="per-page-tbl-deleg-upcoming" data-pg-per-page>
+                <option value="10" selected>10 / page</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Expired panel -->
+      <div id="dpanel-expired" role="tabpanel" aria-labelledby="dtab-expired" class="deleg-panel">
+        <section class="card p-0 overflow-x-auto">
+          <table class="data-table" id="tbl-deleg-expired">
+            <thead>
+              <tr><th>Delegate</th><th>Tasks granted</th><th>Window</th><th>Status</th><th>Created by</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Sunita Arora</div>
+                  <span class="role-chip-pm">PM</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Record Payment</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 01/01/2026</div>
+                  <div>Ends 31/01/2026</div>
+                </td>
+                <td><span class="badge badge-closed">Expired</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">28/12/2025 10:00</div>
+                </td>
+                <td>
+                  <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('sunita-expired')">View</a>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Manoj Verma</div>
+                  <span class="role-chip-pm">PM</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Terminate Lease</span>
+                    <span class="task-chip">Edit Lease</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 01/02/2026</div>
+                  <div>Ends 28/02/2026</div>
+                </td>
+                <td><span class="badge badge-closed">Expired</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">29/01/2026 09:00</div>
+                </td>
+                <td>
+                  <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('manoj-expired')">View</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" data-paginate-for="tbl-deleg-expired" data-per-page="10" aria-label="Pagination">
+            <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+              <div class="pagination-pages" data-pg-pages></div>
+              <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+            </div>
+            <div class="pagination-per-page">
+              <label for="per-page-tbl-deleg-expired" class="sr-only">Rows per page</label>
+              <select id="per-page-tbl-deleg-expired" data-pg-per-page>
+                <option value="10" selected>10 / page</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Revoked panel -->
+      <div id="dpanel-revoked" role="tabpanel" aria-labelledby="dtab-revoked" class="deleg-panel">
+        <section class="card p-0 overflow-x-auto">
+          <table class="data-table" id="tbl-deleg-revoked">
+            <thead>
+              <tr><th>Delegate</th><th>Tasks granted</th><th>Window</th><th>Status</th><th>Revoked by</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="font-poppins font-semibold text-charcoal">Anil Bhardwaj</div>
+                  <span class="role-chip-maint">Maintenance</span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="task-chip">Create Maintenance Request</span>
+                  </div>
+                </td>
+                <td class="text-xs">
+                  <div>Starts 10/04/2026</div>
+                  <div>Ends 10/05/2026</div>
+                </td>
+                <td><span class="badge badge-terminated">Revoked</span></td>
+                <td class="text-xs">
+                  <div class="font-poppins font-semibold text-charcoal">Raj Singh</div>
+                  <div class="muted">22/04/2026 17:00</div>
+                </td>
+                <td>
+                  <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer('anil-revoked')">View</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" data-paginate-for="tbl-deleg-revoked" data-per-page="10" aria-label="Pagination">
+            <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+              <div class="pagination-pages" data-pg-pages></div>
+              <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+            </div>
+            <div class="pagination-per-page">
+              <label for="per-page-tbl-deleg-revoked" class="sr-only">Rows per page</label>
+              <select id="per-page-tbl-deleg-revoked" data-pg-per-page>
+                <option value="10" selected>10 / page</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer note -->
+    </main>
+  </div>
+
+  <!-- New Delegation Modal -->
+  <div class="modal-backdrop modal--mobile-full-wrap" id="newDelegModal" role="dialog" aria-modal="true" aria-labelledby="newDelegTitle">
+    <div class="modal modal--mobile-full" style="max-width:960px;width:95%">
+      <h3 id="newDelegTitle">New Delegation</h3>
+      <p class="muted text-sm mt-1 mb-5">Assign extra rights to a PM or Maintenance Team member for a defined date range.</p>
+
+      <form id="newDelegForm" novalidate onsubmit="event.preventDefault(); submitNewDeleg()">
+
+        <!-- D1: Delegate -->
+        <div>
+          <label class="label" for="delegDelegate">Delegate</label>
+          <select id="delegDelegate" name="delegate" class="input">
+            <option value="">— Select delegate —</option>
+            <option value="sunita-pm">Sunita Arora · PM</option>
+            <option value="manoj-pm">Manoj Verma · PM</option>
+            <option value="pooja-pm">Pooja Khanna · PM</option>
+            <option value="anil-pm">Anil Kapoor · PM</option>
+            <option value="raju-maint">Raju Kumar · Maintenance</option>
+            <option value="anil-maint">Anil Bhardwaj · Maintenance</option>
+          </select>
+          <div class="field-error" id="delegDelegateError"></div>
+          <p class="text-xs muted mt-1">Only PMs and Maintenance Team members can be delegates per NR-8.</p>
+        </div>
+
+        <!-- D2: Tasks granted -->
+        <div class="mt-5">
+          <label class="label" id="tasksLabel">Tasks granted</label>
+          <div id="chipsPreview" class="chips-preview"></div>
+          <div role="group" aria-labelledby="tasksLabel" class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Add Property" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Add Property</strong><span>Create new properties in the organization</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Add Unit" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Add Unit</strong><span>Add units to existing properties</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Edit Unit Rent" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Edit Unit Rent</strong><span>Schedule rent changes on any unit</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Record Payment" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Record Payment</strong><span>Log manual rent payments against leases</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Create Maintenance Request" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Create Maintenance Request</strong><span>Open new maintenance tickets</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Close Maintenance Request" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Close Maintenance Request</strong><span>Mark maintenance tickets as closed</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Add User (PM/Maintenance)" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Add User (PM/Maintenance)</strong><span>Create PM or Maintenance accounts</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Edit Lease" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Edit Lease</strong><span>Modify lease terms on existing leases</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Terminate Lease" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Terminate Lease</strong><span>Initiate lease termination flow</span></div>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="tasks" value="Edit Property Settings" onchange="updateChips()">
+              <div class="checkbox-item-label"><strong>Edit Property Settings</strong><span>Update property name, address, and configuration</span></div>
+            </label>
+          </div>
+          <div class="field-error" id="delegTasksError"></div>
+          <p class="text-xs muted mt-2">An Admin can only delegate actions they are themselves authorized to perform.</p>
+        </div>
+
+        <!-- D3 + D4: Date range -->
+        <div class="mt-5">
+          <!-- Live NR-8 window note -->
+          <div id="windowNote" class="alert mb-4" role="status" aria-live="polite" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="windowNoteText"></span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label" for="delegStart">Start date</label>
+              <input type="date" id="delegStart" name="startDate" class="input"
+                aria-label="Start date (DD/MM/YYYY)"
+                oninput="updateWindowNote()" onblur="validateDelegDate('delegStart')" />
+              <div class="field-error" id="delegStartError"></div>
+              <p class="text-xs muted mt-1">Earliest start is today.</p>
+            </div>
+            <div>
+              <label class="label" for="delegEnd">End date</label>
+              <input type="date" id="delegEnd" name="endDate" class="input"
+                aria-label="End date (DD/MM/YYYY)"
+                oninput="updateWindowNote()" onblur="validateDelegDate('delegEnd')" />
+              <div class="field-error" id="delegEndError"></div>
+              <p class="text-xs muted mt-1">Maximum window: 1 year.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- D5: Reason -->
+        <div class="mt-5">
+          <label class="label" for="delegReason">Reason (optional)</label>
+          <textarea id="delegReason" name="reason" class="input" rows="3" maxlength="200"
+            placeholder="e.g. Covering for Raj's leave in June"
+            oninput="updateCounter()"></textarea>
+          <div class="flex justify-end">
+            <span class="counter" id="reasonCounter">0 / 200</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="closeNewDelegModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save delegation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Revoke Confirm Modal -->
+  <div class="modal-backdrop" id="revokeModal" role="dialog" aria-modal="true" aria-labelledby="revokeModalTitle">
+    <div class="modal">
+      <h3 id="revokeModalTitle">Revoke Delegation?</h3>
+      <p class="muted text-sm mt-2" id="revokeModalBody">The delegate will lose the extra rights immediately. Actions already taken during the window stay recorded against the delegate.</p>
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('revokeModal').classList.remove('open')">Cancel</button>
+        <button type="button" class="btn btn-danger" id="revokeConfirmBtn">Revoke now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Detail Drawer -->
+  <div class="detail-drawer-backdrop" id="detailBackdrop" onclick="closeDetailDrawer()"></div>
+  <aside class="detail-drawer" id="detailDrawer" role="dialog" aria-modal="true" aria-label="Delegation detail">
+    <div class="flex items-center justify-between mb-6">
+      <h3 style="margin:0;">Delegation Detail</h3>
+      <button type="button" aria-label="Close detail panel" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="closeDetailDrawer()">Close</button>
+    </div>
+
+    <div id="drawerContent">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="mt-6">
+      <h4 class="section-title" style="font-size:13px">Recent actions under this delegation</h4>
+      <div class="card p-0 overflow-x-auto mt-2">
+        <table class="data-table">
+          <thead>
+            <tr><th>When (IST)</th><th>Action</th><th>Target</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-xs whitespace-nowrap">14/05/2026 09:42</td>
+              <td><span class="badge badge-renewed">RENT_CHANGE_SCHEDULED</span></td>
+              <td class="text-xs">Lease #L-2103 · Unit 1A</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">13/05/2026 14:11</td>
+              <td><span class="badge badge-prepaid">LEASE_CREATED</span></td>
+              <td class="text-xs">Lease #L-2118 · Unit 4B</td>
+            </tr>
+            <tr>
+              <td class="text-xs whitespace-nowrap">12/05/2026 10:30</td>
+              <td><span class="badge badge-resolved">MAINTENANCE_STATUS_CHANGED</span></td>
+              <td class="text-xs">Ticket #MR-2990</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs muted mt-2"><a href="audit-log.html" class="text-royal-blue font-poppins font-semibold">View full audit log →</a></p>
+    </div>
+  </aside>
+
+  <nav class="tabbar" aria-label="Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <!-- More bottom sheet -->
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+    <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
+    <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
+    <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+    <a href="delegations.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+
+  <script>
+    var lastFocusTrigger = null;
+    var pendingRevokeRow = null;
+    var pendingRevokeName = null;
+
+    /* ---- Tab keyboard navigation ---- */
+    (function() {
+      var tablist = document.querySelector('[role="tablist"]');
+      if (!tablist) return;
+      var tabs = Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]'));
+      tablist.addEventListener('keydown', function(e) {
+        var idx = tabs.indexOf(document.activeElement);
+        if (idx === -1) return;
+        if (e.key === 'ArrowRight') { e.preventDefault(); tabs[(idx + 1) % tabs.length].focus(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); tabs[(idx - 1 + tabs.length) % tabs.length].focus(); }
+        if (e.key === 'Home')       { e.preventDefault(); tabs[0].focus(); }
+        if (e.key === 'End')        { e.preventDefault(); tabs[tabs.length - 1].focus(); }
+      });
+    })();
+
+    function switchDelegTab(status, btn) {
+      var tabs = document.querySelectorAll('[role="tab"]');
+      Array.prototype.forEach.call(tabs, function(t) {
+        t.setAttribute('aria-selected', 'false');
+        t.classList.remove('active');
+      });
+      btn.setAttribute('aria-selected', 'true');
+      btn.classList.add('active');
+      Array.prototype.forEach.call(document.querySelectorAll('.deleg-panel'), function(p) {
+        p.classList.remove('active');
+      });
+      document.getElementById('dpanel-' + status).classList.add('active');
+    }
+
+    /* ---- New Delegation Modal ---- */
+    function openNewDelegModal() {
+      lastFocusTrigger = document.getElementById('newDelegBtn');
+      document.getElementById('newDelegForm').reset();
+      document.getElementById('chipsPreview').innerHTML = '';
+      document.getElementById('windowNote').style.display = 'none';
+      document.getElementById('reasonCounter').textContent = '0 / 200';
+      /* Clear errors */
+      ['delegDelegate','delegTasks','delegStart','delegEnd'].forEach(function(id) {
+        var errEl = document.getElementById(id + 'Error');
+        if (errEl) { errEl.classList.remove('show'); errEl.textContent = ''; }
+        var inp = document.getElementById(id);
+        if (inp) inp.classList.remove('error');
+      });
+      document.getElementById('newDelegModal').classList.add('open');
+      setTimeout(function() { document.getElementById('delegDelegate').focus(); }, 50);
+    }
+
+    function closeNewDelegModal() {
+      document.getElementById('newDelegModal').classList.remove('open');
+      if (lastFocusTrigger) lastFocusTrigger.focus();
+    }
+
+    function updateChips() {
+      var checked = document.querySelectorAll('#newDelegForm input[type="checkbox"]:checked');
+      var preview = document.getElementById('chipsPreview');
+      preview.innerHTML = '';
+      Array.prototype.forEach.call(checked, function(cb) {
+        var chip = document.createElement('span');
+        chip.className = 'task-chip';
+        chip.textContent = cb.value;
+        preview.appendChild(chip);
+      });
+    }
+
+    function updateCounter() {
+      var ta = document.getElementById('delegReason');
+      var counter = document.getElementById('reasonCounter');
+      var len = ta.value.length;
+      counter.textContent = len + ' / 200';
+      counter.className = len > 200 ? 'counter error' : 'counter';
+    }
+
+    function formatDateDMY(dateStr) {
+      if (!dateStr) return '';
+      var parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      return parts[2] + '/' + parts[1] + '/' + parts[0];
+    }
+
+    function updateWindowNote() {
+      var startVal = document.getElementById('delegStart').value;
+      var endVal   = document.getElementById('delegEnd').value;
+      var noteEl   = document.getElementById('windowNote');
+      var noteText = document.getElementById('windowNoteText');
+      if (!startVal || !endVal) { noteEl.style.display = 'none'; return; }
+      var start = new Date(startVal);
+      var end   = new Date(endVal);
+      if (isNaN(start) || isNaN(end) || end <= start) { noteEl.style.display = 'none'; return; }
+      var diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+      noteText.textContent = 'Window: ' + diffDays + ' day' + (diffDays !== 1 ? 's' : '') + ' · '
+        + formatDateDMY(startVal) + ' → ' + formatDateDMY(endVal) + ' · attribution applies during these dates only.';
+      noteEl.style.display = 'flex';
+    }
+
+    function validateDelegDate(id) {
+      var val = document.getElementById(id).value;
+      var errEl = document.getElementById(id + 'Error');
+      var today = new Date(); today.setHours(0,0,0,0);
+      var msg = '';
+      if (!val) {
+        msg = id === 'delegStart' ? 'Start date is required.' : 'End date is required.';
+      } else {
+        var d = new Date(val);
+        if (id === 'delegStart') {
+          if (d < today) msg = 'Start date must be today or later.';
+        } else {
+          var startVal = document.getElementById('delegStart').value;
+          if (startVal) {
+            var start = new Date(startVal);
+            if (d <= start) msg = 'End date must be after start date.';
+            else {
+              var maxEnd = new Date(start);
+              maxEnd.setFullYear(maxEnd.getFullYear() + 1);
+              if (d > maxEnd) msg = 'Window cannot exceed 1 year (365 days).';
+            }
+          }
+        }
+      }
+      if (msg) {
+        errEl.textContent = msg; errEl.classList.add('show');
+        document.getElementById(id).classList.add('error');
+        return false;
+      } else {
+        errEl.classList.remove('show'); errEl.textContent = '';
+        document.getElementById(id).classList.remove('error');
+        return true;
+      }
+    }
+
+    function submitNewDeleg() {
+      var ok = true;
+      /* D1 */
+      var delegate = document.getElementById('delegDelegate').value;
+      var d1Err = document.getElementById('delegDelegateError');
+      if (!delegate) { d1Err.textContent = 'Please select a delegate.'; d1Err.classList.add('show'); document.getElementById('delegDelegate').classList.add('error'); ok = false; }
+      else { d1Err.classList.remove('show'); document.getElementById('delegDelegate').classList.remove('error'); }
+      /* D2 */
+      var checked = document.querySelectorAll('#newDelegForm input[type="checkbox"]:checked');
+      var d2Err = document.getElementById('delegTasksError');
+      if (checked.length === 0) { d2Err.textContent = 'Select at least one task.'; d2Err.classList.add('show'); ok = false; }
+      else { d2Err.classList.remove('show'); }
+      /* D3 + D4 */
+      if (!validateDelegDate('delegStart')) ok = false;
+      if (!validateDelegDate('delegEnd'))   ok = false;
+      /* D5 char limit */
+      var reason = document.getElementById('delegReason').value;
+      if (reason.length > 200) { ok = false; }
+      if (!ok) return;
+
+      var startVal = document.getElementById('delegStart').value;
+      var today = new Date(); today.setHours(0,0,0,0);
+      var start = new Date(startVal);
+      var isActive = start <= today;
+      var targetTab = isActive ? 'active' : 'upcoming';
+
+      /* Switch to relevant tab */
+      var btn = document.getElementById('dtab-' + targetTab);
+      switchDelegTab(targetTab, btn);
+
+      /* Append row */
+      var delegateName = document.getElementById('delegDelegate').options[document.getElementById('delegDelegate').selectedIndex].text;
+      var delegateNameOnly = delegateName.split('·')[0].trim();
+      var delegateRole = delegateName.split('·')[1] ? delegateName.split('·')[1].trim() : 'PM';
+      var roleClass = delegateRole === 'PM' ? 'role-chip-pm' : 'role-chip-maint';
+      var tasks = [];
+      Array.prototype.forEach.call(checked, function(cb) { tasks.push(cb.value); });
+      var chipsHtml = tasks.map(function(t) { return '<span class="task-chip">' + t + '</span>'; }).join('');
+      var endVal = document.getElementById('delegEnd').value;
+      var badgeClass = isActive ? 'badge-active' : 'badge-prepaid';
+      var badgeText  = isActive ? 'Active' : 'Upcoming';
+      var now = new Date();
+      var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+      var ts = pad(now.getDate()) + '/' + pad(now.getMonth()+1) + '/' + now.getFullYear() + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+      var tbody = document.querySelector('#dpanel-' + targetTab + ' tbody');
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><div class="font-poppins font-semibold text-charcoal">' + delegateNameOnly + '</div><span class="' + roleClass + '">' + delegateRole + '</span></td>'
+        + '<td><div class="flex flex-wrap gap-1">' + chipsHtml + '</div></td>'
+        + '<td class="text-xs"><div>Starts ' + formatDateDMY(startVal) + '</div><div>Ends ' + formatDateDMY(endVal) + '</div></td>'
+        + '<td><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>'
+        + '<td class="text-xs"><div class="font-poppins font-semibold text-charcoal">Raj Singh</div><div class="muted">' + ts + '</div></td>'
+        + '<td><div class="flex gap-2"><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRevokeConfirm(this,\'' + delegateNameOnly + '\')">Revoke</button><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openDetailDrawer(null)">View</a></div></td>';
+      tbody.prepend(tr);
+
+      closeNewDelegModal();
+      announce('Delegation created for ' + delegateNameOnly + '.');
+    }
+
+    /* ---- Revoke modal ---- */
+    function openRevokeConfirm(btn, name) {
+      lastFocusTrigger = btn;
+      pendingRevokeRow = btn.closest('tr');
+      pendingRevokeName = name;
+      document.getElementById('revokeModalBody').textContent = 'Revoke this delegation for ' + name + '? The delegate will lose the extra rights immediately. Actions already taken during the window stay recorded against the delegate.';
+      document.getElementById('revokeModal').classList.add('open');
+      document.getElementById('revokeConfirmBtn').focus();
+    }
+
+    document.getElementById('revokeConfirmBtn').addEventListener('click', function() {
+      document.getElementById('revokeModal').classList.remove('open');
+      if (pendingRevokeRow) {
+        /* Flip badge to Revoked and remove Revoke button */
+        var badge = pendingRevokeRow.querySelector('.badge');
+        if (badge) { badge.className = 'badge badge-terminated'; badge.textContent = 'Revoked'; }
+        var revokeBtn = pendingRevokeRow.querySelector('.btn-danger');
+        if (revokeBtn) revokeBtn.remove();
+      }
+      announce(pendingRevokeName + ' delegation revoked.');
+      if (lastFocusTrigger) document.getElementById('newDelegBtn').focus();
+    });
+
+    /* ---- View-detail drawer ---- */
+    var drawerData = {
+      sunita: {
+        name: 'Sunita Arora', role: 'PM', roleClass: 'role-chip-pm',
+        tasks: ['Add Property','Add Unit','Edit Unit Rent'],
+        start: '01/05/2026', end: '31/05/2026', days: 30,
+        createdBy: 'Raj Singh (Admin)', createdAt: '28/04/2026 09:30 IST'
+      },
+      manoj: {
+        name: 'Manoj Verma', role: 'PM', roleClass: 'role-chip-pm',
+        tasks: ['Record Payment','Edit Lease'],
+        start: '15/05/2026', end: '15/06/2026', days: 31,
+        createdBy: 'Raj Singh (Admin)', createdAt: '12/05/2026 14:00 IST'
+      },
+      raju: {
+        name: 'Raju Kumar', role: 'Maintenance', roleClass: 'role-chip-maint',
+        tasks: ['Close Maintenance Request','Create Maintenance Request'],
+        start: '20/05/2026', end: '20/06/2026', days: 31,
+        createdBy: 'Raj Singh (Admin)', createdAt: '19/05/2026 11:15 IST'
+      },
+      pooja: {
+        name: 'Pooja Khanna', role: 'PM', roleClass: 'role-chip-pm',
+        tasks: ['Add User (PM/Maintenance)','Edit Property Settings'],
+        start: '15/06/2026', end: '30/06/2026', days: 15,
+        createdBy: 'Raj Singh (Admin)', createdAt: '25/05/2026 16:45 IST'
+      }
+    };
+
+    function openDetailDrawer(id) {
+      var data = id ? drawerData[id] : null;
+      var content = document.getElementById('drawerContent');
+      if (data) {
+        content.innerHTML = '<div class="mb-4">'
+          + '<div class="font-poppins font-semibold text-charcoal" style="font-size:18px">' + data.name + '</div>'
+          + '<span class="' + data.roleClass + ' mt-1">' + data.role + '</span>'
+          + '</div>'
+          + '<div class="divider"></div>'
+          + '<div class="mt-4"><div class="label">Tasks granted</div><div class="flex flex-wrap gap-1 mt-2">'
+          + data.tasks.map(function(t) { return '<span class="task-chip">' + t + '</span>'; }).join('')
+          + '</div></div>'
+          + '<div class="mt-4"><div class="label">Window</div><p class="text-sm text-charcoal font-poppins font-semibold mt-1">' + data.start + ' → ' + data.end + ' · ' + data.days + ' days</p></div>'
+          + '<div class="mt-4"><div class="label">Created by</div><p class="text-sm text-charcoal mt-1">' + data.createdBy + ' · ' + data.createdAt + '</p></div>';
+      } else {
+        content.innerHTML = '<p class="muted text-sm">Delegation details.</p>';
+      }
+      lastFocusTrigger = document.activeElement;
+      document.getElementById('detailBackdrop').classList.add('open');
+      document.getElementById('detailDrawer').classList.add('open');
+      document.getElementById('detailDrawer').querySelector('button').focus();
+    }
+
+    function closeDetailDrawer() {
+      document.getElementById('detailBackdrop').classList.remove('open');
+      document.getElementById('detailDrawer').classList.remove('open');
+      if (lastFocusTrigger) lastFocusTrigger.focus();
+    }
+
+    /* Escape closes all overlays */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (document.getElementById('newDelegModal').classList.contains('open')) closeNewDelegModal();
+        if (document.getElementById('revokeModal').classList.contains('open')) { document.getElementById('revokeModal').classList.remove('open'); if (lastFocusTrigger) lastFocusTrigger.focus(); }
+        if (document.getElementById('detailDrawer').classList.contains('open')) closeDetailDrawer();
+      }
+    });
+
+    function announce(msg) {
+      var lr = document.getElementById('liveRegion');
+      lr.textContent = '';
+      setTimeout(function() { lr.textContent = msg; }, 50);
+    }
+  </script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">RS</div>
+      <div>
+        <div class="account-menu-name">Raj</div>
+        <div class="account-menu-role">Admin</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+</body>
+</html>

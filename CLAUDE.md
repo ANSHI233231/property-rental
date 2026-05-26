@@ -2,7 +2,7 @@
 
 Guidance for Claude Code working in this repo. **Keep this file ≤ 200 lines.** Anything longer goes in a topic doc and gets linked.
 
-## Repository status — current state (2026-05-27)
+## Repository status — current state (2026-05-26)
 
 GharSetu is a Delhi-first property-rental management platform — 120 units / 18 buildings, four operational roles + one platform role. **Not greenfield.** Phase 8 closed 2026-05-11; v1 is **RELEASE-READY pending user sign-off**, with 967/967 unit+integration tests green, 74/74 Playwright (serial) green, and **23/23 business rules locked in**. Current engagement scope (Solution Overview v8) adds SAAS layer, Super Admin role, Admin Impersonation, Admin Task Delegation, per-room leasing, Visitor Management, Master Data Administration and Settings.
 

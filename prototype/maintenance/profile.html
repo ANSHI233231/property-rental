@@ -13,15 +13,37 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>My Requests</a>
-        <a href="all-open.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Open</a>
-        <div class="sidebar-divider"></div>
-        <a href="profile.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Dashboard</a>
+        <a href="all-requests.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Requests</a>
       </nav>
-      <div class="sidebar-footer">Maintenance · Raju Kumar<br/>Specialization: Plumber<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">RK</div>
+            <div>
+              <div class="account-menu-name">Raju</div>
+              <div class="account-menu-role">Maintenance</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
     </aside>
 
     <main class="app-main">
@@ -29,15 +51,6 @@
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
           <h1 class="page-title">My Profile</h1>
-          <div class="page-subtitle">Account and security</div>
-        </div>
-        <div class="topbar-user">
-          <button class="notif-bell" aria-label="Notifications">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-            <span class="notif-dot"></span>
-          </button>
-          <span class="hidden md:inline">Raju Kumar</span>
-          <a href="profile.html" class="avatar">RK</a>
         </div>
       </header>
 
@@ -81,26 +94,52 @@
         </section>
       </div>
 
-      <!-- Stats -->
+      <!-- Recent Activity -->
       <section class="section mt-8">
-        <h3 class="section-title">Your Work</h3>
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Active assignments</div><div class="kpi-value">3</div></div>
-          <div class="kpi"><div class="kpi-label">Resolved this month</div><div class="kpi-value" style="color:var(--color-status-paid)">14</div></div>
-          <div class="kpi"><div class="kpi-label">Avg. resolution time</div><div class="kpi-value">1.8d</div></div>
-          <div class="kpi"><div class="kpi-label">Emergency response</div><div class="kpi-value" style="color:var(--color-status-overdue)">42m</div><div class="kpi-meta">Avg. since alert</div></div>
+        <h3 class="section-title">Recent Activity</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>When</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
+            <tbody>
+              <tr><td>26/05/2026 10:24</td><td>Closed maintenance request</td><td>#MR-3041 · Water leakage · Unit 7C</td><td>106.51.xx.xx</td></tr>
+              <tr><td>25/05/2026 14:05</td><td>Updated status to In Progress</td><td>#MR-3018 · AC not cooling · Unit 2A</td><td>106.51.xx.xx</td></tr>
+              <tr><td>25/05/2026 09:12</td><td>Acknowledged assignment</td><td>#MR-3044 · Door lock · Unit 5B</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 16:48</td><td>Added internal note</td><td>#MR-3037 · Chimney filter</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 08:30</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
   </div>
 
   <nav class="tabbar" aria-label="Maintenance navigation (mobile)">
-    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>My Requests</a>
-    <a href="all-open.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Open</a>
-    <a href="profile.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>Profile</a>
-    <button type="button" class="tab" aria-label="Logout" onclick="window.location='../login.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Logout</button>
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Dashboard</a>
+    <a href="all-requests.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Requests</a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">RK</div>
+      <div>
+        <div class="account-menu-name">Raju</div>
+        <div class="account-menu-role">Maintenance</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
 </body>
 </html>

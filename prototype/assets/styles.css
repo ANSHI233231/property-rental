@@ -228,16 +228,397 @@ a.sidebar-brand:hover { opacity: 0.85; }
   height: 1px; background: rgba(255,255,255,0.08);
   margin: 12px 24px;
 }
+
+/* Sidebar sub-menu — Master Data section header.
+   Visually matches a sidebar-link row (same case, weight, padding, hover, active border). */
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(255,255,255,0.78);
+  user-select: none;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: all 150ms;
+}
+.sidebar-section-header:hover {
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+}
+.sidebar-section-header .section-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.78;
+}
+/* Chevron sits at the right edge of the row */
+.sidebar-section-header .section-chev {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.78;
+  transition: transform 0.2s ease;
+}
+.sidebar-section-header[aria-expanded="true"] .section-chev { transform: rotate(180deg); }
+/* Default: children hidden — section starts collapsed at every breakpoint */
+.sidebar-section.collapsed .sidebar-sublink { display: none; }
+/* Active state — section header lights up when one of its children is the current page */
+.sidebar-section-header.active {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-left-color: var(--color-saffron);
+}
+.sidebar-section-header.active .section-icon,
+.sidebar-section-header:hover .section-icon { opacity: 1; }
+.sidebar-section-header.active .section-icon { color: var(--color-saffron); }
+
+/* Sidebar sub-link — indented child link variant */
+.sidebar-sublink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 24px 9px 44px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  border-left: 4px solid transparent;
+  transition: all 150ms;
+}
+.sidebar-sublink:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.9); }
+.sidebar-sublink.active {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-left-color: var(--color-saffron);
+}
+/* Sub-link dot marker instead of icon */
+.sidebar-sublink::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.sidebar-sublink.active::before { opacity: 1; background: var(--color-saffron); }
+
+/* More-sheet section header (plain label row in mobile More-sheet) */
+.more-sheet-section-header {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--color-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 10px 8px 4px;
+}
+/* More-sheet sub-link — indented child rows */
+.more-sheet-sublink {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  color: var(--color-charcoal);
+  text-decoration: none;
+  gap: 14px;
+  padding: 10px 8px 10px 32px;
+  font-size: 14px;
+  border: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--color-light-gray);
+  text-align: left;
+  cursor: pointer;
+}
+.more-sheet-sublink:last-of-type { border-bottom: 1px solid var(--color-light-gray); }
+.more-sheet-sublink:hover { background: var(--color-off-white); }
+.more-sheet-sublink.active { color: var(--color-saffron); }
+.more-sheet-sublink::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+.more-sheet-sublink.active::before { opacity: 1; background: var(--color-saffron); }
 .sidebar-footer {
-  padding: 16px 24px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
+  padding: 12px 16px;
   border-top: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+}
+.account-trigger {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.account-trigger:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); }
+.account-trigger:focus-visible {
+  outline: 2px solid var(--color-saffron);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.account-trigger svg { width: 18px; height: 18px; opacity: 0.8; flex-shrink: 0; }
+.account-trigger .account-trigger-label { flex: 1; text-align: left; }
+.account-trigger .account-trigger-chev {
+  transition: transform 0.15s ease;
+}
+.account-trigger[aria-expanded="true"] .account-trigger-chev { transform: rotate(180deg); }
+.account-menu {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 16px; right: 16px;
+  background: var(--color-navy);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 50;
+}
+.account-menu.open { display: block; }
+.account-menu-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.account-menu-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.account-menu-link:focus-visible {
+  outline: 2px solid var(--color-saffron);
+  outline-offset: -2px;
+}
+.account-menu-link svg { width: 16px; height: 16px; opacity: 0.85; flex-shrink: 0; }
+.account-menu-link.danger { color: #FFB4A8; }
+.account-menu-link.danger:hover { background: rgba(220, 38, 38, 0.18); color: #FFC9C0; }
+.account-menu-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 12px;
+}
+.account-menu-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--color-saffron);
+  color: #fff;
+  font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.account-menu-name {
+  font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px;
+  color: #fff; line-height: 1.2;
+}
+.account-menu-role {
+  font-family: 'Inter', sans-serif; font-weight: 400; font-size: 11px;
+  color: rgba(255,255,255,0.6); margin-top: 2px;
+}
+.account-menu-divider {
+  height: 1px; background: rgba(255,255,255,0.08);
+  margin: 4px 6px;
+}
+
+/* Progress timeline — vertical timeline on maintenance detail pages (all 4 roles).
+   Each <li class="timeline-event done|pending"> with a <span class="timeline-dot"> and
+   a <div class="timeline-content"> containing .timeline-title + .timeline-meta. */
+.progress-timeline { list-style: none; padding: 0; margin: 0; position: relative; }
+.progress-timeline::before {
+  content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+  width: 2px; background: var(--color-mid-gray);
+}
+.timeline-event {
+  position: relative;
+  padding: 0 0 16px 32px;
+  font-family: 'Inter', sans-serif;
+}
+.timeline-event:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute; left: 0; top: 4px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--color-mid-gray);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--color-mid-gray);
+}
+.timeline-event.done .timeline-dot {
+  background: var(--color-saffron);
+  box-shadow: 0 0 0 2px var(--color-saffron);
+}
+.timeline-event.pending { opacity: 0.6; }
+.timeline-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; color: var(--color-charcoal); }
+.timeline-meta { font-size: 12px; color: var(--color-slate); margin-top: 2px; }
+
+/* Pagination — shared footer below every list table. Renders "Showing X–Y of N",
+   page-number buttons (truncated with ellipses when >7 pages), prev/next, and a
+   per-page selector. JS lives in assets/paginate.js. */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-mid-gray);
+  background: var(--color-off-white);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--color-slate);
+}
+.pagination-info { font-family: 'Poppins', sans-serif; font-weight: 500; }
+.pagination-info span { color: var(--color-charcoal); font-weight: 600; }
+.pagination-controls { display: flex; align-items: center; gap: 4px; }
+.pagination-pages   { display: flex; align-items: center; gap: 4px; }
+.pagination-btn, .pagination-page {
+  min-width: 32px; height: 32px;
+  padding: 0 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #fff;
+  border: 1px solid var(--color-mid-gray);
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--color-charcoal);
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+.pagination-btn:hover:not(:disabled),
+.pagination-page:hover:not(.active):not([disabled]) {
+  border-color: var(--color-royal-blue);
+  background: var(--color-off-white);
+}
+.pagination-btn:focus-visible, .pagination-page:focus-visible {
+  outline: 2px solid var(--color-saffron);
+  outline-offset: 2px;
+}
+.pagination-btn:disabled, .pagination-page[disabled] {
+  opacity: 0.45; cursor: not-allowed;
+}
+.pagination-page.active {
+  background: var(--color-saffron);
+  border-color: var(--color-saffron);
+  color: #fff;
+  cursor: default;
+}
+.pagination-ellipsis {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; color: var(--color-slate);
+  font-family: 'Poppins', sans-serif; font-weight: 600;
+}
+.pagination-per-page select {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 13px;
+  background: #fff;
+  border: 1px solid var(--color-mid-gray);
+  border-radius: 6px;
+  color: var(--color-charcoal);
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  .pagination { flex-direction: column; align-items: stretch; }
+  .pagination-info, .pagination-per-page { text-align: center; }
+}
+
+/* Filter tile — replaces button pills like "All · 9" / "Emergency · 2" with a
+   stacked count + label tile. One row of tiles flex-fills the available width. */
+.filter-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.filter-tile {
+  flex: 1 1 0;
+  min-width: 130px;
+  background: #fff;
+  border: 1px solid var(--color-mid-gray);
+  border-top: 3px solid var(--color-mid-gray);
+  border-radius: 8px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.filter-tile:hover { border-color: var(--color-royal-blue); }
+.filter-tile:focus-visible {
+  outline: 2px solid var(--color-saffron);
+  outline-offset: 2px;
+}
+.filter-tile.active {
+  border-top-color: var(--color-saffron);
+  background: rgba(255, 111, 0, 0.04);
+}
+.filter-tile-count {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--color-charcoal);
+  line-height: 1;
+}
+.filter-tile.active .filter-tile-count { color: var(--color-saffron); }
+.filter-tile-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--color-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Mobile bottom-sheet variant of the account menu — triggered from tabbar Account tab */
+.account-sheet-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 79;
+}
+.account-sheet-backdrop.open { display: block; }
+.account-sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: var(--color-navy);
+  border-radius: 16px 16px 0 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.25);
+  transform: translateY(100%);
+  transition: transform 0.2s ease;
+  z-index: 80;
+  display: none;
+}
+@media (max-width: 1023px) {
+  .account-sheet { display: block; }
+}
+.account-sheet.open { transform: translateY(0); }
+.account-sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.20);
+  border-radius: 2px;
+  margin: 6px auto 8px;
 }
 
 /* Main shell */
 .app-shell { min-height: 100vh; }
-.app-main { margin-left: 240px; padding: 32px 48px; max-width: 1440px; }
+.app-main { margin-left: 240px; padding: 32px 48px; }
 .topbar {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 32px; gap: 16px;
@@ -517,3 +898,157 @@ a.auth-brand:hover { opacity: 0.8; }
 .role-card { transition: transform 200ms, box-shadow 200ms; cursor: pointer; }
 .role-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .role-icon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+
+/* ---------------------------------------------------------------------------
+ * Impersonation banner
+ * Amber/warning palette — tokens from bg-partial (#FFF8E1 line 24),
+ * color-status-partial (#F57F17 line 17), color-charcoal (#212121 line 9),
+ * color-navy (#1A237E line 6). z-index 80 sits above sidebar (70) and
+ * drawer-backdrop (60) but below modals (100).
+ * Banner height: 48px desktop / auto (≥2 lines) mobile.
+ * -------------------------------------------------------------------------- */
+.impers-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  background: var(--bg-partial);      /* #FFF8E1 — line 24 */
+  border-bottom: 2px solid var(--color-status-partial); /* #F57F17 — line 17 */
+  color: var(--color-charcoal);       /* #212121 — line 9 */
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+.impers-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 48px;                 /* mirrors .app-main desktop padding (line 240) */
+  gap: 16px;
+}
+.impers-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  color: var(--color-status-partial); /* icon inherits warning amber — line 17 */
+}
+.impers-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.impers-banner-line1 {
+  font-family: 'Poppins', system-ui, sans-serif;   /* line 83 .btn font-family */
+  font-weight: 500;
+  font-size: 14px;                                 /* mirrors .sidebar-link 14px — line 207 */
+  color: var(--color-charcoal);                    /* #212121 — line 9 */
+  line-height: 1.4;
+}
+.impers-banner-line1 strong {
+  font-weight: 700;                                /* mirrors .kpi-value weight — line 445 */
+}
+.impers-banner-role {
+  color: var(--color-slate);                       /* #546E7A — line 10 */
+  font-weight: 400;
+}
+.impers-banner-started {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  color: var(--color-slate);                       /* #546E7A — line 10 */
+}
+.impers-banner-line2 {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 13px;                                 /* mirrors .field-error 13px — line 145 */
+  color: var(--color-slate);                       /* #546E7A — line 10 */
+  line-height: 1.4;
+}
+.impers-banner-actor {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--color-charcoal);                    /* #212121 — line 9 */
+}
+
+/* End-impersonation button — amber-bordered, warning palette */
+.impers-end-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;              /* line 83 .btn */
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 6px;                              /* line 86 .btn */
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;               /* line 90 .btn */
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--color-status-partial);              /* #F57F17 amber — line 17 */
+  border: 2px solid var(--color-status-partial);   /* amber outline — line 17 */
+}
+.impers-end-btn:hover {
+  background: var(--color-status-partial);         /* fill on hover */
+  color: #fff;
+}
+.impers-end-btn:focus-visible {
+  /* Override global saffron ring — use navy ring, visible on amber bg */
+  outline: 2px solid var(--color-navy);            /* #1A237E — line 6 */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Layout offsets when banner is active — pushes sidebar and main content down */
+/* Desktop: banner height 48px */
+body.impers-active .sidebar {
+  top: 48px;
+  height: calc(100vh - 48px);
+}
+body.impers-active .app-main {
+  padding-top: calc(32px + 48px);                  /* base 32px (line 240) + 48px banner */
+}
+
+/* Mobile/tablet (≤ 1023px): banner may be taller when text wraps */
+@media (max-width: 1023px) {
+  .impers-banner-inner {
+    padding: 10px 16px;                            /* mirrors .app-main mobile padding (line 321) */
+    flex-wrap: wrap;
+  }
+  .impers-banner-line1 {
+    font-size: 13px;                               /* step down for mobile (line 107 body 15px) */
+  }
+  /* Sidebar is off-screen on mobile (transformed), override top for when drawer opens */
+  body.impers-active .sidebar {
+    top: 0;                                        /* drawer appears full-height on mobile */
+    height: 100vh;
+  }
+  body.impers-active .app-main {
+    padding-top: calc(24px + 64px);               /* base 24px (line 321) + 64px banner mobile */
+  }
+}
+
+/* Table action link — impersonate affordance in users.html */
+.action-link {
+  color: var(--color-royal-blue);                  /* #1565C0 — line 7 */
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.action-link:hover {
+  text-decoration: underline;
+}
+.action-link-sep {
+  color: var(--color-mid-gray);                    /* #CFD8DC — line 13 */
+  margin: 0 6px;
+  font-weight: 400;
+  user-select: none;
+}

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Your Organization · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          navy: '#1A237E', 'royal-blue': '#1565C0', saffron: '#FF6F00',
+          charcoal: '#212121', slate: '#546E7A',
+          'off-white': '#F8F9FA', 'light-gray': '#ECEFF1', 'mid-gray': '#CFD8DC',
+        },
+        fontFamily: { poppins: ['Poppins','sans-serif'], inter: ['Inter','sans-serif'] }
+      }}
+    }
+  </script>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    /* ─── Card — wider on desktop ─────────────────────────────── */
+    .org-auth-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 36px 44px;
+      max-width: 560px;   /* mobile / tablet default */
+      width: 100%;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+    }
+    @media (min-width: 1024px) {
+      .org-auth-card { max-width: 760px; padding: 40px 52px; }
+    }
+    @media (max-width: 767px) {
+      .org-auth-card { padding: 28px 24px; }
+    }
+    @media (max-width: 479px) {
+      .org-auth-card { padding: 22px 16px; }
+    }
+
+    /* ─── 2-column field grid (desktop only) ────────────────── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;          /* gaps handled by .field-group margin */
+    }
+    @media (min-width: 1024px) {
+      .fields-grid { grid-template-columns: 1fr 1fr; column-gap: 20px; }
+      /* span-2 items stretch across both columns */
+      .fields-grid .col-span-2 { grid-column: span 2; }
+    }
+
+    /* ─── City+State side-by-side row ─────────────────────── */
+    .city-state-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 479px) {
+      .city-state-row { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Section separators ──────────────────────────────── */
+    .form-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ECEFF1;
+    }
+    .form-section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* ─── Section heading + saffron rule ─────────────────── */
+    .form-section-heading {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: #FF6F00;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #FF6F00;
+      display: inline-block;
+    }
+
+    /* ─── Field spacing ───────────────────────────────────── */
+    .field-group { margin-bottom: 12px; }
+    .field-group:last-child { margin-bottom: 0; }
+
+    /* ─── Password toggle ─────────────────────────────────── */
+    .pw-wrapper { position: relative; }
+    .pw-wrapper .input { padding-right: 48px; }
+    .pw-toggle {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #546E7A;
+      padding: 4px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .pw-toggle:hover { color: #212121; }
+
+    /* ─── Plan tiles — horizontal row ────────────────────── */
+    .plan-group {
+      display: grid;
+      grid-template-columns: 1fr;    /* <480 px: stack */
+      gap: 10px;
+    }
+    @media (min-width: 480px) {
+      .plan-group { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .plan-tile-input {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+    .plan-tile-label {
+      display: block;
+      border: 1px solid #CFD8DC;
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 150ms, box-shadow 150ms;
+      background: #fff;
+      position: relative;
+      height: 100%;
+    }
+    .plan-tile-label:hover {
+      border-color: #1565C0;
+      box-shadow: 0 2px 8px rgba(21,101,192,0.08);
+    }
+    .plan-tile-input:checked + .plan-tile-label {
+      border: 2px solid #FF6F00;
+      box-shadow: 0 2px 12px rgba(255,111,0,0.15);
+      padding: 13px 15px; /* compensate for extra border px */
+    }
+    .plan-tile-input:focus-visible + .plan-tile-label {
+      outline: 2px solid #FF6F00;
+      outline-offset: 2px;
+    }
+
+    /* ─── Terms checkbox row ──────────────────────────────── */
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #546E7A;
+      line-height: 1.5;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      accent-color: #FF6F00;
+      cursor: pointer;
+    }
+
+    /* ─── Success state ───────────────────────────────────── */
+    #success-card { display: none; }
+    .success-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #E8F5E9;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Visually hidden page title for screen readers -->
+  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">Register your organization</h1>
+
+  <main class="auth-shell" style="align-items:flex-start; padding:40px 24px;">
+
+    <!-- ======================================================
+         FORM CARD
+         ====================================================== -->
+    <div id="form-card" class="org-auth-card" style="margin:0 auto;">
+
+      <!-- Brand -->
+      <a href="index.html" class="auth-brand" aria-label="GharSetu — back to home">Ghar<span>Setu</span></a>
+
+      <!-- Tagline -->
+      <div class="auth-tagline">Register your organization</div>
+
+      <!-- Login text link -->
+      <div style="text-align:center; margin-bottom:24px;">
+        <span style="font-size:14px; color:#546E7A;">Already have an account? </span>
+        <a href="login.html" class="font-poppins font-semibold" style="color:#1565C0; font-size:14px; text-decoration:none;">Login</a>
+      </div>
+
+      <!-- FORM -->
+      <form id="org-signup-form" onsubmit="handleOrgSignupSubmit(event);">
+
+        <!-- ================================================
+             SECTION A — Organization details
+             ================================================ -->
+        <div class="form-section">
+          <h3 class="form-section-heading">Organization details</h3>
+
+          <div class="fields-grid">
+
+            <!-- A1 Organization name -->
+            <div class="field-group">
+              <label class="label" for="org-name">Organization Name <span style="color:#FF6F00;">*</span></label>
+              <input
+                id="org-name"
+                class="input"
+                type="text"
+                placeholder="e.g. Sunrise Properties Pvt. Ltd."
+                autocomplete="organization"
+                aria-describedby="org-name-error"
+                maxlength="80"
+              />
+              <div id="org-name-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- A2 Type of business -->
+            <div class="field-group">
+              <label class="label" for="biz-type">Type of Business <span style="color:#FF6F00;">*</span></label>
+              <select id="biz-type" class="input" aria-describedby="biz-type-error">
+                <option value="">Select business type</option>
+                <option value="pg_hostel">PG / Hostel</option>
+                <option value="housing_society">Housing Society</option>
+                <option value="individual_landlord">Individual Landlord</option>
+                <option value="property_mgmt_firm">Property Management Firm</option>
+                <option value="other">Other</option>
+              </select>
+              <div id="biz-type-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- A3 Expected number of units -->
+            <div class="field-group">
+              <label class="label" for="unit-count">Expected Number of Units <span style="color:#FF6F00;">*</span></label>
+              <select id="unit-count" class="input" aria-describedby="unit-count-error">
+                <option value="">Select unit range</option>
+                <option value="1-10">1–10</option>
+                <option value="11-50">11–50</option>
+                <option value="51-200">51–200</option>
+                <option value="200+">200+</option>
+              </select>
+              <div id="unit-count-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- A4 City + State (spans both columns on desktop) -->
+            <div class="field-group col-span-2">
+              <label class="label">Location <span style="color:#FF6F00;">*</span></label>
+              <div class="city-state-row">
+                <div>
+                  <input
+                    id="city"
+                    class="input"
+                    type="text"
+                    placeholder="City"
+                    aria-label="City"
+                    aria-describedby="city-error"
+                    maxlength="50"
+                  />
+                  <div id="city-error" class="field-error" role="alert" aria-live="polite"></div>
+                </div>
+                <div>
+                  <select id="state" class="input" aria-label="State" aria-describedby="state-error">
+                    <option value="">Select state</option>
+                    <option value="AN">Andaman and Nicobar Islands</option>
+                    <option value="AP">Andhra Pradesh</option>
+                    <option value="AR">Arunachal Pradesh</option>
+                    <option value="AS">Assam</option>
+                    <option value="BR">Bihar</option>
+                    <option value="CH">Chandigarh</option>
+                    <option value="CG">Chhattisgarh</option>
+                    <option value="DN">Dadra and Nagar Haveli and Daman and Diu</option>
+                    <option value="DL">Delhi</option>
+                    <option value="GA">Goa</option>
+                    <option value="GJ">Gujarat</option>
+                    <option value="HR">Haryana</option>
+                    <option value="HP">Himachal Pradesh</option>
+                    <option value="JK">Jammu and Kashmir</option>
+                    <option value="JH">Jharkhand</option>
+                    <option value="KA">Karnataka</option>
+                    <option value="KL">Kerala</option>
+                    <option value="LA">Ladakh</option>
+                    <option value="LD">Lakshadweep</option>
+                    <option value="MP">Madhya Pradesh</option>
+                    <option value="MH">Maharashtra</option>
+                    <option value="MN">Manipur</option>
+                    <option value="ML">Meghalaya</option>
+                    <option value="MZ">Mizoram</option>
+                    <option value="NL">Nagaland</option>
+                    <option value="OD">Odisha</option>
+                    <option value="PY">Puducherry</option>
+                    <option value="PB">Punjab</option>
+                    <option value="RJ">Rajasthan</option>
+                    <option value="SK">Sikkim</option>
+                    <option value="TN">Tamil Nadu</option>
+                    <option value="TS">Telangana</option>
+                    <option value="TR">Tripura</option>
+                    <option value="UP">Uttar Pradesh</option>
+                    <option value="UK">Uttarakhand</option>
+                    <option value="WB">West Bengal</option>
+                  </select>
+                  <div id="state-error" class="field-error" role="alert" aria-live="polite"></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /.fields-grid -->
+        </div><!-- /#section-a -->
+
+        <!-- ================================================
+             SECTION B — Primary contact (first Admin)
+             ================================================ -->
+        <div class="form-section">
+          <h3 class="form-section-heading">Primary contact</h3>
+          <p style="font-size:13px; color:#546E7A; margin:0 0 14px;">You'll be the first Admin once we approve.</p>
+
+          <div class="fields-grid">
+
+            <!-- B1 Full name -->
+            <div class="field-group">
+              <label class="label" for="contact-name">Full Name <span style="color:#FF6F00;">*</span></label>
+              <input
+                id="contact-name"
+                class="input"
+                type="text"
+                placeholder="e.g. Raj Sharma"
+                autocomplete="name"
+                aria-describedby="contact-name-error"
+                maxlength="80"
+              />
+              <div id="contact-name-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- B2 Email -->
+            <div class="field-group">
+              <label class="label" for="contact-email">Email Address <span style="color:#FF6F00;">*</span></label>
+              <input
+                id="contact-email"
+                class="input"
+                type="email"
+                placeholder="raj@example.com"
+                autocomplete="email"
+                aria-describedby="contact-email-error"
+              />
+              <div id="contact-email-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- B3 Phone -->
+            <div class="field-group">
+              <label class="label" for="contact-phone">Mobile Number <span style="color:#FF6F00;">*</span></label>
+              <input
+                id="contact-phone"
+                class="input"
+                type="text"
+                placeholder="10-digit Indian mobile"
+                autocomplete="tel"
+                aria-describedby="contact-phone-error contact-phone-hint"
+                maxlength="15"
+                inputmode="tel"
+              />
+              <div id="contact-phone-hint" class="muted" style="font-size:12px; margin-top:4px;">Enter 10 digits — we'll strip any +91 prefix.</div>
+              <div id="contact-phone-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- Empty cell on desktop so B4 starts a new row aligned left -->
+            <div class="field-group" aria-hidden="true" style="display:none;" id="b3-spacer"></div>
+
+            <!-- B4 Password -->
+            <div class="field-group">
+              <label class="label" for="contact-password">Password <span style="color:#FF6F00;">*</span></label>
+              <div class="pw-wrapper">
+                <input
+                  id="contact-password"
+                  class="input"
+                  type="password"
+                  placeholder="••••••••••"
+                  autocomplete="new-password"
+                  aria-describedby="contact-password-error contact-password-hint"
+                />
+                <button
+                  type="button"
+                  id="pw-toggle-b4"
+                  class="pw-toggle"
+                  aria-label="Show password"
+                  onclick="togglePw('contact-password', 'pw-toggle-b4', 'pw-eye-b4', 'pw-eye-off-b4')"
+                >
+                  <svg id="pw-eye-b4" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg id="pw-eye-off-b4" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 4.22-5.22"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.16 4.19"/>
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
+              <div id="contact-password-hint" class="muted" style="font-size:12px; margin-top:4px;">Min. 10 characters — at least 1 letter and 1 digit.</div>
+              <div id="contact-password-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- B5 Confirm password -->
+            <div class="field-group">
+              <label class="label" for="contact-confirm">Confirm Password <span style="color:#FF6F00;">*</span></label>
+              <div class="pw-wrapper">
+                <input
+                  id="contact-confirm"
+                  class="input"
+                  type="password"
+                  placeholder="••••••••••"
+                  autocomplete="new-password"
+                  aria-describedby="contact-confirm-error"
+                />
+                <button
+                  type="button"
+                  id="pw-toggle-b5"
+                  class="pw-toggle"
+                  aria-label="Show password"
+                  onclick="togglePw('contact-confirm', 'pw-toggle-b5', 'pw-eye-b5', 'pw-eye-off-b5')"
+                >
+                  <svg id="pw-eye-b5" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg id="pw-eye-off-b5" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 4.22-5.22"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.16 4.19"/>
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
+              <div id="contact-confirm-error" class="field-error" role="alert" aria-live="polite"></div>
+            </div>
+
+          </div><!-- /.fields-grid -->
+        </div><!-- /#section-b -->
+
+        <!-- ================================================
+             SECTION C — Subscription plan
+             Horizontal 3-tile row on ≥480px, stacked <480px
+             ================================================ -->
+        <div class="form-section">
+          <h3 class="form-section-heading" id="plan-group-label">Subscription plan</h3>
+          <p style="font-size:13px; color:#546E7A; margin:0 0 14px;">Not sure? Pick Standard — you can change later.</p>
+
+          <div role="radiogroup" aria-labelledby="plan-group-label" class="plan-group" id="plan-group">
+
+            <!-- Basic -->
+            <div>
+              <input
+                class="plan-tile-input"
+                type="radio"
+                name="subscription-plan"
+                id="plan-basic"
+                value="basic"
+                aria-describedby="plan-group-error"
+              />
+              <label class="plan-tile-label" for="plan-basic">
+                <div style="margin-bottom:6px;">
+                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Basic</div>
+                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Up to 5 users</div>
+                </div>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Property &amp; lease management
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Rent collection &amp; tracking
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Maintenance tracking
+                  </li>
+                </ul>
+                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
+              </label>
+            </div>
+
+            <!-- Standard -->
+            <div>
+              <input
+                class="plan-tile-input"
+                type="radio"
+                name="subscription-plan"
+                id="plan-standard"
+                value="standard"
+                aria-describedby="plan-group-error"
+              />
+              <label class="plan-tile-label" for="plan-standard">
+                <div style="margin-bottom:6px;">
+                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Standard <span style="font-size:10px; background:#FF6F00; color:#fff; padding:2px 6px; border-radius:999px; font-weight:600; letter-spacing:0.4px; vertical-align:middle; margin-left:4px;">Popular</span></div>
+                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Up to 20 users</div>
+                </div>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Everything in Basic
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Per-room leasing &amp; visitors
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Multi-property management
+                  </li>
+                </ul>
+                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
+              </label>
+            </div>
+
+            <!-- Premium -->
+            <div>
+              <input
+                class="plan-tile-input"
+                type="radio"
+                name="subscription-plan"
+                id="plan-premium"
+                value="premium"
+                aria-describedby="plan-group-error"
+              />
+              <label class="plan-tile-label" for="plan-premium">
+                <div style="margin-bottom:6px;">
+                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Premium</div>
+                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Unlimited users</div>
+                </div>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Everything in Standard
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Advanced reports &amp; analytics
+                  </li>
+                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Priority support &amp; impersonation
+                  </li>
+                </ul>
+                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
+              </label>
+            </div>
+
+          </div><!-- /.plan-group -->
+
+          <!-- Plan validation error slot -->
+          <div id="plan-group-error" class="field-error" role="alert" aria-live="polite" style="margin-top:8px;"></div>
+        </div><!-- /#section-c -->
+
+        <!-- ================================================
+             SECTION D — Terms acceptance
+             ================================================ -->
+        <div class="form-section">
+          <div class="field-group">
+            <div class="checkbox-row">
+              <input
+                type="checkbox"
+                id="terms-accept"
+                aria-describedby="terms-accept-error"
+                onchange="updateSubmitState()"
+              />
+              <label for="terms-accept" style="cursor:pointer;">
+                I agree to the
+                <a href="#" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Terms of Service</a>
+                and
+                <a href="#" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Privacy Policy</a>
+              </label>
+            </div>
+            <div id="terms-accept-error" class="field-error" role="alert" aria-live="polite" style="margin-top:6px;"></div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          id="submit-btn"
+          class="btn btn-disabled"
+          style="width:100%; font-size:15px; padding:14px;"
+          disabled
+        >
+          Submit Application
+        </button>
+
+      </form>
+
+      <!-- Card footer -->
+      <div style="text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid #ECEFF1;">
+        <a href="index.html" class="font-poppins font-semibold" style="color:#1565C0; font-size:14px; text-decoration:none;">
+          ← Back to home
+        </a>
+      </div>
+
+    </div><!-- /#form-card -->
+
+    <!-- ======================================================
+         SUCCESS STATE (shown on successful submit)
+         ====================================================== -->
+    <div id="success-card" class="org-auth-card" style="margin:0 auto; text-align:center; max-width:520px;">
+      <div class="success-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 class="font-poppins font-semibold" style="font-size:22px; color:#212121; margin-bottom:12px;">Application received</h3>
+      <p style="font-size:15px; color:#546E7A; line-height:1.6; max-width:400px; margin:0 auto 28px;">
+        We'll review your request and email Admin credentials once approved.
+        This usually takes 1–2 working days.
+      </p>
+      <a href="index.html" class="btn btn-secondary" style="width:100%; font-size:15px; padding:12px;">
+        Back to home
+      </a>
+    </div><!-- /#success-card -->
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------------------
+     * Show/hide the B3-spacer only on desktop (≥1024px) so Password
+     * lands in the left column on its own row.
+     * ---------------------------------------------------------------- */
+    function syncSpacerVisibility() {
+      var spacer = document.getElementById('b3-spacer');
+      if (!spacer) return;
+      if (window.innerWidth >= 1024) {
+        spacer.style.display = 'block';
+      } else {
+        spacer.style.display = 'none';
+      }
+    }
+    syncSpacerVisibility();
+    window.addEventListener('resize', syncSpacerVisibility);
+
+    /* ----------------------------------------------------------------
+     * Password visibility toggle
+     * ---------------------------------------------------------------- */
+    function togglePw(inputId, btnId, eyeId, eyeOffId) {
+      var input  = document.getElementById(inputId);
+      var btn    = document.getElementById(btnId);
+      var eye    = document.getElementById(eyeId);
+      var eyeOff = document.getElementById(eyeOffId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.style.display    = 'none';
+        eyeOff.style.display = 'block';
+        btn.setAttribute('aria-label', 'Hide password');
+      } else {
+        input.type = 'password';
+        eye.style.display    = 'block';
+        eyeOff.style.display = 'none';
+        btn.setAttribute('aria-label', 'Show password');
+      }
+    }
+
+    /* ----------------------------------------------------------------
+     * Submit state — enable/disable based on terms checkbox
+     * ---------------------------------------------------------------- */
+    function updateSubmitState() {
+      var cb  = document.getElementById('terms-accept');
+      var btn = document.getElementById('submit-btn');
+      if (cb.checked) {
+        btn.disabled = false;
+        btn.classList.remove('btn-disabled');
+        btn.classList.add('btn-primary');
+      } else {
+        btn.disabled = true;
+        btn.classList.add('btn-disabled');
+        btn.classList.remove('btn-primary');
+      }
+    }
+
+    /* ----------------------------------------------------------------
+     * Custom field validation helpers (no HTML5 tooltips — Working rule §16)
+     * ---------------------------------------------------------------- */
+    function showFieldError(inputEl, errorEl, message) {
+      inputEl.classList.add('error');
+      inputEl.setAttribute('aria-invalid', 'true');
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+    }
+
+    function clearFieldError(inputEl, errorEl) {
+      inputEl.classList.remove('error');
+      inputEl.removeAttribute('aria-invalid');
+      errorEl.textContent = '';
+      errorEl.classList.remove('show');
+    }
+
+    function getEl(id) { return document.getElementById(id); }
+
+    /* ----------------------------------------------------------------
+     * Per-field validators — return null if valid, error string if invalid
+     * ---------------------------------------------------------------- */
+    function validateOrgName(val) {
+      if (!val.trim()) return 'Organization name is required.';
+      if (val.trim().length < 3) return 'Organization name must be 3–80 characters.';
+      return null;
+    }
+    function validateBizType(val) {
+      if (!val) return 'Please select a business type.';
+      return null;
+    }
+    function validateUnitCount(val) {
+      if (!val) return 'Please select an expected unit count.';
+      return null;
+    }
+    function validateCity(val) {
+      if (!val.trim()) return 'City is required.';
+      if (val.trim().length < 2) return 'City must be at least 2 characters.';
+      return null;
+    }
+    function validateState(val) {
+      if (!val) return 'Please select a state.';
+      return null;
+    }
+    function validateContactName(val) {
+      if (!val.trim()) return 'Full name is required.';
+      if (val.trim().length < 2) return 'Full name must be at least 2 characters.';
+      return null;
+    }
+    function validateEmail(val) {
+      if (!val.trim()) return 'Email address is required.';
+      var re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      if (!re.test(val.trim())) return 'Enter a valid email address.';
+      return null;
+    }
+    function validatePhone(val) {
+      var digits = val.replace(/[\s\-]/g, '').replace(/^\+91|^91(?=[6-9])/, '');
+      if (!/^[6-9]\d{9}$/.test(digits)) return 'Enter a 10-digit Indian mobile number.';
+      return null;
+    }
+    function validatePassword(val) {
+      if (!val) return 'Password is required.';
+      if (val.length < 10) return 'Password must be at least 10 characters.';
+      if (!/[a-zA-Z]/.test(val)) return 'Password must include at least one letter.';
+      if (!/\d/.test(val)) return 'Password must include at least one digit.';
+      if (val.length > 128) return 'Password must be no more than 128 characters.';
+      return null;
+    }
+    function validateConfirm(val, pwVal) {
+      if (!val) return 'Please confirm your password.';
+      if (val !== pwVal) return 'Passwords do not match.';
+      return null;
+    }
+    function validatePlan() {
+      var radios  = document.querySelectorAll('input[name="subscription-plan"]');
+      var checked = false;
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) { checked = true; break; }
+      }
+      return checked ? null : 'Please choose a plan.';
+    }
+    function validateTerms() {
+      return getEl('terms-accept').checked ? null : 'You must accept the Terms of Service to continue.';
+    }
+
+    /* ----------------------------------------------------------------
+     * Wire up blur-time validation (clears on input, validates on blur)
+     * ---------------------------------------------------------------- */
+    function wireField(inputId, errorId, validatorFn) {
+      var input = getEl(inputId);
+      var errEl = getEl(errorId);
+      if (!input || !errEl) return;
+      input.addEventListener('input',  function () { clearFieldError(input, errEl); });
+      input.addEventListener('change', function () { clearFieldError(input, errEl); });
+      input.addEventListener('blur',   function () {
+        var err = validatorFn(input.value);
+        if (err) showFieldError(input, errEl, err);
+        else     clearFieldError(input, errEl);
+      });
+    }
+
+    /* ----------------------------------------------------------------
+     * Form submit handler
+     * ---------------------------------------------------------------- */
+    function handleOrgSignupSubmit(e) {
+      e.preventDefault();
+
+      var fields = [
+        { id: 'org-name',         errId: 'org-name-error',         fn: function(v){ return validateOrgName(v); } },
+        { id: 'biz-type',         errId: 'biz-type-error',         fn: function(v){ return validateBizType(v); } },
+        { id: 'unit-count',       errId: 'unit-count-error',       fn: function(v){ return validateUnitCount(v); } },
+        { id: 'city',             errId: 'city-error',             fn: function(v){ return validateCity(v); } },
+        { id: 'state',            errId: 'state-error',            fn: function(v){ return validateState(v); } },
+        { id: 'contact-name',     errId: 'contact-name-error',     fn: function(v){ return validateContactName(v); } },
+        { id: 'contact-email',    errId: 'contact-email-error',    fn: function(v){ return validateEmail(v); } },
+        { id: 'contact-phone',    errId: 'contact-phone-error',    fn: function(v){ return validatePhone(v); } },
+        { id: 'contact-password', errId: 'contact-password-error', fn: function(v){ return validatePassword(v); } },
+      ];
+
+      var firstError = null;
+
+      // Regular field validation
+      for (var i = 0; i < fields.length; i++) {
+        var f   = fields[i];
+        var el  = getEl(f.id);
+        var err = getEl(f.errId);
+        var msg = f.fn(el.value);
+        if (msg) {
+          showFieldError(el, err, msg);
+          if (!firstError) firstError = el;
+        } else {
+          clearFieldError(el, err);
+        }
+      }
+
+      // Confirm password
+      var pwEl       = getEl('contact-password');
+      var confirmEl  = getEl('contact-confirm');
+      var confirmErr = getEl('contact-confirm-error');
+      var confirmMsg = validateConfirm(confirmEl.value, pwEl.value);
+      if (confirmMsg) {
+        showFieldError(confirmEl, confirmErr, confirmMsg);
+        if (!firstError) firstError = confirmEl;
+      } else {
+        clearFieldError(confirmEl, confirmErr);
+      }
+
+      // Plan selection
+      var planErrEl = getEl('plan-group-error');
+      var planMsg   = validatePlan();
+      if (planMsg) {
+        planErrEl.textContent = planMsg;
+        planErrEl.classList.add('show');
+        if (!firstError) {
+          firstError = document.querySelector('input[name="subscription-plan"]');
+        }
+      } else {
+        planErrEl.textContent = '';
+        planErrEl.classList.remove('show');
+      }
+
+      // Terms
+      var termsEl    = getEl('terms-accept');
+      var termsErrEl = getEl('terms-accept-error');
+      var termsMsg   = validateTerms();
+      if (termsMsg) {
+        termsErrEl.textContent = termsMsg;
+        termsErrEl.classList.add('show');
+        if (!firstError) firstError = termsEl;
+      } else {
+        termsErrEl.textContent = '';
+        termsErrEl.classList.remove('show');
+      }
+
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.focus();
+        return;
+      }
+
+      // All valid — show success state
+      getEl('form-card').style.display  = 'none';
+      getEl('success-card').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ----------------------------------------------------------------
+     * Wire blur validators on page load
+     * ---------------------------------------------------------------- */
+    document.addEventListener('DOMContentLoaded', function () {
+      wireField('org-name',         'org-name-error',         validateOrgName);
+      wireField('biz-type',         'biz-type-error',         validateBizType);
+      wireField('unit-count',       'unit-count-error',       validateUnitCount);
+      wireField('city',             'city-error',             validateCity);
+      wireField('state',            'state-error',            validateState);
+      wireField('contact-name',     'contact-name-error',     validateContactName);
+      wireField('contact-email',    'contact-email-error',    validateEmail);
+      wireField('contact-phone',    'contact-phone-error',    validatePhone);
+      wireField('contact-password', 'contact-password-error', validatePassword);
+
+      // Confirm password — also re-validate when main password changes
+      var pwEl       = getEl('contact-password');
+      var confirmEl  = getEl('contact-confirm');
+      var confirmErr = getEl('contact-confirm-error');
+      confirmEl.addEventListener('input', function () { clearFieldError(confirmEl, confirmErr); });
+      confirmEl.addEventListener('blur',  function () {
+        var msg = validateConfirm(confirmEl.value, pwEl.value);
+        if (msg) showFieldError(confirmEl, confirmErr, msg);
+        else     clearFieldError(confirmEl, confirmErr);
+      });
+      pwEl.addEventListener('change', function () {
+        if (confirmEl.value) {
+          var msg = validateConfirm(confirmEl.value, pwEl.value);
+          if (msg) showFieldError(confirmEl, confirmErr, msg);
+          else     clearFieldError(confirmEl, confirmErr);
+        }
+      });
+
+      // Plan radio — clear group error on selection
+      var radios    = document.querySelectorAll('input[name="subscription-plan"]');
+      var planErrEl = getEl('plan-group-error');
+      for (var i = 0; i < radios.length; i++) {
+        radios[i].addEventListener('change', function () {
+          planErrEl.textContent = '';
+          planErrEl.classList.remove('show');
+        });
+      }
+    });
+  </script>
+
+  <!-- validation.js sets novalidate on forms; our custom logic above takes precedence -->
+  <script src="assets/validation.js"></script>
+</body>
+</html>

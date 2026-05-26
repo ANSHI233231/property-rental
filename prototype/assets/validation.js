@@ -179,3 +179,67 @@ document.addEventListener('click', function (e) {
   var link = t.closest && t.closest('.more-sheet a.more-sheet-link');
   if (link) closeMore();
 });
+
+/* ---------------------------------------------------------------------------
+ * Account menu — sidebar bottom popover containing Sign out.
+ * Replaces the old name/role footer text. One menu per page (in the sidebar).
+ * ------------------------------------------------------------------------ */
+function toggleAccountMenu(btn) {
+  var trigger = btn || document.querySelector('.account-trigger');
+  if (!trigger) return;
+  var menu = document.getElementById('accountMenu');
+  if (!menu) return;
+  var isOpen = menu.classList.toggle('open');
+  trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+function closeAccountMenu() {
+  var menu = document.getElementById('accountMenu');
+  var trigger = document.querySelector('.account-trigger');
+  if (menu) menu.classList.remove('open');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+/* Click-outside / Escape close */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t) return;
+  var insideTrigger = t.closest && t.closest('.account-trigger');
+  var insideMenu = t.closest && t.closest('.account-menu');
+  if (!insideTrigger && !insideMenu) closeAccountMenu();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    closeAccountMenu();
+    closeAccountSheet();
+  }
+});
+
+/* ---------------------------------------------------------------------------
+ * Account sheet — mobile bottom-sheet variant of the account menu.
+ * Opens from the tabbar "Account" tab on tenant / maintenance / super-admin.
+ * ------------------------------------------------------------------------ */
+function openAccountSheet() {
+  var s = document.getElementById('accountSheet');
+  var b = document.querySelector('.account-sheet-backdrop');
+  if (s) s.classList.add('open');
+  if (b) b.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAccountSheet() {
+  var s = document.getElementById('accountSheet');
+  var b = document.querySelector('.account-sheet-backdrop');
+  if (s) s.classList.remove('open');
+  if (b) b.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar section toggle — collapses / expands a .sidebar-section on mobile.
+ * Called from the .sidebar-section-header button via onclick="toggleSidebarSection(this)"
+ * On desktop (≥1024px) this is a no-op — the section is always expanded via CSS.
+ * ------------------------------------------------------------------------ */
+function toggleSidebarSection(header) {
+  var section = header.closest('.sidebar-section');
+  if (!section) return;
+  var collapsed = section.classList.toggle('collapsed');
+  header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}

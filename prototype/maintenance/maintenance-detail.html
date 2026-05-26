@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maintenance Request Detail · Maintenance · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    .timeline-event { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--color-light-gray); position: relative; }
+    .timeline-event:last-child { border-bottom: 0; }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .dot-created { background: var(--color-status-prepaid); }
+    .dot-assigned { background: var(--color-status-partial); }
+    .dot-progress { background: var(--color-royal-blue); }
+    .dot-resolved { background: var(--color-status-paid); }
+    .dot-note { background: var(--color-mid-gray); }
+    .timeline-ts { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--color-slate); white-space: nowrap; }
+    .timeline-body { flex: 1; min-width: 0; }
+    .internal-note { background: var(--bg-partial); border-left: 3px solid var(--color-status-partial); padding: 12px 14px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Dashboard</a>
+        <a href="all-requests.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Requests</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header"><div class="account-menu-avatar" style="background:#546E7A;">RK</div><div><div class="account-menu-name">Raju</div><div class="account-menu-role">Maintenance</div></div></div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <a href="all-requests.html" class="text-sm muted font-poppins" style="text-decoration:none;">← Back to All Requests</a>
+          <h1 class="page-title mt-1">#MR-3041</h1>
+        </div>
+      </header>
+
+      <!-- Property context card (NO lease #, NO tenant financial) -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Property</div>
+            <div class="font-poppins font-semibold text-charcoal mt-1">Green Valley Apartments</div>
+            <div class="text-sm muted">Sector 12, Dwarka</div>
+          </div>
+          <div>
+            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Unit</div>
+            <div class="font-poppins font-semibold text-charcoal mt-1">Unit 7C</div>
+            <div class="text-sm muted">7th floor</div>
+          </div>
+          <div>
+            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Reported by</div>
+            <div class="font-poppins font-semibold text-charcoal mt-1">Rohan Mehta</div>
+            <div class="text-sm muted">Tenant · via PM</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Request header card -->
+      <section class="card mb-6">
+        <div class="flex gap-2 flex-wrap mb-3">
+          <span class="badge badge-emergency">Emergency</span>
+          <span class="badge badge-progress">In-Progress</span>
+        </div>
+        <h2 style="font-size:20px; color:var(--color-charcoal); margin:0 0 8px;">Water leakage in kitchen ceiling — overnight</h2>
+        <div class="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+          <div><span class="muted">Category:</span> <strong class="text-charcoal">Plumbing</strong></div>
+          <div><span class="muted">Assigned by:</span> <strong class="text-charcoal">Sunita Arora (PM)</strong></div>
+          <div><span class="muted">Assigned to:</span> <strong class="text-charcoal">You (Raju Kumar)</strong></div>
+          <div><span class="muted">Created:</span> <strong class="text-charcoal">05/05/2026 23:42</strong></div>
+        </div>
+      </section>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Left: Summary + Timeline + Internal notes -->
+        <div class="lg:col-span-2">
+          <section class="card mb-6">
+            <h3 class="section-title">Issue description</h3>
+            <p class="text-sm" style="color:var(--color-charcoal);">Kitchen ceiling is leaking badly. Water collected overnight and the floor is wet. Possible burst pipe above the false ceiling. This is happening since 05/05/2026 evening.</p>
+            <hr class="divider"/>
+            <div class="text-sm muted"><strong class="text-charcoal">Attachments:</strong> File uploads are not supported. Document findings on-site in the notes below.</div>
+          </section>
+
+          <!-- Progress timeline -->
+          <section class="card mb-6">
+            <h3 class="section-title">Progress timeline</h3>
+            <div role="list" class="mt-2">
+              <div class="timeline-event" role="listitem" tabindex="0">
+                <span class="timeline-dot dot-created" aria-hidden="true"></span>
+                <div class="timeline-body"><div class="text-sm font-poppins font-semibold text-charcoal">Request created</div><div class="text-sm muted mt-1">Raised by Rohan Mehta · Plumbing · Emergency.</div></div>
+                <span class="timeline-ts">05/05/2026 23:42</span>
+              </div>
+              <div class="timeline-event" role="listitem" tabindex="0">
+                <span class="timeline-dot dot-assigned" aria-hidden="true"></span>
+                <div class="timeline-body"><div class="text-sm font-poppins font-semibold text-charcoal">Assigned to you</div><div class="text-sm muted mt-1">Assigned by Sunita Arora (Property Manager).</div></div>
+                <span class="timeline-ts">06/05/2026 08:15</span>
+              </div>
+              <div class="timeline-event" role="listitem" tabindex="0">
+                <span class="timeline-dot dot-progress" aria-hidden="true"></span>
+                <div class="timeline-body"><div class="text-sm font-poppins font-semibold text-charcoal">Started work</div><div class="text-sm muted mt-1">You inspected the ceiling; suspected burst pipe in junction box.</div></div>
+                <span class="timeline-ts">06/05/2026 10:30</span>
+              </div>
+              <div class="timeline-event" role="listitem" tabindex="0">
+                <span class="timeline-dot dot-note" aria-hidden="true"></span>
+                <div class="timeline-body"><div class="text-sm font-poppins font-semibold text-charcoal">Progress note added</div><div class="text-sm muted mt-1">Pipe repair ordered. Parts arriving 10/05/2026. Temporary bucket placed.</div></div>
+                <span class="timeline-ts">07/05/2026 14:10</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Internal notes (private to staff/PM/Admin) -->
+          <section class="card">
+            <h3 class="section-title">Internal notes</h3>
+            <p class="text-xs muted mb-3">Visible to Maintenance, PM and Admin only — not the tenant.</p>
+            <div class="internal-note mb-3">
+              <div class="text-sm" style="color:var(--color-charcoal);">Junction box corroded. Need 2 ft of 19mm CPVC + elbow joint. Hardware shop closed today; will pick up tomorrow AM.</div>
+              <div class="text-xs muted mt-1">Raju Kumar · 07/05/2026 14:10</div>
+            </div>
+            <label class="label" for="noteBox">Add internal note</label>
+            <textarea id="noteBox" class="input" rows="3" placeholder="Document parts needed, on-site findings, blockers…"></textarea>
+            <div class="flex justify-end mt-3">
+              <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Internal note added.'); document.getElementById('noteBox').value='';">Add note</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Status-update actions (NO close) -->
+        <div class="lg:col-span-1">
+          <section class="card" style="position:sticky;top:24px;">
+            <h3 class="section-title">Update status</h3>
+            <p class="text-sm muted mt-2 mb-4">Current: <strong class="text-charcoal">In-Progress</strong></p>
+            <div class="flex flex-col gap-2">
+              <button class="btn btn-disabled !text-sm" disabled>Acknowledge</button>
+              <button class="btn btn-disabled !text-sm" disabled>Start work</button>
+              <button class="btn btn-secondary !text-sm" onclick="alert('Request paused. PM notified.')">Pause</button>
+              <button class="btn btn-secondary !text-sm" onclick="alert('Work resumed.')">Resume</button>
+              <button class="btn btn-primary !text-sm" onclick="alert('Marked as Resolved. The tenant can now confirm and close.')">Mark as Resolved</button>
+            </div>
+            <hr class="divider"/>
+            <p class="text-xs muted">You cannot close a request — only the tenant (or Admin / PM) confirms the fix and closes it.</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="Maintenance navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Dashboard</a>
+    <a href="all-requests.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>All Requests</a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header"><div class="account-menu-avatar" style="background:#546E7A;">RK</div><div><div class="account-menu-name">Raju</div><div class="account-menu-role">Maintenance</div></div></div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+</body>
+</html>

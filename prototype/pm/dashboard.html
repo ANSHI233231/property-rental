@@ -13,49 +13,111 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
-        <a href="units.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
         <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
-        <div class="sidebar-divider"></div>
-        <a href="profile.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
       </nav>
-      <div class="sidebar-footer">PM · Sunita Arora<br/>Green Valley, Dwarka<br/><a class="text-saffron font-poppins" href="../login.html">Logout</a></div>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">SA</div>
+            <div>
+              <div class="account-menu-name">Sunita</div>
+              <div class="account-menu-role">PM</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
     </aside>
 
     <main class="app-main">
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">Green Valley Apartments</h1>
-          <div class="page-subtitle">Sector 12, Dwarka · Property Manager: Sunita Arora</div>
-        </div>
-        <div class="topbar-user">
-          <span class="hidden md:inline">Sunita Arora</span>
-          <span class="avatar">SA</span>
+          <h1 class="page-title">Dashboard</h1>
         </div>
       </header>
 
-      <!-- KPIs -->
+      <!-- 5+ requests alert (scoped to assigned properties) -->
+      <div class="alert mb-6" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0" style="width:18px;height:18px;margin-top:2px;" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong class="font-poppins">1 lease has raised 5+ maintenance requests this month</strong> — review for systemic issues.
+          <a href="maintenance.html?filter=high-frequency" class="font-poppins font-semibold ml-2" style="color:var(--color-status-partial);">View →</a>
+        </div>
+      </div>
+
+      <!-- 8-KPI grid (scoped to assigned properties only) -->
       <section class="section">
         <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Total Units</div><div class="kpi-value">40</div></div>
-          <div class="kpi"><div class="kpi-label">Occupied</div><div class="kpi-value" style="color:var(--color-status-paid)">36</div><div class="kpi-meta">90% occupancy</div></div>
-          <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value">4</div></div>
-          <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--color-status-overdue)">3</div><div class="kpi-meta">₹54,000 outstanding</div></div>
+          <div class="kpi">
+            <div class="kpi-label">Properties</div>
+            <div class="kpi-value">3</div>
+            <div class="kpi-meta">Assigned to you</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Units</div>
+            <div class="kpi-value">40</div>
+            <div class="kpi-meta">Across assigned properties</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Occupancy</div>
+            <div class="kpi-value" style="color:var(--color-status-paid)">90%</div>
+            <div class="kpi-meta">36 of 40 units</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Rent Collection</div>
+            <div class="kpi-value" style="color:var(--color-status-paid)">83%</div>
+            <div class="kpi-meta">₹5,00,000 of ₹6,00,000 billed</div>
+          </div>
+          <div class="kpi" style="cursor:pointer;" onclick="window.location='rent-collection.html?filter=overdue'" title="View overdue tenants">
+            <div class="kpi-label">Overdue Tenants</div>
+            <div class="kpi-value" style="color:var(--color-status-overdue)">3</div>
+            <div class="kpi-meta">₹54,000 outstanding</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Open Maintenance</div>
+            <div class="kpi-value" style="font-size:20px; margin-top:6px;">
+              <div class="flex gap-2 flex-wrap">
+                <span class="badge badge-emergency">Emergency · 1</span>
+                <span class="badge badge-partial">High · 2</span>
+                <span class="badge badge-prepaid">Normal · 3</span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Lease Expirations</div>
+            <div class="kpi-value">2</div>
+            <div class="kpi-meta">Expiring within 60 days</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">High-Frequency Units</div>
+            <div class="kpi-value" style="color:var(--color-status-partial)">1</div>
+            <div class="kpi-meta">Lease with 5+ requests this month</div>
+          </div>
         </div>
       </section>
-
-      <!-- Lease expiry alert -->
-      <div class="alert mb-6">
-        <strong class="font-poppins">Leases expiring in 30 days: 2</strong>
-        <div>Unit 3A (Raj Sharma) ends 31/03/2026 · Unit 1B (Gupta family) ends 25/05/2026. <a href="leases.html" class="text-royal-blue font-poppins font-semibold">Review →</a></div>
-      </div>
 
       <!-- Two column -->
       <section class="grid lg:grid-cols-2 gap-6 section">
@@ -73,7 +135,7 @@
                   <div class="font-poppins font-semibold text-charcoal">Unit 7C — Water leakage</div>
                   <p class="text-sm muted mt-1">Kitchen ceiling leak, water dripping into living room.</p>
                 </div>
-                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+                <a href="maintenance-detail.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
               </div>
             </div>
             <div class="card p-4">
@@ -86,7 +148,7 @@
                   <div class="font-poppins font-semibold text-charcoal">Unit 2A — AC not working</div>
                   <p class="text-sm muted mt-1">In-progress · Raju Kumar.</p>
                 </div>
-                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+                <a href="maintenance-detail.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
               </div>
             </div>
             <div class="card p-4">
@@ -99,7 +161,7 @@
                   <div class="font-poppins font-semibold text-charcoal">Unit 5B — Door lock broken</div>
                   <p class="text-sm muted mt-1">Open · awaiting assignment.</p>
                 </div>
-                <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
+                <a href="maintenance-detail.html" class="btn btn-secondary !py-2 !text-sm">Open</a>
               </div>
             </div>
           </div>
@@ -124,18 +186,45 @@
           </div>
         </div>
       </section>
+
+      <!-- Lease expirations (60 days) -->
+      <section class="section">
+        <h3 class="section-title">Lease Expirations — Next 60 Days</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Tenant</th><th>Unit</th><th>End Date</th><th>Days Remaining</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Raj + Priya Sharma</td>
+                <td>3A</td>
+                <td>31/05/2026</td>
+                <td><span class="badge badge-overdue">22</span></td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal">Gupta Family</td>
+                <td>1B</td>
+                <td>25/06/2026</td>
+                <td><span class="badge badge-partial">47</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
 
   <nav class="tabbar" aria-label="PM navigation (mobile)">
-    <a href="dashboard.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Home</a>
-    <a href="units.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="1"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M9 21v-4M15 21v-4"/></svg>Units</a>
+    <a href="dashboard.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
     <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
     <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -143,8 +232,29 @@
     <div class="more-sheet-title">More options</div>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
-    <button type="button" class="more-sheet-link" onclick="closeMore(); window.location='../login.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Logout</button>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">SA</div>
+      <div>
+        <div class="account-menu-name">Sunita</div>
+        <div class="account-menu-role">PM</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
   </div>
 </body>
 </html>

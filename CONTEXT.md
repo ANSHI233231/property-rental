@@ -8,7 +8,7 @@ At-a-glance snapshot of the repository for anyone (human or agent) walking in co
 
 ## 1. What this is
 
-**GharSetu** — internal, role-scoped property-rental management web app for a Delhi operation with **120 units across 18 buildings**. Replaces paper folders, spreadsheets, and WhatsApp groups. **No public sign-up**, four roles, single tenant business.
+**GharSetu** — multi-tenant SAAS platform for property-rental management. The anchor organization is a Delhi operation with **120 units across 18 buildings**. Replaces paper folders, spreadsheets, and WhatsApp groups. **Five roles** (Super Admin platform-level + Admin / PM / Maintenance / Tenant org-scoped). **Public Organization sign-up is in scope** with a Super Admin approval gate; tenant self-signup is out.
 
 | Code | Role | Scope |
 |---|---|---|

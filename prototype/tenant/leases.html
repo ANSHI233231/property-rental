@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Leases · Tenant · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    .lease-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 24px;
+    }
+    @media (min-width: 768px) { .lease-card { grid-template-columns: 1fr 1fr; column-gap: 32px; } }
+    .lease-card .lease-card-head { grid-column: 1 / -1; }
+    .lease-meta { font-family: 'Inter', sans-serif; font-size: 13px; }
+    .lease-meta dt { color: var(--color-slate); font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+    .lease-meta dd { color: var(--color-charcoal); font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; margin: 0 0 12px; }
+    .lease-meta dd:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="leases.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>My Leases</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header"><div class="account-menu-avatar">RM</div><div><div class="account-menu-name">Rohan</div><div class="account-menu-role">Tenant</div></div></div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <h1 class="page-title">My Leases</h1>
+        </div>
+      </header>
+
+      <!-- Filter tiles: Active / Past -->
+      <div class="filter-tiles mb-6" role="group" aria-label="Filter leases by status">
+        <button type="button" class="filter-tile active" data-tile-filter="active" onclick="setLeaseFilter('active', this)">
+          <span class="filter-tile-count">1</span>
+          <span class="filter-tile-label">Active</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-filter="past" onclick="setLeaseFilter('past', this)">
+          <span class="filter-tile-count">2</span>
+          <span class="filter-tile-label">Past</span>
+        </button>
+      </div>
+
+      <!-- Lease cards container -->
+      <div id="lease-cards">
+        <!-- Active leases -->
+        <section class="card mb-6" data-lease-status="active">
+          <div class="lease-card">
+            <div class="lease-card-head">
+              <div class="flex gap-2 flex-wrap items-center mb-2">
+                <span class="badge badge-active">Active</span>
+                <span class="text-xs muted">Lease #L-2103</span>
+              </div>
+              <h3 class="font-poppins" style="font-weight:600;font-size:20px;color:var(--color-charcoal);margin:0;">Unit 3A · Green Valley Apartments</h3>
+              <p class="text-sm mt-1" style="color:var(--color-slate);">Sector 12, Dwarka · Property Manager: Sunita Arora</p>
+            </div>
+
+            <dl class="lease-meta">
+              <dt>Lease starts</dt><dd>01/04/2025</dd>
+              <dt>Lease ends</dt><dd>31/03/2026</dd>
+              <dt>Monthly rent</dt><dd>₹18,000</dd>
+              <dt>Security deposit</dt><dd>₹36,000</dd>
+            </dl>
+
+            <dl class="lease-meta">
+              <dt>Rent due each month</dt><dd>15th</dd>
+              <dt>Co-tenant</dt><dd>Priya Mehta</dd>
+              <dt>Outstanding</dt><dd style="color:var(--color-status-paid);">₹0</dd>
+              <dt>Last paid</dt><dd>15/05/2026 · ₹18,000</dd>
+            </dl>
+
+            <div class="lease-card-head flex gap-2 flex-wrap mt-2">
+              <a href="lease-detail.html?id=L-2103" class="btn btn-primary !py-2 !text-sm">View detail</a>
+              <a href="rent.html" class="btn btn-secondary !py-2 !text-sm">Pay rent</a>
+              <a href="maintenance.html" class="btn btn-secondary !py-2 !text-sm">Raise maintenance</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Past leases -->
+        <section class="card mb-6" data-lease-status="past" style="display:none;">
+          <div class="lease-card">
+            <div class="lease-card-head">
+              <div class="flex gap-2 flex-wrap items-center mb-2">
+                <span class="badge badge-closed">Closed</span>
+                <span class="text-xs muted">Lease #L-1842</span>
+              </div>
+              <h3 class="font-poppins" style="font-weight:600;font-size:20px;color:var(--color-charcoal);margin:0;">Unit 1B · Sai Heights</h3>
+              <p class="text-sm mt-1" style="color:var(--color-slate);">Lajpat Nagar · Property Manager (then): Manoj Verma</p>
+            </div>
+
+            <dl class="lease-meta">
+              <dt>Lease started</dt><dd>01/04/2023</dd>
+              <dt>Lease ended</dt><dd>31/03/2025</dd>
+              <dt>Monthly rent</dt><dd>₹15,000</dd>
+              <dt>Security deposit</dt><dd>₹30,000 · refunded</dd>
+            </dl>
+
+            <dl class="lease-meta">
+              <dt>Reason for closure</dt><dd>Term ended · not renewed</dd>
+              <dt>Co-tenant</dt><dd>—</dd>
+              <dt>Total paid</dt><dd>₹3,60,000</dd>
+              <dt>Months</dt><dd>24</dd>
+            </dl>
+            <div class="lease-card-head flex gap-2 flex-wrap mt-2"><a href="lease-detail.html?id=L-1842" class="btn btn-secondary !py-2 !text-sm">View detail</a></div>
+          </div>
+        </section>
+
+        <section class="card mb-6" data-lease-status="past" style="display:none;">
+          <div class="lease-card">
+            <div class="lease-card-head">
+              <div class="flex gap-2 flex-wrap items-center mb-2">
+                <span class="badge badge-terminated">Terminated</span>
+                <span class="text-xs muted">Lease #L-1521</span>
+              </div>
+              <h3 class="font-poppins" style="font-weight:600;font-size:20px;color:var(--color-charcoal);margin:0;">Unit 4D · Mayur Vihar Residency</h3>
+              <p class="text-sm mt-1" style="color:var(--color-slate);">Mayur Vihar · Property Manager (then): Pooja Khanna</p>
+            </div>
+
+            <dl class="lease-meta">
+              <dt>Lease started</dt><dd>01/06/2022</dd>
+              <dt>Lease ended</dt><dd>31/03/2023</dd>
+              <dt>Monthly rent</dt><dd>₹12,500</dd>
+              <dt>Security deposit</dt><dd>₹25,000 · refunded</dd>
+            </dl>
+
+            <dl class="lease-meta">
+              <dt>Reason for closure</dt><dd>Tenant-initiated termination</dd>
+              <dt>Co-tenant</dt><dd>—</dd>
+              <dt>Total paid</dt><dd>₹1,25,000</dd>
+              <dt>Months</dt><dd>10</dd>
+            </dl>
+            <div class="lease-card-head flex gap-2 flex-wrap mt-2"><a href="lease-detail.html?id=L-1521" class="btn btn-secondary !py-2 !text-sm">View detail</a></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Empty state (for active when none, etc.) -->
+      <p id="lease-empty" class="text-sm muted mt-6" style="display:none;">No leases match the selected filter.</p>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="Tenant navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="visitors.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header"><div class="account-menu-avatar">RM</div><div><div class="account-menu-name">Rohan</div><div class="account-menu-role">Tenant</div></div></div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+
+  <script>
+    function setLeaseFilter(status, btn) {
+      document.querySelectorAll('.filter-tile[data-tile-filter]').forEach(function(t) { t.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      var cards = document.querySelectorAll('[data-lease-status]');
+      var shown = 0;
+      cards.forEach(function(c) {
+        if (c.dataset.leaseStatus === status) { c.style.display = ''; shown++; }
+        else { c.style.display = 'none'; }
+      });
+      document.getElementById('lease-empty').style.display = shown === 0 ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organizations · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+        </a>
+        <a href="organizations.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+        </a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">AK</div>
+            <div>
+              <div class="account-menu-name">Aayush</div>
+              <div class="account-menu-role">Super Admin</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 class="page-title">Organizations</h1>
+        </div>
+      </header>
+
+      <!-- Status filter pills -->
+      <section class="section">
+        <div class="filter-tiles" id="filter-pills">
+          <button type="button" class="filter-tile active" id="pill-all" onclick="setFilter('all')"><span class="filter-tile-count">12</span><span class="filter-tile-label">All</span></button>
+          <button type="button" class="filter-tile" id="pill-pending" onclick="setFilter('pending')"><span class="filter-tile-count">3</span><span class="filter-tile-label">Pending</span></button>
+          <button type="button" class="filter-tile" id="pill-active" onclick="setFilter('active')"><span class="filter-tile-count">8</span><span class="filter-tile-label">Active</span></button>
+          <button type="button" class="filter-tile" id="pill-deactivated" onclick="setFilter('deactivated')"><span class="filter-tile-count">1</span><span class="filter-tile-label">Deactivated</span></button>
+        </div>
+      </section>
+
+      <!-- Search + Plan filter -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="search-org">Search</label>
+            <input id="search-org" class="input" placeholder="Organization name, contact" oninput="debounceSearch(this.value)" />
+          </div>
+          <div>
+            <label class="label" for="plan-filter">Plan</label>
+            <select id="plan-filter" class="input" onchange="filterByPlan(this.value)">
+              <option value="all">All plans</option>
+              <option value="basic">Basic</option>
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Organizations table -->
+      <section class="card p-0 overflow-x-auto" id="table-section">
+        <table class="data-table" id="org-table">
+          <thead>
+            <tr>
+              <th>Organization</th><th>Plan</th><th>Active Users</th><th>Status</th><th>Created</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="org-tbody">
+            <tr data-status="pending" data-plan="standard" data-name="saffron stays pvt ltd">
+              <td class="font-poppins font-semibold text-charcoal">Saffron Stays Pvt Ltd</td>
+              <td>Standard</td>
+              <td>0 / 20</td>
+              <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
+              <td>21/05/2026</td>
+              <td><a href="organization-detail.html?id=1" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="pending" data-plan="basic" data-name="greenleaf housing">
+              <td class="font-poppins font-semibold text-charcoal">Greenleaf Housing</td>
+              <td>Basic</td>
+              <td>0 / 5</td>
+              <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
+              <td>23/05/2026</td>
+              <td><a href="organization-detail.html?id=5" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="pending" data-plan="basic" data-name="metro nest properties">
+              <td class="font-poppins font-semibold text-charcoal">Metro Nest Properties</td>
+              <td>Basic</td>
+              <td>0 / 5</td>
+              <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
+              <td>25/05/2026</td>
+              <td><a href="organization-detail.html?id=6" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="active" data-plan="premium" data-name="delhi dwellings ltd">
+              <td class="font-poppins font-semibold text-charcoal">Delhi Dwellings Ltd</td>
+              <td>Premium</td>
+              <td>42 / ∞</td>
+              <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
+              <td>15/01/2026</td>
+              <td><a href="organization-detail.html?id=4" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="active" data-plan="standard" data-name="green valley co-living">
+              <td class="font-poppins font-semibold text-charcoal">Green Valley Co-living</td>
+              <td>Standard</td>
+              <td>12 / 20</td>
+              <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
+              <td>10/03/2026</td>
+              <td><a href="organization-detail.html?id=2" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="active" data-plan="basic" data-name="urban nest homes">
+              <td class="font-poppins font-semibold text-charcoal">Urban Nest Homes</td>
+              <td>Basic</td>
+              <td>4 / 5</td>
+              <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
+              <td>01/04/2026</td>
+              <td><a href="organization-detail.html?id=3" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="active" data-plan="standard" data-name="cityscape rentals">
+              <td class="font-poppins font-semibold text-charcoal">Cityscape Rentals</td>
+              <td>Standard</td>
+              <td>8 / 20</td>
+              <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
+              <td>05/02/2026</td>
+              <td><a href="organization-detail.html?id=7" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+            <tr data-status="deactivated" data-plan="basic" data-name="sunrise rentals">
+              <td class="font-poppins font-semibold text-charcoal">Sunrise Rentals</td>
+              <td>Basic</td>
+              <td>2 / 5</td>
+              <td><span class="badge badge-closed" aria-label="Status: Deactivated">Deactivated</span></td>
+              <td>12/11/2025</td>
+              <td><a href="organization-detail.html?id=8" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty state (hidden by default) -->
+        <div class="p-8 text-center" id="empty-state" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;color:var(--color-mid-gray);margin:0 auto 12px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div class="font-poppins font-semibold text-charcoal mb-1">No organizations match</div>
+          <div class="text-sm muted mb-4">Try a different filter or clear the search.</div>
+          <button class="btn btn-secondary !py-2 !text-sm" onclick="clearFilters()">Show all</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border-t" style="border-color:var(--color-light-gray)" id="pagination-footer">
+          <div class="text-sm muted" id="pagination-label">Showing 1–8 of 12</div>
+          <div class="flex gap-1">
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm" aria-label="Previous page">‹</button>
+            <button class="btn btn-secondary !py-1 !px-3 !text-sm" aria-label="Next page">›</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mobile tab bar — 4 items, no MoreSheet -->
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+    </a>
+    <a href="organizations.html" class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs
+    </a>
+    <a href="plans.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+    </a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
+    </button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script>
+    var currentStatus = 'all';
+    var currentPlan = 'all';
+    var currentSearch = '';
+    var searchTimer;
+
+    // On load: read URL params
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var f = params.get('filter');
+      var p = params.get('plan');
+      if (f && ['pending','active','deactivated','all'].includes(f)) setFilter(f, true);
+      if (p && ['basic','standard','premium'].includes(p)) {
+        document.getElementById('plan-filter').value = p;
+        filterByPlan(p, true);
+      }
+    })();
+
+    function setFilter(status, noHistory) {
+      currentStatus = status;
+      ['all','pending','active','deactivated'].forEach(function(s) {
+        var btn = document.getElementById('pill-' + s);
+        if (!btn) return;
+        if (s === status) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      if (!noHistory) history.replaceState(null, '', 'organizations.html?filter=' + status);
+      applyFilters();
+    }
+
+    function filterByPlan(plan, noHistory) {
+      currentPlan = plan;
+      if (!noHistory) history.replaceState(null, '', 'organizations.html?filter=' + currentStatus + '&plan=' + plan);
+      applyFilters();
+    }
+
+    function debounceSearch(val) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () { currentSearch = val.toLowerCase(); applyFilters(); }, 300);
+    }
+
+    function applyFilters() {
+      var rows = document.querySelectorAll('#org-tbody tr');
+      var visible = 0;
+      rows.forEach(function (row) {
+        var statusMatch = currentStatus === 'all' || row.dataset.status === currentStatus;
+        var planMatch   = currentPlan === 'all'   || row.dataset.plan === currentPlan;
+        var nameMatch   = !currentSearch || row.dataset.name.includes(currentSearch);
+        var show = statusMatch && planMatch && nameMatch;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      var empty = document.getElementById('empty-state');
+      var footer = document.getElementById('pagination-footer');
+      var label = document.getElementById('pagination-label');
+      if (visible === 0) {
+        empty.style.display = '';
+        footer.style.display = 'none';
+      } else {
+        empty.style.display = 'none';
+        footer.style.display = '';
+        label.textContent = 'Showing 1–' + Math.min(visible, 8) + ' of ' + visible;
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('search-org').value = '';
+      document.getElementById('plan-filter').value = 'all';
+      currentSearch = '';
+      currentPlan = 'all';
+      setFilter('all');
+    }
+  </script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">AK</div>
+      <div>
+        <div class="account-menu-name">Aayush</div>
+        <div class="account-menu-role">Super Admin</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+</body>
+</html>

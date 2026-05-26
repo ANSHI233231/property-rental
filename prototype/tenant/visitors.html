@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Visitors · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>My Leases</a>
+        <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">RM</div>
+            <div>
+              <div class="account-menu-name">Rohan</div>
+              <div class="account-menu-role">Tenant</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <h1 class="page-title">My Visitors</h1>
+        </div>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="openPreapproveModal()" aria-label="Pre-approve a new visitor">+ Pre-approve Visitor</button>
+      </header>
+
+      <!-- Filter tiles -->
+      <div class="filter-tiles mb-6" role="group" aria-label="Filter visitors by status">
+        <button type="button" class="filter-tile active" data-tile-for="tbl-my-visitors" data-tile-filter="all"
+                onclick="Paginator.setFilter('tbl-my-visitors','all',this)">
+          <span class="filter-tile-count" data-pg-count>5</span>
+          <span class="filter-tile-label">All</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-my-visitors" data-tile-filter="pending"
+                onclick="Paginator.setFilter('tbl-my-visitors','pending',this)">
+          <span class="filter-tile-count" data-pg-count>1</span>
+          <span class="filter-tile-label">Pending</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-my-visitors" data-tile-filter="approved"
+                onclick="Paginator.setFilter('tbl-my-visitors','approved',this)">
+          <span class="filter-tile-count" data-pg-count>1</span>
+          <span class="filter-tile-label">Approved</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-my-visitors" data-tile-filter="checked-in"
+                onclick="Paginator.setFilter('tbl-my-visitors','checked-in',this)">
+          <span class="filter-tile-count" data-pg-count>1</span>
+          <span class="filter-tile-label">Checked-in</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-my-visitors" data-tile-filter="checked-out"
+                onclick="Paginator.setFilter('tbl-my-visitors','checked-out',this)">
+          <span class="filter-tile-count" data-pg-count>1</span>
+          <span class="filter-tile-label">Checked-out</span>
+        </button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-my-visitors" data-tile-filter="denied"
+                onclick="Paginator.setFilter('tbl-my-visitors','denied',this)">
+          <span class="filter-tile-count" data-pg-count>1</span>
+          <span class="filter-tile-label">Denied</span>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="myVisitorSearch">Search</label>
+            <input id="myVisitorSearch" class="input" data-pg-search="tbl-my-visitors" placeholder="Search visitor name · phone · purpose…" />
+          </div>
+        </div>
+      </section>
+
+      <!-- My visitors table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table" id="tbl-my-visitors">
+          <thead>
+            <tr>
+              <th>Visitor</th>
+              <th>Phone</th>
+              <th>Purpose</th>
+              <th>When</th>
+              <th>Status</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-status="pending">
+              <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+              <td>98765 43210</td>
+              <td>Personal visit</td>
+              <td>Expected 27/05/2026 14:00</td>
+              <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
+              <td class="text-sm muted">Awaiting Property Manager approval</td>
+            </tr>
+            <tr data-status="approved">
+              <td class="font-poppins font-semibold text-charcoal">Kavya Sharma</td>
+              <td>96543 21098</td>
+              <td>Personal visit</td>
+              <td>Expected 26/05/2026 16:00</td>
+              <td><span class="badge badge-prepaid" aria-label="Status: Approved">Approved</span></td>
+              <td class="text-sm muted">Approved 25/05/2026 by Sunita Arora</td>
+            </tr>
+            <tr data-status="checked-in">
+              <td class="font-poppins font-semibold text-charcoal">Meena Rao</td>
+              <td>91111 22222</td>
+              <td>Personal visit</td>
+              <td>Arrived 26/05/2026 09:42</td>
+              <td><span class="badge badge-progress" aria-label="Status: Checked-in">Checked-in</span></td>
+              <td class="text-sm muted">Currently inside</td>
+            </tr>
+            <tr data-status="checked-out">
+              <td class="font-poppins font-semibold text-charcoal">Suresh Nair</td>
+              <td>90000 11111</td>
+              <td>Personal visit</td>
+              <td>Departed 24/05/2026 16:30 · 2h 30m</td>
+              <td><span class="badge badge-resolved" aria-label="Status: Checked-out">Checked-out</span></td>
+              <td class="text-sm muted">Arrived 24/05/2026 14:00</td>
+            </tr>
+            <tr data-status="denied">
+              <td class="font-poppins font-semibold text-charcoal">Unknown Vendor</td>
+              <td>88888 77777</td>
+              <td>Maintenance vendor</td>
+              <td>Expected 20/05/2026 10:00</td>
+              <td><span class="badge badge-terminated" aria-label="Status: Denied">Denied</span></td>
+              <td class="text-sm muted">Denied 19/05/2026 by Sunita Arora</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" data-paginate-for="tbl-my-visitors" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>5</span> of <span data-pg-total>5</span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+          </div>
+          <div class="pagination-per-page">
+            <label for="per-page-tbl-my-visitors" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-my-visitors" data-pg-per-page>
+              <option value="10" selected>10 / page</option>
+              <option value="25">25 / page</option>
+              <option value="50">50 / page</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Pre-approve visitor modal -->
+  <div class="modal-backdrop" id="preapproveModal" role="dialog" aria-modal="true" aria-labelledby="preapprove-title">
+    <form class="modal" style="max-width:560px;" id="preapproveForm" onsubmit="submitPreapproval(event)">
+      <h3 id="preapprove-title">Pre-approve a Visitor</h3>
+      <p class="muted text-sm mt-1 mb-5">Tell your Property Manager who's coming. They'll see this immediately.</p>
+
+      <!-- Visitor name -->
+      <div class="mb-4">
+        <label class="label" for="va-name">Visitor name</label>
+        <input
+          id="va-name"
+          type="text"
+          class="input"
+          placeholder="Full name of your visitor"
+          required
+          minlength="2"
+          aria-describedby="va-name-error"
+          oninput="liveValidate(this); updateSubmitBtn()"
+          onblur="liveValidate(this)"
+        />
+        <div class="field-error" id="va-name-error" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Phone -->
+      <div class="mb-4">
+        <label class="label" for="va-phone">Phone</label>
+        <input
+          id="va-phone"
+          type="text"
+          class="input"
+          inputmode="tel"
+          placeholder="10-digit Indian mobile"
+          required
+          pattern="[6-9][0-9]{9}"
+          title="10-digit Indian mobile number starting with 6, 7, 8 or 9"
+          aria-describedby="va-phone-error va-phone-hint"
+          oninput="liveValidate(this); updateSubmitBtn()"
+          onblur="liveValidate(this)"
+        />
+        <div class="field-error" id="va-phone-error" role="alert" aria-live="polite"></div>
+        <div id="va-phone-hint" class="text-xs muted mt-1">10-digit Indian mobile, starting 6-9.</div>
+      </div>
+
+      <!-- Purpose (sourced from Visit Purposes master) -->
+      <div class="mb-4">
+        <label class="label" for="va-purpose">Purpose</label>
+        <select
+          id="va-purpose"
+          class="input"
+          required
+          aria-describedby="va-purpose-error va-purpose-hint"
+          onchange="liveValidate(this); togglePurposeOther(); updateSubmitBtn()"
+          onblur="liveValidate(this)"
+        >
+          <option value="">Select a purpose</option>
+          <option value="Personal visit">Personal visit</option>
+          <option value="Delivery">Delivery</option>
+          <option value="Cab / Ride pickup">Cab / Ride pickup</option>
+          <option value="Maintenance vendor">Maintenance vendor</option>
+          <option value="Service / Utility">Service / Utility</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="field-error" id="va-purpose-error" role="alert" aria-live="polite"></div>
+        <div id="va-purpose-hint" class="text-xs muted mt-1">Purposes are managed by Admin in Master Data.</div>
+      </div>
+
+      <!-- Other (free-text reason — revealed when Purpose = Other) -->
+      <div class="mb-4" id="va-purpose-other-wrap" style="display:none;">
+        <label class="label" for="va-purpose-other">Describe the reason</label>
+        <input
+          id="va-purpose-other"
+          type="text"
+          class="input"
+          maxlength="80"
+          aria-describedby="va-purpose-other-error"
+          oninput="liveValidate(this); updateSubmitBtn()"
+          onblur="liveValidate(this)"
+          placeholder="e.g. Document collection"
+        />
+        <div class="field-error" id="va-purpose-other-error" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Expected date -->
+      <div class="mb-4">
+        <label class="label" for="va-date">Expected date</label>
+        <input
+          id="va-date"
+          type="date"
+          class="input"
+          required
+          aria-describedby="va-date-error va-date-hint"
+          oninput="validateDate(); updateSubmitBtn()"
+          onblur="validateDate()"
+        />
+        <div class="field-error" id="va-date-error" role="alert" aria-live="polite"></div>
+        <div id="va-date-hint" class="text-xs muted mt-1">Visit date — must be today or later.</div>
+      </div>
+
+      <!-- Expected time -->
+      <div class="mb-4">
+        <label class="label" for="va-time">Expected time</label>
+        <input
+          id="va-time"
+          type="time"
+          class="input"
+          required
+          aria-describedby="va-time-error va-time-hint"
+          oninput="validateTime(); updateSubmitBtn()"
+          onblur="validateTime()"
+        />
+        <div class="field-error" id="va-time-error" role="alert" aria-live="polite"></div>
+        <div id="va-time-hint" class="text-xs muted mt-1">Arrival time — HH:mm IST. Must be at least 15 minutes from now if today.</div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="closePreapproveModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="va-submit" disabled>Pre-approve</button>
+      </div>
+    </form>
+  </div>
+
+  <nav class="tabbar" aria-label="Tenant navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="visitors.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <script>
+    /* -----------------------------------------------------------------------
+     * Pre-approve modal open / close
+     * ----------------------------------------------------------------------- */
+    function openPreapproveModal() {
+      document.getElementById('preapproveModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      // Set min date to today
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm   = String(today.getMonth() + 1).padStart(2, '0');
+      var dd   = String(today.getDate()).padStart(2, '0');
+      document.getElementById('va-date').min = yyyy + '-' + mm + '-' + dd;
+      setTimeout(function() { document.getElementById('va-name').focus(); }, 50);
+    }
+
+    function closePreapproveModal() {
+      document.getElementById('preapproveModal').classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('preapproveForm').reset();
+      // Clear all errors
+      document.querySelectorAll('#preapproveForm .field-error').forEach(function(el) {
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+      document.querySelectorAll('#preapproveForm .input.error').forEach(function(el) {
+        el.classList.remove('error');
+        el.removeAttribute('aria-invalid');
+      });
+      document.getElementById('va-submit').disabled = true;
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var modal = document.getElementById('preapproveModal');
+        if (modal && modal.classList.contains('open')) closePreapproveModal();
+      }
+    });
+
+    /* -----------------------------------------------------------------------
+     * Inline validation helpers (no native tooltip — errors below field)
+     * ----------------------------------------------------------------------- */
+    function showFieldError(input, errorElId, message) {
+      var err = document.getElementById(errorElId);
+      if (!err) return;
+      err.textContent = message;
+      err.classList.add('show');
+      input.classList.add('error');
+      input.setAttribute('aria-invalid', 'true');
+    }
+
+    function clearFieldError(input, errorElId) {
+      var err = document.getElementById(errorElId);
+      if (err) {
+        err.textContent = '';
+        err.classList.remove('show');
+      }
+      input.classList.remove('error');
+      input.removeAttribute('aria-invalid');
+    }
+
+    function liveValidate(input) {
+      var errorId = input.id + '-error';
+      if (!input.value.trim()) {
+        var label = input.previousElementSibling;
+        var fieldName = label ? label.textContent.trim() : 'This field';
+        showFieldError(input, errorId, fieldName + ' is required.');
+      } else if (input.validity && !input.checkValidity()) {
+        showFieldError(input, errorId, input.title || 'Please check this field.');
+      } else {
+        clearFieldError(input, errorId);
+      }
+    }
+
+    function togglePurposeOther() {
+      var purpose = document.getElementById('va-purpose');
+      var wrap = document.getElementById('va-purpose-other-wrap');
+      var other = document.getElementById('va-purpose-other');
+      if (!wrap || !other) return;
+      if (purpose.value === 'Other') {
+        wrap.style.display = '';
+        other.setAttribute('required', '');
+      } else {
+        wrap.style.display = 'none';
+        other.removeAttribute('required');
+        clearFieldError(other, 'va-purpose-other-error');
+        other.value = '';
+      }
+    }
+
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function validateDate() {
+      var input = document.getElementById('va-date');
+      var err   = 'va-date-error';
+      if (!input.value) {
+        showFieldError(input, err, 'Visit date is required.');
+        return false;
+      }
+      if (input.value < todayStr()) {
+        showFieldError(input, err, 'Visit date must be today or later.');
+        return false;
+      }
+      clearFieldError(input, err);
+      // Re-validate time if already set (min-time changes when date changes)
+      var timeInput = document.getElementById('va-time');
+      if (timeInput.value) validateTime();
+      return true;
+    }
+
+    function validateTime() {
+      var input    = document.getElementById('va-time');
+      var dateInput= document.getElementById('va-date');
+      var err      = 'va-time-error';
+      if (!input.value) {
+        showFieldError(input, err, 'Arrival time is required.');
+        return false;
+      }
+      // If today, time must be >= now + 15 min
+      if (dateInput.value === todayStr()) {
+        var now      = new Date();
+        var nowPlus15= new Date(now.getTime() + 15 * 60000);
+        var parts    = input.value.split(':');
+        var selected = new Date();
+        selected.setHours(+parts[0], +parts[1], 0, 0);
+        if (selected < nowPlus15) {
+          showFieldError(input, err, 'Arrival time must be at least 15 minutes from now for today\'s visit.');
+          return false;
+        }
+      }
+      clearFieldError(input, err);
+      return true;
+    }
+
+    function formIsValid() {
+      var name    = document.getElementById('va-name');
+      var phone   = document.getElementById('va-phone');
+      var purpose = document.getElementById('va-purpose');
+      var date    = document.getElementById('va-date');
+      var time    = document.getElementById('va-time');
+
+      if (!name.value.trim() || name.value.trim().length < 2) return false;
+      if (!phone.value || !/^[6-9][0-9]{9}$/.test(phone.value)) return false;
+      if (!purpose.value) return false;
+      if (purpose.value === 'Other') {
+        var other = document.getElementById('va-purpose-other');
+        if (!other || !other.value.trim() || other.value.trim().length < 2) return false;
+      }
+      if (!date.value || date.value < todayStr()) return false;
+      if (!time.value) return false;
+      if (date.value === todayStr()) {
+        var now      = new Date();
+        var nowPlus15= new Date(now.getTime() + 15 * 60000);
+        var parts    = time.value.split(':');
+        var selected = new Date();
+        selected.setHours(+parts[0], +parts[1], 0, 0);
+        if (selected < nowPlus15) return false;
+      }
+      return true;
+    }
+
+    function updateSubmitBtn() {
+      document.getElementById('va-submit').disabled = !formIsValid();
+    }
+
+    /* -----------------------------------------------------------------------
+     * Form submit — add a new Pending card to Section 1
+     * ----------------------------------------------------------------------- */
+    function submitPreapproval(event) {
+      event.preventDefault();
+      if (!formIsValid()) return;
+
+      var name    = document.getElementById('va-name').value.trim();
+      var phone   = document.getElementById('va-phone').value.trim();
+      var purpose = document.getElementById('va-purpose').value;
+      var dateVal = document.getElementById('va-date').value; // YYYY-MM-DD
+      var timeVal = document.getElementById('va-time').value; // HH:mm
+
+      // Format date as DD/MM/YYYY
+      var dp = dateVal.split('-');
+      var displayDate = dp[2] + '/' + dp[1] + '/' + dp[0];
+      var displayDateTime = displayDate + ' at ' + timeVal;
+
+      var newCard = document.createElement('div');
+      newCard.className = 'card mb-4';
+      newCard.innerHTML =
+        '<div class="flex gap-2 flex-wrap mb-2">' +
+          '<span class="badge badge-partial" aria-label="Status: Pending">Pending</span>' +
+        '</div>' +
+        '<h3>' + htmlEscape(name) + '</h3>' +
+        '<p class="text-sm muted mt-1">' + htmlEscape(phone) + ' · ' + htmlEscape(purpose) + ' · Expected ' + displayDateTime + '</p>' +
+        '<p class="text-sm mt-2" style="font-style:italic;color:var(--color-slate);">Awaiting Property Manager approval.</p>';
+
+      var section = document.getElementById('section-active');
+      // Insert before the first existing card, or append
+      var firstCard = section.querySelector('.card');
+      if (firstCard) {
+        section.insertBefore(newCard, firstCard);
+      } else {
+        section.appendChild(newCard);
+      }
+
+      closePreapproveModal();
+    }
+
+    function htmlEscape(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header">
+      <div class="account-menu-avatar">RM</div>
+      <div>
+        <div class="account-menu-name">Rohan</div>
+        <div class="account-menu-role">Tenant</div>
+      </div>
+    </div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      My Profile
+    </a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      Sign out
+    </a>
+  </div>
+</body>
+</html>
