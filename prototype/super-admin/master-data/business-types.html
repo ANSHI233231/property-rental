@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
-  <title>Cities · Master Data · Super Admin · GharSetu</title>
+  <title>Business Types · Master Data · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -32,10 +32,10 @@
             Master Data
             <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </div>
-          <a href="cities.html" class="sidebar-sublink active" aria-current="page">Cities</a>
+          <a href="cities.html" class="sidebar-sublink">Cities</a>
           <a href="states.html" class="sidebar-sublink">States</a>
           <a href="payment-methods.html" class="sidebar-sublink">Payment Methods</a>
-          <a href="business-types.html" class="sidebar-sublink">Business Types</a>
+          <a href="business-types.html" class="sidebar-sublink active" aria-current="page">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="../server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
@@ -62,76 +62,83 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">Cities</h1>
+          <h1 class="page-title">Business Types</h1>
         </div>
-        <button class="btn btn-primary !py-2 !text-sm" id="addEntryBtn" onclick="openAddModal()">+ Add City</button>
+        <button class="btn btn-primary !py-2 !text-sm" id="addEntryBtn" onclick="openAddModal()">+ Add Business Type</button>
       </header>
 
       <section class="card mb-6">
         <div class="grid md:grid-cols-2 gap-4">
-          <div><label class="label" for="mdSearch">Search</label><input id="mdSearch" class="input" data-pg-search="tbl-city" placeholder="Search by name…" oninput="filterTable()" /></div>
+          <div><label class="label" for="mdSearch">Search</label><input id="mdSearch" class="input" data-pg-search="tbl-biztype" placeholder="Search by name…" oninput="filterTable()" /></div>
           <div><label class="label" for="mdStatus">Status</label><select id="mdStatus" class="input" onchange="filterTable()"><option value="">Any</option><option value="active">Active</option><option value="deactivated">Deactivated</option></select></div>
         </div>
       </section>
 
       <section class="card p-0 overflow-x-auto">
-        <table class="data-table" id="tbl-city">
+        <table class="data-table" id="tbl-biztype">
           <thead>
-            <tr><th>Name</th><th>State</th><th>Used by (properties)</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Used by (organizations)</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr data-name="Delhi" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Delhi</td>
-              <td>Delhi (DL)</td>
-              <td>9</td>
+            <tr data-name="PG / Hostel" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">PG / Hostel</td>
+              <td>3 organizations</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Delhi','Delhi (DL)')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 9 record(s). Retire those references first.">Deactivate</button>
+                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('PG / Hostel')">Edit</a>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — 3 organizations use this type. Reassign them first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Gurugram" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Gurugram</td>
-              <td>Haryana (HR)</td>
-              <td>4</td>
+            <tr data-name="Housing Society" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Housing Society</td>
+              <td>2 organizations</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Gurugram','Haryana (HR)')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 4 record(s). Retire those references first.">Deactivate</button>
+                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Housing Society')">Edit</a>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — 2 organizations use this type. Reassign them first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Noida" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Noida</td>
-              <td>Uttar Pradesh (UP)</td>
-              <td>5</td>
+            <tr data-name="Individual Landlord" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Individual Landlord</td>
+              <td>4 organizations</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Noida','Uttar Pradesh (UP)')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 5 record(s). Retire those references first.">Deactivate</button>
+                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Individual Landlord')">Edit</a>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — 4 organizations use this type. Reassign them first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Faridabad" data-status="active" id="row-faridabad">
-              <td class="font-poppins font-semibold text-charcoal">Faridabad</td>
-              <td>Haryana (HR)</td>
-              <td>0</td>
-              <td id="badge-faridabad"><span class="badge badge-active">Active</span></td>
-              <td id="actions-faridabad">
+            <tr data-name="Property Management Firm" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Property Management Firm</td>
+              <td>2 organizations</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td class="flex items-center gap-3 flex-wrap">
+                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Property Management Firm')">Edit</a>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — 2 organizations use this type. Reassign them first.">Deactivate</button>
+              </td>
+            </tr>
+            <tr data-name="Co-living" data-status="active" id="row-coliving">
+              <td class="font-poppins font-semibold text-charcoal">Co-living</td>
+              <td>1 organization</td>
+              <td id="badge-coliving"><span class="badge badge-active">Active</span></td>
+              <td id="actions-coliving">
                 <div class="flex items-center gap-3">
-                  <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Faridabad','Haryana (HR)')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm('faridabad','Faridabad')">Deactivate</button>
+                  <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Co-living')">Edit</a>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm('coliving','Co-living')">Deactivate</button>
                 </div>
               </td>
             </tr>
-            <tr data-name="Ghaziabad" data-status="deactivated">
-              <td class="font-poppins font-semibold text-charcoal">Ghaziabad</td>
-              <td>Uttar Pradesh (UP)</td>
-              <td>0</td>
-              <td><span class="badge badge-closed">Deactivated</span></td>
-              <td><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a></td>
+            <tr data-name="Other" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Other</td>
+              <td>1 organization</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td class="flex items-center gap-3">
+                <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Other')">Edit</a>
+                <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,'Other')">Deactivate</button>
+              </td>
             </tr>
           </tbody>
         </table>
-        <div class="pagination" data-paginate-for="tbl-city" data-per-page="10" aria-label="Pagination">
+        <div class="pagination" data-paginate-for="tbl-biztype" data-per-page="10" aria-label="Pagination">
           <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>10</span> of <span data-pg-total>0</span></div>
           <div class="pagination-controls">
             <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
@@ -139,39 +146,26 @@
             <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
           </div>
           <div class="pagination-per-page">
-            <label for="per-page-tbl-city" class="sr-only">Rows per page</label>
-            <select id="per-page-tbl-city" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
+            <label for="per-page-tbl-biztype" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-biztype" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
           </div>
         </div>
       </section>
-
     </main>
   </div>
 
   <div class="modal-backdrop" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
     <div class="modal modal--mobile-full">
-      <h3 id="addModalTitle">Add City</h3>
+      <h3 id="addModalTitle">Add Business Type</h3>
       <form id="addForm" novalidate onsubmit="event.preventDefault(); submitAddForm()">
         <div class="mt-4">
-          <label class="label" for="addName">City name</label>
-          <input id="addName" name="name" class="input" placeholder="e.g. Pune" minlength="2" maxlength="60" />
+          <label class="label" for="addName">Business type name</label>
+          <input id="addName" name="name" class="input" placeholder="e.g. Serviced Apartments" minlength="2" maxlength="60" />
           <div class="field-error" id="addNameError"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="addCityState">State</label>
-          <select id="addCityState" name="cityState" class="input">
-            <option value="">— Select a state —</option>
-            <option>Delhi (DL)</option>
-            <option>Haryana (HR)</option>
-            <option>Uttar Pradesh (UP)</option>
-            <option>Rajasthan (RJ)</option>
-            <option>Maharashtra (MH)</option>
-          </select>
-          <div class="field-error" id="addCityStateError"></div>
         </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add City</button>
+          <button type="submit" class="btn btn-primary">Add Business Type</button>
         </div>
       </form>
     </div>
@@ -179,23 +173,12 @@
 
   <div class="modal-backdrop" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modal modal--mobile-full">
-      <h3 id="editModalTitle">Edit City</h3>
+      <h3 id="editModalTitle">Edit Business Type</h3>
       <form id="editForm" novalidate onsubmit="event.preventDefault(); submitEditForm()">
         <div class="mt-4">
-          <label class="label" for="editName">City name</label>
+          <label class="label" for="editName">Business type name</label>
           <input id="editName" name="name" class="input" minlength="2" maxlength="60" />
           <div class="field-error" id="editNameError"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="editCityState">State</label>
-          <select id="editCityState" name="cityState" class="input">
-            <option value="">— Select a state —</option>
-            <option>Delhi (DL)</option>
-            <option>Haryana (HR)</option>
-            <option>Uttar Pradesh (UP)</option>
-            <option>Rajasthan (RJ)</option>
-            <option>Maharashtra (MH)</option>
-          </select>
         </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
@@ -207,8 +190,8 @@
 
   <div class="modal-backdrop" id="deactivateModal" role="dialog" aria-modal="true" aria-labelledby="deactivateModalTitle">
     <div class="modal">
-      <h3 id="deactivateModalTitle">Deactivate City?</h3>
-      <p class="muted text-sm mt-2" id="deactivateModalBody">It will no longer appear in dropdowns. Existing records stay intact. You can reactivate later.</p>
+      <h3 id="deactivateModalTitle">Deactivate Business Type?</h3>
+      <p class="muted text-sm mt-2">It will no longer appear in the sign-up dropdown. Existing organizations keep it. You can reactivate later.</p>
       <div class="flex justify-end gap-3 mt-6">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('deactivateModal').classList.remove('open')">Cancel</button>
         <button type="button" class="btn btn-danger" id="deactivateConfirmBtn">Deactivate</button>
@@ -237,65 +220,61 @@
     var pendingDeactivateId = null; var pendingDeactivateName = null; var lastFocusTrigger = null;
     function filterTable() {
       var q = (document.getElementById('mdSearch').value || '').toLowerCase(); var st = document.getElementById('mdStatus').value;
-      Array.prototype.forEach.call(document.querySelectorAll('#tbl-city tbody tr'), function(row) { row.style.display = (!q||(row.dataset.name||'').toLowerCase().indexOf(q)!==-1)&&(!st||row.dataset.status===st)?'':'none'; });
+      Array.prototype.forEach.call(document.querySelectorAll('#tbl-biztype tbody tr'), function(row) { row.style.display = (!q||(row.dataset.name||'').toLowerCase().indexOf(q)!==-1)&&(!st||row.dataset.status===st)?'':'none'; });
     }
     function openAddModal() { lastFocusTrigger=document.getElementById('addEntryBtn'); document.getElementById('addForm').reset(); document.getElementById('addModal').classList.add('open'); document.getElementById('addName').focus(); }
     function closeAddModal() { document.getElementById('addModal').classList.remove('open'); if(lastFocusTrigger) lastFocusTrigger.focus(); }
     function submitAddForm() {
       var name=document.getElementById('addName').value.trim(); var err=document.getElementById('addNameError');
-      if(!name){err.textContent='City name is required.';err.classList.add('show');document.getElementById('addName').classList.add('error');return;}
-      if(name.length<2||name.length>60){err.textContent='Name must be 2–60 characters.';err.classList.add('show');document.getElementById('addName').classList.add('error');return;}
+      if(!name||name.length<2||name.length>60){err.textContent=name?'Name must be 2–60 characters.':'Name is required.';err.classList.add('show');document.getElementById('addName').classList.add('error');return;}
       err.classList.remove('show');document.getElementById('addName').classList.remove('error');
-      var stateVal=document.getElementById('addCityState').value;
-      if(!stateVal){document.getElementById('addCityStateError').textContent='Please select a state.';document.getElementById('addCityStateError').classList.add('show');document.getElementById('addCityState').classList.add('error');return;}
-      document.getElementById('addCityStateError').classList.remove('show');document.getElementById('addCityState').classList.remove('error');
-      var tbody=document.querySelector('#tbl-city tbody'); var tr=document.createElement('tr'); tr.dataset.name=name; tr.dataset.status='active';
-      tr.innerHTML='<td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td><td>'+escHtml(stateVal)+'</td><td>0</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\',\''+escHtml(stateVal)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
+      var tbody=document.querySelector('#tbl-biztype tbody'); var tr=document.createElement('tr'); tr.dataset.name=name; tr.dataset.status='active';
+      tr.innerHTML='<td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td><td>0 organizations</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
       tbody.appendChild(tr); announce(escHtml(name)+' added.'); closeAddModal();
     }
-    function openEditModal(name, state) { lastFocusTrigger=document.activeElement; document.getElementById('editModalTitle').textContent='Edit — '+name; document.getElementById('editName').value=name; document.getElementById('editCityState').value=state||''; document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus(); }
+    function openEditModal(name) { lastFocusTrigger=document.activeElement; document.getElementById('editModalTitle').textContent='Edit — '+name; document.getElementById('editName').value=name; document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus(); }
     function submitEditForm() {
       var name=document.getElementById('editName').value.trim(); var err=document.getElementById('editNameError');
       if(!name||name.length<2||name.length>60){err.textContent=name?'Name must be 2–60 characters.':'Name is required.';err.classList.add('show');document.getElementById('editName').classList.add('error');return;}
-      err.classList.remove('show');document.getElementById('editName').classList.remove('error'); document.getElementById('editModal').classList.remove('open'); announce('Updated to '+name+'.'); if(lastFocusTrigger) lastFocusTrigger.focus();
+      err.classList.remove('show');document.getElementById('editName').classList.remove('error');
+      document.getElementById('editModal').classList.remove('open'); announce('Updated to '+name+'.'); if(lastFocusTrigger) lastFocusTrigger.focus();
     }
     function openDeactivateConfirm(id, name) { lastFocusTrigger=document.activeElement; pendingDeactivateId=id; pendingDeactivateName=name; document.getElementById('deactivateModalTitle').textContent='Deactivate "'+name+'"?'; document.getElementById('deactivateModal').classList.add('open'); document.getElementById('deactivateConfirmBtn').focus(); }
     document.getElementById('deactivateConfirmBtn').addEventListener('click', function() {
       document.getElementById('deactivateModal').classList.remove('open');
-      if(pendingDeactivateId==='faridabad'){document.getElementById('badge-faridabad').innerHTML='<span class="badge badge-closed">Deactivated</span>';document.getElementById('actions-faridabad').innerHTML='<a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>';document.getElementById('row-faridabad').dataset.status='deactivated';}
+      if(pendingDeactivateId==='coliving'){document.getElementById('badge-coliving').innerHTML='<span class="badge badge-closed">Deactivated</span>';document.getElementById('actions-coliving').innerHTML='<a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>';document.getElementById('row-coliving').dataset.status='deactivated';}
       announce(pendingDeactivateName+' deactivated.'); if(lastFocusTrigger) lastFocusTrigger.focus();
     });
     document.addEventListener('keydown', function(e){if(e.key==='Escape'){['addModal','editModal','deactivateModal'].forEach(function(id){var el=document.getElementById(id);if(el&&el.classList.contains('open')){el.classList.remove('open');if(lastFocusTrigger)lastFocusTrigger.focus();}});}});
 
     function reactivateRow(link) {
-      var row = link.closest('tr');
-      if (!row) return;
+      var row = link.closest('tr'); if (!row) return;
       var name = row.dataset.name || '';
       var cells = row.querySelectorAll('td');
       var statusCell = cells[cells.length - 2];
       var actionsCell = cells[cells.length - 1];
       if (statusCell) statusCell.innerHTML = '<span class="badge badge-active">Active</span>';
-      var safeName = name.replace(/'/g, "\'");
+      var safeName = name.replace(/'/g, "\\'");
       if (actionsCell) actionsCell.innerHTML = '<div class="flex items-center gap-3">' +
         '<a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\'' + safeName + '\')">Edit</a>' +
         '<button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\'' + safeName + '\')">Deactivate</button>' +
         '</div>';
       row.dataset.status = 'active';
-      if (typeof announce === 'function') announce(name + ' reactivated.');
+      announce(name + ' reactivated.');
     }
     function announce(msg){var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=msg;},50);}
     function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   </script>
-  
+
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
     <div class="more-sheet-section-header">Master Data</div>
-    <a href="cities.html" class="more-sheet-sublink active">Cities</a>
+    <a href="cities.html" class="more-sheet-sublink">Cities</a>
     <a href="states.html" class="more-sheet-sublink">States</a>
     <a href="payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
-    <a href="business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="business-types.html" class="more-sheet-sublink active">Business Types</a>
     <a href="../server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
     <a href="../legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
     <a href="../contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>

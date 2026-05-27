@@ -86,17 +86,28 @@ property-rental/
 │           ├── business-rules.ts     · BL-* numeric constants
 │           ├── schemas/              · zod schemas: auth, properties, users-admin, leases, maintenance, rent
 │           └── utils/currency.ts     · paiseToRupees, rupeesToPaise, formatINR
-├── prototype/                        19 static HTML pages — the design contract
+├── prototype/                        62 static HTML pages — the design contract
 │   ├── assets/styles.css             · design tokens (Navy #1A237E, Saffron #FF6F00, status palette)
 │   ├── assets/validation.js          · custom form validator (replaces native tooltips, ⚠ glyph below field)
-│   ├── index.html, login.html, forgot-password.html, reset-password.html
-│   ├── admin/   (9 pages)
-│   ├── pm/      (9 pages)
-│   ├── tenant/  (4 pages)
-│   └── maintenance/ (3 pages)
+│   ├── assets/paginate.js            · URL-driven server-style pagination component (list pages)
+│   ├── assets/plans.js               · single-source plan catalogue + feature flags + `popular` flag (home/signup/super-admin)
+│   ├── assets/legal.js               · single-source privacy/terms content + markdown renderer
+│   ├── assets/business-types.js      · platform Business Types master (signup dropdown source)
+│   ├── assets/impersonation.js       · Admin Impersonation banner/session helper
+│   ├── assets/public-chrome.js       · single-source public nav + footer (index/contact/privacy/terms)
+│   ├── assets/favicon.svg            · brand favicon (all pages)
+│   ├── public:  index, login, organization-signup, forgot-password, reset-password, contact, privacy, terms
+│   ├── admin/   (13 pages, + master-data/ ×3: amenities, categories, visit-purposes)
+│   ├── pm/      (13 pages)
+│   ├── tenant/  (8 pages)
+│   ├── maintenance/ (4 pages)
+│   └── super-admin/ (9 pages, + master-data/ ×4: cities, states, payment-methods, business-types)
 ├── docs/
 │   ├── planning/
 │   │   ├── DOCUMENT_AGENT.md         · document agent briefing
+│   │   ├── FEATURE_PLANNING.md       · per-feature planning workflow + 9-section template
+│   │   ├── prototype-changes.md      · running ledger of prototype changes (Working rule §9)
+│   │   ├── features/                 · per-feature planning files (<YYYY-MM-DD>-<slug>.md)
 │   │   └── v1/
 │   │       ├── MASTER_PLAN.md        · Phase 0 → 8 plan (with acceptance gates per phase)
 │   │       ├── MULTI_REPO_SETUP.md   · submodule day-2 workflow

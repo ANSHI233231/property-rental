@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-05-27 · v8 prototype + IA restructure (units→detail, PM multi-property, tenant lease-detail, maintenance-detail roles, pagination) · maintained by `gharsetu-lead`
+**Last updated:** 2026-05-27 · Homepage redesign + public-chrome unification + Super Admin/plans/master polish · maintained by `gharsetu-lead`
 
 ---
 
@@ -16,36 +16,25 @@
 
 ---
 
-## 2. Last session summary (2026-05-27 — Common UI cleanup)
+## 2. Last session summary (2026-05-27 — Homepage redesign + public-chrome unification + Super Admin/plans/master polish)
 
-**Scope.** Cross-cutting cleanup of the role-page chrome (sidebar, topbar, mobile tabbar, profile pages) so all five roles share identical patterns. No business-rule changes. Planning file authored **retroactively** at user instruction so the app-port team has a binding spec for the React/Next.js port.
+**Scope.** Continued the screen-by-screen prototype review. Shipped the planned homepage redesign, unified the public-page chrome behind a single source, and landed a batch of Super Admin / master-data / plans refinements. Prototype-only — no app code, no business-rule changes.
 
-**Planning file added**:
-- `docs/planning/features/2026-05-26-common-ui-cleanup.md` — 9-section, 11 cleanup categories, 47 test cases across 7 namespaces (TC-CLEANUP-LOGO/TOPBAR/ACCOUNT/NAV/PROFILE/SUBTITLE/IDENTITY).
+**Shipped this session:**
+1. **Homepage redesign** (`prototype/index.html`) — built to `docs/planning/features/2026-05-27-homepage-redesign.md` (now **shipped**): glass nav (white→navy on scroll), navy-gradient hero + browser-framed dashboard mock + factual stats strip (120+/18/4), 4 alternating capability rows, 3-step "how it works", bento role grid (Admin emphasized), plans on light-gray + popular-card glow, merged navy CTA, `IntersectionObserver` scroll-reveal + reduced-motion + skip link. OD-1..5 resolved to the richer Option A; **OD-6 → A (Register pill)** overriding the documented default B (rationale logged in plan §4/§5). Hero mock URL set to `anshika.tlitech.net`; footer About link removed.
+2. **CTA/footer separation** — footer stepped to deep navy `#0D1757` + hairline top border so it no longer merges with the navy CTA band.
+3. **Public-chrome single source** — new `prototype/assets/public-chrome.js` renders one identical sticky glass nav + deep-navy Company/Legal footer into `#gs-public-nav` / `#gs-public-footer` placeholders. Wired into `index.html` (refactored off its inline chrome + glass-scroll JS), `contact.html`, `privacy.html`, `terms.html`. Auth pages (login/signup) intentionally stay chrome-free.
+4. **Profile pages** — removed the **Role** detail row on all 5 roles; role stays only as the `.profile-role` badge by the name.
+5. **Server Logs** — dropped the **Lines** column (header + cell); `lines` data kept for the file-preview modal.
+6. **Super Admin sidebar consistency** — `master-data/payment-methods.html` was missing the **Business Types** sublink; added. All 13 Super Admin surfaces now share an identical sidebar item sequence.
+7. **Master-data deactivate reason → tooltip** — across all 6 masters (4 platform: cities/states/payment-methods/business-types + org: amenities/categories) moved the in-cell "Cannot deactivate — currently used by N record(s)…" note (27 total) into the disabled Deactivate button's `title` attribute (dropped the now-dangling `aria-describedby`).
+8. **Plans "Most Popular" control** — Super Admin `plans.html` now sets which plan is the public highlight (★ badge + saffron top-border on the featured card; "Set as Most Popular" on the others; exclusive; auto-cleared on deactivate). Signup helper de-hardcoded ("Pick the one marked Most Popular" — no plan name) + signup tile badge "Popular"→"Most Popular". All read the shared `popular` flag in `plans.js`.
 
-**Eleven cleanup categories shipped across 37 prototype pages**:
-1. Sidebar logo (`sidebar-brand`) repointed from `../index.html` → `dashboard.html` on 32 role pages (super-admin had this already from earlier work).
-2. Topbar `topbar-user` block (name + avatar + notification bell) deleted from 12 inconsistent pages — the right-side slot is now free for action buttons.
-3. Sidebar account-menu v2 — added header strip with avatar (saffron 36px circle, initials) + first name + role label, then divider, then `My Profile` + `Sign out` (danger red).
-4. `My Profile` removed from the sidebar nav — now lives only inside the account menu.
-5. Mobile bottom-sheet `.account-sheet` added (body-level, slides up from bottom on viewports <1024px).
-6. Mobile tabbar: tenant/maintenance/super-admin (13 pages) now have a 5-tab pattern ending in **Account** that opens the bottom-sheet. Admin + PM keep their existing More-sheet pattern with Logout → Sign out renamed (24 occurrences).
-7. "Cannot see: …" role-disclosure paragraphs removed from `maintenance/dashboard.html` and `maintenance/all-open.html`.
-8. All page subtitles removed (37 `<div class="page-subtitle">` elements stripped).
-9. Profile pages standardized to the super-admin template — `pm/profile.html` dropped "Your Property"; `maintenance/profile.html` dropped "Your Work" KPIs; `tenant/profile.html` dropped "My Lease — Quick view". All three got the **Recent Activity** audit-log table (4 columns: When · Action · Resource · IP) with role-relevant mock entries.
-10. Tenant identity unified — `tenant/profile.html`: Raj Sharma → Rohan Mehta, RS → RM, raj.sharma@example.com → rohan.mehta@example.com, Priya Sharma → Priya Mehta. Now consistent with the account menu.
-11. Dashboard menu label normalized to "Dashboard" on both sidebar nav AND mobile tabbar across all 37 pages (was: Home / My Lease / Lease / My Requests).
+**Earlier in the same session:** added a real **Edit-Profile modal** (Name + Mobile editable; Email + Role locked) across all 5 profile pages, replacing the old JS `alert()`.
 
-**CSS additions** to `prototype/assets/styles.css` (~120 lines): `.sidebar-footer` rewrite + `.account-trigger` + `.account-menu` (+ `.danger` variant) + `.account-menu-header / -avatar / -name / -role / -divider` + `.account-sheet-backdrop / .account-sheet / -handle` + the `@media (max-width: 1023px)` toggle for the sheet.
+**Docs:** homepage planning file → `shipped` + OD log; `docs/planning/prototype-changes.md` **created** (Working rule §9) and seeded with this session's rows; change-log `agent-team-change-logs/gharsetu-frontend-2026-05-27.md` (tasks 1–10). No `feature_list.json` change — prototype polish, not a new app feature.
 
-**JS additions** to `prototype/assets/validation.js` (~35 lines): `toggleAccountMenu`, `closeAccountMenu`, `openAccountSheet`, `closeAccountSheet`, plus click-outside + Escape handlers.
-
-**Process deviation**: per CLAUDE.md Working rule §2 ("Plan first"), the planning file should have been written before the changes. User explicitly asked for the documentation after the work was done so the app-port team has a precise record — the planning file is now the **binding spec** for porting these patterns into `apps/web`.
-
-**Carry-over from this iteration**:
-- `prototype-changes.md` row pending (Working rule §9 — to be added on ship).
-- Promotion of TC-CLEANUP-* (47 cases) into `docs/testing/v1/Test_Cases.md` pending ship.
-- No feature_list.json row — this is UI cleanup, not a feature.
+**Prototype-only caveat (carry-over for app port):** the "Most Popular" choice and all plan CRUD are session-only in the static prototype (no persistence) — the homepage's default featured plan stays **Standard** via `plans.js`. In the live app this becomes a saved setting / PATCH.
 
 ---
 
@@ -140,6 +129,11 @@ Solution Overview was iterated end-to-end (v6.5 → v8) over a long single sessi
 | Admin Impersonation | ✅ shipped |
 | v8 Module Gap Closures (all 6 modules) | ✅ shipped |
 | Sidebar account-menu refactor + common UI cleanup | ✅ shipped (37 pages) |
+| Homepage redesign (modern landing) | ✅ shipped |
+| Public-chrome single source (nav + footer on 4 public pages) | ✅ shipped |
+| Plans "Most Popular" Super Admin control + signup de-hardcode | ✅ shipped |
+| Master-data deactivate reason → button tooltip (6 masters) | ✅ shipped |
+| Profile Role-as-badge · Server Logs Lines column removed · Edit-Profile modal | ✅ shipped |
 | Master Data restructure + platform/org ownership split | ✅ shipped |
 | Server Logs (Super Admin) · Delegations 3-col modal · filter pills→tiles | ✅ shipped |
 | Visitor pages card→table + tiles | ✅ shipped (PM + tenant) |
@@ -152,7 +146,7 @@ Solution Overview was iterated end-to-end (v6.5 → v8) over a long single sessi
 | **Per-Room Leasing — HTML iteration** | 🟡 planned (10 files identified in §6 of its planning file) — still NOT built |
 | Application port (prototype → apps/web + apps/api) | ⏸ not started |
 | `feature_list.json` row creation for the v8 features | ⏸ pending lead pass |
-| `prototype-changes.md` ledger entries | ⏸ deferred to ship |
+| `prototype-changes.md` ledger | 🟢 started 2026-05-27 (homepage + this session's rows); backfill earlier v8 rows on next pass |
 | SRS amendments (one-PM-per-property retired · maintenance assign/close authz · lease-anchored-to-unit) | ⏸ to fold in at next SRS pass — see `docs/planning/features/2026-05-27-ia-restructure-*.md` §2.0 |
 
 ---
@@ -201,6 +195,8 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 
 | Date | HEAD | Agent | What changed |
 |---|---|---|---|
+| 2026-05-27 | _pending_ | orchestrator + gharsetu-frontend | Homepage redesign shipped (glass nav, hero+dashboard-mock+stats strip, alternating capability rows, how-it-works, bento roles, popular-glow plans, merged navy CTA, scroll-reveal) · footer deep-navy `#0D1757` separation · **`public-chrome.js` single source** for nav+footer across index/contact/privacy/terms (auth pages chrome-free) · profile Role row → badge only (5 roles) + Edit-Profile modal (Name+Mobile only) · Server Logs Lines column removed · Super Admin sidebar fixed (payment-methods missing Business Types) · master-data deactivate reason → disabled-button `title` tooltip (6 masters, 27 notes) · Plans Super-Admin "Set as Most Popular" control + signup helper de-hardcoded ("Most Popular", no plan name). `prototype-changes.md` created. |
+| 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | Super Admin review pass + 2 new features: org slugs (`?org=<slug>` everywhere) · org-detail redesign (status simulator + conditional actions + 3 tabs incl. Subscription Plan History) · Plans full CRUD + 9-feature flag catalogue · single-source `plans.js` (home + signup + super-admin render same ✓/✗ list) · Business Types platform master + signup wiring · Legal+Contact feature (privacy/terms/contact public pages + Super Admin Legal editor + Contact Inbox, record-only per Scope-K) · favicon on all 62 pages · removed all helper captions + detail-page back-links. Homepage redesign PLANNED (awaiting sign-off). |
 | 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | IA restructure: deleted standalone Units pages (admin+pm) → created per-role `unit-detail.html` wired from property-detail · `tenant/lease-detail.html` (full payment/co-tenant/maintenance/terminate actions) · `pm/properties.html` + `pm/property-detail.html` with multi-property + read-only tenure-history (retires one-PM-per-property) · created `tenant/maintenance-detail.html` + `maintenance/maintenance-detail.html` (4 role detail pages now complete, each with progress timeline + role-based action card) · maintenance role scoped to assigned-only, self-assign removed, all-open→all-requests · server-side pagination component (`paginate.js`) on **21 list pages** (URL-driven, search/tile reset, tile counts = full dataset). 3 agent dispatches crashed at socket watchdog; orchestrator finished residual by hand. |
 | 2026-05-27 | _pending_ | gharsetu-lead | Server Logs (Super Admin diagnostics) + Delegations modal fix: new `prototype/super-admin/server-logs.html` with 10 mock daily log files · View modal with dark-theme JetBrains Mono log viewer + colored levels · real Blob download for `.log` files · sidebar entry rolled out to 9 Super Admin pages · planning file `2026-05-27-server-logs-page.md` authored BEFORE code (documents app-port carry-over: `apps/api/logs/api-YYYY-MM-DD.log` Pino convention, Super-Admin-only `/api/v1/platform/logs` endpoints, `VIEW_SERVER_LOG`/`DOWNLOAD_SERVER_LOG` audit actions, 90-day retention) · Delegations create modal widened 560→960px and `.checkbox-group` flipped from column to 3-col grid (responsive 3/2/1) so page doesn't get too long. |
 | 2026-05-27 | _pending_ | gharsetu-lead | Master Data ownership split (platform vs org): Cities/States/Payment Methods moved from Admin to Super Admin · `prototype/super-admin/master-data/` subfolder created with 3 sub-pages (Super Admin chrome — Dashboard/Orgs/Plans sidebar + Aayush/Super Admin/AK identity + 4-tab tabbar) · new `super-admin/master-data.html` 3-card landing · Master Data sub-menu added to 5 Super Admin sidebar pages · Admin sub-menu trimmed from 6→3 (Amenities, Categories, Visit Purposes) across 16 admin files · `admin/master-data.html` rewritten as 3-card landing · 3 platform pages deleted from admin · planning file `2026-05-27-master-data-ownership-split.md` authored BEFORE code per Working rule §2 · documents schema model carry-over for app port (platform tables WITHOUT `organization_id`, org tables WITH NOT-NULL `organization_id`). |
@@ -210,10 +206,8 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 | 2026-05-26 | _pending_ | gharsetu-lead                  | CLAUDE.md overhaul: Working rules + Technical conventions sections added · Hard rules renamed to Scope rules · UIUX doc in source-of-truth · stale rule #2 fixed · Conflict-resolution rules · prototype count 19→29 · new docs/planning/FEATURE_PLANNING.md (template + lifecycle + reactivation discipline) |
 | 2026-05-26 | _pending_ | gharsetu-lead + document-agent | UIUX Design Document v3 delivered (10 sections, responsive transformations, structured wireframes) · Solution Overview polish · routing model finalised (three classes) · American spelling sweep · prototype-color audit |
 | 2026-05-26 | `f26752f` | gharsetu-lead + document-agent | Solution Overview v6.5 → v8 final-close · Timeline split into Timeline.xlsx · harness-engineering skill rolled out · sibling files reconciled · agent change logs written |
-| 2026-05-25 | `6a537a4` | gharsetu-lead | Harness-engineering rollout: skill + feature_list.json + claude-progress.md + CLAUDE.md rewrite + AGENTS.md update |
-| 2026-05-22 | (multiple) | document-agent | Solution_Overview v6.5 draft committed (SAAS pivot, per-room leasing, subscription plans) |
-| 2026-05-11 | `d0805bc` | gharsetu-lead | Phase 8 closeout — release-ready verdict; all MUST-FIX closed |
-| 2026-05-11 | `02d6a53` | gharsetu-tester | Phase 8 final regression: 110/110 TCs covered |
+
+> Older milestones (2026-05-25 harness rollout · 2026-05-22 v6.5 draft · 2026-05-11 Phase 8 closeout `d0805bc` + final regression `02d6a53`) trimmed per the ≤10-entry cap; see git history + `docs/testing/v1/phase-8-closeout.md`.
 
 ---
 
@@ -234,6 +228,7 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 - **Feature planning files (2026-05-26)**: every new feature gets `docs/planning/features/<YYYY-MM-DD>-<short-slug>.md` BEFORE coding. Lifecycle `proposed → in-progress → shipped`; `shipped` is terminal. Reactivation discipline = grep before coding, extend existing file rather than fix silently. Full template + process in [docs/planning/FEATURE_PLANNING.md](docs/planning/FEATURE_PLANNING.md).
 - **Solution Overview structure (final, v8)**: cover (DRAFT marker, no version number) + 8 banners — Fixes, New Roles, New Features, Business Rules, Details, Assumptions, Out of Scope, Next Steps. No timeline content in the .docx — that lives in `Timeline.xlsx`.
 - **Timeline lives in Excel**: [docs/product/Timeline.xlsx](docs/product/Timeline.xlsx), regenerated from [doc-assets/templates/generate_timeline.js](doc-assets/templates/generate_timeline.js). The Solution Overview should NOT mention `Timeline.xlsx` by name in customer-facing copy.
+- **Single-source shared assets (2026-05-27)**: cross-page prototype UI is driven from shared modules in `prototype/assets/` to prevent drift — `plans.js` (plan catalogue + marketing/signup/super-admin cards, incl. the `popular` "Most Popular" flag), `legal.js` (privacy/terms content), `business-types.js`, and now `public-chrome.js` (public nav + footer for index/contact/privacy/terms). When porting, these become real components/config, not per-page copies. Public marketing/legal pages share one header+footer; auth pages (login/signup) are deliberately chrome-free.
 
 ---
 

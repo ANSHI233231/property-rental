@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>Organization Detail · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,9 +39,12 @@
           <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
           <a href="master-data/states.html" class="sidebar-sublink">States</a>
           <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
@@ -70,7 +74,6 @@
     </aside>
 
     <main class="app-main">
-      <!-- Topbar — Pending org (Approve button visible; Change Plan + Deactivate shown for demo with id toggle) -->
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -78,24 +81,38 @@
         <div style="flex:1;min-width:0">
           <h1 class="page-title">Saffron Stays Pvt Ltd</h1>
         </div>
-        <!-- Actions vary by status. Showing Pending state: Approve button -->
+        <!-- Status-conditional actions (toggled by setSimStatus) -->
         <div class="flex gap-2 flex-wrap" id="topbar-actions">
-          <button class="btn btn-primary !py-2 !text-sm" onclick="openModal('approveModal')">Approve</button>
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="openModal('startImpersonationModal')" aria-haspopup="dialog">Impersonate Admin</button>
+          <button id="btn-approve" class="btn btn-primary !py-2 !text-sm" onclick="openModal('approveModal')">Approve</button>
+          <button id="btn-impersonate" class="btn btn-primary !py-2 !text-sm" style="display:none" onclick="openModal('startImpersonationModal')" aria-haspopup="dialog">Impersonate Admin</button>
+          <button id="btn-changeplan" class="btn btn-secondary !py-2 !text-sm" style="display:none" onclick="openModal('changePlanModal')">Change Plan</button>
+          <button id="btn-deactivate" class="btn btn-danger !py-2 !text-sm" style="display:none" onclick="openModal('deactivateModal')">Deactivate</button>
+          <button id="btn-reactivate" class="btn btn-primary !py-2 !text-sm" style="display:none" onclick="openModal('reactivateModal')">Reactivate Organization</button>
         </div>
       </header>
+
+      <!-- Prototype status simulator -->
+      <div class="card mb-6" style="border-style:dashed;background:var(--color-off-white);">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="label" style="margin:0">Preview status</span>
+          <div class="flex gap-2" role="group" aria-label="Preview organization status">
+            <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-sim="pending" onclick="setSimStatus('pending',this)">Pending</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-sim="active" onclick="setSimStatus('active',this)">Active</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-sim="deactivated" onclick="setSimStatus('deactivated',this)">Deactivated</button>
+          </div>
+        </div>
+      </div>
 
       <!-- Status strip -->
       <section class="card mb-6">
         <div class="flex flex-wrap gap-6">
           <div>
             <div class="label" style="display:block;margin-bottom:4px">Status</div>
-            <span class="badge badge-partial" aria-label="Status: Pending">Pending</span>
+            <span class="badge badge-partial" id="status-badge" aria-label="Status: Pending">Pending</span>
           </div>
           <div>
             <div class="label" style="display:block;margin-bottom:4px">Plan</div>
             <span class="font-poppins font-semibold text-charcoal">Standard</span>
-            <a href="#" class="font-poppins font-semibold ml-2 text-sm" style="color:var(--color-royal-blue)" onclick="event.preventDefault();openModal('changePlanModal')">Change</a>
           </div>
           <div>
             <div class="label" style="display:block;margin-bottom:4px">Created</div>
@@ -108,73 +125,79 @@
         </div>
       </section>
 
-      <!-- Details + Subscription (two columns) -->
+      <!-- Details + Subscription (the organization detail card) -->
       <section class="section grid lg:grid-cols-2 gap-6">
-        <!-- Organization Details -->
         <div class="profile-card">
           <h3>Organization Details</h3>
           <div class="profile-row"><span class="field">Name</span><span class="value">Saffron Stays Pvt Ltd</span></div>
+          <div class="profile-row"><span class="field">URL slug</span><span class="value"><code style="font-family:'JetBrains Mono',monospace;background:var(--color-light-gray);padding:2px 8px;border-radius:6px;font-size:13px;">saffron-stays</code></span></div>
           <div class="profile-row"><span class="field">Type of business</span><span class="value">Co-living / Paying Guest</span></div>
           <div class="profile-row"><span class="field">Expected unit count</span><span class="value">35 units</span></div>
           <div class="profile-row"><span class="field">City + State</span><span class="value">Delhi, Delhi</span></div>
           <div class="profile-row"><span class="field">Created on</span><span class="value">21/05/2026</span></div>
         </div>
 
-        <!-- Subscription -->
         <div class="profile-card">
           <h3>Subscription</h3>
           <div class="profile-row"><span class="field">Plan</span><span class="value">Standard</span></div>
           <div class="profile-row"><span class="field">Active-user cap</span><span class="value">20 users</span></div>
-          <div class="profile-row">
-            <span class="field">Active users</span>
-            <span class="value">0 of 20</span>
-          </div>
+          <div class="profile-row"><span class="field">Active users</span><span class="value" id="active-users-count">0 of 20</span></div>
           <div class="profile-row">
             <span class="field">Utilization</span>
             <span class="value" style="width:100%">
               <div style="background:var(--color-mid-gray);border-radius:4px;height:8px;width:100%;margin-top:4px">
-                <div style="background:var(--color-saffron);border-radius:4px;height:8px;width:0%" aria-label="0% utilized"></div>
+                <div id="util-bar" style="background:var(--color-saffron);border-radius:4px;height:8px;width:0%" aria-label="0% utilized"></div>
               </div>
             </span>
           </div>
         </div>
       </section>
 
-      <!-- Organization Users (read-only) -->
+      <!-- Tabs: Organization Users · Platform-Level Audit · Subscription Plan History -->
       <section class="section">
-        <h3 class="section-title">Organization Users</h3>
-        <p class="text-sm muted mb-3">Read-only. Manage users from within the organization.</p>
-        <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
-            <thead>
-              <tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th>Last Seen</th></tr>
-            </thead>
-            <tbody id="users-tbody">
-              <!-- Will be populated once org is approved. For Pending orgs show placeholder. -->
-            </tbody>
-          </table>
-          <div class="p-6 text-center text-sm muted" id="users-empty">
-            No users yet — organization is pending approval.
-          </div>
-          <div class="p-4 border-t text-sm muted" style="border-color:var(--color-light-gray)" id="users-footer" style="display:none">
-            Showing 6 of 12 · <a href="#" class="font-poppins font-semibold" style="color:var(--color-royal-blue)" onclick="event.preventDefault();expandUsers()">View all</a>
+        <div role="tablist" class="flex gap-2 flex-wrap mb-4" aria-label="Organization sections">
+          <button role="tab" class="btn btn-primary !py-2 !text-sm" data-tab="users" aria-selected="true" onclick="switchOrgTab('users',this)">Organization Users</button>
+          <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-tab="audit" aria-selected="false" onclick="switchOrgTab('audit',this)">Platform-Level Audit</button>
+          <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-tab="subs" aria-selected="false" onclick="switchOrgTab('subs',this)">Subscription Plan History</button>
+        </div>
+
+        <!-- Panel: Organization Users -->
+        <div class="org-tab-panel" id="panel-users">
+          <div class="card p-0 overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th>Last Seen</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+            <div class="p-6 text-center text-sm muted" id="users-empty">No users yet — organization is pending approval.</div>
           </div>
         </div>
-      </section>
 
-      <!-- Platform-level Audit -->
-      <section class="section">
-        <h3 class="section-title">Platform-Level Audit</h3>
-        <p class="text-sm muted mb-3">Actions Super Admin has taken on this organization.</p>
-        <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
-            <thead>
-              <tr><th>When</th><th>Action</th><th>By</th><th>Notes</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>21/05/2026 14:30</td><td>Submitted</td><td>Priya Mehta (Applicant)</td><td>Organization sign-up submitted</td></tr>
-            </tbody>
-          </table>
+        <!-- Panel: Platform-Level Audit -->
+        <div class="org-tab-panel" id="panel-audit" style="display:none">
+          <div class="card p-0 overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>When</th><th>Action</th><th>By</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>24/05/2026 09:15</td><td>Plan changed</td><td>Aayush Kumar (Super Admin)</td><td>Basic → Standard</td></tr>
+                <tr><td>24/05/2026 09:12</td><td>Approved</td><td>Aayush Kumar (Super Admin)</td><td>Admin credentials emailed to contact@saffronstays.in</td></tr>
+                <tr><td>21/05/2026 14:30</td><td>Submitted</td><td>Priya Mehta (Applicant)</td><td>Organization sign-up submitted</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel: Subscription Plan History -->
+        <div class="org-tab-panel" id="panel-subs" style="display:none">
+          <div class="card p-0 overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Effective</th><th>Plan</th><th>User cap</th><th>Change</th><th>By</th></tr></thead>
+              <tbody>
+                <tr><td>02/06/2026</td><td><span class="badge badge-prepaid">Premium</span></td><td>Unlimited</td><td>Upgraded · Standard → Premium</td><td>Aayush Kumar (Super Admin)</td></tr>
+                <tr><td>24/05/2026</td><td><span class="badge badge-active">Standard</span></td><td>20 users</td><td>Activated on approval</td><td>Aayush Kumar (Super Admin)</td></tr>
+                <tr><td>21/05/2026</td><td>Standard</td><td>20 users</td><td>Selected at sign-up</td><td>Priya Mehta (Applicant)</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>
@@ -285,14 +308,89 @@
     <a href="plans.html" class="tab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
     </a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
-    </button>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script>
     var ORG_NAME = 'Saffron Stays Pvt Ltd';
+
+    /* ---- Prototype status simulator ---- */
+    var MOCK_USERS = [
+      ['Priya Mehta','Admin','contact@saffronstays.in','Active','Today 10:12'],
+      ['Arjun Rao','Property Manager','arjun@saffronstays.in','Active','Today 08:40'],
+      ['Neha Singh','Property Manager','neha@saffronstays.in','Active','Yesterday 19:05'],
+      ['Raju Verma','Maintenance','raju@saffronstays.in','Active','Yesterday 16:20'],
+      ['Sunil Das','Maintenance','sunil@saffronstays.in','Active','22/05/2026 11:00'],
+      ['Anita Roy','Tenant','anita.roy@example.com','Active','Today 07:55']
+    ];
+
+    function setSimStatus(status, btn) {
+      // toggle sim button styling
+      document.querySelectorAll('[data-sim]').forEach(function(b){
+        b.classList.toggle('btn-primary', b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
+      });
+      // status badge
+      var badge = document.getElementById('status-badge');
+      var map = {
+        pending:    ['Pending','badge badge-partial'],
+        active:     ['Active','badge badge-active'],
+        deactivated:['Deactivated','badge badge-closed']
+      };
+      badge.textContent = map[status][0];
+      badge.className = map[status][1];
+      badge.setAttribute('aria-label','Status: ' + map[status][0]);
+      // action buttons
+      var show = {
+        'btn-approve': status==='pending',
+        'btn-impersonate': status==='active',
+        'btn-changeplan': status==='active',
+        'btn-deactivate': status==='active',
+        'btn-reactivate': status==='deactivated'
+      };
+      Object.keys(show).forEach(function(id){
+        document.getElementById(id).style.display = show[id] ? '' : 'none';
+      });
+      // users panel: pending = no users; active/deactivated = list
+      var tbody = document.getElementById('users-tbody');
+      var empty = document.getElementById('users-empty');
+      var count = document.getElementById('active-users-count');
+      var bar = document.getElementById('util-bar');
+      if (status === 'pending') {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        empty.textContent = 'No users yet — organization is pending approval.';
+        count.textContent = '0 of 20'; bar.style.width = '0%';
+      } else {
+        empty.style.display = 'none';
+        tbody.innerHTML = MOCK_USERS.map(function(u){
+          var st = status==='deactivated'
+            ? '<span class="badge badge-closed">Suspended</span>'
+            : '<span class="badge badge-active">Active</span>';
+          var seen = status==='deactivated' ? '—' : u[4];
+          return '<tr><td class="font-poppins font-semibold text-charcoal">'+u[0]+'</td><td>'+u[1]+'</td><td>'+u[2]+'</td><td>'+st+'</td><td class="text-xs muted">'+seen+'</td></tr>';
+        }).join('');
+        count.textContent = '6 of 20'; bar.style.width = '30%';
+        if (status === 'deactivated') {
+          empty.style.display = 'block';
+          empty.textContent = 'Organization is deactivated — all users are locked out until reactivated.';
+          empty.style.color = 'var(--color-status-overdue)';
+        }
+      }
+    }
+
+    function switchOrgTab(name, btn) {
+      document.querySelectorAll('[role="tab"][data-tab]').forEach(function(b){
+        var on = b === btn;
+        b.classList.toggle('btn-primary', on);
+        b.classList.toggle('btn-secondary', !on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      ['users','audit','subs'].forEach(function(p){
+        document.getElementById('panel-'+p).style.display = (p===name) ? 'block' : 'none';
+      });
+    }
 
     function openModal(id) {
       var m = document.getElementById(id);
@@ -404,6 +502,7 @@
         originalUser: 'Aayush Kumar · Super Admin',
         impersonatedUser: 'Priya Mehta · Admin',
         impersonatedOrg: 'Saffron Stays Pvt Ltd',
+        impersonatedOrgSlug: 'saffron-stays',
         startedAt: new Date().toISOString(),
         returnDashboard: '../super-admin/dashboard.html'
       };
@@ -411,26 +510,25 @@
       // Redirect to the Admin dashboard for Saffron Stays (prototype: use generic admin/dashboard)
       window.location.assign('../admin/dashboard.html');
     }
+
+    /* Initialize to Pending on load */
+    setSimStatus('pending', document.querySelector('[data-sim="pending"]'));
   </script>
-  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
-    <div class="account-sheet-handle" aria-hidden="true"></div>
-    <div class="account-menu-header">
-      <div class="account-menu-avatar">AK</div>
-      <div>
-        <div class="account-menu-name">Aayush</div>
-        <div class="account-menu-role">Super Admin</div>
-      </div>
-    </div>
-    <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+  
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
 </body>
 </html>

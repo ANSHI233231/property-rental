@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
   <title>Maintenance Categories · Master Data · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,8 +108,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Plumbing')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-plumbing">Deactivate</button>
-                <p id="note-plumbing" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 23 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 23 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Electrical" data-status="active">
@@ -117,8 +117,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Electrical')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-elec">Deactivate</button>
-                <p id="note-elec" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 17 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 17 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Carpentry" data-status="active">
@@ -127,8 +126,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Carpentry')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-carp">Deactivate</button>
-                <p id="note-carp" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 9 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 9 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="HVAC" data-status="active">
@@ -137,8 +135,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('HVAC')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-hvac">Deactivate</button>
-                <p id="note-hvac" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 5 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 5 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="General Repairs" data-status="active" id="row-gen-repairs">

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
   <title>Payment Methods · Master Data · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,9 +35,12 @@
           <a href="cities.html" class="sidebar-sublink">Cities</a>
           <a href="states.html" class="sidebar-sublink">States</a>
           <a href="payment-methods.html" class="sidebar-sublink active" aria-current="page">Payment Methods</a>
+          <a href="business-types.html" class="sidebar-sublink">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="../server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="../legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="../contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
@@ -92,8 +96,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('UPI')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-upi">Deactivate</button>
-                <p id="note-upi" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 187 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 187 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="NEFT / Bank Transfer" data-status="active">
@@ -102,8 +105,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('NEFT / Bank Transfer')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-neft">Deactivate</button>
-                <p id="note-neft" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 94 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 94 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Cash" data-status="active">
@@ -112,8 +114,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Cash')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-cash">Deactivate</button>
-                <p id="note-cash" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 12 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 12 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Cheque" data-status="active">
@@ -122,8 +123,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Cheque')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-cheque">Deactivate</button>
-                <p id="note-cheque" role="note" class="muted text-xs w-full mt-1">Cannot deactivate — currently used by 3 record(s). Retire those references first.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 3 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="IMPS" data-status="active" id="row-imps">
@@ -212,9 +212,7 @@
     <a href="../plans.html" class="tab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
     </a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
-    </button>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../../assets/validation.js"></script>
@@ -274,18 +272,20 @@
     function announce(msg) { var lr=document.getElementById('liveRegion'); lr.textContent=''; setTimeout(function(){lr.textContent=msg;},50); }
     function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   </script>
-  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
-    <div class="account-sheet-handle" aria-hidden="true"></div>
-    <div class="account-menu-header"><div class="account-menu-avatar">AK</div><div><div class="account-menu-name">Aayush</div><div class="account-menu-role">Super Admin</div></div></div>
-    <div class="account-menu-divider"></div>
-    <a href="../profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
-    <a href="../../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
-  </div>
-    <div class="account-menu-header"><div class="account-menu-avatar">RS</div><div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div></div>
-    <div class="account-menu-divider"></div>
-    <a href="../profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
-    <a href="../../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="states.html" class="more-sheet-sublink">States</a>
+    <a href="payment-methods.html" class="more-sheet-sublink active">Payment Methods</a>
+    <a href="../server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="../legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="../contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="../profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
 </body>
 </html>

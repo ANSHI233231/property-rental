@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>My Profile · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +37,7 @@
         <a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
       </nav>
       <div class="sidebar-footer">
-        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+        <button type="button" class="account-trigger active" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
           <span class="account-trigger-label">Account</span>
           <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
@@ -50,7 +51,7 @@
             </div>
           </div>
           <div class="account-menu-divider"></div>
-          <a href="profile.html" class="account-menu-link" role="menuitem">
+          <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
             My Profile
           </a>
@@ -83,13 +84,12 @@
           <div class="profile-row"><span class="field">Name</span><span class="value">Raj Singh</span></div>
           <div class="profile-row"><span class="field">Email</span><span class="value">raj@gharsetu.in</span></div>
           <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx12</span></div>
-          <div class="profile-row"><span class="field">Role</span><span class="value">Admin · Top Management</span></div>
           <div class="profile-row"><span class="field">Scope</span><span class="value">All 18 properties</span></div>
           <div class="profile-row"><span class="field">Member since</span><span class="value">15/03/2024</span></div>
           <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active">Active</span></span></div>
 
           <div class="mt-6 flex gap-2 flex-wrap">
-            <button class="btn btn-secondary !py-2 !text-sm">Edit details</button>
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditProfile()">Edit details</button>
           </div>
           <p class="text-xs muted mt-3">Email and role changes are audited and require Admin confirmation.</p>
         </section>
@@ -115,10 +115,6 @@
             </div>
             <button type="submit" class="btn btn-primary !py-2 !text-sm">Change password</button>
           </form>
-
-          <hr class="divider"/>
-
-          <a href="../login.html" class="btn btn-danger !py-2 !text-sm">Sign out</a>
         </section>
       </div>
 
@@ -177,7 +173,7 @@
       </div>
     </div>
     <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
+    <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page" onclick="closeAccountSheet()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
       My Profile
     </a>
@@ -186,5 +182,66 @@
       Sign out
     </a>
   </div>
+  <!-- Edit Profile Modal (Name + Mobile only; email/role locked) -->
+  <div class="modal-backdrop" id="editProfileModal" role="dialog" aria-modal="true" aria-labelledby="epTitle">
+    <div class="modal" style="max-width:480px;">
+      <h3 id="epTitle">Edit profile</h3>
+      <form novalidate onsubmit="event.preventDefault(); saveProfile();">
+        <div class="mt-4">
+          <label class="label" for="ep-name">Full name</label>
+          <input id="ep-name" class="input" oninput="document.getElementById('ep-name-error').classList.remove('show'); this.classList.remove('error');" />
+          <div class="field-error" id="ep-name-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="ep-phone">Mobile number</label>
+          <input id="ep-phone" class="input" placeholder="98xxxxxxxx" oninput="document.getElementById('ep-phone-error').classList.remove('show'); this.classList.remove('error');" />
+          <div class="field-error" id="ep-phone-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="ep-email">Email (locked)</label>
+          <input id="ep-email" class="input" disabled style="background:var(--color-light-gray);cursor:not-allowed;" />
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    var _epRows = {};
+    function openEditProfile(){
+      _epRows = {};
+      document.querySelectorAll('.profile-row').forEach(function(r){
+        var f=r.querySelector('.field'), v=r.querySelector('.value'); if(f&&v) _epRows[f.textContent.trim()]=v;
+      });
+      document.getElementById('ep-name').value  = _epRows['Name']  ? _epRows['Name'].textContent.trim()  : '';
+      document.getElementById('ep-phone').value = _epRows['Phone'] ? _epRows['Phone'].textContent.trim() : '';
+      document.getElementById('ep-email').value = _epRows['Email'] ? _epRows['Email'].textContent.trim() : '';
+      document.getElementById('ep-name-error').classList.remove('show');
+      document.getElementById('ep-phone-error').classList.remove('show');
+      document.getElementById('editProfileModal').classList.add('open');
+      document.body.style.overflow='hidden';
+      setTimeout(function(){ document.getElementById('ep-name').focus(); }, 50);
+    }
+    function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('open'); document.body.style.overflow=''; }
+    function epErr(id,msg){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); e.textContent=msg; e.classList.add('show'); i.classList.add('error'); }
+    function saveProfile(){
+      var name=document.getElementById('ep-name').value.trim();
+      var phone=document.getElementById('ep-phone').value.trim();
+      var ok=true;
+      if(!name){ epErr('ep-name','Name is required.'); ok=false; }
+      var hasDigit=/\d/.test(phone);
+      if(!phone || !hasDigit || phone.replace(/\D/g,'').length<10){ epErr('ep-phone','Enter a valid mobile number (at least 10 digits).'); ok=false; }
+      if(!ok) return;
+      if(_epRows['Name'])  _epRows['Name'].textContent  = name;
+      if(_epRows['Phone']) _epRows['Phone'].textContent = phone;
+      var hdr=document.querySelector('.profile-name'); if(hdr) hdr.textContent = name;
+      closeEditProfile();
+      alert('Profile updated.');
+    }
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEditProfile(); });
+    (function(){ var m=document.getElementById('editProfileModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) closeEditProfile(); }); })();
+  </script>
 </body>
 </html>

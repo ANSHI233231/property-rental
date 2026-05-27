@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <title>Contact · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { navy:'#1A237E','royal-blue':'#1565C0',saffron:'#FF6F00',charcoal:'#212121',slate:'#546E7A','off-white':'#F8F9FA','light-gray':'#ECEFF1','mid-gray':'#CFD8DC' },
+      fontFamily: { poppins:['Poppins','sans-serif'], inter:['Inter','sans-serif'] }
+    }}}
+  </script>
+
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="gs-public-nav"></div>
+
+  <main class="max-w-6xl mx-auto px-6" style="padding:48px 0 64px; max-width:620px;">
+    <h1 style="font-size:36px;">Contact us</h1>
+    <p class="muted" style="font-size:15px; margin:8px 0 28px;">Questions about GharSetu? Send us a message and the team will get back to you.</p>
+
+    <form id="contactForm" class="card" novalidate onsubmit="event.preventDefault(); submitContact();">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="label" for="c-name">Full name</label>
+          <input id="c-name" class="input" oninput="clearErr('c-name')" />
+          <div class="field-error" id="c-name-error"></div>
+        </div>
+        <div>
+          <label class="label" for="c-email">Email</label>
+          <input id="c-email" type="email" class="input" oninput="clearErr('c-email')" />
+          <div class="field-error" id="c-email-error"></div>
+        </div>
+        <div>
+          <label class="label" for="c-org">Organization <span class="muted" style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <input id="c-org" class="input" />
+        </div>
+        <div>
+          <label class="label" for="c-phone">Phone <span class="muted" style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <input id="c-phone" class="input" placeholder="98xxxxxxxx" />
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="label" for="c-subject">Subject</label>
+        <input id="c-subject" class="input" oninput="clearErr('c-subject')" />
+        <div class="field-error" id="c-subject-error"></div>
+      </div>
+      <div class="mt-4">
+        <label class="label" for="c-message">Message</label>
+        <textarea id="c-message" class="input" rows="5" oninput="clearErr('c-message')"></textarea>
+        <div class="field-error" id="c-message-error"></div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button type="submit" class="btn btn-primary">Send message</button>
+      </div>
+    </form>
+
+    <div id="contactSuccess" class="card" style="display:none; border-left:4px solid var(--color-status-paid); margin-top:8px;">
+      <h3 style="margin:0 0 4px;">Message sent</h3>
+      <p class="text-sm" style="color:var(--color-charcoal); margin:0;">Thanks — we've received your message and will get back to you by email.</p>
+    </div>
+  </main>
+
+  <div id="gs-public-footer"></div>
+
+  <script>
+    function showErr(id, msg){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); e.textContent=msg; e.classList.add('show'); i.classList.add('error'); }
+    function clearErr(id){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); if(e){e.textContent='';e.classList.remove('show');} if(i){i.classList.remove('error');} }
+    function submitContact(){
+      var ok=true; var first=null;
+      function check(id,cond,msg){ if(!cond){ showErr(id,msg); if(!first) first=document.getElementById(id); ok=false; } else clearErr(id); }
+      var email=document.getElementById('c-email').value.trim();
+      check('c-name', document.getElementById('c-name').value.trim().length>0, 'Please enter your name.');
+      check('c-email', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email), 'Please enter a valid email address.');
+      check('c-subject', document.getElementById('c-subject').value.trim().length>0, 'Please add a subject.');
+      check('c-message', document.getElementById('c-message').value.trim().length>=10, 'Please write at least 10 characters.');
+      if(!ok){ if(first) first.focus(); return; }
+      // Prototype: record-only. No email is sent (manual follow-up). Show success.
+      document.getElementById('contactForm').style.display='none';
+      document.getElementById('contactSuccess').style.display='block';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
+  <script src="assets/public-chrome.js"></script>
+</body>
+</html>

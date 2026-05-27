@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <title>Register Your Organization · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +22,8 @@
     }
   </script>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/plans.js"></script>
+  <script src="assets/business-types.js"></script>
   <style>
     /* ─── Card — wider on desktop ─────────────────────────────── */
     .org-auth-card {
@@ -237,15 +240,9 @@
             <!-- A2 Type of business -->
             <div class="field-group">
               <label class="label" for="biz-type">Type of Business <span style="color:#FF6F00;">*</span></label>
-              <select id="biz-type" class="input" aria-describedby="biz-type-error">
-                <option value="">Select business type</option>
-                <option value="pg_hostel">PG / Hostel</option>
-                <option value="housing_society">Housing Society</option>
-                <option value="individual_landlord">Individual Landlord</option>
-                <option value="property_mgmt_firm">Property Management Firm</option>
-                <option value="other">Other</option>
-              </select>
+              <select id="biz-type" class="input" aria-describedby="biz-type-error"></select>
               <div id="biz-type-error" class="field-error" role="alert" aria-live="polite"></div>
+              <script>renderBusinessTypeOptions("biz-type");</script>
             </div>
 
             <!-- A3 Expected number of units -->
@@ -461,110 +458,11 @@
              ================================================ -->
         <div class="form-section">
           <h3 class="form-section-heading" id="plan-group-label">Subscription plan</h3>
-          <p style="font-size:13px; color:#546E7A; margin:0 0 14px;">Not sure? Pick Standard — you can change later.</p>
+          <p style="font-size:13px; color:#546E7A; margin:0 0 14px;">Not sure? Pick the one marked Most Popular — you can change later.</p>
 
-          <div role="radiogroup" aria-labelledby="plan-group-label" class="plan-group" id="plan-group">
+          <div role="radiogroup" aria-labelledby="plan-group-label" class="plan-group" id="plan-group"></div>
+          <script>renderSignupPlanTiles("plan-group");</script>
 
-            <!-- Basic -->
-            <div>
-              <input
-                class="plan-tile-input"
-                type="radio"
-                name="subscription-plan"
-                id="plan-basic"
-                value="basic"
-                aria-describedby="plan-group-error"
-              />
-              <label class="plan-tile-label" for="plan-basic">
-                <div style="margin-bottom:6px;">
-                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Basic</div>
-                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Up to 5 users</div>
-                </div>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Property &amp; lease management
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Rent collection &amp; tracking
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Maintenance tracking
-                  </li>
-                </ul>
-                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
-              </label>
-            </div>
-
-            <!-- Standard -->
-            <div>
-              <input
-                class="plan-tile-input"
-                type="radio"
-                name="subscription-plan"
-                id="plan-standard"
-                value="standard"
-                aria-describedby="plan-group-error"
-              />
-              <label class="plan-tile-label" for="plan-standard">
-                <div style="margin-bottom:6px;">
-                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Standard <span style="font-size:10px; background:#FF6F00; color:#fff; padding:2px 6px; border-radius:999px; font-weight:600; letter-spacing:0.4px; vertical-align:middle; margin-left:4px;">Popular</span></div>
-                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Up to 20 users</div>
-                </div>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Everything in Basic
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Per-room leasing &amp; visitors
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Multi-property management
-                  </li>
-                </ul>
-                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
-              </label>
-            </div>
-
-            <!-- Premium -->
-            <div>
-              <input
-                class="plan-tile-input"
-                type="radio"
-                name="subscription-plan"
-                id="plan-premium"
-                value="premium"
-                aria-describedby="plan-group-error"
-              />
-              <label class="plan-tile-label" for="plan-premium">
-                <div style="margin-bottom:6px;">
-                  <div class="font-poppins font-semibold" style="font-size:14px; color:#212121;">Premium</div>
-                  <div style="font-size:11px; color:#546E7A; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">Unlimited users</div>
-                </div>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px;">
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Everything in Standard
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Advanced reports &amp; analytics
-                  </li>
-                  <li style="display:flex; align-items:center; gap:6px; font-size:12px; color:#546E7A;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                    Priority support &amp; impersonation
-                  </li>
-                </ul>
-                <div class="muted" style="font-size:11px; margin-top:8px;">Pricing on request</div>
-              </label>
-            </div>
-
-          </div><!-- /.plan-group -->
 
           <!-- Plan validation error slot -->
           <div id="plan-group-error" class="field-error" role="alert" aria-live="polite" style="margin-top:8px;"></div>
@@ -584,9 +482,9 @@
               />
               <label for="terms-accept" style="cursor:pointer;">
                 I agree to the
-                <a href="#" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Terms of Service</a>
+                <a href="terms.html" target="_blank" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Terms of Service</a>
                 and
-                <a href="#" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Privacy Policy</a>
+                <a href="privacy.html" target="_blank" style="color:#1565C0; font-weight:600; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Privacy Policy</a>
               </label>
             </div>
             <div id="terms-accept-error" class="field-error" role="alert" aria-live="polite" style="margin-top:6px;"></div>

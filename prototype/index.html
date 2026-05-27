@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <title>GharSetu — Property Rental Management Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,271 +22,424 @@
     }
   </script>
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- ========================================================
+       Landing-page-only styles. All colors compose existing
+       tokens from assets/styles.css — nothing invented.
+       ======================================================== -->
+  <style>
+    /* ---- Skip link (a11y bypass-blocks) ---- */
+    .skip-link { position:absolute; left:-9999px; top:8px; z-index:100; background:#fff; color:var(--color-navy);
+      padding:8px 16px; border-radius:8px; font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; text-decoration:none; }
+    .skip-link:focus { left:8px; }
+
+    /* ---- Hero gradient + saffron mesh overlay ---- */
+    .hero-gradient {
+      background:
+        radial-gradient(ellipse 80% 60% at 72% 45%, rgba(255,111,0,0.10) 0%, transparent 65%),
+        linear-gradient(135deg, #1A237E 0%, #0D1757 58%, #1565C0 100%);
+    }
+    .hero-inner { padding-top:72px; padding-bottom:0; }
+    .hero-grid { display:grid; grid-template-columns:1.12fr 1fr; gap:56px; align-items:center; padding-bottom:48px; }
+    .hero-eyebrow { display:inline-block; color:var(--color-saffron); font-family:'Poppins',sans-serif; font-weight:600;
+      font-size:13px; text-transform:uppercase; letter-spacing:0.12em; border-bottom:2px solid var(--color-saffron);
+      padding-bottom:5px; margin-bottom:22px; }
+    .hero-h1 { color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:60px; line-height:1.08;
+      letter-spacing:-0.5px; max-width:620px; margin:0; }
+    .hero-sub { color:rgba(255,255,255,0.82); font-size:18px; line-height:1.6; max-width:520px; margin:20px 0 0; }
+    .hero-ctas { display:flex; gap:16px; margin-top:32px; flex-wrap:wrap; }
+    .hero-btn-ghost { background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.55); padding:11px 26px; }
+    .hero-btn-ghost:hover { border-color:#fff; background:rgba(255,255,255,0.06); }
+
+    /* ---- Hero product mock (browser-framed dashboard) ---- */
+    .hero-visual { position:relative; }
+    .mock-window { background:#fff; border-radius:14px; box-shadow:0 24px 64px rgba(0,0,0,0.40);
+      overflow:hidden; border:1px solid rgba(255,255,255,0.12); }
+    .mock-titlebar { background:var(--color-light-gray); padding:10px 14px; display:flex; align-items:center; gap:7px;
+      border-bottom:1px solid var(--color-mid-gray); }
+    .mock-dot { width:10px; height:10px; border-radius:999px; background:var(--color-mid-gray); flex-shrink:0; }
+    .mock-url { margin-left:10px; background:#fff; border:1px solid var(--color-mid-gray); border-radius:6px;
+      padding:3px 12px; font-size:11px; color:var(--color-slate); font-family:'Inter',sans-serif; }
+    .mock-body { padding:18px; }
+    .mock-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+    .mock-kpi { background:var(--color-off-white); border:1px solid var(--color-light-gray); border-radius:10px; padding:10px 12px; }
+    .mock-kpi-label { font-family:'Poppins',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-slate); }
+    .mock-kpi-value { font-family:'Poppins',sans-serif; font-weight:700; font-size:20px; color:var(--color-navy); margin-top:2px; }
+    .mock-table { width:100%; border-collapse:collapse; }
+    .mock-table th { text-align:left; font-family:'Poppins',sans-serif; font-size:10px; text-transform:uppercase;
+      letter-spacing:0.5px; color:var(--color-slate); padding:6px 8px; border-bottom:1px solid var(--color-mid-gray); }
+    .mock-table td { padding:9px 8px; font-size:12px; color:var(--color-charcoal); border-bottom:1px solid var(--color-light-gray); }
+    .mock-table tr:last-child td { border-bottom:0; }
+    .mock-table .badge { font-size:10px; padding:2px 8px; }
+
+    /* ---- Hero trust / stats strip ---- */
+    .hero-stats-strip { display:flex; align-items:center; flex-wrap:wrap; padding:22px 0 36px;
+      border-top:1px solid rgba(255,255,255,0.12); }
+    .hero-stat { padding:6px 32px 6px 0; border-right:1px solid rgba(255,255,255,0.15); margin-right:32px; font-family:'Poppins',sans-serif; }
+    .hero-stat:last-child { border-right:none; margin-right:0; }
+    .hero-stat-value { font-weight:700; font-size:26px; color:#fff; line-height:1.15; }
+    .hero-stat-label { font-size:13px; color:rgba(255,255,255,0.65); font-weight:400; font-family:'Inter',sans-serif; margin-top:2px; }
+
+    /* ---- Section scaffolding ---- */
+    .section-pad { padding:80px 0; }
+    .section-head { text-align:center; max-width:640px; margin:0 auto 56px; }
+    .section-head h2 { font-size:36px; color:var(--color-royal-blue); line-height:1.2; }
+    .eyebrow-center { display:flex; justify-content:center; margin-bottom:14px; }
+    .eyebrow-pill { display:inline-block; background:rgba(255,111,0,0.10); color:var(--color-saffron);
+      font-family:'Poppins',sans-serif; font-weight:600; font-size:12px; text-transform:uppercase;
+      letter-spacing:0.6px; padding:5px 14px; border-radius:999px; }
+
+    /* ---- Capabilities — alternating feature rows ---- */
+    .feature-rows { display:flex; flex-direction:column; gap:64px; }
+    .feature-row { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+    .feature-row.reversed { direction:rtl; }
+    .feature-row.reversed > * { direction:ltr; }
+    .feature-mock { background:#fff; border:1px solid var(--color-mid-gray); border-radius:16px;
+      box-shadow:0 4px 18px rgba(0,0,0,0.06); padding:20px; transition:transform 250ms ease, box-shadow 250ms ease; }
+    .feature-row:hover .feature-mock { transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,0.12); }
+    .feature-h { font-family:'Poppins',sans-serif; font-weight:600; font-size:28px; color:var(--color-charcoal); margin:16px 0 16px; }
+    .feature-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:13px; }
+    .feature-list li { display:flex; gap:10px; font-size:16px; line-height:1.55; color:var(--color-slate); }
+    .feature-list li::before { content:'✓'; color:var(--color-saffron); font-weight:700; flex-shrink:0; }
+
+    /* mock atoms reused inside feature panels */
+    .mock-kv { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--color-light-gray); }
+    .mock-kv:last-child { border-bottom:0; }
+    .mock-kv .k { font-size:12px; color:var(--color-slate); font-family:'Poppins',sans-serif; text-transform:uppercase; letter-spacing:0.4px; }
+    .mock-kv .v { font-size:14px; color:var(--color-charcoal); font-weight:500; }
+    .mock-req-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .mock-req-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; color:var(--color-charcoal); }
+    .mock-timeline { list-style:none; padding:0; margin:14px 0 0; }
+    .mock-timeline li { position:relative; padding:0 0 14px 22px; font-size:12px; color:var(--color-slate); }
+    .mock-timeline li::before { content:''; position:absolute; left:3px; top:3px; width:9px; height:9px; border-radius:999px;
+      background:var(--color-royal-blue); }
+    .mock-timeline li:not(:last-child)::after { content:''; position:absolute; left:7px; top:12px; bottom:0; width:1px; background:var(--color-mid-gray); }
+
+    /* ---- How-it-works ---- */
+    .how-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; position:relative; }
+    .how-grid::before { content:''; position:absolute; top:20px; left:17%; right:17%; border-top:1px dashed var(--color-mid-gray); z-index:0; }
+    .how-step { position:relative; z-index:1; text-align:center; }
+    .how-num-wrap { display:inline-block; background:var(--color-off-white); padding:0 14px; margin-bottom:18px; }
+    .step-number { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:999px;
+      background:rgba(255,111,0,0.10); color:var(--color-saffron); font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; }
+    .how-step h3 { font-size:18px; margin-bottom:8px; }
+    .how-step p { font-size:15px; color:var(--color-slate); line-height:1.6; max-width:280px; margin:0 auto; }
+
+    /* ---- Roles (bento, Admin emphasized) ---- */
+    .roles-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:920px; margin:0 auto; }
+    .role-admin { border-left:4px solid var(--color-saffron); }
+    .role-label { display:inline-block; background:rgba(255,111,0,0.10); color:var(--color-saffron); font-family:'Poppins',sans-serif;
+      font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; padding:3px 10px; border-radius:999px; margin-bottom:10px; }
+
+    /* ---- Plans — popular card glow ---- */
+    #plansGrid a.card[style*="2px solid #FF6F00"] { box-shadow:0 12px 40px rgba(255,111,0,0.18); }
+
+    /* ---- Final CTA + footer merged navy band ---- */
+    .final-cta { background:#1A237E; padding:80px 0 56px; text-align:center; }
+    .final-cta h2 { color:#fff; font-size:36px; margin-bottom:16px; line-height:1.2; }
+
+    /* ---- Scroll reveal ---- */
+    .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* ---- Responsive — single primary breakpoint at 1023px ---- */
+    @media (max-width: 1023px) {
+      .hero-inner { padding-top:48px; }
+      .hero-grid { grid-template-columns:1fr; gap:0; padding-bottom:40px; }
+      .hero-visual { display:none; }
+      .hero-gradient { background:linear-gradient(160deg, #1A237E 0%, #0D1757 100%); }
+      .hero-h1 { font-size:38px; }
+      .hero-sub { max-width:100%; }
+      .section-pad { padding:56px 0; }
+      .section-head { margin-bottom:40px; }
+      .section-head h2 { font-size:28px; }
+      .feature-rows { gap:44px; }
+      .feature-row, .feature-row.reversed { grid-template-columns:1fr; direction:ltr; gap:24px; }
+      .feature-h { font-size:24px; }
+      .how-grid { grid-template-columns:1fr; gap:28px; }
+      .how-grid::before { display:none; }
+      .how-num-wrap { padding:0; }
+      .roles-grid { grid-template-columns:repeat(2,1fr); }
+      .role-admin { border-left:1px solid var(--color-mid-gray); }
+    }
+    @media (max-width: 767px) {
+      .hero-h1 { font-size:34px; }
+      .hero-ctas { flex-direction:column; }
+      .hero-ctas .btn { width:100%; justify-content:center; }
+      .roles-grid { grid-template-columns:1fr; }
+      #plansGrid { grid-template-columns:1fr !important; max-width:480px; }
+      .final-cta h2 { font-size:26px; }
+    }
+    @media (max-width: 480px) { .hero-stats-strip { display:none; } }
+    @media (max-width: 359px) { .max-w-6xl { padding-left:16px !important; padding-right:16px !important; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity:0; transform:none; transition:opacity 0.3s ease; }
+      .reveal.visible { transform:none; }
+      .feature-row:hover .feature-mock { transform:none; }
+    }
+  </style>
 </head>
 <body>
+  <a href="#hero" class="skip-link">Skip to main content</a>
 
   <!-- ========================================================
-       SECTION 1 — Top nav
-       White bar, 1px bottom mid-gray border, logo left + Login right
+       SECTION A — Top navigation (shared chrome — assets/public-chrome.js)
        ======================================================== -->
-  <nav style="background:#fff; border-bottom:1px solid #CFD8DC; position:sticky; top:0; z-index:40;">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="index.html" class="font-poppins font-bold text-2xl text-navy tracking-wide" style="text-decoration:none;">
-        Ghar<span class="text-saffron">Setu</span>
-      </a>
-      <a href="login.html" class="font-poppins font-semibold text-sm text-royal-blue" style="text-decoration:none;">
-        Login
-      </a>
-    </div>
-  </nav>
+  <div id="gs-public-nav"></div>
 
   <!-- ========================================================
-       SECTION 2 — Hero
-       Navy background, eyebrow + H1 + sub-headline + two CTAs
-       Text-only (no right-side panel per Q1 default)
+       SECTION B — Hero
+       Navy gradient + saffron mesh · copy left · product mock right · stats strip
        ======================================================== -->
-  <section id="hero" aria-labelledby="hero-heading" style="background:#1A237E;" class="text-white">
-    <div class="max-w-6xl mx-auto px-6 py-16" style="padding-top:80px; padding-bottom:80px;">
-      <!-- Eyebrow -->
-      <p class="font-poppins font-semibold uppercase tracking-widest text-saffron mb-4" style="font-size:13px; letter-spacing:0.12em;">
-        Multi-tenant Property Rental Management
-      </p>
-      <!-- H1 headline -->
-      <h1 id="hero-heading" class="text-white" style="color:#fff; font-size:44px; line-height:1.15; max-width:700px;">
-        Run your rental business from one place.
-      </h1>
-      <!-- Sub-headline -->
-      <p class="mt-5 text-white" style="color:rgba(255,255,255,0.82); font-size:18px; line-height:1.6; max-width:620px;">
-        Multi-property rental management — leases, rent, maintenance, visitors, all role-scoped.
-        Sign your organization up in minutes.
-      </p>
-      <!-- CTAs -->
-      <div class="flex gap-4 mt-8 flex-wrap">
-        <a href="organization-signup.html" class="btn btn-primary" style="font-size:15px; padding:12px 28px;">
-          Register Your Organization
-        </a>
-        <a href="login.html" class="btn btn-secondary" style="color:#fff; border-color:#fff; padding:10px 26px;">
-          Login
-        </a>
+  <section id="hero" class="hero-gradient" aria-labelledby="hero-heading">
+    <div class="max-w-6xl mx-auto px-6 hero-inner">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="hero-eyebrow">Property Rental Management</span>
+          <h1 id="hero-heading" class="hero-h1">Run your entire rental business from one place.</h1>
+          <p class="hero-sub">Leases, rent, maintenance and visitors — every record role-scoped and auditable. Get your organization live in minutes.</p>
+          <div class="hero-ctas">
+            <a href="organization-signup.html" class="btn btn-primary" style="font-size:15px; padding:13px 30px;">Register Your Organization</a>
+            <a href="login.html" class="btn btn-secondary hero-btn-ghost">Login</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="mock-window">
+            <div class="mock-titlebar">
+              <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+              <span class="mock-url">anshika.tlitech.net</span>
+            </div>
+            <div class="mock-body">
+              <div class="mock-kpis">
+                <div class="mock-kpi"><div class="mock-kpi-label">Collected</div><div class="mock-kpi-value">₹4.2L</div></div>
+                <div class="mock-kpi"><div class="mock-kpi-label">Occupancy</div><div class="mock-kpi-value">94%</div></div>
+                <div class="mock-kpi"><div class="mock-kpi-label">Open req.</div><div class="mock-kpi-value">7</div></div>
+              </div>
+              <table class="mock-table">
+                <thead><tr><th>Unit</th><th>Tenant</th><th>Rent</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Flat 101</td><td>Priya Sharma</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                  <tr><td>Flat 204</td><td>Rahul Verma</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
+                  <tr><td>Flat 305</td><td>Anjali Mehta</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-stats-strip">
+        <div class="hero-stat"><div class="hero-stat-value">120+</div><div class="hero-stat-label">Units managed</div></div>
+        <div class="hero-stat"><div class="hero-stat-value">18</div><div class="hero-stat-label">Buildings</div></div>
+        <div class="hero-stat"><div class="hero-stat-value">4</div><div class="hero-stat-label">Operational roles</div></div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================
-       SECTION 3 — Problem
-       Off-white background, three 1-line pain points in a 3-up grid
+       SECTION C — Capabilities (alternating feature rows)
        ======================================================== -->
-  <section id="problem" aria-labelledby="problem-heading" style="background:#F8F9FA; padding:64px 0;">
+  <section id="capabilities" aria-labelledby="capabilities-heading" class="section-pad" style="background:#fff;">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <h2 id="problem-heading">Paper folders, spreadsheets, and WhatsApp groups don't scale.</h2>
-        <p class="muted mt-3" style="font-size:16px;">When your portfolio grows, manual tracking fails. GharSetu replaces the chaos.</p>
-      </div>
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;" class="problem-grid">
-        <div class="card" style="text-align:center; padding:28px 24px;">
-          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">Lost receipts &amp; payment gaps</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Rent payments recorded in notebooks get lost. Disputes arise with no audit trail.</p>
-        </div>
-        <div class="card" style="text-align:center; padding:28px 24px;">
-          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">Forgotten lease renewals</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Lease end dates buried in spreadsheets mean costly holdovers and unprepared tenants.</p>
-        </div>
-        <div class="card" style="text-align:center; padding:28px 24px;">
-          <div style="width:44px; height:44px; border-radius:10px; background:#FFF3E0; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#FF6F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <h3 class="font-poppins font-semibold text-charcoal" style="font-size:16px; margin-bottom:8px;">No audit trail</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Who approved the maintenance request? Who changed the rent? Without logs, there's no accountability.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       SECTION 4 — Solution capabilities
-       White background, 4 capability cards
-       Desktop 4-col → tablet 2-col → mobile 1-col
-       ======================================================== -->
-  <section id="capabilities" aria-labelledby="capabilities-heading" style="background:#fff; padding:64px 0;">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="section-head">
+        <div class="eyebrow-center"><span class="eyebrow-pill">Platform capabilities</span></div>
         <h2 id="capabilities-heading">Everything your rental business needs</h2>
-        <p class="muted mt-3" style="font-size:16px;">One integrated platform — no juggling apps, no data silos.</p>
       </div>
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;" class="capabilities-grid">
-        <div class="card">
-          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <div class="feature-rows">
+
+        <!-- Row 1 — Rent Collection (mock left · text right) -->
+        <div class="feature-row reveal">
+          <div class="feature-mock">
+            <table class="mock-table">
+              <thead><tr><th>Unit</th><th>Rent</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Flat 101</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                <tr><td>Flat 204</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
+                <tr><td>Flat 305</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
+                <tr><td>Flat 402</td><td>₹20,000</td><td><span class="badge badge-prepaid">Prepaid</span></td></tr>
+              </tbody>
+            </table>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Rent Collection</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Track monthly rent, mark payments, handle partial and prepaid amounts. Overdue alerts automatically.</p>
+          <div class="feature-text">
+            <span class="eyebrow-pill">Rent</span>
+            <h3 class="feature-h">Rent Collection</h3>
+            <ul class="feature-list">
+              <li>Record payments — full, partial or prepaid — in a click.</li>
+              <li>Overdue rent surfaces automatically; no manual chasing.</li>
+              <li>Every rupee captured with a permanent audit trail.</li>
+            </ul>
+          </div>
         </div>
-        <div class="card">
-          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+
+        <!-- Row 2 — Maintenance (text left · mock right) -->
+        <div class="feature-row reversed reveal">
+          <div class="feature-mock">
+            <div class="mock-req-head">
+              <span class="mock-req-title">Leaking tap — Flat 204</span>
+              <span class="badge badge-emergency">Emergency</span>
+            </div>
+            <div class="mock-kv"><span class="k">Assigned</span><span class="v">Suresh K.</span></div>
+            <div class="mock-kv"><span class="k">Status</span><span class="badge badge-progress">In Progress</span></div>
+            <ul class="mock-timeline">
+              <li>Raised by tenant · 24/05/2026</li>
+              <li>Assigned to Suresh K. · 24/05/2026</li>
+              <li>Work started · 25/05/2026</li>
+            </ul>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Maintenance</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Replace WhatsApp threads with structured requests — assign staff, track status, close with accountability.</p>
+          <div class="feature-text">
+            <span class="eyebrow-pill">Maintenance</span>
+            <h3 class="feature-h">Maintenance Requests</h3>
+            <ul class="feature-list">
+              <li>Structured requests replace scattered WhatsApp threads.</li>
+              <li>Assign staff, track status and close with accountability.</li>
+              <li>Emergency requests are flagged and surfaced first.</li>
+            </ul>
+          </div>
         </div>
-        <div class="card">
-          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+
+        <!-- Row 3 — Leases (mock left · text right) -->
+        <div class="feature-row reveal">
+          <div class="feature-mock">
+            <div class="mock-req-head">
+              <span class="mock-req-title">Lease · Flat 101</span>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div class="mock-kv"><span class="k">Tenant</span><span class="v">Priya Sharma</span></div>
+            <div class="mock-kv"><span class="k">Start</span><span class="v">01/06/2025</span></div>
+            <div class="mock-kv"><span class="k">End</span><span class="v">31/05/2026</span></div>
+            <div class="mock-kv"><span class="k">Monthly rent</span><span class="v">₹18,000</span></div>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Leases</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Create, manage and renew leases with rent-lock logic, co-tenant support, and scheduled rent changes.</p>
+          <div class="feature-text">
+            <span class="eyebrow-pill">Leases</span>
+            <h3 class="feature-h">Lease Management</h3>
+            <ul class="feature-list">
+              <li>Create, renew and terminate leases with rent-lock logic.</li>
+              <li>Co-tenant support with per-tenant consent on changes.</li>
+              <li>Schedule future rent changes ahead of renewal.</li>
+            </ul>
+          </div>
         </div>
-        <div class="card">
-          <div style="width:44px; height:44px; border-radius:10px; background:#E3F2FD; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+        <!-- Row 4 — Visitors & Tenants (text left · mock right) -->
+        <div class="feature-row reversed reveal">
+          <div class="feature-mock">
+            <table class="mock-table">
+              <thead><tr><th>Visitor</th><th>Flat</th><th>Check-in</th></tr></thead>
+              <tbody>
+                <tr><td>Amit Rao</td><td>101</td><td>10:24</td></tr>
+                <tr><td>Delivery — BlueDart</td><td>204</td><td>11:05</td></tr>
+                <tr><td>Neha Gupta</td><td>305</td><td>13:40</td></tr>
+                <tr><td>Plumber</td><td>402</td><td>15:12</td></tr>
+              </tbody>
+            </table>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenants &amp; Visitors</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Tenant onboarding, visitor logs, and self-service portals — one place for every person in your building.</p>
+          <div class="feature-text">
+            <span class="eyebrow-pill">Visitors &amp; Tenants</span>
+            <h3 class="feature-h">Visitors &amp; Tenant Portal</h3>
+            <ul class="feature-list">
+              <li>Log every visitor with flat, purpose and check-in time.</li>
+              <li>Tenants self-serve their lease, rent status and requests.</li>
+              <li>One record for every person in your building.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION D — How it works (three steps)
+       ======================================================== -->
+  <section id="how" aria-labelledby="how-heading" class="section-pad reveal" style="background:#F8F9FA;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="section-head">
+        <div class="eyebrow-center"><span class="eyebrow-pill">Get started</span></div>
+        <h2 id="how-heading">Live in three steps</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-step">
+          <div class="how-num-wrap"><div class="step-number">01</div></div>
+          <h3 class="font-poppins">Register your organization</h3>
+          <p>Sign up and choose a plan — your workspace is ready once approved.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num-wrap"><div class="step-number">02</div></div>
+          <h3 class="font-poppins">Invite your team</h3>
+          <p>Add property managers and maintenance staff, each scoped to their role.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num-wrap"><div class="step-number">03</div></div>
+          <h3 class="font-poppins">Manage from day one</h3>
+          <p>Add properties and leases — rent, requests and visitors track themselves.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================
-       SECTION 5 — Roles
-       Light-gray background, 4 marketing role cards (no links)
-       Desktop 4-col → tablet 2-col → mobile 1-col
+       SECTION E — Roles (bento, Admin emphasized)
        ======================================================== -->
-  <section id="roles" aria-labelledby="roles-heading" style="background:#ECEFF1; padding:64px 0;">
+  <section id="roles" aria-labelledby="roles-heading" class="section-pad" style="background:#fff;">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <h2 id="roles-heading">Built for the four people who run a rental business</h2>
-        <p class="muted mt-3" style="font-size:16px;">Every role gets exactly the view they need — nothing more, nothing less.</p>
+      <div class="section-head">
+        <div class="eyebrow-center"><span class="eyebrow-pill">Who it's for</span></div>
+        <h2 id="roles-heading">Built for every person in your building</h2>
       </div>
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;" class="roles-grid">
-        <div class="card">
+      <div class="roles-grid">
+        <div class="card role-card role-admin reveal">
           <div class="role-icon" style="background:#1A237E; margin-bottom:16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Admin</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Full system control across all properties, users, and alerts. Highest privilege, complete visibility.</p>
+          <span class="role-label">Owner / Operator</span>
+          <h3 class="font-poppins font-semibold" style="font-size:20px; color:#212121; margin-bottom:8px;">Admin</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Full control across every property, user and alert. Highest privilege, complete visibility, and the buyer who sets up the workspace.</p>
         </div>
-        <div class="card">
+        <div class="card role-card reveal">
           <div class="role-icon" style="background:#1565C0; margin-bottom:16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
           </div>
           <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Property Manager</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Manages one assigned property — leases, rent collection, tenants, and maintenance coordination.</p>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Manages assigned properties — leases, rent collection, tenants and maintenance coordination.</p>
         </div>
-        <div class="card">
+        <div class="card role-card reveal">
+          <div class="role-icon" style="background:#FF6F00; margin-bottom:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
+          </div>
+          <span class="role-label">Self-service portal</span>
+          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenant</h3>
+          <p class="muted" style="font-size:14px; line-height:1.6;">Views their lease, tracks rent status and raises maintenance requests from their own portal.</p>
+        </div>
+        <div class="card role-card reveal">
           <div class="role-icon" style="background:#546E7A; margin-bottom:16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
           </div>
           <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Maintenance Staff</h3>
           <p class="muted" style="font-size:14px; line-height:1.6;">Sees only the requests assigned to them. No access to rent or lease data — scoped by design.</p>
         </div>
-        <div class="card">
-          <div class="role-icon" style="background:#FF6F00; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
-          </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenant</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Views their lease, tracks rent status, and raises maintenance requests from a self-service portal.</p>
-        </div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================
-       SECTION 6 — Subscription Plans
-       White background, 3 cards: Basic · Standard (highlighted) · Premium
-       Each links to organization-signup.html
+       SECTION F — Subscription plans (rendered from plans.js)
        ======================================================== -->
-  <section id="plans" aria-labelledby="plans-heading" style="background:#fff; padding:64px 0;">
+  <section id="plans" aria-labelledby="plans-heading" class="section-pad" style="background:#ECEFF1;">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="section-head">
+        <div class="eyebrow-center"><span class="eyebrow-pill">Pricing</span></div>
         <h2 id="plans-heading">Plans for every size</h2>
-        <p class="muted mt-3" style="font-size:16px;">From a single landlord to a large property management firm — GharSetu scales with you.</p>
       </div>
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:900px; margin:0 auto;" class="plans-grid">
-
-        <!-- Basic -->
-        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; transition:transform 200ms, box-shadow 200ms; padding:32px 24px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Basic</div>
-          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Up to 5 active users</div>
-          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
-          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Property &amp; lease management
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Rent collection &amp; tracking
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Maintenance request tracking
-            </li>
-          </ul>
-          <div class="font-poppins font-semibold text-royal-blue" style="font-size:14px;">Get started →</div>
-        </a>
-
-        <!-- Standard (highlighted) -->
-        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; border:2px solid #FF6F00; transition:transform 200ms, box-shadow 200ms; padding:32px 24px; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(255,111,0,0.2)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-          <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#FF6F00; color:#fff; font-family:'Poppins',sans-serif; font-weight:600; font-size:11px; padding:3px 12px; border-radius:999px; white-space:nowrap; letter-spacing:0.5px; text-transform:uppercase;">Most Popular</div>
-          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Standard</div>
-          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Up to 20 active users</div>
-          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
-          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Everything in Basic
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Per-room leasing &amp; visitor management
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Multi-property management
-            </li>
-          </ul>
-          <div class="font-poppins font-semibold text-saffron" style="font-size:14px;">Get started →</div>
-        </a>
-
-        <!-- Premium -->
-        <a href="organization-signup.html" class="card" style="display:block; text-decoration:none; cursor:pointer; transition:transform 200ms, box-shadow 200ms; padding:32px 24px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-          <div class="font-poppins font-semibold text-slate" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Premium</div>
-          <div class="font-poppins font-bold text-charcoal" style="font-size:22px; margin-bottom:4px;">Unlimited active users</div>
-          <div class="muted" style="font-size:13px; margin-bottom:20px;">Pricing on request</div>
-          <ul style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px;">
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Everything in Standard
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Advanced reports &amp; analytics
-            </li>
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:#546E7A;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-              Priority support &amp; Admin impersonation
-            </li>
-          </ul>
-          <div class="font-poppins font-semibold text-royal-blue" style="font-size:14px;">Get started →</div>
-        </a>
-
-      </div>
+      <div id="plansGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:900px; margin:0 auto;" class="plans-grid"></div>
     </div>
   </section>
 
   <!-- ========================================================
-       SECTION 7 — Final CTA
-       Full-width navy band, H2 + saffron primary + text-link
+       SECTION G — Final CTA (navy, merges into footer)
        ======================================================== -->
-  <section id="final-cta" aria-labelledby="final-cta-heading" style="background:#1A237E; padding:80px 0; text-align:center;">
+  <section id="final-cta" aria-labelledby="final-cta-heading" class="final-cta">
     <div class="max-w-6xl mx-auto px-6">
-      <h2 id="final-cta-heading" class="text-white" style="color:#fff; font-size:32px; margin-bottom:16px;">Ready to organize your rental business?</h2>
+      <h2 id="final-cta-heading">Ready to organize your rental business?</h2>
       <p style="color:rgba(255,255,255,0.78); font-size:17px; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto;">Join organizations that have replaced paper chaos with GharSetu. Sign up takes minutes.</p>
       <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
         <a href="organization-signup.html" class="btn btn-primary" style="font-size:16px; padding:14px 36px; min-width:260px;">
@@ -299,69 +453,30 @@
   </section>
 
   <!-- ========================================================
-       SECTION 8 — Footer
-       Navy, white/70 text, logo + tagline left, stub links right
+       SECTION H — Footer (shared chrome — assets/public-chrome.js)
        ======================================================== -->
-  <footer style="background:#1A237E; padding:48px 0 32px; border-top:1px solid rgba(255,255,255,0.08);">
-    <div class="max-w-6xl mx-auto px-6">
-      <div style="display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:32px; margin-bottom:32px;">
-        <!-- Logo + tagline -->
-        <div>
-          <a href="index.html" class="font-poppins font-bold" style="font-size:22px; color:#fff; text-decoration:none; letter-spacing:0.5px;">
-            Ghar<span style="color:#FF6F00;">Setu</span>
-          </a>
-          <p style="color:rgba(255,255,255,0.65); font-size:14px; margin-top:8px; max-width:220px; line-height:1.6;">Multi-tenant property rental management — organized, role-scoped, auditable.</p>
-        </div>
-        <!-- Stub links -->
-        <div style="display:flex; gap:48px; flex-wrap:wrap;">
-          <div>
-            <div class="font-poppins font-semibold" style="color:rgba(255,255,255,0.85); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">Company</div>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
-              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">About</a></li>
-              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Contact</a></li>
-            </ul>
-          </div>
-          <div>
-            <div class="font-poppins font-semibold" style="color:rgba(255,255,255,0.85); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">Legal</div>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
-              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Privacy</a></li>
-              <li><a href="#" class="font-poppins" style="color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; transition:color 150ms;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Terms</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!-- Copyright -->
-      <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:20px; color:rgba(255,255,255,0.5); font-size:13px;">
-        &copy; 2026 GharSetu. All rights reserved.
-      </div>
-    </div>
-  </footer>
+  <div id="gs-public-footer"></div>
 
-  <!-- Responsive styles for single 1024px breakpoint -->
-  <style>
-    /* Tablet and mobile (≤ 1023px) */
-    @media (max-width: 1023px) {
-      .capabilities-grid { grid-template-columns: repeat(2, 1fr) !important; }
-      .roles-grid { grid-template-columns: repeat(2, 1fr) !important; }
-      .plans-grid { grid-template-columns: 1fr !important; max-width: 480px !important; }
-    }
-    /* Mobile (≤ 767px) */
-    @media (max-width: 767px) {
-      .problem-grid { grid-template-columns: 1fr !important; }
-      .capabilities-grid { grid-template-columns: 1fr !important; }
-      .roles-grid { grid-template-columns: 1fr !important; }
-      .plans-grid { grid-template-columns: 1fr !important; max-width: 100% !important; }
-      #hero h1 { font-size: 28px !important; }
-      #hero p { font-size: 16px !important; }
-      #hero .flex { flex-direction: column; }
-      #hero .btn { width: 100%; justify-content: center; }
-      #final-cta h2 { font-size: 24px !important; }
-    }
-    /* Minimum 320px — prevent horizontal scroll */
-    @media (max-width: 359px) {
-      .max-w-6xl { padding-left: 16px !important; padding-right: 16px !important; }
-    }
-  </style>
+  <script src="assets/public-chrome.js"></script>
+  <script src="assets/plans.js"></script>
+  <script>
+    renderMarketingPlans("plansGrid");
 
+    /* Scroll reveal — IntersectionObserver, reduced-motion aware */
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var els = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) {
+        els.forEach(function (e) { e.classList.add('visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function (e) { io.observe(e); });
+    })();
+  </script>
 </body>
 </html>

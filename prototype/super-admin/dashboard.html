@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>Platform Dashboard · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,9 +39,12 @@
           <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
           <a href="master-data/states.html" class="sidebar-sublink">States</a>
           <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
@@ -170,25 +174,25 @@
             </thead>
             <tbody>
               <tr>
-                <td><a href="organization-detail.html?id=1" class="font-poppins font-semibold text-charcoal" style="color:var(--color-charcoal);text-decoration:none">Saffron Stays Pvt Ltd</a></td>
+                <td><a href="organization-detail.html?org=saffron-stays" class="font-poppins font-semibold text-charcoal" style="color:var(--color-charcoal);text-decoration:none">Saffron Stays Pvt Ltd</a></td>
                 <td>Standard</td>
                 <td>26/05/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
-                <td><a href="organization-detail.html?id=2" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Green Valley Co-living</a></td>
+                <td><a href="organization-detail.html?org=green-valley" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Green Valley Co-living</a></td>
                 <td>Standard</td>
                 <td>24/05/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
-                <td><a href="organization-detail.html?id=3" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Urban Nest Homes</a></td>
+                <td><a href="organization-detail.html?org=urban-nest" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Urban Nest Homes</a></td>
                 <td>Basic</td>
                 <td>20/05/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
-                <td><a href="organization-detail.html?id=4" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Delhi Dwellings Ltd</a></td>
+                <td><a href="organization-detail.html?org=delhi-dwellings" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Delhi Dwellings Ltd</a></td>
                 <td>Premium</td>
                 <td>15/05/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
@@ -230,31 +234,25 @@
     <a href="plans.html" class="tab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
     </a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
-    </button>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
-  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
-    <div class="account-sheet-handle" aria-hidden="true"></div>
-    <div class="account-menu-header">
-      <div class="account-menu-avatar">AK</div>
-      <div>
-        <div class="account-menu-name">Aayush</div>
-        <div class="account-menu-role">Super Admin</div>
-      </div>
-    </div>
-    <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+  
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
 </body>
 </html>

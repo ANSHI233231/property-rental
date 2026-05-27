@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>My Profile · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,12 +39,15 @@
           <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
           <a href="master-data/states.html" class="sidebar-sublink">States</a>
           <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
       </nav>
       <div class="sidebar-footer">
-        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+        <button type="button" class="account-trigger active" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
           <span class="account-trigger-label">Account</span>
           <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
@@ -57,7 +61,7 @@
             </div>
           </div>
           <div class="account-menu-divider"></div>
-          <a href="profile.html" class="account-menu-link" role="menuitem">
+          <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
             My Profile
           </a>
@@ -92,13 +96,12 @@
           <div class="profile-row"><span class="field">Name</span><span class="value">Aayush Kumar</span></div>
           <div class="profile-row"><span class="field">Email</span><span class="value">aayush@gharsetu.in</span></div>
           <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx00</span></div>
-          <div class="profile-row"><span class="field">Role</span><span class="value">Super Admin · Platform</span></div>
           <div class="profile-row"><span class="field">Scope</span><span class="value">All organizations · Platform-level</span></div>
           <div class="profile-row"><span class="field">Member since</span><span class="value">01/01/2025</span></div>
           <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active" aria-label="Status: Active">Active</span></span></div>
 
           <div class="mt-6 flex gap-2 flex-wrap">
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Edit details — read-only in prototype.')">Edit details</button>
+            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditProfile()">Edit details</button>
           </div>
           <p class="text-xs muted mt-3">Email and role changes are audited and require platform-level confirmation.</p>
         </section>
@@ -127,10 +130,6 @@
             </div>
             <button type="submit" class="btn btn-disabled !py-2 !text-sm" id="change-pw-btn" disabled>Change password</button>
           </form>
-
-          <hr class="divider"/>
-
-          <a href="../login.html" class="btn btn-danger !py-2 !text-sm">Sign out</a>
         </section>
       </div>
 
@@ -163,9 +162,7 @@
     <a href="plans.html" class="tab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
     </a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
-    </button>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
@@ -244,25 +241,82 @@
       updateSubmitBtn();
     }
   </script>
-  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
-    <div class="account-sheet-handle" aria-hidden="true"></div>
-    <div class="account-menu-header">
-      <div class="account-menu-avatar">AK</div>
-      <div>
-        <div class="account-menu-name">Aayush</div>
-        <div class="account-menu-role">Super Admin</div>
-      </div>
-    </div>
-    <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+  
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <!-- Edit Profile Modal (Name + Mobile only; email/role locked) -->
+  <div class="modal-backdrop" id="editProfileModal" role="dialog" aria-modal="true" aria-labelledby="epTitle">
+    <div class="modal" style="max-width:480px;">
+      <h3 id="epTitle">Edit profile</h3>
+      <form novalidate onsubmit="event.preventDefault(); saveProfile();">
+        <div class="mt-4">
+          <label class="label" for="ep-name">Full name</label>
+          <input id="ep-name" class="input" oninput="document.getElementById('ep-name-error').classList.remove('show'); this.classList.remove('error');" />
+          <div class="field-error" id="ep-name-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="ep-phone">Mobile number</label>
+          <input id="ep-phone" class="input" placeholder="98xxxxxxxx" oninput="document.getElementById('ep-phone-error').classList.remove('show'); this.classList.remove('error');" />
+          <div class="field-error" id="ep-phone-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="ep-email">Email (locked)</label>
+          <input id="ep-email" class="input" disabled style="background:var(--color-light-gray);cursor:not-allowed;" />
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    var _epRows = {};
+    function openEditProfile(){
+      _epRows = {};
+      document.querySelectorAll('.profile-row').forEach(function(r){
+        var f=r.querySelector('.field'), v=r.querySelector('.value'); if(f&&v) _epRows[f.textContent.trim()]=v;
+      });
+      document.getElementById('ep-name').value  = _epRows['Name']  ? _epRows['Name'].textContent.trim()  : '';
+      document.getElementById('ep-phone').value = _epRows['Phone'] ? _epRows['Phone'].textContent.trim() : '';
+      document.getElementById('ep-email').value = _epRows['Email'] ? _epRows['Email'].textContent.trim() : '';
+      document.getElementById('ep-name-error').classList.remove('show');
+      document.getElementById('ep-phone-error').classList.remove('show');
+      document.getElementById('editProfileModal').classList.add('open');
+      document.body.style.overflow='hidden';
+      setTimeout(function(){ document.getElementById('ep-name').focus(); }, 50);
+    }
+    function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('open'); document.body.style.overflow=''; }
+    function epErr(id,msg){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); e.textContent=msg; e.classList.add('show'); i.classList.add('error'); }
+    function saveProfile(){
+      var name=document.getElementById('ep-name').value.trim();
+      var phone=document.getElementById('ep-phone').value.trim();
+      var ok=true;
+      if(!name){ epErr('ep-name','Name is required.'); ok=false; }
+      var hasDigit=/\d/.test(phone);
+      if(!phone || !hasDigit || phone.replace(/\D/g,'').length<10){ epErr('ep-phone','Enter a valid mobile number (at least 10 digits).'); ok=false; }
+      if(!ok) return;
+      if(_epRows['Name'])  _epRows['Name'].textContent  = name;
+      if(_epRows['Phone']) _epRows['Phone'].textContent = phone;
+      var hdr=document.querySelector('.profile-name'); if(hdr) hdr.textContent = name;
+      closeEditProfile();
+      alert('Profile updated.');
+    }
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEditProfile(); });
+    (function(){ var m=document.getElementById('editProfileModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) closeEditProfile(); }); })();
+  </script>
 </body>
 </html>

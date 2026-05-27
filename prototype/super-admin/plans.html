@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>Subscription Plans · Super Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,9 +39,12 @@
           <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
           <a href="master-data/states.html" class="sidebar-sublink">States</a>
           <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
         </div>
         <div class="sidebar-divider"></div>
         <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
@@ -74,105 +78,74 @@
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div>
+        <div style="flex:1;min-width:0">
           <h1 class="page-title">Subscription Plans</h1>
         </div>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="openPlanEditor()">+ Add Plan</button>
       </header>
 
-      <!-- Info banner -->
+      <!-- Plan cards (rendered from the PLANS model) -->
       <section class="section">
-        <div class="alert" role="note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;color:var(--color-status-partial)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div>Plans are platform-wide. Cap changes take effect immediately for new user additions; existing users above the cap are not removed.</div>
-        </div>
-      </section>
-
-      <!-- Plan cards — 3-up grid -->
-      <section class="section">
-        <div class="grid lg:grid-cols-3 gap-6" id="plan-cards">
-
-          <!-- Basic -->
-          <div class="card" id="card-basic">
-            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Basic</h2>
-            <div class="kpi-value" id="cap-basic">5</div>
-            <div class="kpi-meta mb-4">active users cap</div>
-            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
-              <li>· Up to 5 active users</li>
-              <li>· 1 property</li>
-              <li>· Core rent + maintenance flows</li>
-              <li>· Manual visitor management</li>
-            </ul>
-            <div class="text-sm mb-4">
-              <span class="muted">4 organizations on this plan.</span>
-              <a href="organizations.html?plan=basic" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
-            </div>
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('basic', 5, 4, 'Urban Nest Homes')">Edit cap</button>
-          </div>
-
-          <!-- Standard -->
-          <div class="card" id="card-standard">
-            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Standard</h2>
-            <div class="kpi-value" id="cap-standard">20</div>
-            <div class="kpi-meta mb-4">active users cap</div>
-            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
-              <li>· Up to 20 active users</li>
-              <li>· Unlimited properties</li>
-              <li>· Per-room leasing</li>
-              <li>· Admin Impersonation</li>
-              <li>· Task Delegations</li>
-            </ul>
-            <div class="text-sm mb-4">
-              <span class="muted">5 organizations on this plan.</span>
-              <a href="organizations.html?plan=standard" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
-            </div>
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('standard', 20, 12, 'Saffron Stays Pvt Ltd')">Edit cap</button>
-          </div>
-
-          <!-- Premium -->
-          <div class="card" id="card-premium">
-            <h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">Premium</h2>
-            <div class="kpi-value" id="cap-premium">∞</div>
-            <div class="kpi-meta mb-4">unlimited active users</div>
-            <ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">
-              <li>· Unlimited active users</li>
-              <li>· All Standard features</li>
-              <li>· Master Data customization</li>
-              <li>· Settings tuning</li>
-              <li>· Priority support</li>
-            </ul>
-            <div class="text-sm mb-4">
-              <span class="muted">1 organization on this plan.</span>
-              <a href="organizations.html?plan=premium" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a>
-            </div>
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditCapModal('premium', null, null, null)">Edit cap</button>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- Deferred notice -->
-      <section class="section">
-        <p class="text-sm muted">Feature scope per plan is a v8 design decision and not editable from the catalogue in this prototype.</p>
+        <div class="grid lg:grid-cols-3 gap-6" id="plan-cards"></div>
       </section>
     </main>
   </div>
 
-  <!-- Edit Cap Modal (shared, populated by JS) -->
-  <div class="modal-backdrop" id="editCapModal" role="dialog" aria-modal="true" aria-labelledby="editCapTitle">
-    <div class="modal">
-      <h3 id="editCapTitle">Edit plan cap</h3>
-      <form novalidate onsubmit="event.preventDefault();saveCapChange()">
+  <!-- Plan Editor Modal (add + full edit) -->
+  <div class="modal-backdrop" id="planModal" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+    <div class="modal" style="max-width:560px;">
+      <h3 id="planModalTitle">Add plan</h3>
+      <form novalidate onsubmit="event.preventDefault();savePlan()">
         <div class="mt-4">
-          <label class="label" for="new-cap" id="cap-label">Active-user cap</label>
-          <input id="new-cap" type="number" class="input" min="1" max="999" placeholder="e.g. 10" oninput="checkCapValid()" onblur="blurCapValidate()" />
-          <div class="field-error" id="cap-error"></div>
-          <p class="text-xs muted mt-2" id="cap-helper"></p>
+          <label class="label" for="pl-name">Plan name</label>
+          <input id="pl-name" type="text" class="input" placeholder="e.g. Enterprise" oninput="validatePlanForm()" />
+          <div class="field-error" id="pl-name-error"></div>
         </div>
+
+        <div class="grid sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="label" for="pl-cap">Active-user cap</label>
+            <input id="pl-cap" type="number" class="input" min="1" max="9999" placeholder="e.g. 50" oninput="validatePlanForm()" />
+            <div class="field-error" id="pl-cap-error"></div>
+            <label class="flex items-center gap-2 mt-3" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+              <input type="checkbox" id="pl-unlimited" style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="toggleUnlimited()" />
+              Unlimited users
+            </label>
+          </div>
+          <div>
+            <label class="label" for="pl-propcap">Property cap</label>
+            <input id="pl-propcap" type="number" class="input" min="1" max="9999" placeholder="e.g. 10" oninput="validatePlanForm()" />
+            <div class="field-error" id="pl-propcap-error"></div>
+            <label class="flex items-center gap-2 mt-3" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+              <input type="checkbox" id="pl-propunlimited" style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="togglePropUnlimited()" />
+              Unlimited properties
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label">Included features</label>
+          <div id="pl-features" class="grid sm:grid-cols-2 gap-2" style="border:1px solid var(--color-mid-gray);border-radius:8px;padding:14px;"></div>
+          <div class="field-error" id="pl-features-error"></div>
+        </div>
+
         <div class="flex justify-end gap-3 mt-6">
-          <button type="button" class="btn btn-secondary" id="editCapCancelBtn" onclick="closeModal('editCapModal')">Cancel</button>
-          <button type="submit" class="btn btn-disabled" id="saveCapBtn" disabled>Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('planModal')">Cancel</button>
+          <button type="submit" class="btn btn-disabled" id="savePlanBtn" disabled>Save plan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Deactivate / Reactivate Plan confirm -->
+  <div class="modal-backdrop" id="planStatusModal" role="dialog" aria-modal="true" aria-labelledby="planStatusTitle">
+    <div class="modal">
+      <h3 id="planStatusTitle">Deactivate plan?</h3>
+      <p class="text-sm muted mt-2 mb-6" id="planStatusBody">Organizations already on this plan keep it. You cannot assign it to new organizations until reactivated.</p>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('planStatusModal')">Cancel</button>
+        <button type="button" class="btn btn-danger" id="planStatusConfirmBtn" onclick="confirmPlanStatus()">Deactivate</button>
+      </div>
     </div>
   </div>
 
@@ -187,100 +160,225 @@
     <a href="plans.html" class="tab active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
     </a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account
-    </button>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/plans.js"></script>
   <script>
-    var editingPlan = null;
-    var editingCurrentCap = null;
-    var editingHighest = null;
-    var editingHighestOrg = null;
+    /* ---- Catalogue + plans come from the shared single source (assets/plans.js) ---- */
+    var FEATURE_CATALOG = window.GHARSETU_FEATURE_CATALOG;
+    var PLANS = window.GHARSETU_PLANS;
+    function featureLabel(id){ var m = FEATURE_CATALOG.filter(function(f){return f.id===id;})[0]; return m ? m.label : id; }
 
-    function openEditCapModal(plan, currentCap, highest, highestOrg) {
-      editingPlan = plan;
-      editingCurrentCap = currentCap;
-      editingHighest = highest;
-      editingHighestOrg = highestOrg;
+    var editingId = null;       // plan id being edited (null = adding)
+    var statusTargetId = null;  // plan id for deactivate/reactivate
 
-      var title = document.getElementById('editCapTitle');
-      var input = document.getElementById('new-cap');
-      var helper = document.getElementById('cap-helper');
-      var label = document.getElementById('cap-label');
-      var saveBtn = document.getElementById('saveCapBtn');
-      var capErr = document.getElementById('cap-error');
+    function slugify(s){ return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 
-      // Reset
-      capErr.textContent = '';
-      capErr.classList.remove('show');
-      input.classList.remove('error');
-      saveBtn.classList.add('btn-disabled');
-      saveBtn.classList.remove('btn-primary');
-      saveBtn.disabled = true;
+    function renderPlans() {
+      var wrap = document.getElementById('plan-cards');
+      wrap.innerHTML = PLANS.map(function(p){
+        var inactive = p.status !== 'active';
+        var userCap = (p.cap === null) ? '∞' : p.cap;
+        var propCap = (p.propertyCap === null) ? '∞' : p.propertyCap;
+        // Full catalogue with ✓ (included) / ✗ (not included)
+        var feats = FEATURE_CATALOG.map(function(fc){
+          var on = p.features.indexOf(fc.id) !== -1;
+          var icon = on
+            ? '<span style="color:var(--color-status-paid);font-weight:700">✓</span>'
+            : '<span style="color:var(--color-mid-gray);font-weight:700">✗</span>';
+          var style = on ? 'color:var(--color-charcoal)' : 'color:var(--color-mid-gray);text-decoration:line-through';
+          return '<li style="display:flex;gap:8px;align-items:center;'+style+'">'+icon+' '+fc.label+'</li>';
+        }).join('');
+        var statusBtn = inactive
+          ? '<button class="btn btn-primary !py-2 !text-sm" onclick="askPlanStatus(\''+p.id+'\',\'reactivate\')">Reactivate</button>'
+          : '<button class="btn btn-danger !py-2 !text-sm" onclick="askPlanStatus(\''+p.id+'\',\'deactivate\')">Deactivate</button>';
+        // Only one active plan can be the public "Most Popular" highlight.
+        var popularBtn = (!p.popular && !inactive)
+          ? '<button class="btn btn-secondary !py-2 !text-sm" onclick="setPopular(\''+p.id+'\')">Set as Most Popular</button>'
+          : '';
+        return ''
+          + '<div class="card" style="'+(inactive?'opacity:0.6;':'')+(p.popular?'border-top:3px solid var(--color-saffron);':'')+'">'
+          +   '<div class="flex items-start justify-between gap-2">'
+          +     '<h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">'+p.name+'</h2>'
+          +     '<div class="flex flex-col items-end gap-1">'
+          +       (p.popular ? '<span class="badge" style="background:rgba(255,111,0,0.12);color:var(--color-saffron);white-space:nowrap">★ Most Popular</span>' : '')
+          +       (inactive ? '<span class="badge badge-closed">Deactivated</span>' : '')
+          +     '</div>'
+          +   '</div>'
+          +   '<div class="flex gap-8 mb-4 mt-2">'
+          +     '<div><div class="kpi-value">'+userCap+'</div><div class="kpi-meta">active users</div></div>'
+          +     '<div><div class="kpi-value">'+propCap+'</div><div class="kpi-meta">properties</div></div>'
+          +   '</div>'
+          +   '<ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">'+feats+'</ul>'
+          +   '<div class="text-sm mb-4"><span class="muted">'+p.orgs+' organization'+(p.orgs===1?'':'s')+' on this plan.</span> '
+          +     '<a href="organizations.html?plan='+p.id+'" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a></div>'
+          +   '<div class="flex gap-2 flex-wrap">'
+          +     '<button class="btn btn-secondary !py-2 !text-sm" onclick="openPlanEditor(\''+p.id+'\')">Edit</button>'
+          +     popularBtn
+          +     statusBtn
+          +   '</div>'
+          + '</div>';
+      }).join('');
+    }
 
-      title.textContent = 'Edit ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan cap';
-      label.textContent = 'Active-user cap';
+    /* ---- Add / Edit ---- */
+    function openPlanEditor(id) {
+      editingId = id || null;
+      var title = document.getElementById('planModalTitle');
+      var name = document.getElementById('pl-name');
+      var cap = document.getElementById('pl-cap');
+      var unlimited = document.getElementById('pl-unlimited');
+      var features = document.getElementById('pl-features');
+      document.getElementById('pl-name-error').textContent = '';
+      document.getElementById('pl-cap-error').textContent = '';
 
-      if (plan === 'premium') {
-        input.value = 'Unlimited';
-        input.disabled = true;
-        input.classList.add('btn-disabled');
-        helper.textContent = 'Premium is uncapped — change requires platform-level engineering review.';
+      var propcap = document.getElementById('pl-propcap');
+      var propunlimited = document.getElementById('pl-propunlimited');
+      document.getElementById('pl-propcap-error').textContent = '';
+
+      var enabled = editingId ? (PLANS.filter(function(x){return x.id===editingId;})[0].features) : [];
+
+      // Render feature checkboxes from the catalogue
+      features.innerHTML = FEATURE_CATALOG.map(function(fc){
+        var checked = enabled.indexOf(fc.id) !== -1 ? ' checked' : '';
+        return '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:\'Inter\',sans-serif;font-size:14px;color:var(--color-charcoal)">'
+             + '<input type="checkbox" class="pl-feat" value="'+fc.id+'"'+checked+' style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="validatePlanForm()" /> '
+             + fc.label + '</label>';
+      }).join('');
+
+      if (editingId) {
+        var p = PLANS.filter(function(x){return x.id===editingId;})[0];
+        title.textContent = 'Edit ' + p.name + ' plan';
+        name.value = p.name;
+        unlimited.checked = (p.cap === null);
+        cap.value = (p.cap === null) ? '' : p.cap;
+        propunlimited.checked = (p.propertyCap === null);
+        propcap.value = (p.propertyCap === null) ? '' : p.propertyCap;
       } else {
-        input.value = currentCap;
-        input.disabled = false;
-        input.classList.remove('btn-disabled');
-        input.type = 'number';
-        helper.textContent = highest ? 'Current highest: ' + highest + ' users on ' + highestOrg + '.' : '';
+        title.textContent = 'Add plan';
+        name.value = ''; cap.value = ''; unlimited.checked = false;
+        propcap.value = ''; propunlimited.checked = false;
       }
-
-      openModal('editCapModal');
+      toggleUnlimited();
+      togglePropUnlimited();
+      validatePlanForm();
+      openModal('planModal');
     }
 
-    function checkCapValid() {
-      var input = document.getElementById('new-cap');
-      var saveBtn = document.getElementById('saveCapBtn');
-      var capErr = document.getElementById('cap-error');
-      var val = parseInt(input.value, 10);
+    function toggleUnlimited() {
+      var unlimited = document.getElementById('pl-unlimited');
+      var cap = document.getElementById('pl-cap');
+      cap.disabled = unlimited.checked;
+      if (unlimited.checked) { cap.value = ''; cap.classList.add('btn-disabled'); }
+      else cap.classList.remove('btn-disabled');
+      validatePlanForm();
+    }
 
-      if (isNaN(val) || val < 1) {
-        capErr.textContent = 'Cap must be at least 1.';
-        capErr.classList.add('show');
-        input.classList.add('error');
-        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
-        return;
-      }
-      if (editingHighest && val < editingHighest) {
-        capErr.textContent = 'Cap must be ≥ ' + editingHighest + ' (current highest on ' + editingHighestOrg + ').';
-        capErr.classList.add('show');
-        input.classList.add('error');
-        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
-        return;
-      }
-      capErr.textContent = ''; capErr.classList.remove('show');
-      input.classList.remove('error');
+    function togglePropUnlimited() {
+      var u = document.getElementById('pl-propunlimited');
+      var pc = document.getElementById('pl-propcap');
+      pc.disabled = u.checked;
+      if (u.checked) { pc.value = ''; pc.classList.add('btn-disabled'); }
+      else pc.classList.remove('btn-disabled');
+      validatePlanForm();
+    }
 
-      if (val !== editingCurrentCap) {
-        saveBtn.classList.remove('btn-disabled'); saveBtn.classList.add('btn-primary'); saveBtn.disabled = false;
+    function validatePlanForm() {
+      var name = document.getElementById('pl-name');
+      var cap = document.getElementById('pl-cap');
+      var unlimited = document.getElementById('pl-unlimited');
+      var propcap = document.getElementById('pl-propcap');
+      var propunlimited = document.getElementById('pl-propunlimited');
+      var nameErr = document.getElementById('pl-name-error');
+      var capErr = document.getElementById('pl-cap-error');
+      var propErr = document.getElementById('pl-propcap-error');
+      var featErr = document.getElementById('pl-features-error');
+      var saveBtn = document.getElementById('savePlanBtn');
+      var ok = true;
+
+      nameErr.textContent = ''; nameErr.classList.remove('show'); name.classList.remove('error');
+      capErr.textContent = ''; capErr.classList.remove('show'); cap.classList.remove('error');
+      propErr.textContent = ''; propErr.classList.remove('show'); propcap.classList.remove('error');
+      featErr.textContent = ''; featErr.classList.remove('show');
+
+      if (!name.value.trim()) ok = false;
+      if (!unlimited.checked) {
+        var v = parseInt(cap.value, 10);
+        if (isNaN(v) || v < 1) ok = false;
+      }
+      if (!propunlimited.checked) {
+        var pv = parseInt(propcap.value, 10);
+        if (isNaN(pv) || pv < 1) ok = false;
+      }
+      var anyFeat = document.querySelectorAll('.pl-feat:checked').length > 0;
+      if (!anyFeat) ok = false;
+
+      if (ok) { saveBtn.classList.remove('btn-disabled'); saveBtn.classList.add('btn-primary'); saveBtn.disabled = false; }
+      else { saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true; }
+    }
+
+    function savePlan() {
+      var name = document.getElementById('pl-name').value.trim();
+      var unlimited = document.getElementById('pl-unlimited').checked;
+      var cap = unlimited ? null : parseInt(document.getElementById('pl-cap').value, 10);
+      var propunlimited = document.getElementById('pl-propunlimited').checked;
+      var propCap = propunlimited ? null : parseInt(document.getElementById('pl-propcap').value, 10);
+      var features = Array.prototype.map.call(document.querySelectorAll('.pl-feat:checked'), function(c){ return c.value; });
+      if (!name || (!unlimited && (isNaN(cap) || cap < 1)) || (!propunlimited && (isNaN(propCap) || propCap < 1)) || !features.length) return;
+
+      if (editingId) {
+        var p = PLANS.filter(function(x){return x.id===editingId;})[0];
+        p.name = name; p.cap = cap; p.propertyCap = propCap; p.features = features;
+        alert('Plan "' + name + '" updated.');
       } else {
-        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary'); saveBtn.disabled = true;
+        var id = slugify(name) || ('plan-' + (PLANS.length+1));
+        PLANS.push({ id:id, name:name, cap:cap, propertyCap:propCap, orgs:0, status:'active', features:features });
+        alert('Plan "' + name + '" added.');
       }
+      closeModal('planModal');
+      renderPlans();
     }
 
-    function blurCapValidate() {
-      var input = document.getElementById('new-cap');
-      if (input.value && !input.checkValidity()) checkCapValid();
+    /* ---- Most Popular (public-site highlight) ----
+       Exactly one active plan carries the flag; setting it clears the others.
+       In the live app this is a PATCH; in the prototype it updates the shared
+       window.GHARSETU_PLANS so the home + sign-up cards stay in sync. */
+    function setPopular(id) {
+      PLANS.forEach(function(p){ p.popular = (p.id === id); });
+      renderPlans();
     }
 
-    function saveCapChange() {
-      var input = document.getElementById('new-cap');
-      var newCap = parseInt(input.value, 10);
-      closeModal('editCapModal');
-      document.getElementById('cap-' + editingPlan).textContent = newCap;
-      editingCurrentCap = newCap;
-      alert('Cap for ' + editingPlan + ' plan updated to ' + newCap + ' users.');
+    /* ---- Deactivate / Reactivate ---- */
+    function askPlanStatus(id, action) {
+      statusTargetId = id;
+      var p = PLANS.filter(function(x){return x.id===id;})[0];
+      var title = document.getElementById('planStatusTitle');
+      var body = document.getElementById('planStatusBody');
+      var btn = document.getElementById('planStatusConfirmBtn');
+      if (action === 'deactivate') {
+        title.textContent = 'Deactivate ' + p.name + '?';
+        body.textContent = 'Organizations already on this plan keep it. You cannot assign it to new organizations until reactivated.';
+        btn.textContent = 'Deactivate'; btn.className = 'btn btn-danger';
+        btn.dataset.action = 'deactivate';
+      } else {
+        title.textContent = 'Reactivate ' + p.name + '?';
+        body.textContent = 'The plan becomes assignable to new organizations again.';
+        btn.textContent = 'Reactivate'; btn.className = 'btn btn-primary';
+        btn.dataset.action = 'reactivate';
+      }
+      openModal('planStatusModal');
+    }
+
+    function confirmPlanStatus() {
+      var action = document.getElementById('planStatusConfirmBtn').dataset.action;
+      var p = PLANS.filter(function(x){return x.id===statusTargetId;})[0];
+      p.status = (action === 'deactivate') ? 'inactive' : 'active';
+      // A deactivated plan can't be the public "Most Popular" highlight.
+      if (action === 'deactivate' && p.popular) p.popular = false;
+      closeModal('planStatusModal');
+      renderPlans();
     }
 
     function openModal(id) {
@@ -318,26 +416,25 @@
         else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
       });
     });
+
+    /* Initial render */
+    renderPlans();
   </script>
-  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
-    <div class="account-sheet-handle" aria-hidden="true"></div>
-    <div class="account-menu-header">
-      <div class="account-menu-avatar">AK</div>
-      <div>
-        <div class="account-menu-name">Aayush</div>
-        <div class="account-menu-role">Super Admin</div>
-      </div>
-    </div>
-    <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+  
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
 </body>
 </html>

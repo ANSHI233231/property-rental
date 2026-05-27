@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  <title>Contact Inbox · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="organizations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations</a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans</a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header"><div class="account-menu-avatar">AK</div><div><div class="account-menu-name">Aayush</div><div class="account-menu-role">Super Admin</div></div></div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div id="liveRegion" role="status" aria-live="polite" class="sr-only" style="position:absolute;left:-9999px;"></div>
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div><h1 class="page-title">Contact Inbox</h1></div>
+      </header>
+
+      <div class="filter-tiles mb-6">
+        <button type="button" class="filter-tile active" data-tile-for="tbl-inbox" data-tile-filter="all" onclick="Paginator.setFilter('tbl-inbox','all',this)"><span class="filter-tile-count" data-pg-count>5</span><span class="filter-tile-label">All</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-inbox" data-tile-filter="new" onclick="Paginator.setFilter('tbl-inbox','new',this)"><span class="filter-tile-count" data-pg-count>2</span><span class="filter-tile-label">New</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-inbox" data-tile-filter="read" onclick="Paginator.setFilter('tbl-inbox','read',this)"><span class="filter-tile-count" data-pg-count>2</span><span class="filter-tile-label">Read</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-inbox" data-tile-filter="replied" onclick="Paginator.setFilter('tbl-inbox','replied',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">Replied</span></button>
+      </div>
+
+      <section class="card mb-6">
+        <label class="label" for="inboxSearch">Search</label>
+        <input id="inboxSearch" class="input" data-pg-search="tbl-inbox" placeholder="Search by name, email or subject…" />
+      </section>
+
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table" id="tbl-inbox">
+          <thead><tr><th>When</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr data-status="new">
+              <td class="text-xs">27/05/2026 10:12</td><td class="font-poppins font-semibold text-charcoal">Anjali Rao</td><td>anjali@example.com</td><td>Demo request for 60-unit PG</td>
+              <td><span class="badge badge-partial">New</span></td>
+              <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(0)">View</button></td>
+            </tr>
+            <tr data-status="new">
+              <td class="text-xs">27/05/2026 08:40</td><td class="font-poppins font-semibold text-charcoal">Mohit Sethi</td><td>mohit@sethirentals.in</td><td>Can we import existing tenants?</td>
+              <td><span class="badge badge-partial">New</span></td>
+              <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(1)">View</button></td>
+            </tr>
+            <tr data-status="read">
+              <td class="text-xs">26/05/2026 17:22</td><td class="font-poppins font-semibold text-charcoal">Farida Khan</td><td>farida@example.com</td><td>Pricing for unlimited users</td>
+              <td><span class="badge badge-prepaid">Read</span></td>
+              <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(2)">View</button></td>
+            </tr>
+            <tr data-status="read">
+              <td class="text-xs">25/05/2026 11:05</td><td class="font-poppins font-semibold text-charcoal">Deepak Nair</td><td>deepak@nairhomes.in</td><td>Does it support per-room leasing?</td>
+              <td><span class="badge badge-prepaid">Read</span></td>
+              <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(3)">View</button></td>
+            </tr>
+            <tr data-status="replied">
+              <td class="text-xs">24/05/2026 09:30</td><td class="font-poppins font-semibold text-charcoal">Sunita Verma</td><td>sunita@example.com</td><td>Onboarding help</td>
+              <td><span class="badge badge-paid">Replied</span></td>
+              <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(4)">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" data-paginate-for="tbl-inbox" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>5</span> of <span data-pg-total>5</span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+          </div>
+          <div class="pagination-per-page">
+            <label for="per-page-tbl-inbox" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-inbox" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Message detail modal -->
+  <div class="modal-backdrop" id="msgModal" role="dialog" aria-modal="true" aria-labelledby="msgSubject">
+    <div class="modal" style="max-width:600px;">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <h3 id="msgSubject" style="margin:0;"></h3>
+        <span id="msgStatusBadge"></span>
+      </div>
+      <div class="text-sm muted mb-1" id="msgMeta"></div>
+      <hr class="divider"/>
+      <p id="msgBody" class="text-sm" style="color:var(--color-charcoal);line-height:1.7;white-space:pre-wrap;"></p>
+      <hr class="divider"/>
+      <div class="flex justify-end gap-3 flex-wrap">
+        <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="closeMsg()">Close</button>
+        <button type="button" class="btn btn-secondary !py-2 !text-sm" id="markReadBtn" onclick="setMsgStatus('read')">Mark as read</button>
+        <button type="button" class="btn btn-primary !py-2 !text-sm" id="markRepliedBtn" onclick="setMsgStatus('replied')">Mark as replied</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="organizations.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs</a>
+    <a href="plans.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans</a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <script>
+    var MESSAGES = [
+      { name:'Anjali Rao', email:'anjali@example.com', when:'27/05/2026 10:12', subject:'Demo request for 60-unit PG', body:'Hi, we run a 60-bed PG in Dwarka and want to move off spreadsheets. Can we get a walkthrough this week?' },
+      { name:'Mohit Sethi', email:'mohit@sethirentals.in', when:'27/05/2026 08:40', subject:'Can we import existing tenants?', body:'We have ~40 active tenants. Is there a way to import them, or do we add manually?' },
+      { name:'Farida Khan', email:'farida@example.com', when:'26/05/2026 17:22', subject:'Pricing for unlimited users', body:'What does the Premium (unlimited users) plan cost for a 12-property firm?' },
+      { name:'Deepak Nair', email:'deepak@nairhomes.in', when:'25/05/2026 11:05', subject:'Does it support per-room leasing?', body:'We lease individual rooms in shared flats. Does GharSetu handle a lease per room?' },
+      { name:'Sunita Verma', email:'sunita@example.com', when:'24/05/2026 09:30', subject:'Onboarding help', body:'Signed up yesterday — could someone help us add our first property and users?' }
+    ];
+    var openIdx = null;
+    function openMsg(i){
+      openIdx = i; var m = MESSAGES[i];
+      document.getElementById('msgSubject').textContent = m.subject;
+      document.getElementById('msgMeta').textContent = m.name + ' · ' + m.email + ' · ' + m.when;
+      document.getElementById('msgBody').textContent = m.body;
+      var row = document.querySelectorAll('#tbl-inbox tbody tr')[i];
+      document.getElementById('msgStatusBadge').innerHTML = row.querySelector('.badge').outerHTML;
+      document.getElementById('msgModal').classList.add('open');
+      document.body.style.overflow='hidden';
+    }
+    function closeMsg(){ document.getElementById('msgModal').classList.remove('open'); document.body.style.overflow=''; }
+    function setMsgStatus(status){
+      if(openIdx===null) return;
+      var row = document.querySelectorAll('#tbl-inbox tbody tr')[openIdx];
+      var map = { read:['Read','badge badge-prepaid'], replied:['Replied','badge badge-paid'] };
+      row.dataset.status = status;
+      row.querySelector('td:nth-child(5)').innerHTML = '<span class="'+map[status][1]+'">'+map[status][0]+'</span>';
+      document.getElementById('msgStatusBadge').innerHTML = '<span class="'+map[status][1]+'">'+map[status][0]+'</span>';
+      if(window.Paginator) Paginator.refresh('tbl-inbox');
+      closeMsg();
+    }
+    document.getElementById('msgModal').addEventListener('click', function(e){ if(e.target===this) closeMsg(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeMsg(); });
+  </script>
+
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+</body>
+</html>

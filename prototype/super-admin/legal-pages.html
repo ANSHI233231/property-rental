@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  <title>Legal Pages · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/legal.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+        <a href="organizations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations</a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans</a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header"><div class="account-menu-avatar">AK</div><div><div class="account-menu-name">Aayush</div><div class="account-menu-role">Super Admin</div></div></div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div id="liveRegion" role="status" aria-live="polite" class="sr-only" style="position:absolute;left:-9999px;"></div>
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div style="flex:1;min-width:0">
+          <h1 class="page-title">Legal Pages</h1>
+        </div>
+        <button class="btn btn-secondary !py-2 !text-sm" id="previewToggle" onclick="togglePreview()">Preview</button>
+        <button class="btn btn-secondary !py-2 !text-sm" onclick="addSection()">+ Add Section</button>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="publishDoc()">Publish</button>
+      </header>
+
+      <div role="tablist" class="flex gap-2 flex-wrap mb-4" aria-label="Legal document">
+        <button role="tab" class="btn btn-primary !py-2 !text-sm" data-doc="privacy" aria-selected="true" onclick="switchDoc('privacy', this)">Privacy Policy</button>
+        <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-doc="terms" aria-selected="false" onclick="switchDoc('terms', this)">Terms of Service</button>
+      </div>
+
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <span class="muted text-sm" id="updatedStamp"></span>
+        <a id="viewPublic" href="../privacy.html" target="_blank" class="text-royal-blue font-poppins font-semibold text-sm">View public page ↗</a>
+      </div>
+
+      <div id="sectionsWrap"></div>
+      <div id="previewWrap" class="card" style="display:none; max-width:760px;"></div>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="organizations.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs</a>
+    <a href="plans.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans</a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script>
+    var currentDoc = 'privacy';
+    function switchDoc(key, btn) {
+      currentDoc = key;
+      document.querySelectorAll('[role="tab"][data-doc]').forEach(function(b){
+        var on=b===btn; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); b.setAttribute('aria-selected',on?'true':'false');
+      });
+      document.getElementById('viewPublic').href = '../' + (key==='privacy'?'privacy.html':'terms.html');
+      if (previewing) togglePreview();
+      renderEditor();
+    }
+    var previewing = false;
+    function renderEditor() {
+      var doc = window.GHARSETU_LEGAL[currentDoc];
+      document.getElementById('updatedStamp').textContent = 'Last updated ' + doc.updated;
+      var n = doc.sections.length;
+      var wrap = document.getElementById('sectionsWrap');
+      wrap.innerHTML = doc.sections.map(function(s, i){
+        var upDis = i===0 ? ' btn-disabled" disabled' : '"';
+        var downDis = i===n-1 ? ' btn-disabled" disabled' : '"';
+        return '<section class="card mb-4">'
+          + '<div class="flex items-center gap-2 mb-3">'
+          +   '<input class="input" style="font-family:\'Poppins\',sans-serif;font-weight:600;" value="'+escAttr(s.heading)+'" oninput="updateSection('+i+',\'heading\',this.value)" aria-label="Section heading" />'
+          +   '<button class="btn btn-secondary !py-1 !px-3 !text-sm flex-shrink-0'+upDis+' onclick="moveSection('+i+',-1)" aria-label="Move section up">↑</button>'
+          +   '<button class="btn btn-secondary !py-1 !px-3 !text-sm flex-shrink-0'+downDis+' onclick="moveSection('+i+',1)" aria-label="Move section down">↓</button>'
+          +   '<button class="btn btn-danger !py-1 !px-3 !text-sm flex-shrink-0" onclick="removeSection('+i+')">Remove</button>'
+          + '</div>'
+          + '<div class="md-toolbar" role="toolbar" aria-label="Formatting" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">'
+          +   '<button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" title="Bold (**)" aria-label="Bold" onclick="mdFmt('+i+',\'bold\')"><strong>B</strong></button>'
+          +   '<button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" title="Italic (*)" aria-label="Italic" onclick="mdFmt('+i+',\'italic\')"><em>I</em></button>'
+          +   '<button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" title="Bullet list" aria-label="Bullet list" onclick="mdFmt('+i+',\'bullet\')">• List</button>'
+          +   '<button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" title="Link" aria-label="Insert link" onclick="mdFmt('+i+',\'link\')">🔗 Link</button>'
+          + '</div>'
+          + '<textarea id="body-'+i+'" class="input" rows="4" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;" oninput="updateSection('+i+',\'body\',this.value)" aria-label="Section body (Markdown)">'+escHtml(s.body)+'</textarea>'
+          + '</section>';
+      }).join('');
+    }
+    function updateSection(i, field, val){ window.GHARSETU_LEGAL[currentDoc].sections[i][field]=val; }
+    function mdFmt(i, kind){
+      var ta = document.getElementById('body-'+i); if(!ta) return;
+      var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value, sel = v.slice(s,e), out;
+      if(kind==='bold')        out = '**' + (sel||'bold text') + '**';
+      else if(kind==='italic') out = '*'  + (sel||'italic text') + '*';
+      else if(kind==='link')   out = '['  + (sel||'link text') + '](https://)';
+      else if(kind==='bullet') out = (sel||'List item').split('\n').map(function(l){return l.trim()?'- '+l:l;}).join('\n');
+      else return;
+      ta.value = v.slice(0,s) + out + v.slice(e);
+      updateSection(i,'body',ta.value);
+      ta.focus(); ta.selectionStart = s; ta.selectionEnd = s + out.length;
+    }
+    function moveSection(i, dir){
+      var arr = window.GHARSETU_LEGAL[currentDoc].sections;
+      var j = i + dir;
+      if (j < 0 || j >= arr.length) return;
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      renderEditor(); announce('Section moved ' + (dir<0?'up':'down') + '.');
+    }
+    function togglePreview(){
+      previewing = !previewing;
+      var sw = document.getElementById('sectionsWrap'), pv = document.getElementById('previewWrap'), btn = document.getElementById('previewToggle');
+      if (previewing){
+        var doc = window.GHARSETU_LEGAL[currentDoc];
+        pv.innerHTML = '<p class="muted" style="font-size:13px;margin:0 0 20px;">Last updated ' + doc.updated + '</p>' +
+          doc.sections.map(function(s){ return '<h2 style="font-size:22px;color:var(--color-royal-blue);margin:24px 0 8px;">'+escHtml(s.heading)+'</h2>' + window.GHARSETU_mdToHtml(s.body); }).join('');
+        sw.style.display='none'; pv.style.display='block'; btn.textContent='Edit';
+      } else {
+        sw.style.display=''; pv.style.display='none'; btn.textContent='Preview';
+      }
+    }
+    function addSection(){ if(previewing) togglePreview(); window.GHARSETU_LEGAL[currentDoc].sections.push({heading:'New section', body:''}); renderEditor(); announce('Section added.'); }
+    function removeSection(i){ window.GHARSETU_LEGAL[currentDoc].sections.splice(i,1); renderEditor(); announce('Section removed.'); }
+    function publishDoc(){
+      var d=new Date(); var dd=String(d.getDate()).padStart(2,'0'), mm=String(d.getMonth()+1).padStart(2,'0');
+      window.GHARSETU_LEGAL[currentDoc].updated = dd+'/'+mm+'/'+d.getFullYear();
+      document.getElementById('updatedStamp').textContent='Last updated '+window.GHARSETU_LEGAL[currentDoc].updated;
+      alert((currentDoc==='privacy'?'Privacy Policy':'Terms of Service')+' published. The public page now shows this content.');
+    }
+    function announce(m){var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=m;},50);}
+    function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function escAttr(s){return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+    renderEditor();
+  </script>
+
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+</body>
+</html>

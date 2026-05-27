@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
   <title>My Maintenance · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,77 +59,77 @@
         <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('newReqModal').classList.add('open')">+ Raise New Request</button>
       </header>
 
-      <!-- Open — raised by tenant -->
-      <section class="card card-emergency mb-4">
-        <div class="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <div class="flex gap-2 mb-2 flex-wrap">
-              <span class="badge badge-emergency">Emergency</span>
-              <span class="badge badge-progress">In-Progress</span>
-            </div>
-            <h3>Water leakage in kitchen</h3>
-            <p class="text-sm muted mt-1">Raised 05/05/2026 · 23:42</p>
-            <p class="text-xs muted mt-1" style="font-size:12px; font-family:'Inter',sans-serif;">Raised by you</p>
-            <p class="text-sm mt-3">Assigned to: <strong class="text-charcoal">Raju Kumar</strong></p>
-          </div>
-          <a href="maintenance-detail.html?id=MR-3041" class="btn btn-secondary !py-2 !text-sm flex-shrink-0">View details</a>
-        </div>
+      <!-- Filter tiles (by status) -->
+      <div class="filter-tiles mb-6">
+        <button type="button" class="filter-tile active" data-tile-for="tbl-tenant-maintenance" data-tile-filter="all" onclick="Paginator.setFilter('tbl-tenant-maintenance','all',this)"><span class="filter-tile-count" data-pg-count>4</span><span class="filter-tile-label">All</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-tenant-maintenance" data-tile-filter="open" onclick="Paginator.setFilter('tbl-tenant-maintenance','open',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">Open</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-tenant-maintenance" data-tile-filter="progress" onclick="Paginator.setFilter('tbl-tenant-maintenance','progress',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">In-Progress</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-tenant-maintenance" data-tile-filter="resolved" onclick="Paginator.setFilter('tbl-tenant-maintenance','resolved',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">Resolved</span></button>
+        <button type="button" class="filter-tile" data-tile-for="tbl-tenant-maintenance" data-tile-filter="closed" onclick="Paginator.setFilter('tbl-tenant-maintenance','closed',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">Closed</span></button>
+      </div>
+
+      <!-- Search -->
+      <section class="card mb-6">
+        <label class="label" for="mSearch">Search</label>
+        <input id="mSearch" class="input" data-pg-search="tbl-tenant-maintenance" placeholder="Search by ticket or issue…" />
       </section>
 
-      <!-- Open — raised by Property Manager on tenant's unit -->
-      <section class="card mb-4">
-        <div class="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <div class="flex gap-2 mb-2 flex-wrap">
-              <span class="badge badge-partial">High</span>
-              <span class="badge badge-open">Open</span>
-            </div>
-            <h3>Bathroom ceiling paint peeling — water damage</h3>
-            <p class="text-sm muted mt-1">Raised 08/05/2026</p>
-            <p class="text-xs muted mt-1" style="font-size:12px; font-family:'Inter',sans-serif;">Raised by Property Manager</p>
-            <p class="text-sm mt-3">Awaiting technician assignment.</p>
+      <!-- Requests table -->
+      <section class="card p-0 overflow-x-auto">
+        <table class="data-table" id="tbl-tenant-maintenance">
+          <thead>
+            <tr><th>Ticket</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised by</th><th>Raised</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr data-status="progress">
+              <td class="font-mono text-xs">#MR-3041</td>
+              <td>Water leakage in kitchen</td>
+              <td><span class="badge badge-emergency">Emergency</span></td>
+              <td><span class="badge badge-progress">In-Progress</span></td>
+              <td>You</td>
+              <td class="text-xs">05/05/2026 23:42</td>
+              <td><a href="maintenance-detail.html?id=MR-3041" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-status="open">
+              <td class="font-mono text-xs">#MR-3052</td>
+              <td>Bathroom ceiling paint peeling — water damage</td>
+              <td><span class="badge badge-partial">High</span></td>
+              <td><span class="badge badge-open">Open</span></td>
+              <td>Property Manager</td>
+              <td class="text-xs">08/05/2026</td>
+              <td><a href="maintenance-detail.html?id=MR-3052" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-status="resolved">
+              <td class="font-mono text-xs">#MR-3019</td>
+              <td>AC not cooling</td>
+              <td><span class="badge badge-partial">High</span></td>
+              <td><span class="badge badge-resolved">Resolved</span></td>
+              <td>You</td>
+              <td class="text-xs">10/04/2026</td>
+              <td><a href="maintenance-detail.html?id=MR-3019" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-status="closed">
+              <td class="font-mono text-xs">#MR-2987</td>
+              <td>Door lock broken</td>
+              <td><span class="badge badge-prepaid">Medium</span></td>
+              <td><span class="badge badge-closed">Closed</span></td>
+              <td>You</td>
+              <td class="text-xs">01/03/2026</td>
+              <td><a href="maintenance-detail.html?id=MR-2987" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" data-paginate-for="tbl-tenant-maintenance" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>4</span> of <span data-pg-total>4</span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
           </div>
-          <a href="maintenance-detail.html?id=MR-3052" class="btn btn-secondary !py-2 !text-sm flex-shrink-0">View details</a>
-        </div>
-      </section>
-
-      <!-- Resolved (awaiting close) -->
-      <section class="card mb-4">
-        <div class="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <div class="flex gap-2 mb-2 flex-wrap">
-              <span class="badge badge-partial">High</span>
-              <span class="badge badge-resolved">Resolved</span>
-            </div>
-            <h3>AC not cooling</h3>
-            <p class="text-sm muted mt-1">Raised 10/04/2026 · Resolved 12/04/2026</p>
-            <p class="text-xs muted mt-1" style="font-size:12px; font-family:'Inter',sans-serif;">Raised by you</p>
-            <p class="text-sm mt-3"><strong class="text-charcoal">Resolution:</strong> Compressor serviced and refrigerant topped up. Tested cooling for 30 minutes — working normally.</p>
+          <div class="pagination-per-page">
+            <label for="per-page-tbl-tenant-maintenance" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-tenant-maintenance" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
           </div>
-          <a href="maintenance-detail.html?id=MR-3019" class="btn btn-secondary !py-2 !text-sm flex-shrink-0">View details</a>
-        </div>
-        <hr class="divider"/>
-        <p class="text-sm muted mb-3">Are you happy with the resolution? Closing the request confirms the issue is fixed.</p>
-        <div class="flex gap-2 flex-wrap">
-          <button class="btn btn-primary !py-2 !text-sm" onclick="alert('Request closed. Thank you for confirming the fix.')">Close Request</button>
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Request reopened. Your Property Manager has been notified.')">Issue not fully fixed</button>
-        </div>
-      </section>
-
-      <!-- Closed -->
-      <section class="card mb-4">
-        <div class="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <div class="flex gap-2 mb-2 flex-wrap">
-              <span class="badge badge-prepaid">Medium</span>
-              <span class="badge badge-closed">Closed</span>
-            </div>
-            <h3>Door lock broken</h3>
-            <p class="text-sm muted mt-1">Raised 01/03/2026 · Closed 04/03/2026</p>
-            <p class="text-xs muted mt-1" style="font-size:12px; font-family:'Inter',sans-serif;">Raised by you</p>
-            <p class="text-sm mt-3">No further action available. Closed requests cannot be reopened — if the same issue returns, please raise a new request.</p>
-          </div>
-          <a href="maintenance-detail.html?id=MR-2987" class="btn btn-secondary !py-2 !text-sm flex-shrink-0">View details</a>
         </div>
       </section>
 
@@ -189,14 +190,17 @@
     <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
     <a href="maintenance.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
     <a href="visitors.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
-    <button type="button" class="tab" aria-label="Account" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+    <button type="button" class="tab" aria-label="More" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/paginate.js"></script>
   <script src="../assets/impersonation.js"></script>
   <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
-  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="account-sheet-handle" aria-hidden="true"></div>
+    <a href="leases.html" class="account-menu-link" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>My Leases</a>
+    <div class="account-menu-divider"></div>
     <div class="account-menu-header">
       <div class="account-menu-avatar">RM</div>
       <div>

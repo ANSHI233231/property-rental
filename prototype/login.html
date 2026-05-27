@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <title>Login · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,10 +71,11 @@
 
       <!-- 1-col on mobile; 2-col at 768px; 4-col at 1024px -->
       <div class="shortcuts-grid">
-        <a href="admin/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Login as Admin</a>
-        <a href="pm/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Login as Property Manager</a>
-        <a href="maintenance/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Login as Maintenance Staff</a>
-        <a href="tenant/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Login as Tenant</a>
+        <a href="super-admin/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Super Admin</a>
+        <a href="admin/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Admin</a>
+        <a href="pm/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Property Manager</a>
+        <a href="maintenance/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Maintenance</a>
+        <a href="tenant/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Tenant</a>
       </div>
 
       <div style="text-align:center; color:rgba(255,255,255,0.5); font-family:'Inter',sans-serif; font-size:13px; margin-top:12px;">
@@ -84,7 +86,7 @@
   </main>
 
   <style>
-    /* Shortcuts grid: 1-col mobile → 2-col 768px → 4-col 1024px */
+    /* Shortcuts grid: 1-col mobile → 2-col 768px → 5-col 1024px (one per role) */
     .shortcuts-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -97,7 +99,7 @@
     }
     @media (min-width: 1024px) {
       .shortcuts-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
       }
     }
   </style>

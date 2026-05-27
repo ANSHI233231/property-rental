@@ -476,3 +476,40 @@ Per user request: "delegations create popup should be large and show tasks grant
 - No commits.
 
 ---
+
+## Task 8 — Super Admin review pass: slugs, org-detail redesign, plans CRUD, Business Types master, Legal+Contact, favicon
+
+- Status: ✅ Completed
+- Started: 2026-05-27 IST
+- Completed: 2026-05-27 IST
+- Duration: orchestrator-driven screen-by-screen review + 2 planned features
+
+### Changes (screen-by-screen Super Admin review)
+- **Org slugs**: every organization carries a unique slug; `organizations.html` gained a Slug column; all detail links → `organization-detail.html?org=<slug>`; dashboard "Recently Approved" links + org-detail show the slug.
+- **Organization detail redesign**: prototype status simulator (Pending/Active/Deactivated) · status-conditional actions (Pending→Approve, Active→Impersonate+Change Plan+Deactivate, Deactivated→Reactivate) · three tabs (Organization Users · Platform-Level Audit · Subscription Plan History) · removed the back-link + all descriptive caption text.
+- **Plans page → full CRUD**: add/deactivate/reactivate plans (was 3 hardcoded) · full edit (name + user cap + property cap, each with Unlimited toggle + features) · feature flags via a fixed catalogue with ✓/✗ per plan · Audit Log + Master Data removed as flags (audit = platform-foundational; master data = always-on) · final 9-feature catalogue (Rent, Maintenance, Visitors, Per-Room, Delegation, Impersonation, Settings, Data Export, Priority Support).
+- **Plans single source**: `assets/plans.js` is now canonical (catalogue + plans); `index.html` marketing cards + `organization-signup.html` tiles + `super-admin/plans.html` all render the SAME ✓/✗ feature list from it (fixes the "home cards don't match super-admin" drift).
+- **Business Types master** (platform-level): `assets/business-types.js` + `super-admin/master-data/business-types.html` (CRUD) · Master Data sub-menu 3→4 across all super-admin pages + landing 4th card · signup `#biz-type` renders from the master.
+- **Legal + Contact feature**: public `privacy.html` + `terms.html` (render from `assets/legal.js`) + `contact.html` (validated, record-only per Scope rule K) · `super-admin/legal-pages.html` (Privacy/Terms sectioned editor + Publish) · `super-admin/contact-inbox.html` (status tiles + search + paginate + detail modal w/ Mark read/replied) · Legal Pages + Contact Inbox added to super-admin sidebar + More-sheet across all pages · index footer + signup terms-checkbox links wired.
+- **Favicon**: `assets/favicon.svg` (navy + saffron house) injected into all 62 pages at correct relative depth.
+- **Cleanups (per user rules, saved to memory)**: removed all descriptive helper captions; removed "← Back to X" links from all in-app detail pages; fixed orphan account-sheet fragment in master sub-pages.
+- **Login**: added "Login as Super Admin" shortcut (grid → 5 cols).
+
+### New planning files (2026-05-27)
+- master-data-restructure · master-data-ownership-split · server-logs-page · server-side-pagination (earlier) + this session: legal-pages-and-contact (shipped) · business-types-master (shipped) · homepage-redesign (planned, awaiting sign-off) · ia-restructure-units-pm-leases-maintenance.
+
+### Files (high level)
+- NEW assets: plans.js, business-types.js, legal.js, favicon.svg
+- NEW super-admin pages: master-data/business-types.html, legal-pages.html, contact-inbox.html
+- NEW public pages: privacy.html, terms.html, contact.html
+- EDITED: all super-admin pages (nav 3→4 master data + Legal/Contact), plans.html (CRUD + shared source), organizations.html (slug col), organization-detail.html (redesign), index.html (footer + plans render), organization-signup.html (biz-type + plan tiles + terms links), login.html (super-admin shortcut), styles.css (account-trigger.active, filter-tile already there)
+
+### App-port carry-overs (documented in planning files)
+- org `slug` unique immutable; plan `user_cap`/`property_cap` (nullable=unlimited) + `plan_features` flags; audit log always-on (not a flag); org-level master data always-on; `business_types` platform-global; `legal_documents` + `contact_submissions` (record-only, no email per Scope rule K).
+
+### Notes / Pending
+- Homepage redesign is PLANNED only (`2026-05-27-homepage-redesign.md`, 465 lines, 6 open decisions) — awaiting user sign-off before build.
+- Several planning files have open §4 decisions defaulted but not formally signed off.
+- No commits yet this session.
+
+---
