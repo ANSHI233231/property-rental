@@ -195,10 +195,11 @@
       if(_epRows['Phone']) _epRows['Phone'].textContent = phone;
       var hdr=document.querySelector('.profile-name'); if(hdr) hdr.textContent = name;
       closeEditProfile();
-      alert('Profile updated.');
+      gsToast('Profile updated.');
     }
     document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEditProfile(); });
     (function(){ var m=document.getElementById('editProfileModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) closeEditProfile(); }); })();
   </script>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

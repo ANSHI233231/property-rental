@@ -572,6 +572,9 @@ a.sidebar-brand:hover { opacity: 0.85; }
   border-top-color: var(--color-saffron);
   background: rgba(255, 111, 0, 0.04);
 }
+/* Read-only summary tile — same shape as .filter-tile, no interaction */
+.filter-tile.is-static { cursor: default; border-top-color: var(--color-royal-blue); }
+.filter-tile.is-static:hover { border-color: var(--color-mid-gray); }
 .filter-tile-count {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
@@ -1060,4 +1063,40 @@ body.impers-active .app-main {
   margin: 0 6px;
   font-weight: 400;
   user-select: none;
+}
+
+/* ---- Global toast notifications (assets/toast.js) ---- */
+.gs-toast-region {
+  position: fixed; top: 16px; right: 16px; z-index: 200;
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: 360px; width: calc(100% - 32px); pointer-events: none;
+}
+.gs-toast {
+  pointer-events: auto;
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #fff; border: 1px solid var(--color-mid-gray);
+  border-left: 4px solid var(--color-slate);
+  border-radius: 12px; padding: 12px 14px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+  opacity: 0; transform: translateX(16px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.gs-toast--in  { opacity: 1; transform: translateX(0); }
+.gs-toast--out { opacity: 0; transform: translateX(16px); }
+.gs-toast-icon { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; }
+.gs-toast-icon svg { width: 20px; height: 20px; display: block; }
+.gs-toast-msg { flex: 1; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.45; color: var(--color-charcoal); }
+.gs-toast-close { flex-shrink: 0; background: none; border: 0; cursor: pointer; font-size: 20px; line-height: 1; color: var(--color-slate); padding: 0 2px; }
+.gs-toast-close:hover { color: var(--color-charcoal); }
+.gs-toast--success { border-left-color: var(--color-status-paid); }
+.gs-toast--success .gs-toast-icon { color: var(--color-status-paid); }
+.gs-toast--info { border-left-color: var(--color-royal-blue); }
+.gs-toast--info .gs-toast-icon { color: var(--color-royal-blue); }
+.gs-toast--error { border-left-color: var(--color-status-overdue); }
+.gs-toast--error .gs-toast-icon { color: var(--color-status-overdue); }
+@media (prefers-reduced-motion: reduce) {
+  .gs-toast, .gs-toast--in, .gs-toast--out { transform: none; transition: opacity 200ms ease; }
+}
+@media (max-width: 479px) {
+  .gs-toast-region { left: 16px; right: 16px; max-width: none; }
 }

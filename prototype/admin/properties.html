@@ -19,6 +19,7 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
@@ -29,6 +30,7 @@
             Master Data
             <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </div>
+          <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
@@ -70,29 +72,26 @@
           <h1 class="page-title">Properties</h1>
         </div>
         <div class="flex gap-3">
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Export started. CSV will download shortly.')">Export</button>
-          <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('addPropertyModal').classList.add('open')">+ Add Property</button>
+          <button class="btn btn-secondary !py-2 !text-sm" onclick="exportProperties()">Export</button>
+          <button class="btn btn-primary !py-2 !text-sm" onclick="openPropertyModal()">+ Add Property</button>
         </div>
       </header>
 
-      <!-- Filter tiles -->
+      <!-- Portfolio summary tiles (read-only) -->
       <section class="section">
         <div class="filter-tiles">
-          <button type="button" class="filter-tile active" data-tile-for="tbl-properties" data-tile-filter="all"
-                  onclick="Paginator.setFilter('tbl-properties','all',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">All</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-properties" data-tile-filter="apartment-complex"
-                  onclick="Paginator.setFilter('tbl-properties','apartment-complex',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Apartment Complex</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-properties" data-tile-filter="independent-building"
-                  onclick="Paginator.setFilter('tbl-properties','independent-building',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Independent Buildings</span>
-          </button>
+          <div class="filter-tile is-static">
+            <span class="filter-tile-count">7</span>
+            <span class="filter-tile-label">Available Units</span>
+          </div>
+          <div class="filter-tile is-static">
+            <span class="filter-tile-count">113</span>
+            <span class="filter-tile-label">Total Active Leases</span>
+          </div>
+          <div class="filter-tile is-static">
+            <span class="filter-tile-count">4</span>
+            <span class="filter-tile-label">Upcoming Leases</span>
+          </div>
         </div>
       </section>
 
@@ -134,7 +133,7 @@
               <td>40</td>
               <td>Sunita Arora</td>
               <td>36/40 · 90%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Sai Heights</td>
@@ -143,7 +142,7 @@
               <td>24</td>
               <td>Manoj Verma</td>
               <td>23/24 · 96%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Mayur Vihar Residency</td>
@@ -152,7 +151,7 @@
               <td>32</td>
               <td>Pooja Khanna</td>
               <td>31/32 · 97%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="independent-building">
               <td class="font-poppins font-semibold text-charcoal">Rohini Greens</td>
@@ -161,7 +160,7 @@
               <td>24</td>
               <td>Anil Kapoor</td>
               <td>23/24 · 96%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Janakpuri Enclave</td>
@@ -170,7 +169,7 @@
               <td>18</td>
               <td>Sunita Arora</td>
               <td>16/18 · 89%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="independent-building">
               <td class="font-poppins font-semibold text-charcoal">Pitampura Towers</td>
@@ -179,7 +178,7 @@
               <td>12</td>
               <td>Manoj Verma</td>
               <td>10/12 · 83%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Saket Heights</td>
@@ -188,7 +187,7 @@
               <td>36</td>
               <td>Pooja Khanna</td>
               <td>34/36 · 94%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Vasant Kunj Residency</td>
@@ -197,7 +196,7 @@
               <td>28</td>
               <td>Anil Kapoor</td>
               <td>25/28 · 89%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="independent-building">
               <td class="font-poppins font-semibold text-charcoal">Laxmi Nagar Complex</td>
@@ -206,7 +205,7 @@
               <td>16</td>
               <td>Sunita Arora</td>
               <td>14/16 · 88%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Paschim Vihar Plaza</td>
@@ -215,7 +214,7 @@
               <td>22</td>
               <td>Manoj Verma</td>
               <td>20/22 · 91%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="independent-building">
               <td class="font-poppins font-semibold text-charcoal">Uttam Nagar Flats</td>
@@ -224,7 +223,7 @@
               <td>10</td>
               <td>Pooja Khanna</td>
               <td>9/10 · 90%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Kalkaji Mansion</td>
@@ -233,7 +232,7 @@
               <td>20</td>
               <td>Anil Kapoor</td>
               <td>17/20 · 85%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="apartment-complex">
               <td class="font-poppins font-semibold text-charcoal">Noida Extension Towers</td>
@@ -242,7 +241,7 @@
               <td>30</td>
               <td>Sunita Arora</td>
               <td>28/30 · 93%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
             <tr data-category="independent-building">
               <td class="font-poppins font-semibold text-charcoal">Rajouri Garden Residency</td>
@@ -251,7 +250,7 @@
               <td>14</td>
               <td>Manoj Verma</td>
               <td>12/14 · 86%</td>
-              <td><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
+              <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
           </tbody>
         </table>
@@ -278,22 +277,18 @@
 
   <!-- Add Property Modal -->
   <div class="modal-backdrop" id="addPropertyModal">
-    <form class="modal" style="max-width:560px" novalidate onsubmit="event.preventDefault(); document.getElementById('addPropertyModal').classList.remove('open'); alert('Property created. The new building is now in the list.');">
-      <h3>Add New Property</h3>
-      <p class="muted text-sm mt-1 mb-5">Properties are created here. Once saved, units are added separately.</p>
+    <form class="modal" style="max-width:560px" novalidate onsubmit="event.preventDefault(); saveProperty();">
+      <h3 id="propModalTitle">Add New Property</h3>
+      <p class="muted text-sm mt-1 mb-5" id="propModalSub">Properties are created here. Once saved, units are added separately.</p>
 
       <label class="label" for="add-prop-name">Property name</label>
-      <input id="add-prop-name" class="input" required placeholder="e.g. Sunshine Heights, Saket" />
-      <div class="field-error"></div>
+      <input id="add-prop-name" class="input" placeholder="e.g. Sunshine Heights, Saket" />
+      <div class="field-error" id="add-prop-name-error"></div>
 
       <div class="grid grid-cols-2 gap-3 mt-4">
         <div>
           <label class="label" for="add-prop-type">Type</label>
-          <select id="add-prop-type" class="input">
-            <option>Apartment Complex</option>
-            <option>Independent Building</option>
-            <option>Villa</option>
-          </select>
+          <select id="add-prop-type" class="input"></select>
         </div>
         <div>
           <label class="label" for="add-prop-units">Total units</label>
@@ -309,7 +304,7 @@
       </div>
 
       <div class="grid grid-cols-2 gap-3 mt-4">
-        <div>
+        <div id="prop-mgr-field">
           <label class="label" for="add-prop-mgr">Assign Manager</label>
           <select id="add-prop-mgr" class="input">
             <option value="">—</option>
@@ -327,53 +322,23 @@
       </div>
 
       <div class="mt-4">
-        <label class="label" for="add-prop-amenities">Amenities</label>
-        <!-- Selected amenity chips render here -->
-        <div id="amenityChips" class="flex flex-wrap gap-2 mb-2" aria-live="polite" aria-label="Selected amenities"></div>
-        <select id="add-prop-amenities" name="amenities" class="input" multiple size="6"
-          aria-label="Amenities — hold Ctrl / Cmd to select multiple"
-          onchange="syncAmenityChips()">
-          <option value="CCTV">CCTV</option>
-          <option value="Gym">Gym</option>
-          <option value="Lift">Lift</option>
-          <option value="Parking">Parking</option>
-          <option value="Power backup">Power backup</option>
-          <option value="Security">Security</option>
-          <option value="Swimming pool">Swimming pool</option>
-          <option value="Water softener">Water softener</option>
-        </select>
-        <p class="text-xs muted mt-1">Sourced from Master Data &rarr; Amenities. Manage list under Settings. Hold Ctrl / Cmd to select multiple.</p>
+        <label class="label">Amenities</label>
+        <div class="grid sm:grid-cols-2 gap-2" role="group" aria-label="Amenities" style="border:1px solid var(--color-mid-gray);border-radius:8px;padding:14px;">
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="CCTV" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> CCTV</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Gym" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Gym</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Lift" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Lift</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Parking" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Parking</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Power backup" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Power backup</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Security" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Security</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Swimming pool" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Swimming pool</label>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)"><input type="checkbox" name="amenities" value="Water softener" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Water softener</label>
+        </div>
+        <p class="text-xs muted mt-1">Managed in Master Data &rarr; Amenities.</p>
       </div>
-      <script>
-        function syncAmenityChips() {
-          var sel = document.getElementById('add-prop-amenities');
-          var container = document.getElementById('amenityChips');
-          container.innerHTML = '';
-          Array.from(sel.selectedOptions).forEach(function(opt) {
-            var chip = document.createElement('span');
-            chip.className = 'badge badge-prepaid';
-            chip.style.display = 'inline-flex';
-            chip.style.alignItems = 'center';
-            chip.style.gap = '4px';
-            chip.textContent = opt.value;
-            var x = document.createElement('button');
-            x.type = 'button';
-            x.setAttribute('aria-label', 'Remove ' + opt.value);
-            x.style.cssText = 'background:none;border:none;cursor:pointer;padding:0 2px;font-size:13px;line-height:1;color:inherit';
-            x.textContent = '×';
-            x.onclick = function() {
-              opt.selected = false;
-              syncAmenityChips();
-            };
-            chip.appendChild(x);
-            container.appendChild(chip);
-          });
-        }
-      </script>
 
       <div class="flex justify-end gap-3 mt-6">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('addPropertyModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Create Property</button>
+        <button type="submit" class="btn btn-primary" id="propSaveBtn">Create Property</button>
       </div>
     </form>
   </div>
@@ -388,6 +353,91 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/property-types.js"></script>
+  <script>
+    renderPropertyTypeOptions('add-prop-type');
+
+    // Export the properties table to a CSV download.
+    function exportProperties() {
+      var headers = ['Property', 'Address', 'Type', 'Units', 'Manager', 'Occupancy'];
+      var rows = document.querySelectorAll('#tbl-properties tbody tr');
+      var lines = [headers.join(',')];
+      Array.prototype.forEach.call(rows, function (tr) {
+        var tds = tr.querySelectorAll('td');
+        var vals = [];
+        for (var i = 0; i < headers.length && i < tds.length; i++) {
+          var t = tds[i].textContent.trim().replace(/\s+/g, ' ');
+          vals.push('"' + t.replace(/"/g, '""') + '"');
+        }
+        lines.push(vals.join(','));
+      });
+      var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'properties.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      if (window.gsToast) gsToast('Exported ' + rows.length + ' properties to CSV.');
+    }
+
+    var editingPropertyRow = null;
+    function resetPropFields() {
+      document.getElementById('add-prop-name').value = '';
+      renderPropertyTypeOptions('add-prop-type');
+      document.getElementById('add-prop-units').value = '';
+      document.getElementById('add-prop-addr').value = '';
+      document.getElementById('add-prop-mgr').value = '';
+      document.getElementById('add-prop-floors').value = '';
+      Array.prototype.forEach.call(document.querySelectorAll('#addPropertyModal input[name="amenities"]'), function (c) { c.checked = false; });
+      var ne = document.getElementById('add-prop-name-error'); if (ne) { ne.textContent = ''; ne.classList.remove('show'); }
+      document.getElementById('add-prop-name').classList.remove('error');
+    }
+    function openPropertyModal() {
+      editingPropertyRow = null;
+      resetPropFields();
+      document.getElementById('propModalTitle').textContent = 'Add New Property';
+      document.getElementById('propModalSub').textContent = 'Properties are created here. Once saved, units are added separately.';
+      document.getElementById('propSaveBtn').textContent = 'Create Property';
+      document.getElementById('prop-mgr-field').style.display = '';   // manager can be set at creation
+      document.getElementById('addPropertyModal').classList.add('open');
+      document.getElementById('add-prop-name').focus();
+    }
+    function editPropertyRow(link) {
+      var tr = link.closest('tr');
+      var c = tr.querySelectorAll('td');
+      editingPropertyRow = tr;
+      resetPropFields();
+      document.getElementById('add-prop-name').value = c[0].textContent.trim();
+      document.getElementById('add-prop-addr').value = c[1].textContent.trim();
+      var typeLabel = c[2].textContent.trim();
+      Array.prototype.forEach.call(document.getElementById('add-prop-type').options, function (o) { o.selected = (o.textContent.trim() === typeLabel); });
+      document.getElementById('add-prop-units').value = (c[3].textContent.match(/\d+/) || [''])[0];
+      var mgr = c[4].textContent.trim();
+      Array.prototype.forEach.call(document.getElementById('add-prop-mgr').options, function (o) { o.selected = (o.textContent.trim() === mgr); });
+      document.getElementById('propModalTitle').textContent = 'Edit Property';
+      document.getElementById('propModalSub').textContent = 'Update this property’s details. Assigning a manager is a separate action on the property page.';
+      document.getElementById('propSaveBtn').textContent = 'Save changes';
+      document.getElementById('prop-mgr-field').style.display = 'none';   // manager change = Reassign PM on detail page
+      document.getElementById('addPropertyModal').classList.add('open');
+      document.getElementById('add-prop-name').focus();
+    }
+    function saveProperty() {
+      var name = document.getElementById('add-prop-name').value.trim();
+      var ne = document.getElementById('add-prop-name-error');
+      if (!name) {
+        if (ne) { ne.textContent = 'Property name is required.'; ne.classList.add('show'); }
+        document.getElementById('add-prop-name').classList.add('error');
+        document.getElementById('add-prop-name').focus();
+        return;
+      }
+      document.getElementById('addPropertyModal').classList.remove('open');
+      var msg = editingPropertyRow ? ('“' + name + '” updated.') : 'Property created. The new building is now in the list.';
+      if (window.gsToast) gsToast(msg); else alert(msg);
+    }
+  </script>
   <!-- More bottom sheet (Admin overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -395,8 +445,10 @@
     <div class="more-sheet-title">More options</div>
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
@@ -425,5 +477,6 @@
       Sign out
     </a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

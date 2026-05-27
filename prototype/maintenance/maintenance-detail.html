@@ -140,7 +140,7 @@
             <label class="label" for="noteBox">Add internal note</label>
             <textarea id="noteBox" class="input" rows="3" placeholder="Document parts needed, on-site findings, blockers…"></textarea>
             <div class="flex justify-end mt-3">
-              <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Internal note added.'); document.getElementById('noteBox').value='';">Add note</button>
+              <button class="btn btn-secondary !py-2 !text-sm" onclick="gsToast('Internal note added.'); document.getElementById('noteBox').value='';">Add note</button>
             </div>
           </section>
         </div>
@@ -153,9 +153,9 @@
             <div class="flex flex-col gap-2">
               <button class="btn btn-disabled !text-sm" disabled>Acknowledge</button>
               <button class="btn btn-disabled !text-sm" disabled>Start work</button>
-              <button class="btn btn-secondary !text-sm" onclick="alert('Request paused. PM notified.')">Pause</button>
-              <button class="btn btn-secondary !text-sm" onclick="alert('Work resumed.')">Resume</button>
-              <button class="btn btn-primary !text-sm" onclick="alert('Marked as Resolved. The tenant can now confirm and close.')">Mark as Resolved</button>
+              <button class="btn btn-secondary !text-sm" onclick="gsToast('Request paused. PM notified.')">Pause</button>
+              <button class="btn btn-secondary !text-sm" onclick="gsToast('Work resumed.')">Resume</button>
+              <button class="btn btn-primary !text-sm" onclick="gsToast('Marked as Resolved. The tenant can now confirm and close.')">Mark as Resolved</button>
             </div>
             <hr class="divider"/>
             <p class="text-xs muted">You cannot close a request — only the tenant (or Admin / PM) confirms the fix and closes it.</p>
@@ -181,5 +181,6 @@
     <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
     <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

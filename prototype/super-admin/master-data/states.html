@@ -277,7 +277,7 @@
       row.dataset.status = 'active';
       if (typeof announce === 'function') announce(name + ' reactivated.');
     }
-    function announce(msg){var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=msg;},50);}
+    function announce(msg){ if(window.gsToast)gsToast(msg);var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=msg;},50);}
     function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   </script>
   
@@ -296,5 +296,6 @@
     <a href="../profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script src="../../assets/toast.js"></script>
 </body>
 </html>

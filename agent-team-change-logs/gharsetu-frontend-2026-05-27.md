@@ -70,3 +70,99 @@ The public "Most Popular" highlight was a fixed `popular:true` on Standard in `p
 - `docs/planning/prototype-changes.md` rows added for this session.
 - `pnpm build/test/lint/typecheck` not run — **no app code touched** (all changes are static `prototype/` + `docs/`; `apps/web` + `apps/api` submodules untouched).
 - Commit/push NOT performed — awaiting explicit user authorization per CLAUDE.md Working rule §1.
+
+---
+
+## Task 11 — Admin dashboard copy/IA tweaks
+
+- KPI **"Overdue Tenants" → "Overdue Leases"** (label + tooltip) — overdue is anchored to the lease, not the tenant.
+- Replaced **"Property Snapshot"** section with **"Recent Open Maintenance Requests"** (latest 4 open; Request · Property·Unit · Issue · Priority · Reported · Status; emergency row matches the alert above). Tag-balanced.
+
+## Task 12 — Property Types master (planned + shipped)
+
+Plan-first: `docs/planning/features/2026-05-27-property-types-master.md` (org-level decision, seed, test cases). Shipped:
+- NEW `assets/property-types.js` (single source + `renderPropertyTypeOptions`) and `admin/master-data/property-types.html` (clone of amenities; 5 seed types; deactivate-block tooltips).
+- Landing card on `admin/master-data.html`; **Property Types sublink rolled out to all 17 admin nav surfaces** (sidebar + more-sheet, placed first) via script (32 inserts).
+- Add Property **Type dropdown wired** to the master (`renderPropertyTypeOptions('add-prop-type')`).
+- Verified: JS `node --check` OK; 17/17 sublink coverage both navs; 17/17 admin pages tag-balanced.
+
+## Task 13 — Add Property: Amenities → checkbox list
+
+Replaced the `<select multiple>` + chip-sync with an 8-item checkbox grid (`name="amenities"`); removed `syncAmenityChips`/`#amenityChips`. Helper trimmed. (Edit Property remains a placeholder `alert()` — flagged to user; no real form yet.)
+
+## Task 14 — Visit Purposes deactivate note → tooltip
+
+The 6-master tooltip sweep (Task 8) missed visit-purposes (different wording). Moved its 5 in-cell "Used by N visits…" notes to the disabled-button `title` (canonical wording); removed the `<p role="note">` lines. All 8 masters now consistent. Tag-balanced.
+
+## Task 15 — Admin property detail polish
+
+Manager phone unmasked (Admin scope; email already full). Removed "Active Leases" section (lives on unit detail). Units table: added **Current Tenant** column; **Add/Edit Unit** modal (status select locked while occupied + "Occupied" not manually selectable); **Retire** row action (reason required, blocked while occupied via disabled-button tooltip — soft status badge, not a delete). Removed **Edit Property** and **+ Create Lease** buttons. Tag-balanced, JS parses.
+
+## Task 16 — Admin property listing: Edit + summary tiles
+
+Type-filter tiles → read-only **summary tiles** (Available Units / Total Active Leases / Upcoming Leases) via a new `.is-static` modifier. **Edit Property** per row (14) via a shared add/edit modal (`openPropertyModal` / `editPropertyRow` / `saveProperty`); Assign-Manager field hidden in edit mode. Add/Edit Property **amenities** → checkbox grid (was multi-select).
+
+## Task 17 — Signup State→City cascade + Pincode
+
+New single-source `assets/locations.js` (5 states / 5 NCR cities mirroring the masters). State dropdown = states with cities; City cascades from State (disabled until chosen). Added **Pincode** (6-digit, digits-only). Validators + submit wiring updated. JS parses.
+
+## Task 18 — Global success toast (all forms)
+
+Plan `2026-05-27-global-success-toast.md`. Built `assets/toast.js` + CSS (top-right, auto-dismiss 4s, pause-on-hover, dismissable, `aria-live`, reduced-motion). Rolled out to **all 64 pages**: 38 success `alert()` → `gsToast`, 12 master `announce()` routed, `property-detail` `showSuccess` → toast, signup + contact toast on success. Placeholders left as `alert()`. 63/63 tag-balanced + sampled JS parses.
+
+## Task 19 — Admin Leases page
+
+Plan `2026-05-27-admin-leases-page.md`. NEW `admin/leases.html` (org-wide list + filter tiles + property filter + New Lease modal + co-tenant consent + pagination; View → unit-detail; gsToast). **Leases** sidebar + more-sheet link rolled out to all 17 admin pages (after Properties). 18/18 admin tag-balanced.
+
+## Task 20 — Config
+
+`gharsetu-frontend` agent model pinned `sonnet` → `claude-sonnet-4-6` (user request).
+
+## Task 21 — PM property-detail + unit-detail: mirror Admin display changes
+
+**Files changed:** `prototype/pm/property-detail.html`, `prototype/pm/unit-detail.html`
+
+**pm/property-detail.html:**
+- Removed the entire `<!-- Active leases -->` section (table with 2 rows + headers). Leases now live on unit-detail only.
+- Units table: added `<th>Current Tenant</th>` between Status and Action. Occupied rows (1A→Rohan Mehta, 2B→Priya Patel) get the tenant name; Available/Listed rows (3A, 7C) get an empty `<td>`.
+- Open Maintenance Action cell links changed from "View" → "View detail" (matching admin pattern; `text-royal-blue font-poppins font-semibold text-sm`).
+- No CRUD controls added (no Add/Edit/Retire unit — PM is display-only for unit structure).
+
+**pm/unit-detail.html (full rewrite):**
+- Removed `<button class="btn btn-primary ...">Edit unit</button>` from topbar (and its wrapper `<div class="flex gap-3">`).
+- Removed `<button class="btn btn-secondary ...">+ Create Lease</button>` from lease section header.
+- Collapsed "Active Lease" + "Past Leases" into a single **"Leases"** table. Columns: Lease · Tenant · Co-tenant · Start · End · Rent · Status · Action. Active row first with `badge badge-active`; past rows with `badge badge-closed` (Ended) and `badge badge-terminated` (Terminated). Co-tenant shows `—` where none. No reason sub-notes under badges.
+- Added `<section class="section" id="tenant-section">` "Current Tenant(s)" card: Rohan Mehta (Primary / `badge-active`) + Priya Mehta (Co-tenant / `badge-prepaid`); footer line links to `lease-detail.html?id=L-2103`.
+- Added prototype status simulator (dashed card, 5 buttons `data-usim`, `setUnitSimStatus` JS, init to `occupied`). Status→badge map matches admin. `#tenant-section` visible only when `occupied`.
+- `id="unit-status-badge"` on the context card badge.
+- PM chrome (Sunita / PM / SA identity, PM sidebar, PM tabbar, more-sheet) unchanged throughout.
+- All lease links → `lease-detail.html` (PM); maintenance links → `maintenance-detail.html` (PM).
+- `assets/toast.js` script tag preserved.
+
+**Verified:** HTML tag-balance OK (python html.parser); inline JS `node --check` OK; all 16 checks passed on both files (PM chrome, absent CRUD controls, required new elements).
+
+---
+
+### Session close (2026-05-27 PM)
+- Debug scan clean (no console.log/debugger/FIXME); 64/64 HTML tag-balanced; all `assets/*.js` parse.
+- `claude-progress.md` (§2/§3/§7), `prototype-changes.md`, this change-log updated.
+- 3 new planning files (property-types, admin-leases, global-toast).
+- `pnpm` gates N/A — prototype + docs only; `apps/*` submodules untouched.
+- Commit/push pending user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, after the first close — admin/PM unit-detail + create-lease + reject + export)
+
+- **Create Lease → full page** `admin/create-lease.html` (Unit · Lease terms · Primary tenant · repeatable Co-tenants); Leases "+ New Lease" navigates there (modal removed); flash-toast on return. Removed "+ Create Lease" from unit-detail and property-detail.
+- **Org detail — Reject** action for pending orgs (red button + required-reason modal + new `Rejected` status/badge) alongside Approve.
+- **Properties Export → real CSV** download (Blob) + toast (was a placeholder alert).
+- **Unit detail unified + occupancy-aware** (admin + PM identical): combined Active/Past leases → one **Leases** table + Status column; **Current Tenant(s)** card; **Bathrooms** attribute (modal + table); Monthly Rent → top context card; lease KPI strip; **prototype status simulator** moved to the top — when not occupied it hides the tenant card, lease KPI strip, active-lease row, and (except *Under Maintenance*) the Open Maintenance section. **Open Maintenance section removed** from unit detail.
+- **Property detail**: Units table + **Bathrooms** column + **Add/Edit Unit** modal (status locked while occupied) + **Retire** (reason, soft status); Open Maintenance rows → View-detail; "Active Leases" section removed; manager phone unmasked.
+- **PM parity mirror** (Task 21, via gharsetu-frontend agent): PM property/unit detail matched to admin display/lease/preview behaviour, **no** structural CRUD (PM operations-scoped).
+
+### Session close (final, 2026-05-27)
+- Debug scan clean; **65/65** HTML tag-balanced; all `assets/*.js` parse.
+- `claude-progress.md` §2 (items 10–15) + `prototype-changes.md` (6 rows) updated.
+- `pnpm` gates N/A — prototype + docs only; `apps/*` untouched.
+- Commit/push pending explicit user authorization (Working rule §1).

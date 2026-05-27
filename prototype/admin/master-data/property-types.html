@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
-  <title>Amenities · Master Data · Admin · GharSetu</title>
+  <title>Property Types · Master Data · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -37,8 +37,8 @@
             Master Data
             <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </div>
-          <a href="property-types.html" class="sidebar-sublink">Property Types</a>
-          <a href="amenities.html" class="sidebar-sublink active" aria-current="page">Amenities</a>
+          <a href="property-types.html" class="sidebar-sublink active" aria-current="page">Property Types</a>
+          <a href="amenities.html" class="sidebar-sublink">Amenities</a>
           <a href="categories.html" class="sidebar-sublink">Categories</a>
           <a href="visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -78,26 +78,26 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">Amenities</h1>
+          <h1 class="page-title">Property Types</h1>
         </div>
-        <button class="btn btn-primary !py-2 !text-sm" id="addEntryBtn" onclick="openAddModal()">+ Add Amenity</button>
+        <button class="btn btn-primary !py-2 !text-sm" id="addEntryBtn" onclick="openAddModal()">+ Add Property Type</button>
       </header>
 
       <!-- Filter tiles -->
       <section class="section">
         <div class="filter-tiles">
-          <button type="button" class="filter-tile active" data-tile-for="tbl-amenities" data-tile-filter="all"
-                  onclick="Paginator.setFilter('tbl-amenities','all',this)">
+          <button type="button" class="filter-tile active" data-tile-for="tbl-ptypes" data-tile-filter="all"
+                  onclick="Paginator.setFilter('tbl-ptypes','all',this)">
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">All</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-amenities" data-tile-filter="active"
-                  onclick="Paginator.setFilter('tbl-amenities','active',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-ptypes" data-tile-filter="active"
+                  onclick="Paginator.setFilter('tbl-ptypes','active',this)">
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">Active</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-amenities" data-tile-filter="deactivated"
-                  onclick="Paginator.setFilter('tbl-amenities','deactivated',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-ptypes" data-tile-filter="deactivated"
+                  onclick="Paginator.setFilter('tbl-ptypes','deactivated',this)">
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">Deactivated</span>
           </button>
@@ -109,209 +109,69 @@
         <div class="grid md:grid-cols-2 gap-4">
           <div>
             <label class="label" for="mdSearch">Search</label>
-            <input id="mdSearch" class="input" placeholder="Search by name…" data-pg-search="tbl-amenities" />
+            <input id="mdSearch" class="input" placeholder="Search by name…" data-pg-search="tbl-ptypes" />
           </div>
         </div>
       </section>
 
       <!-- Table -->
       <section class="card p-0 overflow-x-auto">
-        <table class="data-table" id="tbl-amenities">
+        <table class="data-table" id="tbl-ptypes">
           <thead>
-            <tr><th>Name</th><th>Used by (units)</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Used by (properties)</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr data-name="Swimming Pool" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Swimming Pool</td>
-              <td>14</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Swimming Pool" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Swimming Pool')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 14 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Gym" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Gym</td>
-              <td>22</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Gym" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Gym')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 22 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Power Backup" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Power Backup</td>
-              <td>40</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Power Backup" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Power Backup')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 40 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Lift" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Lift</td>
-              <td>38</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Lift" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Lift')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 38 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="CCTV" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">CCTV</td>
-              <td>30</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity CCTV" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('CCTV')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 30 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Sauna" data-status="active" id="row-sauna">
-              <td class="font-poppins font-semibold text-charcoal">Sauna</td>
-              <td>0</td>
-              <td id="badge-sauna"><span class="badge badge-active">Active</span></td>
-              <td id="actions-sauna">
-                <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity Sauna" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Sauna')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Sauna" onclick="openDeactivateConfirm('sauna','Sauna')">Deactivate</button>
-                </div>
-              </td>
-            </tr>
-            <tr data-name="Parking" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Parking</td>
-              <td>36</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Parking" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Parking')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 36 record(s). Retire those references first.">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Water Softener" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Water Softener</td>
+            <tr data-name="Apartment Complex" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Apartment Complex</td>
               <td>12</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Water Softener" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Water Softener')">Edit</a>
+                <a href="#" aria-label="Edit property type Apartment Complex" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Apartment Complex')">Edit</a>
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 12 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Intercom" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Intercom</td>
-              <td>28</td>
+            <tr data-name="Independent Building" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Independent Building</td>
+              <td>6</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Intercom" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Intercom')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 28 record(s). Retire those references first.">Deactivate</button>
+                <a href="#" aria-label="Edit property type Independent Building" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Independent Building')">Edit</a>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 6 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Club House" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Club House</td>
-              <td>18</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Club House" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Club House')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 18 record(s). Retire those references first.">Deactivate</button>
+            <tr data-name="Villa" data-status="active" id="row-villa">
+              <td class="font-poppins font-semibold text-charcoal">Villa</td>
+              <td>0</td>
+              <td id="badge-villa"><span class="badge badge-active">Active</span></td>
+              <td id="actions-villa">
+                <div class="flex items-center gap-3">
+                  <a href="#" aria-label="Edit property type Villa" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Villa')">Edit</a>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate property type Villa" onclick="openDeactivateConfirm('villa','Villa')">Deactivate</button>
+                </div>
               </td>
             </tr>
-            <tr data-name="Children's Play Area" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Children's Play Area</td>
-              <td>8</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td class="flex items-center gap-3 flex-wrap">
-                <a href="#" aria-label="Edit amenity Children's Play Area" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(&quot;Children's Play Area&quot;)">Edit</a>
-                <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Children's Play Area" onclick="openDeactivateConfirm(null,&quot;Children\'s Play Area&quot;)">Deactivate</button>
-              </td>
-            </tr>
-            <tr data-name="Visitor Parking" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Visitor Parking</td>
+            <tr data-name="Independent Floor" data-status="active">
+              <td class="font-poppins font-semibold text-charcoal">Independent Floor</td>
               <td>0</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
                 <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity Visitor Parking" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Visitor Parking')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Visitor Parking" onclick="openDeactivateConfirm(null,'Visitor Parking')">Deactivate</button>
+                  <a href="#" aria-label="Edit property type Independent Floor" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Independent Floor')">Edit</a>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate property type Independent Floor" onclick="openDeactivateConfirm(null,'Independent Floor')">Deactivate</button>
                 </div>
               </td>
             </tr>
-            <tr data-name="Solar Panels" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Solar Panels</td>
-              <td>0</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity Solar Panels" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Solar Panels')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Solar Panels" onclick="openDeactivateConfirm(null,'Solar Panels')">Deactivate</button>
-                </div>
-              </td>
-            </tr>
-            <tr data-name="Rainwater Harvesting" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Rainwater Harvesting</td>
-              <td>0</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity Rainwater Harvesting" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Rainwater Harvesting')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Rainwater Harvesting" onclick="openDeactivateConfirm(null,'Rainwater Harvesting')">Deactivate</button>
-                </div>
-              </td>
-            </tr>
-            <tr data-name="Terrace Garden" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">Terrace Garden</td>
-              <td>0</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity Terrace Garden" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Terrace Garden')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity Terrace Garden" onclick="openDeactivateConfirm(null,'Terrace Garden')">Deactivate</button>
-                </div>
-              </td>
-            </tr>
-            <tr data-name="ATM" data-status="active">
-              <td class="font-poppins font-semibold text-charcoal">ATM</td>
-              <td>0</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="flex items-center gap-3">
-                  <a href="#" aria-label="Edit amenity ATM" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('ATM')">Edit</a>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" aria-label="Deactivate amenity ATM" onclick="openDeactivateConfirm(null,'ATM')">Deactivate</button>
-                </div>
-              </td>
-            </tr>
-            <tr data-name="Security Guard" data-status="deactivated" id="row-security">
-              <td class="font-poppins font-semibold text-charcoal">Security Guard</td>
+            <tr data-name="Plot / Land" data-status="deactivated" id="row-plot">
+              <td class="font-poppins font-semibold text-charcoal">Plot / Land</td>
               <td>0</td>
               <td><span class="badge badge-closed">Deactivated</span></td>
               <td>
-                <a href="#" aria-label="Reactivate amenity Security Guard" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>
-              </td>
-            </tr>
-            <tr data-name="Rooftop Lounge" data-status="deactivated">
-              <td class="font-poppins font-semibold text-charcoal">Rooftop Lounge</td>
-              <td>0</td>
-              <td><span class="badge badge-closed">Deactivated</span></td>
-              <td>
-                <a href="#" aria-label="Reactivate amenity Rooftop Lounge" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>
-              </td>
-            </tr>
-            <tr data-name="Badminton Court" data-status="deactivated">
-              <td class="font-poppins font-semibold text-charcoal">Badminton Court</td>
-              <td>0</td>
-              <td><span class="badge badge-closed">Deactivated</span></td>
-              <td>
-                <a href="#" aria-label="Reactivate amenity Badminton Court" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>
-              </td>
-            </tr>
-            <tr data-name="Yoga Deck" data-status="deactivated">
-              <td class="font-poppins font-semibold text-charcoal">Yoga Deck</td>
-              <td>0</td>
-              <td><span class="badge badge-closed">Deactivated</span></td>
-              <td>
-                <a href="#" aria-label="Reactivate amenity Yoga Deck" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>
+                <a href="#" aria-label="Reactivate property type Plot / Land" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>
               </td>
             </tr>
           </tbody>
         </table>
-        <div class="pagination" data-paginate-for="tbl-amenities" data-per-page="10" aria-label="Pagination">
+        <div class="pagination" data-paginate-for="tbl-ptypes" data-per-page="10" aria-label="Pagination">
           <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
           <div class="pagination-controls">
             <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
@@ -319,8 +179,8 @@
             <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
           </div>
           <div class="pagination-per-page">
-            <label for="per-page-tbl-amenities" class="sr-only">Rows per page</label>
-            <select id="per-page-tbl-amenities" data-pg-per-page>
+            <label for="per-page-tbl-ptypes" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-ptypes" data-pg-per-page>
               <option value="10" selected>10 / page</option>
               <option value="25">25 / page</option>
               <option value="50">50 / page</option>
@@ -335,17 +195,17 @@
   <!-- Add Modal -->
   <div class="modal-backdrop" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
     <div class="modal modal--mobile-full">
-      <h3 id="addModalTitle">Add Amenity</h3>
+      <h3 id="addModalTitle">Add Property Type</h3>
       <form id="addForm" novalidate onsubmit="event.preventDefault(); submitAddForm()">
         <div class="mt-4">
           <label class="label" for="addName">Name</label>
-          <input id="addName" name="name" class="input" placeholder="e.g. Rooftop Terrace" minlength="2" maxlength="60" />
+          <input id="addName" name="name" class="input" placeholder="e.g. Builder Floor" minlength="2" maxlength="60" />
           <div class="field-error" id="addNameError"></div>
           <p class="text-xs muted mt-1">2–60 characters.</p>
         </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add Amenity</button>
+          <button type="submit" class="btn btn-primary">Add Property Type</button>
         </div>
       </form>
     </div>
@@ -354,7 +214,7 @@
   <!-- Edit Modal -->
   <div class="modal-backdrop" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modal modal--mobile-full">
-      <h3 id="editModalTitle">Edit Amenity</h3>
+      <h3 id="editModalTitle">Edit Property Type</h3>
       <form id="editForm" novalidate onsubmit="event.preventDefault(); submitEditForm()">
         <div class="mt-4">
           <label class="label" for="editName">Name</label>
@@ -372,8 +232,8 @@
   <!-- Deactivate Confirm Modal -->
   <div class="modal-backdrop" id="deactivateModal" role="dialog" aria-modal="true" aria-labelledby="deactivateModalTitle">
     <div class="modal">
-      <h3 id="deactivateModalTitle">Deactivate Amenity?</h3>
-      <p class="muted text-sm mt-2" id="deactivateModalBody">It will no longer appear in dropdowns for new records. Existing records stay intact. You can reactivate later.</p>
+      <h3 id="deactivateModalTitle">Deactivate Property Type?</h3>
+      <p class="muted text-sm mt-2" id="deactivateModalBody">It will no longer appear in the property Type dropdown for new properties. Existing properties stay intact. You can reactivate later.</p>
       <div class="flex justify-end gap-3 mt-6">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('deactivateModal').classList.remove('open')">Cancel</button>
         <button type="button" class="btn btn-danger" id="deactivateConfirmBtn">Deactivate</button>
@@ -401,8 +261,8 @@
     <a href="../leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="../audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
-    <a href="property-types.html" class="more-sheet-sublink">Property Types</a>
-    <a href="amenities.html" class="more-sheet-sublink active">Amenities</a>
+    <a href="property-types.html" class="more-sheet-sublink active">Property Types</a>
+    <a href="amenities.html" class="more-sheet-sublink">Amenities</a>
     <a href="categories.html" class="more-sheet-sublink">Categories</a>
     <a href="visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="../settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
@@ -415,19 +275,6 @@
     var pendingDeactivateId = null;
     var pendingDeactivateName = null;
     var lastFocusTrigger = null;
-
-    function filterTable() {
-      var q = (document.getElementById('mdSearch').value || '').toLowerCase();
-      var st = document.getElementById('mdStatus').value;
-      var rows = document.querySelectorAll('#tbl-amenities tbody tr');
-      Array.prototype.forEach.call(rows, function(row) {
-        var name = (row.dataset.name || '').toLowerCase();
-        var status = (row.dataset.status || '');
-        var nameMatch = !q || name.indexOf(q) !== -1;
-        var statusMatch = !st || status === st;
-        row.style.display = (nameMatch && statusMatch) ? '' : 'none';
-      });
-    }
 
     function openAddModal() {
       lastFocusTrigger = document.getElementById('addEntryBtn');
@@ -447,7 +294,7 @@
       if (!name) { err.textContent = 'Name is required.'; err.classList.add('show'); document.getElementById('addName').classList.add('error'); return; }
       if (name.length < 2 || name.length > 60) { err.textContent = 'Name must be 2–60 characters.'; err.classList.add('show'); document.getElementById('addName').classList.add('error'); return; }
       err.classList.remove('show'); document.getElementById('addName').classList.remove('error');
-      var tbody = document.querySelector('#tbl-amenities tbody');
+      var tbody = document.querySelector('#tbl-ptypes tbody');
       var tr = document.createElement('tr');
       tr.dataset.name = name; tr.dataset.status = 'active';
       tr.innerHTML = '<td class="font-poppins font-semibold text-charcoal">' + escHtml(name) + '</td><td>0</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\'' + escHtml(name) + '\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\'' + escHtml(name) + '\')">Deactivate</button></div></td>';
@@ -481,22 +328,21 @@
       lastFocusTrigger = document.activeElement;
       pendingDeactivateId = id; pendingDeactivateName = name;
       document.getElementById('deactivateModalTitle').textContent = 'Deactivate "' + name + '"?';
-      document.getElementById('deactivateModalBody').textContent = '"' + name + '" will no longer appear in dropdowns. Existing records stay intact. You can reactivate later.';
+      document.getElementById('deactivateModalBody').textContent = '"' + name + '" will no longer appear in the property Type dropdown. Existing properties stay intact. You can reactivate later.';
       document.getElementById('deactivateModal').classList.add('open');
       document.getElementById('deactivateConfirmBtn').focus();
     }
 
     document.getElementById('deactivateConfirmBtn').addEventListener('click', function() {
       document.getElementById('deactivateModal').classList.remove('open');
-      if (pendingDeactivateId === 'sauna') {
-        document.getElementById('badge-sauna').innerHTML = '<span class="badge badge-closed">Deactivated</span>';
-        document.getElementById('actions-sauna').innerHTML = '<a href="#" aria-label="Reactivate amenity Sauna" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>';
-        document.getElementById('row-sauna').dataset.status = 'deactivated';
+      if (pendingDeactivateId === 'villa') {
+        document.getElementById('badge-villa').innerHTML = '<span class="badge badge-closed">Deactivated</span>';
+        document.getElementById('actions-villa').innerHTML = '<a href="#" aria-label="Reactivate property type Villa" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); reactivateRow(this)">Reactivate</a>';
+        document.getElementById('row-villa').dataset.status = 'deactivated';
       }
       announce(pendingDeactivateName + ' deactivated.');
       if (lastFocusTrigger) lastFocusTrigger.focus();
     });
-
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
@@ -506,7 +352,6 @@
         });
       }
     });
-
 
     function reactivateRow(link) {
       var row = link.closest('tr');

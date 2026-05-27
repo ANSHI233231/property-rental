@@ -84,9 +84,11 @@
       // Prototype: record-only. No email is sent (manual follow-up). Show success.
       document.getElementById('contactForm').style.display='none';
       document.getElementById('contactSuccess').style.display='block';
+      if(window.gsToast) gsToast('Message sent — we’ll get back to you by email.');
       window.scrollTo({top:0, behavior:'smooth'});
     }
   </script>
   <script src="assets/public-chrome.js"></script>
+  <script src="assets/toast.js"></script>
 </body>
 </html>

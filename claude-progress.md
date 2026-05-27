@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-05-27 · Homepage redesign + public-chrome unification + Super Admin/plans/master polish · maintained by `gharsetu-lead`
+**Last updated:** 2026-05-27 · Admin role build-out (Property Types master · Leases page · property/unit edit+retire) + global success toast + signup State→City cascade · maintained by `gharsetu-lead`
 
 ---
 
@@ -16,25 +16,32 @@
 
 ---
 
-## 2. Last session summary (2026-05-27 — Homepage redesign + public-chrome unification + Super Admin/plans/master polish)
+## 2. Last session summary (2026-05-27 PM — Admin role build-out + Property Types master + global success toast)
 
-**Scope.** Continued the screen-by-screen prototype review. Shipped the planned homepage redesign, unified the public-page chrome behind a single source, and landed a batch of Super Admin / master-data / plans refinements. Prototype-only — no app code, no business-rule changes.
+**Scope.** Continued the screen-by-screen review, focused on the **Admin role** plus two cross-cutting features (Property Types master, global toast). Prototype-only — no app code, no business-rule changes. (The morning's homepage redesign + public-chrome work is committed in `994bfa4`; see §7.)
 
-**Shipped this session:**
-1. **Homepage redesign** (`prototype/index.html`) — built to `docs/planning/features/2026-05-27-homepage-redesign.md` (now **shipped**): glass nav (white→navy on scroll), navy-gradient hero + browser-framed dashboard mock + factual stats strip (120+/18/4), 4 alternating capability rows, 3-step "how it works", bento role grid (Admin emphasized), plans on light-gray + popular-card glow, merged navy CTA, `IntersectionObserver` scroll-reveal + reduced-motion + skip link. OD-1..5 resolved to the richer Option A; **OD-6 → A (Register pill)** overriding the documented default B (rationale logged in plan §4/§5). Hero mock URL set to `anshika.tlitech.net`; footer About link removed.
-2. **CTA/footer separation** — footer stepped to deep navy `#0D1757` + hairline top border so it no longer merges with the navy CTA band.
-3. **Public-chrome single source** — new `prototype/assets/public-chrome.js` renders one identical sticky glass nav + deep-navy Company/Legal footer into `#gs-public-nav` / `#gs-public-footer` placeholders. Wired into `index.html` (refactored off its inline chrome + glass-scroll JS), `contact.html`, `privacy.html`, `terms.html`. Auth pages (login/signup) intentionally stay chrome-free.
-4. **Profile pages** — removed the **Role** detail row on all 5 roles; role stays only as the `.profile-role` badge by the name.
-5. **Server Logs** — dropped the **Lines** column (header + cell); `lines` data kept for the file-preview modal.
-6. **Super Admin sidebar consistency** — `master-data/payment-methods.html` was missing the **Business Types** sublink; added. All 13 Super Admin surfaces now share an identical sidebar item sequence.
-7. **Master-data deactivate reason → tooltip** — across all 6 masters (4 platform: cities/states/payment-methods/business-types + org: amenities/categories) moved the in-cell "Cannot deactivate — currently used by N record(s)…" note (27 total) into the disabled Deactivate button's `title` attribute (dropped the now-dangling `aria-describedby`).
-8. **Plans "Most Popular" control** — Super Admin `plans.html` now sets which plan is the public highlight (★ badge + saffron top-border on the featured card; "Set as Most Popular" on the others; exclusive; auto-cleared on deactivate). Signup helper de-hardcoded ("Pick the one marked Most Popular" — no plan name) + signup tile badge "Popular"→"Most Popular". All read the shared `popular` flag in `plans.js`.
+**Shipped:**
+1. **Property Types master** (org-level, Admin) — new `admin/master-data/property-types.html` + single-source `assets/property-types.js`; landing card; **Property Types** sublink rolled out to all 17 admin nav surfaces; Add Property **Type** dropdown rendered from it. Plan: `2026-05-27-property-types-master.md` (shipped).
+2. **Admin dashboard** — "Overdue Tenants" → **"Overdue Leases"**; "Property Snapshot" → **"Recent Open Maintenance Requests"** (latest 4 open).
+3. **Property listing** — property-type filter tiles → **read-only summary tiles** (Available Units / Total Active Leases / Upcoming Leases); **Edit Property** per row via a shared add/edit modal (Assign Manager hidden in edit — that's the Reassign-PM action on the detail page).
+4. **Property detail** — manager phone unmasked (Admin can see it); "Active Leases" section removed (lives on unit detail); Units table gained a **Current Tenant** column + **Add/Edit Unit** modal (status locked while occupied; "Occupied" not manually selectable) + **Retire** (row action, reason required, blocked while occupied — a soft status, not a delete); **Edit Property** + **Create Lease** buttons removed.
+5. **Admin Leases page** — NEW `admin/leases.html`, org-wide list (Tenant · Property · Unit · Start · End · Rent · Status · Actions) + New Lease modal + co-tenant consent + pagination; row View → unit-detail; **Leases** added to admin sidebar + more-sheet across 17 pages. Plan: `2026-05-27-admin-leases-page.md`.
+6. **Add/Edit Property — Amenities** → checkbox list (was a Ctrl/Cmd multi-select).
+7. **Signup form** — State → City **cascade** dropdowns from new single-source `assets/locations.js` (NCR states only) + **Pincode** field (6-digit).
+8. **Global success toast** — `assets/toast.js` + CSS (top-right, auto-dismiss 4s, pause-on-hover, `aria-live`, reduced-motion). **Rolled out to all 64 pages**: 38 success `alert()` → `gsToast`, 12 master `announce()` routed, `property-detail` `showSuccess` → toast, signup + contact toast on success. Placeholders ("…form opened", export, PDF) left as `alert()`. Plan: `2026-05-27-global-success-toast.md`.
+9. **Visit Purposes** deactivate note → button `title` tooltip (the earlier 6-master sweep had missed it; all 8 masters now consistent).
+10. **Create Lease → full page** — new `admin/create-lease.html` (Unit · Lease terms · Primary tenant · repeatable Co-tenants); the Leases-page "+ New Lease" navigates there (modal removed); flash-toast on return. Unit-detail "+ Create Lease" + property-detail "+ Create Lease"/"Edit Property" buttons removed.
+11. **Org detail — Reject action** — Super Admin can now **Reject** a pending org (red action + reason modal + new `Rejected` status/badge), alongside Approve.
+12. **Properties Export → real CSV** download (was a placeholder alert) + success toast.
+13. **Unit detail unified + occupancy-aware** (admin + PM identical): combined Active/Past leases into one **Leases** table with a Status column; **Current Tenant(s)** card; **Bathrooms** added (modal + table); KPI strip reworked (Monthly Rent moved into the top context card; lease KPIs = Active Lease/Outstanding/Lease-ends-in). **Prototype status simulator** (Available/Listed/Occupied/Under-Maintenance/Retired) moved to the top; when not occupied it hides the tenant card, lease KPI strip, the active-lease row, and (except under Maintenance) the Open Maintenance section. Open Maintenance **section removed** from unit detail.
+14. **Property detail — Open Maintenance** rows got View-detail links; "Active Leases" section removed; Units table gained Current Tenant + **Bathrooms** columns + Add/Edit Unit modal (status locked while occupied) + **Retire** (reason, soft status); manager phone unmasked.
+15. **PM parity mirror** (`gharsetu-frontend` agent) — PM property-detail + unit-detail brought to the same display/lease/preview behaviour as admin, **without** structural CRUD (PM stays operations-scoped).
 
-**Earlier in the same session:** added a real **Edit-Profile modal** (Name + Mobile editable; Email + Role locked) across all 5 profile pages, replacing the old JS `alert()`.
+**Config:** `gharsetu-frontend` agent model pinned `sonnet` → `claude-sonnet-4-6` (user request).
 
-**Docs:** homepage planning file → `shipped` + OD log; `docs/planning/prototype-changes.md` **created** (Working rule §9) and seeded with this session's rows; change-log `agent-team-change-logs/gharsetu-frontend-2026-05-27.md` (tasks 1–10). No `feature_list.json` change — prototype polish, not a new app feature.
+**Docs:** 3 new planning files (property-types, admin-leases, global-toast); `prototype-changes.md` + frontend change-log updated. No `feature_list.json` change (prototype polish).
 
-**Prototype-only caveat (carry-over for app port):** the "Most Popular" choice and all plan CRUD are session-only in the static prototype (no persistence) — the homepage's default featured plan stays **Standard** via `plans.js`. In the live app this becomes a saved setting / PATCH.
+**Carry-over:** an orphaned (unreachable) Create-Lease drawer remains on `admin/property-detail.html` — harmless dead code, strip later. Toast / Most-Popular / plan + property + unit CRUD are session-only (no persistence) in the static prototype.
 
 ---
 
@@ -134,6 +141,11 @@ Solution Overview was iterated end-to-end (v6.5 → v8) over a long single sessi
 | Plans "Most Popular" Super Admin control + signup de-hardcode | ✅ shipped |
 | Master-data deactivate reason → button tooltip (6 masters) | ✅ shipped |
 | Profile Role-as-badge · Server Logs Lines column removed · Edit-Profile modal | ✅ shipped |
+| Property Types master (org-level) + Add-Property dropdown wired | ✅ shipped |
+| Admin Leases page (org-wide) + Leases nav across 17 admin pages | ✅ shipped |
+| Property listing Edit + summary tiles · property-detail unit add/edit/retire · amenities checkboxes | ✅ shipped |
+| Signup State→City cascade (`locations.js`) + Pincode | ✅ shipped |
+| Global success toast (`toast.js`) rolled out to all 64 pages | ✅ shipped |
 | Master Data restructure + platform/org ownership split | ✅ shipped |
 | Server Logs (Super Admin) · Delegations 3-col modal · filter pills→tiles | ✅ shipped |
 | Visitor pages card→table + tiles | ✅ shipped (PM + tenant) |
@@ -195,7 +207,8 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 
 | Date | HEAD | Agent | What changed |
 |---|---|---|---|
-| 2026-05-27 | _pending_ | orchestrator + gharsetu-frontend | Homepage redesign shipped (glass nav, hero+dashboard-mock+stats strip, alternating capability rows, how-it-works, bento roles, popular-glow plans, merged navy CTA, scroll-reveal) · footer deep-navy `#0D1757` separation · **`public-chrome.js` single source** for nav+footer across index/contact/privacy/terms (auth pages chrome-free) · profile Role row → badge only (5 roles) + Edit-Profile modal (Name+Mobile only) · Server Logs Lines column removed · Super Admin sidebar fixed (payment-methods missing Business Types) · master-data deactivate reason → disabled-button `title` tooltip (6 masters, 27 notes) · Plans Super-Admin "Set as Most Popular" control + signup helper de-hardcoded ("Most Popular", no plan name). `prototype-changes.md` created. |
+| 2026-05-27 | _pending_ | orchestrator | Admin role build-out + 2 cross-cutting features. **Property Types master** (org-level: `property-types.html` + `property-types.js` + Add-Property dropdown + sublink ×17). **Admin Leases page** (`admin/leases.html`, org-wide + Leases nav ×17). Property detail: Current-Tenant column, **Add/Edit Unit** modal (status locked while occupied) + **Retire** (reason, soft status), removed Active-Leases/Edit-Property/Create-Lease, unmasked PM phone. Property listing: **Edit Property** (shared modal, manager hidden in edit) + read-only summary tiles. Add/Edit Property amenities → checkboxes. Dashboard: Overdue-Leases + Recent-Open-Maintenance. **Signup State→City cascade** (`locations.js`) + Pincode. **Global success toast** (`toast.js`) across all 64 pages (38 alerts + 12 announce + signup/contact). Visit-Purposes note→tooltip. `gharsetu-frontend` model → `claude-sonnet-4-6`. 3 planning files added. |
+| 2026-05-27 | `994bfa4` | orchestrator + gharsetu-frontend | Homepage redesign shipped (glass nav, hero+dashboard-mock+stats strip, alternating capability rows, how-it-works, bento roles, popular-glow plans, merged navy CTA, scroll-reveal) · footer deep-navy `#0D1757` separation · **`public-chrome.js` single source** for nav+footer across index/contact/privacy/terms (auth pages chrome-free) · profile Role row → badge only (5 roles) + Edit-Profile modal (Name+Mobile only) · Server Logs Lines column removed · Super Admin sidebar fixed (payment-methods missing Business Types) · master-data deactivate reason → disabled-button `title` tooltip (6 masters, 27 notes) · Plans Super-Admin "Set as Most Popular" control + signup helper de-hardcoded ("Most Popular", no plan name). `prototype-changes.md` created. |
 | 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | Super Admin review pass + 2 new features: org slugs (`?org=<slug>` everywhere) · org-detail redesign (status simulator + conditional actions + 3 tabs incl. Subscription Plan History) · Plans full CRUD + 9-feature flag catalogue · single-source `plans.js` (home + signup + super-admin render same ✓/✗ list) · Business Types platform master + signup wiring · Legal+Contact feature (privacy/terms/contact public pages + Super Admin Legal editor + Contact Inbox, record-only per Scope-K) · favicon on all 62 pages · removed all helper captions + detail-page back-links. Homepage redesign PLANNED (awaiting sign-off). |
 | 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | IA restructure: deleted standalone Units pages (admin+pm) → created per-role `unit-detail.html` wired from property-detail · `tenant/lease-detail.html` (full payment/co-tenant/maintenance/terminate actions) · `pm/properties.html` + `pm/property-detail.html` with multi-property + read-only tenure-history (retires one-PM-per-property) · created `tenant/maintenance-detail.html` + `maintenance/maintenance-detail.html` (4 role detail pages now complete, each with progress timeline + role-based action card) · maintenance role scoped to assigned-only, self-assign removed, all-open→all-requests · server-side pagination component (`paginate.js`) on **21 list pages** (URL-driven, search/tile reset, tile counts = full dataset). 3 agent dispatches crashed at socket watchdog; orchestrator finished residual by hand. |
 | 2026-05-27 | _pending_ | gharsetu-lead | Server Logs (Super Admin diagnostics) + Delegations modal fix: new `prototype/super-admin/server-logs.html` with 10 mock daily log files · View modal with dark-theme JetBrains Mono log viewer + colored levels · real Blob download for `.log` files · sidebar entry rolled out to 9 Super Admin pages · planning file `2026-05-27-server-logs-page.md` authored BEFORE code (documents app-port carry-over: `apps/api/logs/api-YYYY-MM-DD.log` Pino convention, Super-Admin-only `/api/v1/platform/logs` endpoints, `VIEW_SERVER_LOG`/`DOWNLOAD_SERVER_LOG` audit actions, 90-day retention) · Delegations create modal widened 560→960px and `.checkbox-group` flipped from column to 3-col grid (responsive 3/2/1) so page doesn't get too long. |

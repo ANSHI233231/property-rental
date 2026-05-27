@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>Audit Log · Admin · GharSetu</title>
+  <title>Leases · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -19,11 +19,11 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="leases.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
-        <a href="audit-log.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+        <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-section collapsed">
           <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
             <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
@@ -69,235 +69,165 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">Audit Log</h1>
+          <h1 class="page-title">Leases</h1>
         </div>
-        <button class="btn btn-secondary !py-2 !text-sm">Export CSV</button>
+        <a href="create-lease.html" class="btn btn-primary !py-2 !text-sm">+ New Lease</a>
       </header>
 
-      <!-- Filters -->
-      <section class="card mb-6">
-        <div class="grid md:grid-cols-5 gap-4">
-          <div>
-            <label class="label" for="event-type">Event type</label>
-            <select id="event-type" class="input">
-              <option>All events</option>
-              <option>USER_LOGIN</option>
-              <option>USER_LOGOUT</option>
-              <option>LEASE_CREATED</option>
-              <option>LEASE_TERMINATED</option>
-              <option>DEPOSIT_REFUND_PROCESSED</option>
-              <option>RENT_CHANGE_SCHEDULED</option>
-              <option>RENT_CHANGE_APPLIED</option>
-              <option>RENT_CHANGE_CANCELLED</option>
-              <option>MAINTENANCE_STATUS_CHANGED</option>
-              <option>CO_TENANT_CONSENT_GIVEN</option>
-              <option>CO_TENANT_CONSENT_REJECTED</option>
-              <option>PROPERTY_TRANSFERRED</option>
-              <option>ADMIN_RESET_PASSWORD</option>
-            </select>
-          </div>
-          <div>
-            <label class="label" for="actor-role">Actor role</label>
-            <select id="actor-role" class="input">
-              <option>Any role</option><option>Admin</option><option>Property Manager</option><option>Maintenance</option><option>Tenant</option>
-            </select>
-          </div>
-          <div>
-            <label class="label" for="from-date">From</label>
-            <input id="from-date" type="date" class="input" />
-          </div>
-          <div>
-            <label class="label" for="to-date">To</label>
-            <input id="to-date" type="date" class="input" />
-          </div>
-          <div>
-            <label class="label" for="actor-search">Actor name</label>
-            <input id="actor-search" class="input" placeholder="e.g. Sunita Arora" data-pg-search="tbl-audit" />
-          </div>
-        </div>
-        <div class="flex justify-end mt-4 gap-3">
-          <button class="btn btn-secondary !py-2 !text-sm">Clear</button>
-          <button class="btn btn-primary !py-2 !text-sm">Search</button>
+      <!-- Filter tiles -->
+      <section class="section">
+        <div class="filter-tiles">
+          <button type="button" class="filter-tile active" data-tile-for="tbl-leases" data-tile-filter="all" onclick="Paginator.setFilter('tbl-leases','all',this)">
+            <span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">All</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-leases" data-tile-filter="active" onclick="Paginator.setFilter('tbl-leases','active',this)">
+            <span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Active</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-leases" data-tile-filter="renewed" onclick="Paginator.setFilter('tbl-leases','renewed',this)">
+            <span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Renewed</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-leases" data-tile-filter="terminated" onclick="Paginator.setFilter('tbl-leases','terminated',this)">
+            <span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Terminated</span>
+          </button>
         </div>
       </section>
 
-      <!-- Log table -->
+      <!-- Filters -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="search">Search</label>
+            <input id="search" class="input" placeholder="Tenant, unit, property" data-pg-search="tbl-leases" />
+          </div>
+          <div>
+            <label class="label" for="propertyFilter">Property</label>
+            <select id="propertyFilter" class="input">
+              <option>All properties</option>
+              <option>Green Valley, Dwarka</option>
+              <option>Sai Heights, Lajpat Nagar</option>
+              <option>Mayur Vihar Residency</option>
+              <option>Rohini Greens</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <div class="alert mb-6" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0" style="width:18px;height:18px;margin-top:2px;" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong class="font-poppins">4 leases expiring within 60 days</strong> — renewals create a new lease record; the old one stays Active until its end date, then becomes Renewed.
+        </div>
+      </div>
+
       <section class="card p-0 overflow-x-auto">
-        <table class="data-table" id="tbl-audit">
+        <table class="data-table" id="tbl-leases">
           <thead>
-            <tr>
-              <th>When (IST)</th>
-              <th>Actor</th>
-              <th>Role</th>
-              <th>Event</th>
-              <th>Target</th>
-              <th>Details</th>
-            </tr>
+            <tr><th>Tenant(s)</th><th>Property</th><th>Unit</th><th>Start</th><th>End</th><th>Rent</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td class="text-xs whitespace-nowrap">14/05/2026 09:42</td>
-              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
-              <td>PM</td>
-              <td><span class="badge badge-renewed">RENT_CHANGE_SCHEDULED</span></td>
-              <td>Lease #L-2103 · Unit 1A · Green Valley</td>
-              <td class="text-xs">₹18,000 → ₹19,500 effective 15/07/2026</td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Raj + Priya Sharma</div><div class="text-xs muted">Co-tenants</div></td>
+              <td>Green Valley, Dwarka</td>
+              <td>3A</td>
+              <td>01/06/2025</td>
+              <td>31/05/2026</td>
+              <td>₹18,000</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="flex gap-2 flex-wrap">
+                  <a href="unit-detail.html?unit=3A&property=green-valley" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
+                  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">14/05/2026 09:11</td>
-              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
-              <td>Admin</td>
-              <td><span class="badge badge-prepaid">ADMIN_RESET_PASSWORD</span></td>
-              <td>User #U-148 · Raju Kumar</td>
-              <td class="text-xs">Password reset by Admin</td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Gupta Family</div><div class="text-xs muted">3 co-tenants · consent pending</div></td>
+              <td>Green Valley, Dwarka</td>
+              <td>1B</td>
+              <td>01/06/2024</td>
+              <td>25/06/2026</td>
+              <td>₹22,000</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="flex gap-2 flex-wrap">
+                  <a href="unit-detail.html?unit=1B&property=green-valley" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
+                  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">14/05/2026 08:55</td>
-              <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
-              <td>Tenant</td>
-              <td><span class="badge badge-paid">USER_LOGIN</span></td>
-              <td>User #U-204</td>
-              <td class="text-xs">IP 49.207.x.x · Mobile Safari</td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Rohan Mehta</div></td>
+              <td>Green Valley, Dwarka</td>
+              <td>1A</td>
+              <td>15/04/2026</td>
+              <td>14/03/2027</td>
+              <td>₹18,000</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="flex gap-2 flex-wrap">
+                  <a href="unit-detail.html?unit=1A&property=green-valley" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
+                  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">13/05/2026 17:30</td>
-              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
-              <td>PM</td>
-              <td><span class="badge badge-resolved">MAINTENANCE_STATUS_CHANGED</span></td>
-              <td>Ticket #MR-2990 · Unit 3A</td>
-              <td class="text-xs">Resolved → Closed</td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Anjali Verma</div></td>
+              <td>Sai Heights, Lajpat Nagar</td>
+              <td>4B</td>
+              <td>16/06/2025</td>
+              <td>15/06/2026</td>
+              <td>₹20,000</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="flex gap-2 flex-wrap">
+                  <a href="unit-detail.html?unit=4B&property=sai-heights" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
+                  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">13/05/2026 11:02</td>
-              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
-              <td>PM</td>
-              <td><span class="badge badge-prepaid">LEASE_CREATED</span></td>
-              <td>Lease #L-2118 · Unit 4B · Sai Heights</td>
-              <td class="text-xs">11-mo lease · Anjali Verma · ₹32,000</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">12/05/2026 21:14</td>
-              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
-              <td>PM</td>
-              <td><span class="badge badge-partial">DEPOSIT_REFUND_PROCESSED</span></td>
-              <td>Lease #L-2086 · Unit 6D</td>
-              <td class="text-xs">₹54,000 refunded (full)</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">12/05/2026 16:00</td>
-              <td class="font-poppins font-semibold text-charcoal">Priya Patel</td>
-              <td>Tenant</td>
-              <td><span class="badge badge-prepaid">CO_TENANT_CONSENT_GIVEN</span></td>
-              <td>Lease #L-2095 · Unit 2A</td>
-              <td class="text-xs">Consented to termination request</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">12/05/2026 09:00</td>
-              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
-              <td>Admin</td>
-              <td><span class="badge badge-renewed">PROPERTY_TRANSFERRED</span></td>
+            <tr data-status="active">
+              <td><div class="font-poppins font-semibold text-charcoal">Arun Yadav</div></td>
               <td>Rohini Greens</td>
-              <td class="text-xs">Anil Kapoor → Manoj Verma (interim)</td>
+              <td>2C</td>
+              <td>05/07/2025</td>
+              <td>04/07/2026</td>
+              <td>₹19,000</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="flex gap-2 flex-wrap">
+                  <a href="unit-detail.html?unit=2C&property=rohini-greens" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
+                  <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">11/05/2026 14:22</td>
-              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
-              <td>PM</td>
-              <td><span class="badge badge-closed">LEASE_TERMINATED</span></td>
-              <td>Lease #L-2086 · Unit 6D</td>
-              <td class="text-xs">Early termination · tenant relocating</td>
+            <tr data-status="renewed">
+              <td><div class="font-poppins font-semibold text-charcoal">Vikram Mehta</div></td>
+              <td>Mayur Vihar Residency</td>
+              <td>2B</td>
+              <td>01/01/2025</td>
+              <td>31/12/2025</td>
+              <td>₹22,000</td>
+              <td><span class="badge badge-renewed">Renewed</span></td>
+              <td><a href="unit-detail.html?unit=2B&property=mayur-vihar" class="btn btn-secondary !py-1 !px-3 !text-sm">View History</a></td>
             </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">11/05/2026 10:05</td>
-              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
-              <td>PM</td>
-              <td><span class="badge badge-paid">RENT_CHANGE_APPLIED</span></td>
-              <td>Lease #L-2091 · Unit 3B · Sai Heights</td>
-              <td class="text-xs">₹26,000 applied from 01/05/2026</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">10/05/2026 18:40</td>
-              <td class="font-poppins font-semibold text-charcoal">Pooja Khanna</td>
-              <td>PM</td>
-              <td><span class="badge badge-prepaid">LEASE_CREATED</span></td>
-              <td>Lease #L-2120 · Unit 7A · Mayur Vihar</td>
-              <td class="text-xs">12-mo lease · Rahul Tiwari · ₹35,000</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">10/05/2026 09:14</td>
-              <td class="font-poppins font-semibold text-charcoal">Raju Kumar</td>
-              <td>Maintenance</td>
-              <td><span class="badge badge-resolved">MAINTENANCE_STATUS_CHANGED</span></td>
-              <td>Ticket #MR-3018 · Unit 2A</td>
-              <td class="text-xs">In-Progress → Resolved</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">09/05/2026 22:11</td>
-              <td class="font-poppins font-semibold text-charcoal">Raj Sharma</td>
-              <td>Tenant</td>
-              <td><span class="badge badge-paid">USER_LOGIN</span></td>
-              <td>User #U-188</td>
-              <td class="text-xs">IP 182.64.x.x · Chrome on Android</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">09/05/2026 16:30</td>
-              <td class="font-poppins font-semibold text-charcoal">Anil Kapoor</td>
-              <td>PM</td>
-              <td><span class="badge badge-renewed">RENT_CHANGE_SCHEDULED</span></td>
-              <td>Lease #L-2077 · Unit 1C · Rohini Greens</td>
-              <td class="text-xs">₹15,500 → ₹17,000 effective 01/07/2026</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">09/05/2026 11:00</td>
-              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
-              <td>Admin</td>
-              <td><span class="badge badge-prepaid">ADMIN_RESET_PASSWORD</span></td>
-              <td>User #U-212 · Anjali Verma</td>
-              <td class="text-xs">Password reset by Admin</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">08/05/2026 20:05</td>
-              <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td>
-              <td>Tenant</td>
-              <td><span class="badge badge-prepaid">CO_TENANT_CONSENT_REJECTED</span></td>
-              <td>Lease #L-2108 · Unit 5B</td>
-              <td class="text-xs">Rejected termination request</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">08/05/2026 14:18</td>
-              <td class="font-poppins font-semibold text-charcoal">Pooja Khanna</td>
-              <td>PM</td>
-              <td><span class="badge badge-partial">DEPOSIT_REFUND_PROCESSED</span></td>
-              <td>Lease #L-2099 · Unit 9A</td>
-              <td class="text-xs">₹70,000 refunded (full)</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">07/05/2026 09:00</td>
-              <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
-              <td>PM</td>
-              <td><span class="badge badge-paid">USER_LOGOUT</span></td>
-              <td>User #U-112 · Sunita Arora</td>
-              <td class="text-xs">Session ended</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">06/05/2026 11:30</td>
-              <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
-              <td>PM</td>
-              <td><span class="badge badge-closed">LEASE_TERMINATED</span></td>
-              <td>Lease #L-2104 · Unit 9B · Sai Heights</td>
-              <td class="text-xs">Lease expired — natural end</td>
-            </tr>
-            <tr>
-              <td class="text-xs whitespace-nowrap">05/05/2026 08:45</td>
-              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
-              <td>Admin</td>
-              <td><span class="badge badge-renewed">PROPERTY_TRANSFERRED</span></td>
-              <td>Janakpuri Enclave</td>
-              <td class="text-xs">Sunita Arora — newly assigned as PM</td>
+            <tr data-status="terminated">
+              <td><div class="font-poppins font-semibold text-charcoal">Pradeep Yadav</div></td>
+              <td>Mayur Vihar Residency</td>
+              <td>5C</td>
+              <td>01/01/2026</td>
+              <td>15/04/2026</td>
+              <td>₹17,000</td>
+              <td><span class="badge badge-terminated">Terminated</span></td>
+              <td><button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Deposit refund form opened. You can issue partial or full refund with a reason.')">Process Refund</button></td>
             </tr>
           </tbody>
         </table>
-        <div class="pagination" data-paginate-for="tbl-audit" data-per-page="10" aria-label="Pagination">
+        <div class="pagination" data-paginate-for="tbl-leases" data-per-page="10" aria-label="Pagination">
           <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
           <div class="pagination-controls">
             <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
@@ -305,17 +235,40 @@
             <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
           </div>
           <div class="pagination-per-page">
-            <label for="per-page-tbl-audit" class="sr-only">Rows per page</label>
-            <select id="per-page-tbl-audit" data-pg-per-page>
-              <option value="10" selected>10 / page</option>
-              <option value="25">25 / page</option>
-              <option value="50">50 / page</option>
-            </select>
+            <label for="per-page-tbl-leases" class="sr-only">Rows per page</label>
+            <select id="per-page-tbl-leases" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
           </div>
         </div>
       </section>
 
-      <p class="text-xs muted mt-4">All timestamps are in Indian Standard Time (IST, UTC+5:30). The audit log is append-only — entries cannot be edited or deleted.</p>
+      <!-- Co-tenant termination consent panel -->
+      <section class="section mt-8">
+        <h3 class="section-title">Pending Co-Tenant Consent</h3>
+        <div class="card">
+          <div class="flex items-start justify-between flex-wrap gap-4">
+            <div>
+              <div class="font-poppins font-semibold text-charcoal text-lg">Green Valley, Dwarka · Unit 1B — Termination requested by Rohit Gupta</div>
+              <p class="text-sm muted mt-1">Reason: Job relocation to Bengaluru · Requested 04/05/2026</p>
+              <div class="mt-4 grid sm:grid-cols-3 gap-3">
+                <div class="p-3 rounded border border-mid-gray">
+                  <div class="text-xs muted">Rohit Gupta (requester)</div>
+                  <span class="badge badge-paid mt-1">Approved</span>
+                </div>
+                <div class="p-3 rounded border border-mid-gray">
+                  <div class="text-xs muted">Anita Gupta</div>
+                  <span class="badge badge-paid mt-1">Approved</span>
+                </div>
+                <div class="p-3 rounded border border-mid-gray">
+                  <div class="text-xs muted">Sahil Gupta</div>
+                  <span class="badge badge-open mt-1">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr class="divider"/>
+          <p class="text-sm muted">All co-tenants must approve before this termination can be finalised. There is <strong>no automatic timeout</strong> — the request stays pending until everyone responds, or the requester withdraws it.</p>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -327,8 +280,18 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
-  <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/toast.js"></script>
+  <script>
+    /* Flash toast after returning from Create Lease */
+    (function () {
+      try {
+        var f = sessionStorage.getItem('gharsetu_flash');
+        if (f) { sessionStorage.removeItem('gharsetu_flash'); if (window.gsToast) gsToast(f); }
+      } catch (e) {}
+    })();
+  </script>
   <!-- More bottom sheet (Admin overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -336,7 +299,7 @@
     <div class="more-sheet-title">More options</div>
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="leases.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
@@ -368,6 +331,5 @@
       Sign out
     </a>
   </div>
-  <script src="../assets/toast.js"></script>
 </body>
 </html>

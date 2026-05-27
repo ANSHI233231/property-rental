@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="assets/styles.css" />
   <script src="assets/plans.js"></script>
   <script src="assets/business-types.js"></script>
+  <script src="assets/locations.js"></script>
   <style>
     /* ─── Card — wider on desktop ─────────────────────────────── */
     .org-auth-card {
@@ -56,10 +57,10 @@
       .fields-grid .col-span-2 { grid-column: span 2; }
     }
 
-    /* ─── City+State side-by-side row ─────────────────────── */
+    /* ─── State · City · Pincode row ─────────────────────── */
     .city-state-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
     }
     @media (max-width: 479px) {
@@ -263,58 +264,30 @@
               <label class="label">Location <span style="color:#FF6F00;">*</span></label>
               <div class="city-state-row">
                 <div>
-                  <input
-                    id="city"
-                    class="input"
-                    type="text"
-                    placeholder="City"
-                    aria-label="City"
-                    aria-describedby="city-error"
-                    maxlength="50"
-                  />
+                  <select id="state" class="input" aria-label="State" aria-describedby="state-error" onchange="onStateChange()">
+                    <option value="">Select state</option>
+                  </select>
+                  <div id="state-error" class="field-error" role="alert" aria-live="polite"></div>
+                </div>
+                <div>
+                  <select id="city" class="input" aria-label="City" aria-describedby="city-error" disabled>
+                    <option value="">Select state first</option>
+                  </select>
                   <div id="city-error" class="field-error" role="alert" aria-live="polite"></div>
                 </div>
                 <div>
-                  <select id="state" class="input" aria-label="State" aria-describedby="state-error">
-                    <option value="">Select state</option>
-                    <option value="AN">Andaman and Nicobar Islands</option>
-                    <option value="AP">Andhra Pradesh</option>
-                    <option value="AR">Arunachal Pradesh</option>
-                    <option value="AS">Assam</option>
-                    <option value="BR">Bihar</option>
-                    <option value="CH">Chandigarh</option>
-                    <option value="CG">Chhattisgarh</option>
-                    <option value="DN">Dadra and Nagar Haveli and Daman and Diu</option>
-                    <option value="DL">Delhi</option>
-                    <option value="GA">Goa</option>
-                    <option value="GJ">Gujarat</option>
-                    <option value="HR">Haryana</option>
-                    <option value="HP">Himachal Pradesh</option>
-                    <option value="JK">Jammu and Kashmir</option>
-                    <option value="JH">Jharkhand</option>
-                    <option value="KA">Karnataka</option>
-                    <option value="KL">Kerala</option>
-                    <option value="LA">Ladakh</option>
-                    <option value="LD">Lakshadweep</option>
-                    <option value="MP">Madhya Pradesh</option>
-                    <option value="MH">Maharashtra</option>
-                    <option value="MN">Manipur</option>
-                    <option value="ML">Meghalaya</option>
-                    <option value="MZ">Mizoram</option>
-                    <option value="NL">Nagaland</option>
-                    <option value="OD">Odisha</option>
-                    <option value="PY">Puducherry</option>
-                    <option value="PB">Punjab</option>
-                    <option value="RJ">Rajasthan</option>
-                    <option value="SK">Sikkim</option>
-                    <option value="TN">Tamil Nadu</option>
-                    <option value="TS">Telangana</option>
-                    <option value="TR">Tripura</option>
-                    <option value="UP">Uttar Pradesh</option>
-                    <option value="UK">Uttarakhand</option>
-                    <option value="WB">West Bengal</option>
-                  </select>
-                  <div id="state-error" class="field-error" role="alert" aria-live="polite"></div>
+                  <input
+                    id="pincode"
+                    class="input"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="Pincode"
+                    aria-label="Pincode"
+                    aria-describedby="pincode-error"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                  />
+                  <div id="pincode-error" class="field-error" role="alert" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -625,13 +598,26 @@
       return null;
     }
     function validateCity(val) {
-      if (!val.trim()) return 'City is required.';
-      if (val.trim().length < 2) return 'City must be at least 2 characters.';
+      if (!getEl('state').value) return null;   // state error covers the "pick state first" case
+      if (!val) return 'Please select a city.';
       return null;
     }
     function validateState(val) {
       if (!val) return 'Please select a state.';
       return null;
+    }
+    function validatePincode(val) {
+      var v = (val || '').trim();
+      if (!v) return 'Pincode is required.';
+      if (!/^[1-9][0-9]{5}$/.test(v)) return 'Enter a valid 6-digit pincode.';
+      return null;
+    }
+    /* State → City cascade: repopulate the city dropdown for the chosen state. */
+    function onStateChange() {
+      renderCitiesForState('city', getEl('state').value);
+      var cityEl = getEl('city'); var cityErr = getEl('city-error');
+      if (cityErr) { cityErr.textContent = ''; cityErr.classList.remove('show'); }
+      if (cityEl) cityEl.classList.remove('error');
     }
     function validateContactName(val) {
       if (!val.trim()) return 'Full name is required.';
@@ -700,8 +686,9 @@
         { id: 'org-name',         errId: 'org-name-error',         fn: function(v){ return validateOrgName(v); } },
         { id: 'biz-type',         errId: 'biz-type-error',         fn: function(v){ return validateBizType(v); } },
         { id: 'unit-count',       errId: 'unit-count-error',       fn: function(v){ return validateUnitCount(v); } },
-        { id: 'city',             errId: 'city-error',             fn: function(v){ return validateCity(v); } },
         { id: 'state',            errId: 'state-error',            fn: function(v){ return validateState(v); } },
+        { id: 'city',             errId: 'city-error',             fn: function(v){ return validateCity(v); } },
+        { id: 'pincode',          errId: 'pincode-error',          fn: function(v){ return validatePincode(v); } },
         { id: 'contact-name',     errId: 'contact-name-error',     fn: function(v){ return validateContactName(v); } },
         { id: 'contact-email',    errId: 'contact-email-error',    fn: function(v){ return validateEmail(v); } },
         { id: 'contact-phone',    errId: 'contact-phone-error',    fn: function(v){ return validatePhone(v); } },
@@ -772,6 +759,7 @@
       // All valid — show success state
       getEl('form-card').style.display  = 'none';
       getEl('success-card').style.display = 'block';
+      if (window.gsToast) gsToast('Registration submitted — we’ll review and email you shortly.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -782,8 +770,11 @@
       wireField('org-name',         'org-name-error',         validateOrgName);
       wireField('biz-type',         'biz-type-error',         validateBizType);
       wireField('unit-count',       'unit-count-error',       validateUnitCount);
-      wireField('city',             'city-error',             validateCity);
+      renderStateOptions('state');
+      renderCitiesForState('city', '');
       wireField('state',            'state-error',            validateState);
+      wireField('city',             'city-error',             validateCity);
+      wireField('pincode',          'pincode-error',          validatePincode);
       wireField('contact-name',     'contact-name-error',     validateContactName);
       wireField('contact-email',    'contact-email-error',    validateEmail);
       wireField('contact-phone',    'contact-phone-error',    validatePhone);
@@ -821,5 +812,6 @@
 
   <!-- validation.js sets novalidate on forms; our custom logic above takes precedence -->
   <script src="assets/validation.js"></script>
+  <script src="assets/toast.js"></script>
 </body>
 </html>

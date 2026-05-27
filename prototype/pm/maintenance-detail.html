@@ -202,7 +202,7 @@
               <label class="label" for="internal-note">Add internal note</label>
               <textarea id="internal-note" class="input" rows="3" placeholder="Visible only to PMs and Admins."></textarea>
               <div class="flex justify-end mt-2">
-                <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Internal note saved.')">Save Note</button>
+                <button class="btn btn-secondary !py-2 !text-sm" onclick="gsToast('Internal note saved.')">Save Note</button>
               </div>
             </div>
           </section>
@@ -221,7 +221,7 @@
                 <option>Deepak Sharma</option>
                 <option>Anil Yadav</option>
               </select>
-              <button class="btn btn-primary w-full !text-sm !py-2" onclick="alert('Technician reassigned.')">Confirm Reassignment</button>
+              <button class="btn btn-primary w-full !text-sm !py-2" onclick="gsToast('Technician reassigned.')">Confirm Reassignment</button>
             </div>
 
             <hr class="divider"/>
@@ -235,7 +235,7 @@
                 <option>Medium</option>
                 <option>Low</option>
               </select>
-              <button class="btn btn-secondary w-full !text-sm !py-2" onclick="alert('Priority updated.')">Update Priority</button>
+              <button class="btn btn-secondary w-full !text-sm !py-2" onclick="gsToast('Priority updated.')">Update Priority</button>
             </div>
 
             <hr class="divider"/>
@@ -244,8 +244,8 @@
             <div>
               <div class="font-poppins font-semibold text-sm text-charcoal mb-2">Status Actions</div>
               <div class="flex flex-col gap-2">
-                <button class="btn btn-secondary !text-sm !py-2" onclick="alert('Request closed on behalf of tenant. Audit log updated.')">Close on Behalf of Tenant</button>
-                <button class="btn btn-secondary !text-sm !py-2" onclick="alert('Request reopened.')">Reopen Request</button>
+                <button class="btn btn-secondary !text-sm !py-2" onclick="gsToast('Request closed on behalf of tenant. Audit log updated.')">Close on Behalf of Tenant</button>
+                <button class="btn btn-secondary !text-sm !py-2" onclick="gsToast('Request reopened.')">Reopen Request</button>
               </div>
               <p class="text-xs muted mt-2">Closing records you as the actor in the audit log (BL-15). Cross-property reassignment requires Admin role.</p>
             </div>
@@ -297,5 +297,6 @@
       Sign out
     </a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

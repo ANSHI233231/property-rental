@@ -1,7 +1,7 @@
 ---
 name: gharsetu-frontend
 description: "Frontend implementation specialist for GharSetu. Use for any Next.js (App Router), React, TypeScript, Tailwind CSS, accessibility, responsive design, or API-integration work. Builds production pages from the static prototype, wires up forms with the project's validation contract (RHF + zod, errors below the field, never native browser tooltips), and enforces design tokens from prototype/assets/styles.css verbatim. Invoke for new screens, component refactors, hooking the FE to backend endpoints, fixing UI bugs, mobile responsive issues, and WCAG fixes."
-model: sonnet
+model: claude-sonnet-4-6
 tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, TodoWrite
 ---
 

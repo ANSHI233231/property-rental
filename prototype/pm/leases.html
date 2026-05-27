@@ -87,7 +87,7 @@
                 <div class="flex gap-2 flex-wrap">
                   <a href="lease-detail.html" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
                   <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) alert('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
                 </div>
               </td>
             </tr>
@@ -103,7 +103,7 @@
                 <div class="flex gap-2 flex-wrap">
                   <a href="lease-detail.html" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a>
                   <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="alert('Renewal form opened. A new lease record will be created on save.')">Renew</button>
-                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) alert('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
+                  <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="if(confirm('Terminate this lease early? You\'ll be asked for a reason and a date.')) gsToast('Termination recorded. Deposit refund is a separate step.')">Early Terminate</button>
                 </div>
               </td>
             </tr>
@@ -269,5 +269,6 @@
       Sign out
     </a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

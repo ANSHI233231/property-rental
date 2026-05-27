@@ -24,6 +24,7 @@
       <nav class="sidebar-nav">
         <a href="../dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="../properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="../leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="../users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="../maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="../rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
@@ -34,6 +35,7 @@
             Master Data
             <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </div>
+          <a href="property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="amenities.html" class="sidebar-sublink">Amenities</a>
           <a href="categories.html" class="sidebar-sublink">Categories</a>
           <a href="visit-purposes.html" class="sidebar-sublink active" aria-current="page">Visit Purposes</a>
@@ -86,8 +88,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Personal visit','Friends · family · social')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-personal">Deactivate</button>
-                <p id="note-personal" role="note" class="muted text-xs w-full mt-1">Used by 23 visits. Existing visits keep their label; deactivate to prevent new use.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 23 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Delivery" data-status="active">
@@ -97,8 +98,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Delivery','Food · parcel · courier')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-delivery">Deactivate</button>
-                <p id="note-delivery" role="note" class="muted text-xs w-full mt-1">Used by 47 visits. Existing visits keep their label; deactivate to prevent new use.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 47 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Cab / Ride pickup" data-status="active">
@@ -108,8 +108,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Cab / Ride pickup','Cab arrival to pick up the resident')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-cab">Deactivate</button>
-                <p id="note-cab" role="note" class="muted text-xs w-full mt-1">Used by 18 visits. Existing visits keep their label; deactivate to prevent new use.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 18 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Maintenance vendor" data-status="active">
@@ -119,8 +118,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Maintenance vendor','External tradesperson called by PM or tenant')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-maint">Deactivate</button>
-                <p id="note-maint" role="note" class="muted text-xs w-full mt-1">Used by 9 visits. Existing visits keep their label; deactivate to prevent new use.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 9 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Service / Utility" data-status="active">
@@ -130,8 +128,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
                 <a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal('Service / Utility','Meter reader · plumber call · service technician')">Edit</a>
-                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" aria-describedby="note-service">Deactivate</button>
-                <p id="note-service" role="note" class="muted text-xs w-full mt-1">Used by 12 visits. Existing visits keep their label; deactivate to prevent new use.</p>
+                <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 12 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
             <tr data-name="Other" data-status="active" id="row-other">
@@ -234,8 +231,10 @@
     <div class="more-sheet-title">More options</div>
     <a href="../users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="../properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="../leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="../audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
+    <a href="property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="amenities.html" class="more-sheet-sublink">Amenities</a>
     <a href="categories.html" class="more-sheet-sublink">Categories</a>
     <a href="visit-purposes.html" class="more-sheet-sublink active">Visit Purposes</a>
@@ -293,7 +292,7 @@
       row.dataset.status = 'active';
       if (typeof announce === 'function') announce(name + ' reactivated.');
     }
-    function announce(msg){var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=msg;},50);}
+    function announce(msg){ if(window.gsToast)gsToast(msg);var lr=document.getElementById('liveRegion');lr.textContent='';setTimeout(function(){lr.textContent=msg;},50);}
     function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   </script>
   <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
@@ -304,5 +303,6 @@
     <a href="../profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
     <a href="../../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script src="../../assets/toast.js"></script>
 </body>
 </html>

@@ -536,7 +536,7 @@
 
     function submitRenewal() {
       document.getElementById('renewLeaseDrawer').classList.remove('open');
-      alert('Renewal lease created successfully. The renewed lease appears in the Leases list.');
+      gsToast('Renewal lease created successfully. The renewed lease appears in the Leases list.');
     }
 
     // Backdrop close
@@ -589,5 +589,6 @@
       Sign out
     </a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

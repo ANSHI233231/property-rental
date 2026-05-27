@@ -353,7 +353,7 @@
     }
 
     // -------------------- Misc --------------------
-    function announce(msg) {
+    function announce(msg) { if (window.gsToast) gsToast(msg);
       var lr = document.getElementById('liveRegion');
       lr.textContent = '';
       setTimeout(function() { lr.textContent = msg; }, 50);
@@ -367,5 +367,6 @@
       if (e.target === this) closeViewModal();
     });
   </script>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

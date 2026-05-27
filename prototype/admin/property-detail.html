@@ -19,6 +19,7 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
@@ -29,6 +30,7 @@
             Master Data
             <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </div>
+          <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
@@ -74,8 +76,6 @@
         </div>
         <div class="flex gap-3 flex-wrap">
           <button class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('reassignPMModal').classList.add('open')">Reassign PM</button>
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Edit property form opened.')">Edit Property</button>
-          <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('createLeaseDrawer').classList.add('open')">+ Create Lease</button>
         </div>
       </header>
 
@@ -111,7 +111,7 @@
             <div class="avatar" style="width:48px;height:48px;font-size:18px">SA</div>
             <div>
               <div class="font-poppins font-semibold text-charcoal">Sunita Arora</div>
-              <div class="text-sm muted">PM since 14/03/2024 · 98xxxxxx34 · sunita@gharsetu.in</div>
+              <div class="text-sm muted">PM since 14/03/2024 · 98765 43234 · sunita@gharsetu.in</div>
             </div>
           </div>
           <table class="data-table">
@@ -128,34 +128,18 @@
       <section class="section">
         <div class="flex items-center justify-between mb-4">
           <h3 class="section-title m-0">Units in this property</h3>
-          <button class="btn btn-primary !py-2 !text-sm">+ Add Unit</button>
+          <button class="btn btn-primary !py-2 !text-sm" onclick="openUnitModal()">+ Add Unit</button>
         </div>
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>Unit</th><th>Floor</th><th>Bedrooms</th><th>Area (sq ft)</th><th>Rent</th><th>Status</th><th>Action</th></tr>
+              <tr><th>Unit</th><th>Floor</th><th>Bedrooms</th><th>Bathrooms</th><th>Area (sq ft)</th><th>Rent</th><th>Status</th><th>Current Tenant</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr><td class="font-poppins font-semibold text-charcoal">1A</td><td>1</td><td>2</td><td>820</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="unit-detail.html?unit=1A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
-              <tr><td class="font-poppins font-semibold text-charcoal">2B</td><td>2</td><td>3</td><td>1,140</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td><a href="unit-detail.html?unit=2B&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
-              <tr><td class="font-poppins font-semibold text-charcoal">3A</td><td>3</td><td>2</td><td>820</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td><td><a href="unit-detail.html?unit=3A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
-              <tr><td class="font-poppins font-semibold text-charcoal">7C</td><td>7</td><td>2</td><td>880</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td><td><a href="unit-detail.html?unit=7C&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Active leases -->
-      <section class="section">
-        <h3 class="section-title">Active Leases</h3>
-        <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
-            <thead>
-              <tr><th>Lease</th><th>Tenant</th><th>Unit</th><th>Start</th><th>End</th><th>Rent</th></tr>
-            </thead>
-            <tbody>
-              <tr><td class="font-mono text-xs">#L-2103</td><td>Rohan Mehta</td><td>1A</td><td>15/04/2026</td><td>14/03/2027</td><td>₹18,000</td></tr>
-              <tr><td class="font-mono text-xs">#L-2095</td><td>Priya Patel</td><td>2B</td><td>01/03/2026</td><td>28/02/2027</td><td>₹24,000</td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">1A</td><td>1</td><td>2</td><td>2</td><td>820</td><td>₹18,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td>Rohan Mehta</td><td><div class="flex items-center gap-3"><a href="unit-detail.html?unit=1A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a><a href="#" class="text-royal-blue font-poppins font-semibold text-sm" onclick="event.preventDefault(); editUnit(this)">Edit</a><button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot retire — unit is occupied. End the active lease first.">Retire</button></div></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">2B</td><td>2</td><td>3</td><td>3</td><td>1,140</td><td>₹24,000</td><td><span class="badge badge-prepaid">Occupied</span></td><td>Priya Patel</td><td><div class="flex items-center gap-3"><a href="unit-detail.html?unit=2B&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a><a href="#" class="text-royal-blue font-poppins font-semibold text-sm" onclick="event.preventDefault(); editUnit(this)">Edit</a><button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot retire — unit is occupied. End the active lease first.">Retire</button></div></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">3A</td><td>3</td><td>2</td><td>2</td><td>820</td><td>₹20,000</td><td><span class="badge badge-paid">Available</span></td><td></td><td><div class="flex items-center gap-3"><a href="unit-detail.html?unit=3A&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a><a href="#" class="text-royal-blue font-poppins font-semibold text-sm" onclick="event.preventDefault(); editUnit(this)">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="retireFromRow(this)">Retire</button></div></td></tr>
+              <tr><td class="font-poppins font-semibold text-charcoal">7C</td><td>7</td><td>2</td><td>2</td><td>880</td><td>₹22,000</td><td><span class="badge badge-renewed">Listed</span></td><td></td><td><div class="flex items-center gap-3"><a href="unit-detail.html?unit=7C&property=green-valley" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a><a href="#" class="text-royal-blue font-poppins font-semibold text-sm" onclick="event.preventDefault(); editUnit(this)">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="retireFromRow(this)">Retire</button></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -167,11 +151,11 @@
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>Ticket</th><th>Unit</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th></tr>
+              <tr><th>Ticket</th><th>Unit</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr><td class="font-mono text-xs">#MR-3041</td><td>7C</td><td>Water leakage in kitchen ceiling</td><td><span class="badge badge-emergency">Emergency</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td></tr>
-              <tr><td class="font-mono text-xs">#MR-3018</td><td>2A</td><td>AC not cooling</td><td><span class="badge badge-partial">High</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td></tr>
+              <tr><td class="font-mono text-xs">#MR-3041</td><td>7C</td><td>Water leakage in kitchen ceiling</td><td><span class="badge badge-emergency">Emergency</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td><td><a href="maintenance-detail.html" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
+              <tr><td class="font-mono text-xs">#MR-3018</td><td>2A</td><td>AC not cooling</td><td><span class="badge badge-partial">High</span></td><td><span class="badge badge-progress">In-Progress</span></td><td>Raju Kumar</td><td><a href="maintenance-detail.html" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td></tr>
             </tbody>
           </table>
         </div>
@@ -214,6 +198,84 @@
           <button type="submit" class="btn btn-primary">Confirm Reassignment</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Add / Edit Unit Modal -->
+  <div class="modal-backdrop" id="unitModal" role="dialog" aria-modal="true" aria-labelledby="unitModalTitle">
+    <div class="modal" style="max-width:520px;max-height:90vh;overflow-y:auto">
+      <h3 id="unitModalTitle" class="m-0">Add Unit</h3>
+      <p class="muted text-sm mt-1 mb-5" id="unitModalSub">Adding a unit to Green Valley Apartments, Dwarka.</p>
+      <form id="unitForm" novalidate onsubmit="event.preventDefault(); saveUnit();">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="u-number">Unit number</label>
+            <input id="u-number" class="input" placeholder="e.g. 4C" />
+            <div class="field-error" id="u-number-error"></div>
+          </div>
+          <div>
+            <label class="label" for="u-floor">Floor</label>
+            <input id="u-floor" class="input" type="number" min="0" placeholder="e.g. 4" />
+            <div class="field-error" id="u-floor-error"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="label" for="u-bedrooms">Bedrooms</label>
+            <input id="u-bedrooms" class="input" type="number" min="0" placeholder="e.g. 2" />
+            <div class="field-error" id="u-bedrooms-error"></div>
+          </div>
+          <div>
+            <label class="label" for="u-bathrooms">Bathrooms</label>
+            <input id="u-bathrooms" class="input" type="number" min="0" placeholder="e.g. 2" />
+            <div class="field-error" id="u-bathrooms-error"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="label" for="u-area">Area (sq ft)</label>
+            <input id="u-area" class="input" type="number" min="1" placeholder="e.g. 820" />
+            <div class="field-error" id="u-area-error"></div>
+          </div>
+          <div>
+            <label class="label" for="u-rent">Monthly rent (₹)</label>
+            <input id="u-rent" class="input" type="number" min="0" placeholder="e.g. 18000" />
+            <div class="field-error" id="u-rent-error"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="label" for="u-status">Status</label>
+            <select id="u-status" class="input">
+              <option value="Available">Available</option>
+              <option value="Listed">Listed</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+            </select>
+            <p class="text-xs muted mt-1" id="u-status-lock" style="display:none;">Status is set by the lease while the unit is occupied.</p>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('unitModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="unitSaveBtn">Add Unit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Retire Unit confirm -->
+  <div class="modal-backdrop" id="retireUnitModal" role="dialog" aria-modal="true" aria-labelledby="retireUnitTitle">
+    <div class="modal">
+      <h3 id="retireUnitTitle">Retire unit?</h3>
+      <p class="muted text-sm mt-2 mb-4">Unit <strong id="retireUnitName"></strong> will be marked <strong>Retired</strong> — it stops accepting new leases. Nothing is deleted: existing records stay, and you can set it back anytime.</p>
+      <div class="mb-6">
+        <label class="label" for="retire-reason">Reason for retiring</label>
+        <textarea id="retire-reason" class="input" rows="3" placeholder="e.g. Under major renovation · merged with adjacent unit · decommissioned"></textarea>
+        <div class="field-error" id="retire-reason-error"></div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('retireUnitModal').classList.remove('open')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="doRetireUnit()">Retire unit</button>
+      </div>
     </div>
   </div>
 
@@ -309,7 +371,9 @@
 
   <script>
     function showSuccess(msg) {
+      if (window.gsToast) { gsToast(msg); return; }
       var b = document.getElementById('successBanner');
+      if (!b) return;
       document.getElementById('successBannerText').textContent = msg;
       b.style.display = 'flex';
       setTimeout(function() { b.style.display = 'none'; }, 4000);
@@ -346,7 +410,115 @@
 
     function doCreateLease() {
       document.getElementById('createLeaseDrawer').classList.remove('open');
-      showSuccess('Lease created. Tenant account will be provisioned. Lease appears in the Active Leases list.');
+      showSuccess('Lease created. Tenant account will be provisioned. The lease now appears on the unit\'s detail page.');
+    }
+
+    // ---- Add / Edit Unit ----
+    var editingUnit = null;
+    var currentUnitName = '';
+
+    // Status is lease-driven: locked + shown read-only while occupied. "Occupied" is never a manual choice.
+    function applyUnitStatusRules(isOccupied) {
+      var sel = document.getElementById('u-status');
+      var lock = document.getElementById('u-status-lock');
+      var occOpt = sel.querySelector('option[value="Occupied"]');
+      if (isOccupied) {
+        if (!occOpt) { occOpt = document.createElement('option'); occOpt.value = 'Occupied'; occOpt.textContent = 'Occupied'; sel.appendChild(occOpt); }
+        occOpt.selected = true;
+        sel.disabled = true;
+      } else {
+        if (occOpt) occOpt.remove();
+        sel.disabled = false;
+      }
+      if (lock) lock.style.display = isOccupied ? 'block' : 'none';
+    }
+
+    // ---- Retire unit (status change with a reason — not a delete) ----
+    var retiringRow = null;
+    function retireFromRow(btn) {
+      if (btn.getAttribute('aria-disabled') === 'true') return;   // occupied → blocked
+      retiringRow = btn.closest('tr');
+      currentUnitName = retiringRow.querySelectorAll('td')[0].textContent.trim();
+      document.getElementById('retireUnitName').textContent = currentUnitName;
+      var r = document.getElementById('retire-reason'); r.value = ''; r.classList.remove('error');
+      var re = document.getElementById('retire-reason-error'); re.textContent = ''; re.classList.remove('show');
+      document.getElementById('retireUnitModal').classList.add('open');
+    }
+    function doRetireUnit() {
+      var r = document.getElementById('retire-reason');
+      var re = document.getElementById('retire-reason-error');
+      if (!r.value.trim()) { re.textContent = 'Please give a reason for retiring this unit.'; re.classList.add('show'); r.classList.add('error'); return; }
+      re.classList.remove('show'); r.classList.remove('error');
+      document.getElementById('retireUnitModal').classList.remove('open');
+      if (retiringRow) {
+        retiringRow.querySelectorAll('td')[5].innerHTML = '<span class="badge badge-closed">Retired</span>';
+      }
+      showSuccess('Unit ' + currentUnitName + ' marked Retired. Reason recorded — nothing was deleted.');
+      retiringRow = null;
+    }
+
+    function clearUnitErrors() {
+      ['u-number','u-floor','u-bedrooms','u-bathrooms','u-area','u-rent'].forEach(function(id) {
+        var e = document.getElementById(id + '-error'); if (e) { e.textContent = ''; e.classList.remove('show'); }
+        var i = document.getElementById(id); if (i) i.classList.remove('error');
+      });
+    }
+    function openUnitModal() {
+      editingUnit = null;
+      currentUnitName = '';
+      document.getElementById('unitForm').reset();
+      document.getElementById('unitModalTitle').textContent = 'Add Unit';
+      document.getElementById('unitModalSub').textContent = 'Adding a unit to Green Valley Apartments, Dwarka.';
+      document.getElementById('unitSaveBtn').textContent = 'Add Unit';
+      applyUnitStatusRules(false);                                       // new unit is never occupied
+      clearUnitErrors();
+      document.getElementById('unitModal').classList.add('open');
+      document.getElementById('u-number').focus();
+    }
+    function editUnit(link) {
+      var tr = link.closest('tr');
+      var c = tr.querySelectorAll('td');
+      editingUnit = tr;
+      currentUnitName = c[0].textContent.trim();
+      var status = c[6].textContent.trim();
+      document.getElementById('u-number').value = currentUnitName;
+      document.getElementById('u-floor').value = c[1].textContent.trim();
+      document.getElementById('u-bedrooms').value = c[2].textContent.trim();
+      document.getElementById('u-bathrooms').value = c[3].textContent.trim();
+      document.getElementById('u-area').value = c[4].textContent.trim().replace(/,/g, '');
+      document.getElementById('u-rent').value = c[5].textContent.replace(/[^0-9]/g, '');
+      var sel = document.getElementById('u-status');
+      Array.prototype.forEach.call(sel.options, function(o) { o.selected = (o.value === status); });
+      document.getElementById('unitModalTitle').textContent = 'Edit Unit — ' + currentUnitName;
+      document.getElementById('unitModalSub').textContent = 'Editing a unit in Green Valley Apartments, Dwarka.';
+      document.getElementById('unitSaveBtn').textContent = 'Save changes';
+      applyUnitStatusRules(status === 'Occupied');
+      clearUnitErrors();
+      document.getElementById('unitModal').classList.add('open');
+      document.getElementById('u-number').focus();
+    }
+    function saveUnit() {
+      var ok = true;
+      function check(id, cond, msg) {
+        var e = document.getElementById(id + '-error'); var i = document.getElementById(id);
+        if (!cond) { if (e) { e.textContent = msg; e.classList.add('show'); } i.classList.add('error'); ok = false; }
+        else { if (e) { e.textContent = ''; e.classList.remove('show'); } i.classList.remove('error'); }
+      }
+      var num = document.getElementById('u-number').value.trim();
+      var floor = document.getElementById('u-floor').value.trim();
+      var beds = document.getElementById('u-bedrooms').value.trim();
+      var baths = document.getElementById('u-bathrooms').value.trim();
+      var area = document.getElementById('u-area').value.trim();
+      var rent = document.getElementById('u-rent').value.trim();
+      check('u-number', num.length > 0, 'Unit number is required.');
+      check('u-floor', floor !== '' && parseInt(floor, 10) >= 0, 'Enter a valid floor.');
+      check('u-bedrooms', beds !== '' && parseInt(beds, 10) >= 0, 'Enter the number of bedrooms.');
+      check('u-bathrooms', baths !== '' && parseInt(baths, 10) >= 0, 'Enter the number of bathrooms.');
+      check('u-area', area !== '' && parseInt(area, 10) >= 1, 'Enter a valid area.');
+      check('u-rent', rent !== '' && parseInt(rent, 10) >= 0, 'Enter the monthly rent.');
+      if (!ok) return;
+      document.getElementById('unitModal').classList.remove('open');
+      showSuccess(editingUnit ? ('Unit ' + num + ' updated.') : ('Unit ' + num + ' added to the property.'));
     }
 
     // Close modals on backdrop click
@@ -354,6 +526,12 @@
       if (e.target === this) this.classList.remove('open');
     });
     document.getElementById('createLeaseDrawer').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    document.getElementById('unitModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    document.getElementById('retireUnitModal').addEventListener('click', function(e) {
       if (e.target === this) this.classList.remove('open');
     });
   </script>
@@ -367,6 +545,7 @@
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
+  <script src="../assets/toast.js"></script>
   <!-- More bottom sheet (Admin overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -374,8 +553,10 @@
     <div class="more-sheet-title">More options</div>
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>

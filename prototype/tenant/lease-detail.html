@@ -231,7 +231,7 @@
 
       <div class="flex justify-end gap-3 mt-6">
         <button class="btn btn-secondary" onclick="document.getElementById('termModal').classList.remove('open')">Cancel</button>
-        <button class="btn btn-danger" onclick="alert('Termination initiated. Priya Mehta has been notified and Sunita Arora (PM) is in the loop.'); document.getElementById('termModal').classList.remove('open');">Initiate termination</button>
+        <button class="btn btn-danger" onclick="gsToast('Termination initiated. Priya Mehta has been notified and Sunita Arora (PM) is in the loop.'); document.getElementById('termModal').classList.remove('open');">Initiate termination</button>
       </div>
     </div>
   </div>
@@ -257,5 +257,6 @@
     <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
     <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>

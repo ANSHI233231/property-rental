@@ -84,6 +84,7 @@
         <!-- Status-conditional actions (toggled by setSimStatus) -->
         <div class="flex gap-2 flex-wrap" id="topbar-actions">
           <button id="btn-approve" class="btn btn-primary !py-2 !text-sm" onclick="openModal('approveModal')">Approve</button>
+          <button id="btn-reject" class="btn btn-danger !py-2 !text-sm" onclick="openModal('rejectModal')">Reject</button>
           <button id="btn-impersonate" class="btn btn-primary !py-2 !text-sm" style="display:none" onclick="openModal('startImpersonationModal')" aria-haspopup="dialog">Impersonate Admin</button>
           <button id="btn-changeplan" class="btn btn-secondary !py-2 !text-sm" style="display:none" onclick="openModal('changePlanModal')">Change Plan</button>
           <button id="btn-deactivate" class="btn btn-danger !py-2 !text-sm" style="display:none" onclick="openModal('deactivateModal')">Deactivate</button>
@@ -99,6 +100,7 @@
             <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-sim="pending" onclick="setSimStatus('pending',this)">Pending</button>
             <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-sim="active" onclick="setSimStatus('active',this)">Active</button>
             <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-sim="deactivated" onclick="setSimStatus('deactivated',this)">Deactivated</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-sim="rejected" onclick="setSimStatus('rejected',this)">Rejected</button>
           </div>
         </div>
       </div>
@@ -134,6 +136,7 @@
           <div class="profile-row"><span class="field">Type of business</span><span class="value">Co-living / Paying Guest</span></div>
           <div class="profile-row"><span class="field">Expected unit count</span><span class="value">35 units</span></div>
           <div class="profile-row"><span class="field">City + State</span><span class="value">Delhi, Delhi</span></div>
+          <div class="profile-row"><span class="field">Pincode</span><span class="value">110001</span></div>
           <div class="profile-row"><span class="field">Created on</span><span class="value">21/05/2026</span></div>
         </div>
 
@@ -211,6 +214,23 @@
       <div class="flex justify-end gap-3">
         <button class="btn btn-secondary" id="approveCancelBtn" onclick="closeModal('approveModal')">Cancel</button>
         <button class="btn btn-primary" onclick="confirmApprove()">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal-backdrop" id="rejectModal" role="dialog" aria-modal="true" aria-labelledby="rejectTitle">
+    <div class="modal">
+      <h3 id="rejectTitle">Reject Saffron Stays?</h3>
+      <p class="text-sm muted mt-2 mb-4">The registration is declined — no workspace is provisioned and the applicant is notified by email. They can re-apply later.</p>
+      <div class="mb-6">
+        <label class="label" for="reject-reason">Reason for rejection</label>
+        <textarea id="reject-reason" class="input" rows="3" placeholder="e.g. Could not verify the organization · duplicate registration · incomplete details"></textarea>
+        <div class="field-error" id="reject-reason-error"></div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button class="btn btn-secondary" onclick="closeModal('rejectModal')">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmReject()">Reject</button>
       </div>
     </div>
   </div>
@@ -336,7 +356,8 @@
       var map = {
         pending:    ['Pending','badge badge-partial'],
         active:     ['Active','badge badge-active'],
-        deactivated:['Deactivated','badge badge-closed']
+        deactivated:['Deactivated','badge badge-closed'],
+        rejected:   ['Rejected','badge badge-overdue']
       };
       badge.textContent = map[status][0];
       badge.className = map[status][1];
@@ -344,6 +365,7 @@
       // action buttons
       var show = {
         'btn-approve': status==='pending',
+        'btn-reject': status==='pending',
         'btn-impersonate': status==='active',
         'btn-changeplan': status==='active',
         'btn-deactivate': status==='active',
@@ -357,10 +379,13 @@
       var empty = document.getElementById('users-empty');
       var count = document.getElementById('active-users-count');
       var bar = document.getElementById('util-bar');
-      if (status === 'pending') {
+      if (status === 'pending' || status === 'rejected') {
         tbody.innerHTML = '';
         empty.style.display = 'block';
-        empty.textContent = 'No users yet — organization is pending approval.';
+        empty.style.color = '';
+        empty.textContent = status === 'rejected'
+          ? 'No users — this organization’s registration was rejected.'
+          : 'No users yet — organization is pending approval.';
         count.textContent = '0 of 20'; bar.style.width = '0%';
       } else {
         empty.style.display = 'none';
@@ -434,8 +459,21 @@
 
     function confirmApprove() {
       closeModal('approveModal');
-      alert('Organization approved. Admin credentials sent to contact@saffronstays.in.');
+      gsToast('Organization approved. Admin credentials sent to contact@saffronstays.in.');
       window.location.reload();
+    }
+
+    function confirmReject() {
+      var ta = document.getElementById('reject-reason');
+      var err = document.getElementById('reject-reason-error');
+      if (!ta.value.trim()) {
+        err.textContent = 'Please give a reason for rejecting.'; err.classList.add('show'); ta.classList.add('error');
+        ta.focus(); return;
+      }
+      err.classList.remove('show'); ta.classList.remove('error');
+      closeModal('rejectModal');
+      setSimStatus('rejected', document.querySelector('[data-sim="rejected"]'));
+      gsToast('Organization rejected. The applicant has been notified.');
     }
 
     // Change Plan: enable Save only when selection differs from current
@@ -459,7 +497,7 @@
       var selected = document.querySelector('input[name="plan"]:checked');
       if (!selected || selected.value === currentPlan) return;
       closeModal('changePlanModal');
-      alert('Plan changed to ' + selected.value.charAt(0).toUpperCase() + selected.value.slice(1) + '.');
+      gsToast('Plan changed to ' + selected.value.charAt(0).toUpperCase() + selected.value.slice(1) + '.');
       currentPlan = selected.value;
     }
 
@@ -480,13 +518,13 @@
 
     function confirmDeactivate() {
       closeModal('deactivateModal');
-      alert('Organization deactivated. All users have been logged out.');
+      gsToast('Organization deactivated. All users have been logged out.');
       window.location.reload();
     }
 
     function confirmReactivate() {
       closeModal('reactivateModal');
-      alert('Organization reactivated. Users can log in again.');
+      gsToast('Organization reactivated. Users can log in again.');
       window.location.reload();
     }
 
@@ -530,5 +568,6 @@
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script src="../assets/toast.js"></script>
 </body>
 </html>
