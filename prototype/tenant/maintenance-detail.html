@@ -58,9 +58,27 @@
         </div>
       </header>
 
+      <!-- Prototype status simulator -->
+      <div class="card mb-6" style="border:2px dashed var(--color-mid-gray);background:var(--color-off-white);">
+        <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider mb-3">Prototype — status preview</div>
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="open"       onclick="setMaintStatus('open',this)">Open</button>
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="assigned"   onclick="setMaintStatus('assigned',this)">Assigned</button>
+            <button class="btn btn-primary  !py-1 !text-sm" data-sim="progress"   onclick="setMaintStatus('progress',this)">In-Progress</button>
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="resolved"   onclick="setMaintStatus('resolved',this)">Resolved</button>
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="closed"     onclick="setMaintStatus('closed',this)">Closed</button>
+          </div>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+            <input type="checkbox" id="sim-emergency" checked onchange="toggleEmergency(this)" style="width:18px;height:18px;accent-color:var(--color-status-overdue)" />
+            Emergency
+          </label>
+        </div>
+      </div>
+
       <!-- Lease & Property context card -->
       <section class="card mb-6">
-        <div class="grid md:grid-cols-3 gap-4">
+        <div class="grid md:grid-cols-4 gap-4">
           <div>
             <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Property</div>
             <div class="font-poppins font-semibold text-charcoal mt-1">Green Valley Apartments</div>
@@ -72,9 +90,13 @@
             <div class="text-sm muted">2 BHK · 820 sq ft</div>
           </div>
           <div>
-            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Lease</div>
-            <div class="font-poppins font-semibold text-charcoal mt-1">#L-2103</div>
-            <div class="text-sm muted">PM: Sunita Arora</div>
+            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Assignee</div>
+            <div class="font-poppins font-semibold text-charcoal mt-1">Raju Kumar</div>
+            <div class="text-sm muted">Maintenance Team</div>
+          </div>
+          <div>
+            <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider">Property Manager</div>
+            <div class="font-poppins font-semibold text-charcoal mt-1">Sunita Arora</div>
           </div>
         </div>
       </section>
@@ -82,8 +104,8 @@
       <!-- Request header card -->
       <section class="card mb-6">
         <div class="flex gap-2 flex-wrap mb-3">
-          <span class="badge badge-emergency">Emergency</span>
-          <span class="badge badge-progress">In-Progress</span>
+          <span class="badge badge-emergency" id="mr-emergency-badge">Emergency</span>
+          <span class="badge badge-progress" id="mr-status-badge">In Progress</span>
         </div>
         <h2 style="font-size:20px; color:var(--color-charcoal); margin:0 0 8px;">Water leakage in kitchen ceiling — overnight</h2>
         <div class="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
@@ -168,13 +190,9 @@
         <div class="lg:col-span-1">
           <section class="card" style="position:sticky;top:24px;">
             <h3 class="section-title">Actions</h3>
-            <p class="text-sm muted mt-2 mb-4">You can close this request once the team marks it Resolved.</p>
-            <div class="flex flex-col gap-2">
-              <button class="btn btn-disabled !text-sm" disabled title="Available once the request is Resolved">Close request</button>
-              <button class="btn btn-disabled !text-sm" disabled title="Available once the request is Resolved">Issue not fully fixed</button>
+            <div id="mr-actions-content">
+              <!-- populated by setMaintStatus() — default: In-Progress -->
             </div>
-            <hr class="divider"/>
-            <p class="text-xs muted">Current status: <strong class="text-charcoal">In-Progress</strong>. The maintenance team is working on it. You'll be notified when it's resolved.</p>
           </section>
         </div>
       </div>
@@ -202,5 +220,40 @@
     <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script>
+    var TS_STATUS = {
+      open:     {badgeCls:'badge-open',     badgeTxt:'Submitted',      msg:'Awaiting assignment by your Property Manager.',   actionsCls:'disabled'},
+      assigned: {badgeCls:'badge-open',     badgeTxt:'Being Assigned', msg:'Your PM is assigning a technician.',              actionsCls:'disabled'},
+      progress: {badgeCls:'badge-progress', badgeTxt:'In Progress',    msg:'The maintenance team is working on your request.',actionsCls:'disabled'},
+      resolved: {badgeCls:'badge-resolved', badgeTxt:'Resolved',       msg:'',                                                actionsCls:'active'},
+      closed:   {badgeCls:'badge-closed',   badgeTxt:'Closed',         msg:'',                                                actionsCls:'closed'}
+    };
+
+    function setMaintStatus(s, btn) {
+      var c = TS_STATUS[s];
+      if (!c) return;
+      document.getElementById('mr-status-badge').className = 'badge ' + c.badgeCls;
+      document.getElementById('mr-status-badge').textContent = c.badgeTxt;
+      var ac = document.getElementById('mr-actions-content');
+      if (c.actionsCls === 'active') {
+        ac.innerHTML = '<div class="flex flex-col gap-2"><button class="btn btn-primary !text-sm !py-2" onclick="gsToast(\'Request closed. Thank you for confirming.\')">Close request</button><button class="btn btn-secondary !text-sm !py-2" onclick="gsToast(\'Request reopened. Your PM has been notified.\')">Still an issue</button></div>';
+      } else if (c.actionsCls === 'closed') {
+        ac.innerHTML = '<p class="muted text-sm">Request closed.</p>';
+      } else {
+        ac.innerHTML = '<p class="muted text-sm">' + c.msg + '</p><div class="flex flex-col gap-2 mt-3"><button class="btn btn-disabled !text-sm" disabled>Close request</button><button class="btn btn-disabled !text-sm" disabled>Still an issue</button></div>';
+      }
+      document.querySelectorAll('[data-sim]').forEach(function(b) {
+        b.className = b.getAttribute('data-sim') === s ? 'btn btn-primary !py-1 !text-sm' : 'btn btn-secondary !py-1 !text-sm';
+      });
+    }
+
+    function toggleEmergency(cb) {
+      var b = document.getElementById('mr-emergency-badge');
+      b.className = cb.checked ? 'badge badge-emergency' : 'badge badge-partial';
+      b.textContent = cb.checked ? 'Emergency' : 'High';
+    }
+
+    setMaintStatus('progress', null);
+  </script>
 </body>
 </html>

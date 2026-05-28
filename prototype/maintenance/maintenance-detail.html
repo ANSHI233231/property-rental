@@ -56,6 +56,22 @@
         </div>
       </header>
 
+      <!-- Prototype status simulator -->
+      <div class="card mb-6" style="border:2px dashed var(--color-mid-gray);background:var(--color-off-white);">
+        <div class="text-xs muted font-poppins font-semibold uppercase tracking-wider mb-3">Prototype — status preview</div>
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="assigned"   onclick="setMaintStatus('assigned',this)">Assigned</button>
+            <button class="btn btn-primary  !py-1 !text-sm" data-sim="progress"   onclick="setMaintStatus('progress',this)">In-Progress</button>
+            <button class="btn btn-secondary !py-1 !text-sm" data-sim="resolved"   onclick="setMaintStatus('resolved',this)">Resolved</button>
+          </div>
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+            <input type="checkbox" id="sim-emergency" checked onchange="toggleEmergency(this)" style="width:18px;height:18px;accent-color:var(--color-status-overdue)" />
+            Emergency
+          </label>
+        </div>
+      </div>
+
       <!-- Property context card (NO lease #, NO tenant financial) -->
       <section class="card mb-6">
         <div class="grid md:grid-cols-3 gap-4">
@@ -80,8 +96,8 @@
       <!-- Request header card -->
       <section class="card mb-6">
         <div class="flex gap-2 flex-wrap mb-3">
-          <span class="badge badge-emergency">Emergency</span>
-          <span class="badge badge-progress">In-Progress</span>
+          <span class="badge badge-emergency" id="mr-emergency-badge">Emergency</span>
+          <span class="badge badge-progress" id="mr-status-badge">In-Progress</span>
         </div>
         <h2 style="font-size:20px; color:var(--color-charcoal); margin:0 0 8px;">Water leakage in kitchen ceiling — overnight</h2>
         <div class="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
@@ -98,8 +114,6 @@
           <section class="card mb-6">
             <h3 class="section-title">Issue description</h3>
             <p class="text-sm" style="color:var(--color-charcoal);">Kitchen ceiling is leaking badly. Water collected overnight and the floor is wet. Possible burst pipe above the false ceiling. This is happening since 05/05/2026 evening.</p>
-            <hr class="divider"/>
-            <div class="text-sm muted"><strong class="text-charcoal">Attachments:</strong> File uploads are not supported. Document findings on-site in the notes below.</div>
           </section>
 
           <!-- Progress timeline -->
@@ -132,7 +146,6 @@
           <!-- Internal notes (private to staff/PM/Admin) -->
           <section class="card">
             <h3 class="section-title">Internal notes</h3>
-            <p class="text-xs muted mb-3">Visible to Maintenance, PM and Admin only — not the tenant.</p>
             <div class="internal-note mb-3">
               <div class="text-sm" style="color:var(--color-charcoal);">Junction box corroded. Need 2 ft of 19mm CPVC + elbow joint. Hardware shop closed today; will pick up tomorrow AM.</div>
               <div class="text-xs muted mt-1">Raju Kumar · 07/05/2026 14:10</div>
@@ -145,20 +158,13 @@
           </section>
         </div>
 
-        <!-- Right: Status-update actions (NO close) -->
+        <!-- Right: Status-update actions -->
         <div class="lg:col-span-1">
           <section class="card" style="position:sticky;top:24px;">
             <h3 class="section-title">Update status</h3>
-            <p class="text-sm muted mt-2 mb-4">Current: <strong class="text-charcoal">In-Progress</strong></p>
-            <div class="flex flex-col gap-2">
-              <button class="btn btn-disabled !text-sm" disabled>Acknowledge</button>
-              <button class="btn btn-disabled !text-sm" disabled>Start work</button>
-              <button class="btn btn-secondary !text-sm" onclick="gsToast('Request paused. PM notified.')">Pause</button>
-              <button class="btn btn-secondary !text-sm" onclick="gsToast('Work resumed.')">Resume</button>
-              <button class="btn btn-primary !text-sm" onclick="gsToast('Marked as Resolved. The tenant can now confirm and close.')">Mark as Resolved</button>
+            <div id="mr-actions-content">
+              <!-- populated by setMaintStatus() — default: In-Progress -->
             </div>
-            <hr class="divider"/>
-            <p class="text-xs muted">You cannot close a request — only the tenant (or Admin / PM) confirms the fix and closes it.</p>
           </section>
         </div>
       </div>
@@ -182,5 +188,49 @@
     <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script>
+    var MS_STATUS = {
+      assigned: {
+        badgeClass: 'badge-open',
+        badgeText:  'Assigned',
+        actions: function() {
+          return '<button class="btn btn-primary w-full !text-sm !py-2" onclick="gsToast(\'Moving to In-Progress.\')">Mark In-Progress</button>';
+        }
+      },
+      progress: {
+        badgeClass: 'badge-progress',
+        badgeText:  'In-Progress',
+        actions: function() {
+          return '<button class="btn btn-primary w-full !text-sm !py-2" onclick="gsToast(\'Marked as Resolved. PM and tenant notified.\')">Mark as Resolved</button>';
+        }
+      },
+      resolved: {
+        badgeClass: 'badge-resolved',
+        badgeText:  'Resolved',
+        actions: function() {
+          return '<p class="muted text-sm">Work completed. Waiting for tenant or PM to close.</p>';
+        }
+      }
+    };
+
+    function setMaintStatus(s, btn) {
+      var c = MS_STATUS[s];
+      if (!c) return;
+      document.getElementById('mr-status-badge').className = 'badge ' + c.badgeClass;
+      document.getElementById('mr-status-badge').textContent = c.badgeText;
+      document.getElementById('mr-actions-content').innerHTML = c.actions();
+      document.querySelectorAll('[data-sim]').forEach(function(b) {
+        b.className = b.getAttribute('data-sim') === s ? 'btn btn-primary !py-1 !text-sm' : 'btn btn-secondary !py-1 !text-sm';
+      });
+    }
+
+    function toggleEmergency(cb) {
+      var b = document.getElementById('mr-emergency-badge');
+      b.className = cb.checked ? 'badge badge-emergency' : 'badge badge-partial';
+      b.textContent = cb.checked ? 'Emergency' : 'High';
+    }
+
+    setMaintStatus('progress', null);
+  </script>
 </body>
 </html>

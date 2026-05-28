@@ -301,3 +301,70 @@ Reworked `admin/maintenance.html` then cloned the design to `pm/maintenance.html
 
 `pnpm` gates N/A — prototype + docs only; `apps/*` untouched.
 Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Task 22 — Maintenance detail pages: simulator + context card + status-aware actions (PM / Maintenance / Tenant)
+
+**Files changed:** `prototype/pm/maintenance-detail.html`, `prototype/maintenance/maintenance-detail.html`, `prototype/tenant/maintenance-detail.html`
+
+**pm/maintenance-detail.html:**
+- Context card: 3-col (Property · Unit · Lease) → **4-col** (Property · Unit · Tenant [Rohan Mehta / Lease #L-2103] · Assignee [Raju Kumar / Plumbing]).
+- Added dashed prototype simulator card (before context card) with 5 status buttons (Open / Assigned / In-Progress / Closed) + Emergency checkbox.
+- Added `id="mr-emergency-badge"`, `id="mr-status-badge"`, `id="mr-assignee-cell"`, `id="mr-actions-content"`.
+- Replaced the static hard-coded actions panel with `STATUS_CONFIG` + `setMaintStatus()` (same pattern as admin). Status-aware actions: Open → Assign Technician (primary) + Change Priority; Assigned → Reassign + Mark In-Progress (primary) + Change Priority; In-Progress (default) → Reassign (primary) + Change Priority + Close on Behalf of Tenant; Resolved → Close on Behalf of Tenant (primary) + Reopen; Closed → "No further actions." para only.
+- `toggleEmergency()` function wired to checkbox.
+- Removed Attachments line + its `<hr>` + wrapper div from Summary card.
+- Removed all caption `<p class="text-xs/sm muted">` sentences from actions panel.
+- Removed Internal Notes caption sentence ("Internal notes are visible to PMs and Admins only…").
+
+**maintenance/maintenance-detail.html:**
+- Added dashed simulator card with **3 buttons** (Assigned · In-Progress · Resolved) + Emergency checkbox. No Open/Closed (maintenance staff only see assigned requests).
+- Added `id="mr-emergency-badge"`, `id="mr-status-badge"`, `id="mr-actions-content"`.
+- Replaced broken button set (Acknowledge/Start/Pause/Resume) with `MS_STATUS` + `setMaintStatus()`: Assigned → Mark In-Progress (primary); In-Progress (default) → Mark as Resolved (primary); Resolved → read-only "Work completed. Waiting for tenant or PM to close." para.
+- Internal notes section (textarea + existing note) kept unchanged.
+- Removed Attachments line + `<hr>` + wrapper from Issue description card.
+- Removed `<p class="text-xs muted">You cannot close a request…</p>` caption.
+- Removed `<p class="text-sm muted mt-2 mb-4">Current: …</p>` from actions card.
+
+**tenant/maintenance-detail.html:**
+- Context card: 3-col (Property · Unit · Lease/#L-2103/PM:Sunita) → **4-col** (Property [Green Valley / Sector 12, Dwarka] · Unit [Unit 3A / 2 BHK · 820 sq ft] · Assignee [Raju Kumar / Maintenance Team] · Property Manager [Sunita Arora]).
+- Added dashed simulator card with 5 buttons (Open · Assigned · In-Progress · Resolved · Closed) + Emergency checkbox. Tenant-friendly badge labels: Submitted / Being Assigned / In Progress / Resolved / Closed.
+- Added `id="mr-emergency-badge"`, `id="mr-status-badge"`, `id="mr-actions-content"`.
+- `TS_STATUS` + `setMaintStatus()`: Open/Assigned/In-Progress → read-only status message + both buttons `btn-disabled disabled`; Resolved → Close request (btn-primary) + Still an issue (btn-secondary) both active; Closed → "Request closed." para.
+- Removed the two caption `<p class="text-xs/sm muted">` paragraphs from actions card.
+- Removed `<hr class="divider"/>` between buttons and bottom caption in actions card.
+
+**Verification:** all 3 files `python3 /tmp/claude/tagcheck.py` → `residual: [] errors: []`; all 3 inline scripts `node --check` → OK.
+
+---
+
+## Session close (2026-05-28) — Maintenance detail pages
+
+### All 4 maintenance detail pages updated
+
+**Admin (`admin/maintenance-detail.html`):**
+- Context card: Monthly Rent → Property Manager (Sunita Arora · phone); Lease → Tenant (Rohan Mehta · Lease #L-2103)
+- Assignment History table removed (timeline covers all transitions)
+- Note input added below the timeline ("Add to Timeline" — Admin/PM-only)
+- Status simulator: 5 buttons (Open/Assigned/In-Progress/Resolved/Closed) + Emergency checkbox. Closed state: "No further actions." only (Reopen removed from Closed, kept only on Resolved). Cross-property reassign removed entirely.
+
+**PM (`pm/maintenance-detail.html`):**
+- Context card: 3 cols → 4 (Property / Unit / Tenant / Assignee); Attachments line removed; captions removed
+- Status simulator added (same 5 buttons + Emergency checkbox); status-aware actions (no cross-property reassign)
+- Internal Notes caption removed
+
+**Maintenance staff (`maintenance/maintenance-detail.html`):**
+- Simulator: 3 buttons (Assigned · In-Progress · Resolved) + Emergency checkbox
+- Actions: Assigned → Mark In-Progress only; In-Progress → Mark as Resolved; Resolved → read-only message
+- Acknowledge / Pause / Resume removed (per product decision)
+- Attachments line + action captions removed
+
+**Tenant (`tenant/maintenance-detail.html`):**
+- Context card: 3 cols → 4 (Property / Unit / Assignee / Property Manager)
+- Simulator: 5 buttons with tenant-friendly labels (Submitted · Being Assigned · In Progress · Resolved · Closed)
+- Close + "Still an issue" enabled only on Resolved; captions removed
+
+**Verify:** 66/66 HTML tag-balanced; all inline JS `node --check` clean.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
