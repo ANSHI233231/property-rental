@@ -107,8 +107,10 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-my-visitors">
           <thead>
-            <tr>
+            <tr><th class="w-12">#</th>
+              <th>Visitor Code</th>
               <th>Visitor</th>
+              <th>Property · Unit</th>
               <th>Phone</th>
               <th>Purpose</th>
               <th>When</th>
@@ -117,40 +119,50 @@
             </tr>
           </thead>
           <tbody>
-            <tr data-status="pending">
+            <tr data-status="pending"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-A7K2</td>
               <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>98765 43210</td>
               <td>Personal visit</td>
               <td>Expected 27/05/2026 14:00</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td class="text-sm muted">Awaiting Property Manager approval</td>
             </tr>
-            <tr data-status="approved">
+            <tr data-status="approved"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-B3M9</td>
               <td class="font-poppins font-semibold text-charcoal">Kavya Sharma</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>96543 21098</td>
               <td>Personal visit</td>
               <td>Expected 26/05/2026 16:00</td>
               <td><span class="badge badge-prepaid" aria-label="Status: Approved">Approved</span></td>
               <td class="text-sm muted">Approved 25/05/2026 by Sunita Arora</td>
             </tr>
-            <tr data-status="checked-in">
+            <tr data-status="checked-in"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-C5N1</td>
               <td class="font-poppins font-semibold text-charcoal">Meena Rao</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>91111 22222</td>
               <td>Personal visit</td>
               <td>Arrived 26/05/2026 09:42</td>
               <td><span class="badge badge-progress" aria-label="Status: Checked-in">Checked-in</span></td>
               <td class="text-sm muted">Currently inside</td>
             </tr>
-            <tr data-status="checked-out">
+            <tr data-status="checked-out"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-D8P4</td>
               <td class="font-poppins font-semibold text-charcoal">Suresh Nair</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>90000 11111</td>
               <td>Personal visit</td>
               <td>Departed 24/05/2026 16:30 · 2h 30m</td>
               <td><span class="badge badge-resolved" aria-label="Status: Checked-out">Checked-out</span></td>
               <td class="text-sm muted">Arrived 24/05/2026 14:00</td>
             </tr>
-            <tr data-status="denied">
+            <tr data-status="denied"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-E2Q6</td>
               <td class="font-poppins font-semibold text-charcoal">Unknown Vendor</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 7B</div></td>
               <td>88888 77777</td>
               <td>Maintenance vendor</td>
               <td>Expected 20/05/2026 10:00</td>
@@ -183,7 +195,19 @@
   <div class="modal-backdrop" id="preapproveModal" role="dialog" aria-modal="true" aria-labelledby="preapprove-title">
     <form class="modal" style="max-width:560px;" id="preapproveForm" onsubmit="submitPreapproval(event)">
       <h3 id="preapprove-title">Pre-approve a Visitor</h3>
-      <p class="muted text-sm mt-1 mb-5">Tell your Property Manager who's coming. They'll see this immediately.</p>
+
+      <!-- Unit (searchable — property + unit label) -->
+      <div class="mb-4">
+        <label class="label" for="va-unit">Unit</label>
+        <select id="va-unit" class="input" data-searchable required
+                onchange="liveValidate(this); updateSubmitBtn()"
+                onblur="liveValidate(this)">
+          <option value="" disabled selected>Select your unit</option>
+          <option value="3A">Green Valley, Dwarka · Unit 3A</option>
+          <option value="7B">Green Valley, Dwarka · Unit 7B</option>
+        </select>
+        <div class="field-error" id="va-unit-error" role="alert" aria-live="polite"></div>
+      </div>
 
       <!-- Visitor name -->
       <div class="mb-4">
@@ -214,12 +238,11 @@
           required
           pattern="[6-9][0-9]{9}"
           title="10-digit Indian mobile number starting with 6, 7, 8 or 9"
-          aria-describedby="va-phone-error va-phone-hint"
+          aria-describedby="va-phone-error"
           oninput="liveValidate(this); updateSubmitBtn()"
           onblur="liveValidate(this)"
         />
         <div class="field-error" id="va-phone-error" role="alert" aria-live="polite"></div>
-        <div id="va-phone-hint" class="text-xs muted mt-1">10-digit Indian mobile, starting 6-9.</div>
       </div>
 
       <!-- Purpose (sourced from Visit Purposes master) -->
@@ -229,7 +252,7 @@
           id="va-purpose"
           class="input"
           required
-          aria-describedby="va-purpose-error va-purpose-hint"
+          aria-describedby="va-purpose-error"
           onchange="liveValidate(this); togglePurposeOther(); updateSubmitBtn()"
           onblur="liveValidate(this)"
         >
@@ -242,7 +265,6 @@
           <option value="Other">Other</option>
         </select>
         <div class="field-error" id="va-purpose-error" role="alert" aria-live="polite"></div>
-        <div id="va-purpose-hint" class="text-xs muted mt-1">Purposes are managed by Admin in Master Data.</div>
       </div>
 
       <!-- Other (free-text reason — revealed when Purpose = Other) -->
@@ -269,12 +291,11 @@
           type="date"
           class="input"
           required
-          aria-describedby="va-date-error va-date-hint"
+          aria-describedby="va-date-error"
           oninput="validateDate(); updateSubmitBtn()"
           onblur="validateDate()"
         />
         <div class="field-error" id="va-date-error" role="alert" aria-live="polite"></div>
-        <div id="va-date-hint" class="text-xs muted mt-1">Visit date — must be today or later.</div>
       </div>
 
       <!-- Expected time -->
@@ -285,12 +306,11 @@
           type="time"
           class="input"
           required
-          aria-describedby="va-time-error va-time-hint"
+          aria-describedby="va-time-error"
           oninput="validateTime(); updateSubmitBtn()"
           onblur="validateTime()"
         />
         <div class="field-error" id="va-time-error" role="alert" aria-live="polite"></div>
-        <div id="va-time-hint" class="text-xs muted mt-1">Arrival time — HH:mm IST. Must be at least 15 minutes from now if today.</div>
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
@@ -311,6 +331,7 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/searchable-select.js"></script>
   <script>
     /* -----------------------------------------------------------------------
      * Pre-approve modal open / close
@@ -331,6 +352,8 @@
       document.getElementById('preapproveModal').classList.remove('open');
       document.body.style.overflow = '';
       document.getElementById('preapproveForm').reset();
+      // Reset the searchable-select unit combobox display
+      if (window.SearchableSelect) SearchableSelect.refresh('va-unit');
       // Clear all errors
       document.querySelectorAll('#preapproveForm .field-error').forEach(function(el) {
         el.textContent = '';
@@ -449,12 +472,14 @@
     }
 
     function formIsValid() {
+      var unit    = document.getElementById('va-unit');
       var name    = document.getElementById('va-name');
       var phone   = document.getElementById('va-phone');
       var purpose = document.getElementById('va-purpose');
       var date    = document.getElementById('va-date');
       var time    = document.getElementById('va-time');
 
+      if (!unit.value) return false;
       if (!name.value.trim() || name.value.trim().length < 2) return false;
       if (!phone.value || !/^[6-9][0-9]{9}$/.test(phone.value)) return false;
       if (!purpose.value) return false;
@@ -480,11 +505,33 @@
     }
 
     /* -----------------------------------------------------------------------
-     * Form submit — add a new Pending card to Section 1
+     * Visitor code generator — VIS- + 4 random uppercase alphanumeric chars
+     * ----------------------------------------------------------------------- */
+    function generateVisitorCode() {
+      var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      var code = 'VIS-';
+      for (var i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    /* -----------------------------------------------------------------------
+     * Form submit — add a new Pending row to the visitors table
      * ----------------------------------------------------------------------- */
     function submitPreapproval(event) {
       event.preventDefault();
       if (!formIsValid()) return;
+
+      var unitEl  = document.getElementById('va-unit');
+      var unitVal = unitEl.value;
+      // Get the label text for the unit option (e.g. "Green Valley · Unit 3A")
+      var unitOpt = unitEl.options[unitEl.selectedIndex];
+      var unitLabel = unitOpt ? unitOpt.textContent.trim() : unitVal;
+      // Split "Property · Unit X" into property name and unit sub-line
+      var unitParts = unitLabel.split('·');
+      var unitProp = unitParts[0] ? unitParts[0].trim() : '';
+      var unitShort = unitParts[1] ? unitParts[1].trim() : ('Unit ' + unitVal);
 
       var name    = document.getElementById('va-name').value.trim();
       var phone   = document.getElementById('va-phone').value.trim();
@@ -495,28 +542,33 @@
       // Format date as DD/MM/YYYY
       var dp = dateVal.split('-');
       var displayDate = dp[2] + '/' + dp[1] + '/' + dp[0];
-      var displayDateTime = displayDate + ' at ' + timeVal;
 
-      var newCard = document.createElement('div');
-      newCard.className = 'card mb-4';
-      newCard.innerHTML =
-        '<div class="flex gap-2 flex-wrap mb-2">' +
-          '<span class="badge badge-partial" aria-label="Status: Pending">Pending</span>' +
-        '</div>' +
-        '<h3>' + htmlEscape(name) + '</h3>' +
-        '<p class="text-sm muted mt-1">' + htmlEscape(phone) + ' · ' + htmlEscape(purpose) + ' · Expected ' + displayDateTime + '</p>' +
-        '<p class="text-sm mt-2" style="font-style:italic;color:var(--color-slate);">Awaiting Property Manager approval.</p>';
+      var code = generateVisitorCode();
 
-      var section = document.getElementById('section-active');
-      // Insert before the first existing card, or append
-      var firstCard = section.querySelector('.card');
-      if (firstCard) {
-        section.insertBefore(newCard, firstCard);
-      } else {
-        section.appendChild(newCard);
-      }
+      // Build and prepend a new table row
+      var tbody = document.querySelector('#tbl-my-visitors tbody');
+      var tr = document.createElement('tr');
+      tr.setAttribute('data-status', 'pending');
+      tr.innerHTML =
+        '<td data-pg-serial class="muted"></td>' +
+        '<td class="font-mono text-xs font-semibold text-charcoal">' + htmlEscape(code) + '</td>' +
+        '<td class="font-poppins font-semibold text-charcoal">' + htmlEscape(name) + '</td>' +
+        '<td>' + htmlEscape(unitProp) + '<div class="text-xs muted">' + htmlEscape(unitShort) + '</div></td>' +
+        '<td>' + htmlEscape(phone) + '</td>' +
+        '<td>' + htmlEscape(purpose) + '</td>' +
+        '<td>Expected ' + htmlEscape(displayDate) + ' ' + htmlEscape(timeVal) + '</td>' +
+        '<td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>' +
+        '<td class="text-sm muted">Awaiting Property Manager approval</td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      // Refresh paginator so serial numbers + counts update
+      if (window.Paginator) Paginator.refresh('tbl-my-visitors');
 
       closePreapproveModal();
+
+      if (typeof gsToast === 'function') {
+        gsToast('Visitor pre-approved! Code: ' + code + ' — share this with your visitor.', 'success');
+      }
     }
 
     function htmlEscape(str) {

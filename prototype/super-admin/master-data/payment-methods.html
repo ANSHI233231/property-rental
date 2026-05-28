@@ -87,10 +87,10 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-payment">
           <thead>
-            <tr><th>Name</th><th>Used by (payments)</th><th>Status</th><th>Actions</th></tr>
+            <tr><th class="w-12">#</th><th>Name</th><th>Used by (payments)</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr data-name="UPI" data-status="active">
+            <tr data-name="UPI" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">UPI</td>
               <td>187</td>
               <td><span class="badge badge-active">Active</span></td>
@@ -99,7 +99,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 187 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="NEFT / Bank Transfer" data-status="active">
+            <tr data-name="NEFT / Bank Transfer" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">NEFT / Bank Transfer</td>
               <td>94</td>
               <td><span class="badge badge-active">Active</span></td>
@@ -108,7 +108,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 94 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Cash" data-status="active">
+            <tr data-name="Cash" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Cash</td>
               <td>12</td>
               <td><span class="badge badge-active">Active</span></td>
@@ -117,7 +117,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 12 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Cheque" data-status="active">
+            <tr data-name="Cheque" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Cheque</td>
               <td>3</td>
               <td><span class="badge badge-active">Active</span></td>
@@ -126,7 +126,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 3 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="IMPS" data-status="active" id="row-imps">
+            <tr data-name="IMPS" data-status="active" id="row-imps"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">IMPS</td>
               <td>0</td>
               <td id="badge-imps"><span class="badge badge-active">Active</span></td>

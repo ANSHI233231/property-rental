@@ -1,15 +1,19 @@
 # Software Requirements Specification (SRS)
 ## GharSetu — Property Rental Management Platform
 
-**Version:** 1.0
-**Date:** May 2026
-**Sources:** [Blueprint_Property_Rental_Application_v8](v1/Blueprint_Property_Rental_Application_v8.docx), [GharSetu_UIUX_Design_Document_updated](v1/GharSetu_UIUX_Design_Document_updated.docx)
+**Version:** 2.0 — current engagement (v8 scope)
+**Date:** 27/05/2026
+**Sources:** [Solution_Overview.docx](Solution_Overview.docx) (v8), [UIUX_Design_Document.docx](UIUX_Design_Document.docx), [GharSetu_Model_API_Spec.md](v1/GharSetu_Model_API_Spec.md), [Blueprint_Property_Rental_Application_v8](v1/Blueprint_Property_Rental_Application_v8.docx)
+
+> **v2.0 reconciliation (27/05/2026).** Brought in line with the current engagement (v8) as built in the prototype: SAAS layer + **Super Admin** role, public Organization sign-up with approval gate, Subscription Plans, **per-room leasing**, **Visitor Management**, **Master Data Administration**, **Settings**, **Admin Impersonation**, **Task Delegation**. The v1 hard rules **BL-01 → BL-23 are preserved**; **BL-05** (retire is now a reversible status) and **BL-19** (a PM may manage multiple properties) are amended in place with notes, and **eight new rules NR-1 → NR-8** are added (§5). Items now in scope are removed from §9; only subscription-billing integration and custom domains / per-org branding remain deferred.
 
 ---
 
 ## 1. Project Overview
 
-GharSetu replaces paper folders, spreadsheets, and WhatsApp groups for a Delhi-based property management business operating **120 rental units across 18 buildings**. It centralizes properties, tenants, leases, rent collection, and maintenance into a single role-scoped web/mobile app.
+GharSetu replaces paper folders, spreadsheets, and WhatsApp groups. It centralizes properties, tenants, leases, rent collection, maintenance and visitors into a single role-scoped web/mobile app.
+
+**Multi-tenant SAAS (v8).** GharSetu is a multi-organization platform: each organization registers (public sign-up → Super Admin approval), runs on a Subscription Plan, and operates in complete isolation from every other organization. The flagship reference deployment manages **120 rental units across 18 buildings** in Delhi; that scale is illustrative, not a system limit. A platform-level **Super Admin** sits above all organizations; every other role is scoped to exactly one organization (NR-5).
 
 **Tagline:** *"Stop Losing Track. Start Running Smoothly."*
 **Aesthetic:** Trustworthy · Simple · Delhi-First
@@ -33,91 +37,162 @@ The platform has **five roles** — four operational roles inside each organizat
 
 ## 3. Pages & Navigation Map
 
+Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org prefix) · **Org-scoped** (`/:org/...` for Admin / PM / Maintenance / Tenant).
+
 ### Public
 | Page | File | Purpose |
 |---|---|---|
-| Landing / role picker | `prototype/index.html` | Marketing + role selection |
-| Login | `prototype/login.html` | Email/phone + password sign-in |
+| Landing | `index.html` | Marketing homepage (hero, capabilities, plans, CTA) |
+| Organization sign-up | `organization-signup.html` | Public registration → queues for Super Admin approval (business type, expected units, State→City, pincode, plan) |
+| Login | `login.html` | Email/phone + password sign-in |
+| Forgot / Reset password | `forgot-password.html`, `reset-password.html` | Self-service password reset |
+| Contact | `contact.html` | Contact form (record-only; surfaced to Super Admin) |
+| Privacy / Terms | `privacy.html`, `terms.html` | Legal pages (Super-Admin-managed content) |
 
-### Admin
+### Super Admin (platform-level)
 | Page | File | Purpose |
 |---|---|---|
-| Dashboard | `prototype/admin/dashboard.html` | KPIs, alerts, rent + maintenance overview |
-| Properties | `prototype/admin/properties.html` | List of all 18 buildings + units |
-| Users | `prototype/admin/users.html` | Manage Admin / PM / Maintenance / Tenant accounts |
-| Maintenance | `prototype/admin/maintenance.html` | All requests across all properties |
-| Rent | `prototype/admin/rent.html` | Collection overview, overdue tenants |
-| My Profile | `prototype/admin/profile.html` | Account, member-since, password, sessions, 2FA, recent activity |
+| Dashboard | `super-admin/dashboard.html` | Platform KPIs across organizations |
+| Organizations | `super-admin/organizations.html` | All organizations (slug, plan, status) |
+| Organization detail | `super-admin/organization-detail.html` | Approve / **Reject** / Deactivate / Reactivate · Impersonate Admin · Change Plan · org users · platform audit · plan history |
+| Plans | `super-admin/plans.html` | Subscription Plans CRUD + feature catalogue + "Most Popular" |
+| Master Data (platform) | `super-admin/master-data.html` + `master-data/{cities,states,payment-methods,business-types}.html` | Platform-level masters (no `organization_id`) |
+| Legal Pages | `super-admin/legal-pages.html` | Markdown editor for Privacy / Terms + section reorder |
+| Contact Inbox | `super-admin/contact-inbox.html` | Contact submissions (record-only) |
+| Server Logs | `super-admin/server-logs.html` | Diagnostic log files (view / download) |
+| My Profile | `super-admin/profile.html` | Account (name + mobile editable; email + role locked) |
 
-### Property Manager
+### Admin (own organization)
 | Page | File | Purpose |
 |---|---|---|
-| Dashboard | `prototype/pm/dashboard.html` | Property stats + maintenance queue + recent payments |
-| Tenants | `prototype/pm/tenants.html` | Tenants in this property |
-| Leases | `prototype/pm/leases.html` | Active / expired leases + renew / terminate |
-| Rent Collection | `prototype/pm/rent-collection.html` | Per-unit rent periods + record payment modal |
-| Maintenance | `prototype/pm/maintenance.html` | Property maintenance queue |
-| My Profile | `prototype/pm/profile.html` | Account, assigned property, password, sessions, 2FA |
+| Dashboard | `admin/dashboard.html` | Org KPIs, 5+-request alert, recent open maintenance |
+| Properties | `admin/properties.html` | Properties list + Add/Edit Property + CSV export |
+| Property detail | `admin/property-detail.html` | Units table (Add/Edit/Retire Unit), Reassign PM, open maintenance |
+| Unit detail | `admin/unit-detail.html` | Unit facts + leases (current+past) + current tenant + status preview |
+| Leases · Create Lease | `admin/leases.html`, `admin/create-lease.html` | Org-wide leases + co-tenant consent; full-page lease creation |
+| Users | `admin/users.html` | Manage PM / Maintenance / Tenant accounts |
+| Maintenance | `admin/maintenance.html` + `maintenance-detail.html` | All requests + detail |
+| Visitors | `admin/visitors.html` | Org-wide visitor log — Approve / Deny / Check-in (code validation) / Check-out; Property → Unit filter |
+| Rent | `admin/rent.html` | Collection overview, overdue leases |
+| Master Data (org) | `admin/master-data.html` + `master-data/{property-types,amenities,specializations,categories,visit-purposes}.html` | Org-level masters (NOT-NULL `organization_id`) |
+| Settings · Delegations · Audit Log | `admin/settings.html`, `delegations.html`, `audit-log.html` | Org settings · task delegation windows · audit trail |
+| My Profile | `admin/profile.html` | Account (name + mobile editable; email + role locked) |
 
-### Maintenance Staff
+### Property Manager (assigned properties)
 | Page | File | Purpose |
 |---|---|---|
-| My Requests | `prototype/maintenance/dashboard.html` | Assigned requests with status actions |
-| All Open | `prototype/maintenance/all-open.html` | Read-only view of every open request across all properties |
-| My Profile | `prototype/maintenance/profile.html` | Account, member-since, password, sessions, work stats |
+| Dashboard | `pm/dashboard.html` | Stats + maintenance queue + recent payments |
+| Properties · detail · unit | `pm/properties.html`, `property-detail.html`, `unit-detail.html` | Assigned properties (**multi-property** + read-only tenure history) |
+| Tenants | `pm/tenants.html` | People directory (one row per person) — name · property · unit · phone · status; no detail page (contracts live under Leases) |
+| Leases · detail | `pm/leases.html`, `lease-detail.html` | Leases + renew / terminate |
+| Rent Collection | `pm/rent-collection.html` | Per-period record-payment |
+| Maintenance | `pm/maintenance.html` + `maintenance-detail.html` | Property maintenance |
+| Visitors | `pm/visitors.html` | Visitor log — Approve / Deny / Check-in (code validation) / Check-out; Property · Unit combined view |
+| My Profile | `pm/profile.html` | Account |
 
-### Tenant
+### Maintenance Staff (assigned requests only)
 | Page | File | Purpose |
 |---|---|---|
-| My Lease | `prototype/tenant/dashboard.html` | Lease summary + current rent status snapshot |
-| Rent | `prototype/tenant/rent.html` | Full payment history, outstanding balance, late-fee breakdown |
-| Maintenance | `prototype/tenant/maintenance.html` | My requests + raise new |
-| My Profile | `prototype/tenant/profile.html` | Account, member-since, password, sessions, lease quick-view |
+| My Requests | `maintenance/dashboard.html` | Assigned requests + status actions |
+| All Requests | `maintenance/all-requests.html` | Read-only view of open requests (no rent/lease data) |
+| Request detail | `maintenance/maintenance-detail.html` | Request detail + resolve (≥20-char notes) |
+| My Profile | `maintenance/profile.html` | Account |
+
+### Tenant (own lease only)
+| Page | File | Purpose |
+|---|---|---|
+| My Lease · history | `tenant/dashboard.html`, `tenant/leases.html`, `tenant/lease-detail.html` | Lease summary + history |
+| Rent | `tenant/rent.html` | Payment history, outstanding, late fee |
+| Maintenance | `tenant/maintenance.html` + `maintenance-detail.html` | My requests + raise new + close resolved |
+| Visitors | `tenant/visitors.html` | Pre-approve visitors |
+| My Profile | `tenant/profile.html` | Account |
 
 **Navigation:**
-- **Desktop / tablet** — Fixed left sidebar (240px, Deep Navy, Saffron 4px left border on active item).
-- **Mobile** — Bottom tab bar, max 5 icons. **No hamburger menus.**
+- **Desktop / tablet (≥1024px)** — fixed left sidebar (240px, Deep Navy, Saffron active accent); collapsible **Master Data** sub-menu.
+- **Mobile (≤1023px)** — bottom tab bar (≤5 items) + **More** sheet for overflow nav + account. **No hamburger menus.**
 
 ---
 
 ## 4. Features by Module
 
 ### Module 1 — Users & Access
-- Admins/PMs create accounts; tenants are created at lease signing.
-- Co-tenants (couples, families) get individual logins linked to one shared lease.
-- Role-scoped views: maintenance staff never see rent/lease data.
-- Property transfer: previous PM keeps **read-only** audit access; new activity routes to new PM.
+- **Every user belongs to exactly one Organization** — except the Super Admin (platform-level, NR-5). No role, including Admin, reads/writes outside its own organization.
+- Admin creates PM / Maintenance / Tenant accounts; tenant accounts auto-create at lease signing. Organizations self-register publicly (Super Admin approval gate). The Admin's own account is **not** listed on the Users page (it is managed from My Profile); no new Admins are created there.
+- **User editing:** Admin can edit a PM / Maintenance user's name + phone and **reset their password** (with confirmation) from a single form; **email and role are immutable** there (role change is a separate audited action). A **Tenant** row exposes **password reset only** (profile is lease-derived) — the row action reads *Reset*. New / reset passwords are shared privately; no email is sent.
+- **User activation:** a user can be **Deactivated / Reactivated** (confirmation required) — a soft status that blocks login and revokes sessions while preserving all records; an inactive user cannot be impersonated. No DELETE (Scope rule C).
+- Maintenance staff may hold **one or more Specializations** (from Master Data, Module 7).
+- Co-tenants (couples, families) get individual logins linked to one shared lease; every such login is a Tenant and may be primary on another lease.
+- Role-scoped views: maintenance staff never see rent / lease / financial data.
+- Property reassignment: previous PM keeps **read-only** tenure history; new activity routes to the new PM (BL-20).
+- **Admin Impersonation** and **Task Delegation** — see Module 9.
 
 ### Module 2 — Properties & Units
-- Property: name, address, type, total units, amenities, assigned PM.
-- Unit: number, floor, bedrooms, bathrooms, area (sq ft), monthly rent.
-- Unit states: `available` · `occupied` · `in-maintenance` · `listed` · `retired`.
-- **Retired = permanent.** Removed units never reactivate; a fresh unit must be created.
+- Property: name, address, **property type (from Master Data)**, total units, amenities (from Master Data), pincode, assigned PM(s).
+- Unit: number, floor, bedrooms, **bathrooms**, area (sq ft), monthly rent, status.
+- Unit states: `available` · `listed` · `occupied` · `under-maintenance` · `retired`.
+- **Retire is a reversible soft status** (amended — see BL-05): a retired unit no longer accepts new leases and is never hard-deleted, but can be set back to `available` when it has no active lease. Status is **lease-driven** — it cannot be changed manually while the unit is `occupied`.
+- Unit **Add / Edit / Retire is an Admin action**; PM is operations-scoped (views units, does not create/retire them).
+- **A PM may manage multiple properties** (amended — see BL-19), with read-only tenure history on reassignment.
+- **Leasing mode** per property — Unit-based or Room-based (per-room leasing); the mode locks once any active lease exists (NR-1).
 
 ### Module 3 — Leases & Tenants
-- Lease record: start date, end date, monthly rent, security deposit, status.
+- A lease is anchored to a **unit** (or a **room**, under per-room leasing) — not to the property.
+- Lease record: start date, end date, monthly rent, security deposit, status; primary tenant + optional co-tenants.
 - Lease statuses: `active` · `expired` · `renewed` · `terminated`.
 - Renewal creates a new lease record; old lease stays `active` until its end date, then transitions to `renewed`.
 - Early termination = two steps: (1) record termination date + reason, (2) PM processes deposit refund (full or partial) with reason.
-- Co-tenant termination requires explicit consent from **all** co-tenants (no timeout).
+- Co-tenant termination requires explicit consent from **all** co-tenants — no timeout (BL-08, BL-09).
+- Lease creation is a full-page Admin/PM flow; the tenant account is provisioned at signing.
 
 ### Module 4 — Maintenance Requests
-- Raised by Tenant or PM only. Maintenance staff cannot create.
-- Fields: unit, category, description (≥30 chars), priority (low / medium / high / emergency).
-- Workflow: `open` → `assigned` → `in-progress` → `resolved` → `closed`.
-- Tenant closes the request after they're satisfied with the resolution.
-- Resolution notes ≥ 20 chars (no one-word "done").
-- Emergency flag: red badge, visible on PM dashboard immediately.
-- Times stored in property's local time (Asia/Kolkata).
+- Raised by **Tenant, PM, or Admin** — maintenance staff cannot create (BL-16). PM and Admin share one **"+ Raise Request"** affordance on the maintenance listing.
+- Maintenance staff **cannot self-assign and cannot close**: the PM/Admin assigns the request; the tenant (or PM/Admin) closes it after resolution (BL-21).
+- Fields: unit (or room), category (from Master Data), description (≥30 chars), priority (low / medium / high / emergency).
+- Workflow: `open` → `assigned` → `in-progress` → `resolved` → `closed` (Closed = resolved then closed out).
+- **Listing** (Admin = all properties · PM = own): one row of **status** filter tiles (All · Open · In-Progress · Resolved · Closed) + a one-row filter bar — **Property → Unit cascade** (units shown = only those with ≥1 request), **Priority**, **Assignee** (incl. Unassigned), Search. Property + unit render together in one **"Property · Unit"** column. Assign / reassign / close / reopen happen on the request detail, not the list.
+- **Visibility (per-room, NR-2):** a whole-unit (shared) request is visible to every room tenant on the unit + the PM + Maintenance; a room-specific request is visible only to that room's tenant + PM + Maintenance.
+- Resolution notes ≥ 20 chars. Emergency = red badge, surfaced on the PM dashboard immediately. Times in Asia/Kolkata.
 
 ### Module 5 — Rent Collection
-- Due date = same day each month from lease start. If start = 31st and month has no 31st, use last day of that month.
-- Payment fields: amount, date, method (UPI / NEFT / Cash / Cheque), reference number, recorded-by (auto-stamped).
+- Due date = same day each month from lease start. If start = 31st and month has no 31st, use the last day of that month.
+- Payment fields: amount, date, **method (from Master Data Payment Methods — NR-3)**, reference number, recorded-by (auto-stamped).
 - Period statuses: `paid` · `partial` · `overdue` · `prepaid`.
-- **Overdue:** automatically set 5 calendar days (incl. weekends) past due date.
-- **Late fee:** 2% of outstanding balance per full week overdue, calculated by system.
-- **Prepaid:** excess payment auto-applied to next period (no manual adjustment).
-- **Only the PM** records payments; tenants view-only.
+- **Overdue:** auto-set 5 calendar days past due date (BL-12). **Late fee:** 2% of outstanding × full weeks overdue (BL-13). **Prepaid:** excess auto-applied to next period (BL-11).
+- **Only PROPERTY_MANAGER and ADMIN record payments** (BL-10); Tenant / Maintenance are view-only.
+
+### Module 6 — Organizations & Subscriptions (SAAS)
+- **Organization record** (captured at public sign-up): name, unique URL **slug**, **business type** (from Business Types Master Data), expected unit count, **address (State → City from Master Data + pincode)**, contact person + email, chosen plan.
+- **Public Organization sign-up** → status `Pending` → Super Admin **Approve** (provisions the workspace + emails Admin credentials) or **Reject** (with reason; no workspace). Active orgs can be Deactivated / Reactivated. Org lifecycle: `Pending → Active → Deactivated` (and `Pending → Rejected`).
+- **Subscription Plans** — Basic / Standard / Premium (Super-Admin-managed CRUD: add / edit / deactivate, never below the 3 defaults). Each plan sets an **active-user cap** and a **property cap** (either may be unlimited) and **toggles a feature catalogue**; exactly one plan per organization (NR-6), changeable any time with the new cap applying to subsequent additions. Exactly one active plan is flagged **"Most Popular"** for the public site (shown identically on home, sign-up and the Super Admin screen from one source).
+- **Plan feature catalogue** (toggled per plan): Rent Collection · Maintenance Requests · Visitor Management · Per-Room Leasing · Task Delegation · Admin Impersonation · Settings Customization · Data Export (CSV) · Priority Support. A plan's enabled features gate which modules an organization can use. **Audit log and Master Data are always-on for every plan** (the platform depends on them) and are not catalogue items.
+- **Billing is manual-invoice only** — no payment gateway (see §9).
+
+### Module 7 — Master Data
+- **Org-level (Admin-owned):** Property Types, Amenities, **Maintenance Specializations**, Maintenance Categories, Visit Purposes. **Platform-level (Super-Admin-owned):** Cities, States, Payment Methods, Business Types.
+- **Maintenance Specializations** seed the trades a Maintenance user can be tagged with; a user may hold **several** (many-to-many). Used by the Add / Edit User form as a multi-select.
+- Forms read the **active** list from Master Data at selection time — values are never hardcoded (NR-3).
+- An entry **in use on active records cannot be deactivated** until it is no longer referenced; deactivation is a soft-retire (NR-4). The blocking reason is shown on the disabled control.
+
+### Module 8 — Visitor Management
+- **Lifecycle:** Tenant pre-approves (name · phone · unit · purpose · expected date/time) → system generates a **Visitor Code** (`VIS-XXXX`, 4-char alphanumeric) shared with the tenant → PM/Admin **Approves** or **Denies** → on arrival the visitor presents their code → PM/Admin **enters the code** in the check-in modal (validated against the stored code; mismatch is blocked) → **Checked-in** → on departure **Checked-out**. Statuses: `pending → approved → checked-in → checked-out` (or `denied`).
+- **Visitor Code** is a gate-validation token — shown to the **tenant** (who shares it with their visitor) but **never displayed to PM/Admin**. PM/Admin enter it at check-in to confirm identity without any integration with physical gate hardware.
+- **Roles:** Tenant = pre-approve only. PM = Approve/Deny/Check-in(validate)/Check-out for their assigned properties. Admin = same as PM but org-wide (all properties, with Property → Unit filter).
+- Purpose sourced from **Visit Purposes Master Data** (NR-3). Unit picker shows property + unit label. No SMS / gate-hardware integration.
+
+### Module 9 — Admin Impersonation & Task Delegation
+- **Impersonation:** an Admin may impersonate a PM / Maintenance / Tenant **within their own organization**. Every action is recorded against the **Admin** in the audit log; the Admin cannot impersonate the Super Admin or anyone outside their org (NR-7).
+- **Task Delegation:** an Admin delegates a task to a PM / Maintenance for a defined date window. Actions during the window are recorded against the **delegate**; outside the window the delegate has no extra rights (NR-8).
+
+### Module 10 — Platform Administration (Super Admin)
+- **Legal Pages** — Privacy Policy and Terms of Service content is editable by the Super Admin via a section-based **markdown editor** (bold/italic/list/link, reorder sections up/down, publish). The public Privacy/Terms pages render from this single source.
+- **Contact Inbox** — public Contact-form submissions are **record-only** (no email is sent; follow-up is out-of-band per Scope rule K). Super Admin views/triages them (New / Read / Replied).
+- **Server Logs** — read-only diagnostic log files, viewable and downloadable. *App-port carry-over:* Pino daily files under `apps/api/logs/`, Super-Admin-only `/platform/logs` endpoints, `VIEW_SERVER_LOG` / `DOWNLOAD_SERVER_LOG` audit actions, ~90-day retention.
+- **Cross-org audit** — the Super Admin can view the platform-level audit trail across organizations.
+
+### Module 11 — Settings (Admin, org-level)
+- An Admin configures organization-wide operational parameters: **late-fee rate (%)**, **overdue grace period (days)**, and **rent-change notice window (days)**.
+- These are the configurable values behind the rent rules — defaults: **2%** (BL-13 late fee), **5 days** (BL-12 overdue grace), **60 days** (BL-11 rent-change notice). The rule logic is unchanged; only the constant is org-configurable. Changes are audited and apply going forward (never retroactively).
+- "Settings Customization" is a plan feature (Module 6) — an org whose plan lacks it uses the platform defaults.
 
 ---
 
@@ -131,7 +206,7 @@ These rules **must be enforced by the backend**, not just the UI:
 | BL-02 | Monthly rent is locked at lease signing; cannot be changed mid-lease | Protects tenants from arbitrary hikes |
 | BL-03 | Rent on a unit can only be edited when state is `available` or `listed` | Same as BL-02, enforcement layer |
 | BL-04 | An `occupied` unit cannot be moved to `in-maintenance` or `listed` until lease is properly ended | State integrity |
-| BL-05 | Records are never deleted — `retired` is the soft-delete; retired units never reactivate | Audit trail |
+| BL-05 | Records are never deleted. `retired` is a **reversible soft-retire** status — a retired unit accepts no new leases but is never hard-deleted, and may be set back to `available` when it has no active lease. *(v2.0 amendment: v1 treated retire as permanent; reactivation is now allowed.)* | Audit trail / lifecycle |
 | BL-06 | Listed unit rent change instantly updates the public listing | Pricing consistency |
 | BL-07 | All co-tenants are jointly liable for unpaid rent | Legal clarity |
 | BL-08 | One co-tenant cannot end the lease alone — all must consent | Joint tenancy law |
@@ -142,14 +217,31 @@ These rules **must be enforced by the backend**, not just the UI:
 | BL-13 | Late fee = 2% of outstanding × full weeks overdue, added to payable amount automatically | No manual math |
 | BL-14 | Maintenance description ≥ 30 chars; resolution notes ≥ 20 chars | Forces real records |
 | BL-15 | Closed requests cannot be reopened by anyone (incl. Admin) | Clean history |
-| BL-16 | Maintenance staff: `read + update` only — cannot `create` | Role separation |
+| BL-16 | Maintenance staff: `read + update` only — cannot `create`, **cannot self-assign** (the PM/Admin assigns), and **cannot close** (the tenant closes, per BL-21) | Role separation |
 | BL-17 | If a tenant raises ≥5 maintenance requests for the same unit in one **calendar month** (1st → end of month), an Admin alert fires | Catches problem units / frivolous requests |
 | BL-18 | Tenant turnover gap (e.g., Fri move-out → Mon move-in) is a normal no-lease period — not overdue, not double-bookable | Edge case clarity |
-| BL-19 | Each PM is assigned to exactly **one** property | Scope clarity |
+| BL-19 | **A PM may be assigned to multiple properties**; on reassignment the previous PM keeps read-only tenure history. *(v2.0 amendment: v1 enforced exactly one property per PM — that one-PM-per-property constraint is retired.)* | Scope clarity |
 | BL-20 | After property transfer, previous PM keeps read-only access; writes go to new PM | Audit + continuity |
 | BL-21 | Tenant closes their own resolved requests (PMs/Admins do not auto-close) | Tenant satisfaction signal |
 | BL-22 | All times stored & displayed in property local time (Asia/Kolkata) | Avoid timezone confusion |
 | BL-23 | Dates rendered DD/MM/YYYY everywhere (Delhi convention) | Local norms |
+
+### New rules added in v8 (NR-1 → NR-8)
+
+These extend the hard rules for the current engagement and are enforced at the API/DB level alongside BL-01 → BL-23.
+
+| # | Rule | Why |
+|---|---|---|
+| NR-1 | Leasing mode (Unit-based or Room-based) **locks** once any active lease exists on a property; switching requires terminating all active leases first | Per-room leasing integrity |
+| NR-2 | Shared (whole-unit) maintenance requests are visible to every room tenant on the unit, the PM and Maintenance; room-specific requests are visible only to that room's tenant, the PM and Maintenance | Per-room privacy |
+| NR-3 | Amenities, Maintenance Categories, Payment Methods (and Property Types, **Maintenance Specializations**, Visit Purposes, Cities, States, Business Types) are sourced from **Master Data**; forms read the active list at selection time — never hardcoded | Single source of truth |
+| NR-4 | Master Data entries **in use on active records cannot be deactivated** until no longer referenced | Referential safety |
+| NR-5 | Every user belongs to **exactly one Organization**, except the Super Admin (platform-level). No other role — including Admin — reads/writes outside its own organization; enforced on every request | Tenant isolation |
+| NR-6 | Each Organization has **exactly one Subscription Plan** (Basic / Standard / Premium); the plan caps active users (and properties); Super Admin may change it any time and the new cap applies to subsequent additions | Subscription model |
+| NR-7 | During Admin impersonation, **every action is recorded against the Admin** — never the impersonated user; Admin cannot impersonate the Super Admin or anyone outside their organization | Accountability |
+| NR-8 | A delegated task runs under the **delegate** (PM / Maintenance) inside the Admin-defined date window; actions are recorded against the delegate; outside the window the delegate has no extra rights | Scoped delegation |
+
+> **Configurable constants (v8).** The numeric constants in **BL-11** (60-day rent-change notice), **BL-12** (5-day overdue grace) and **BL-13** (2% late-fee rate) are **org-configurable via Settings** (Module 11); the values shown are the platform defaults. The rule logic (notice required, overdue trigger, late-fee formula) is unchanged.
 
 ---
 
@@ -221,6 +313,11 @@ These rules **must be enforced by the backend**, not just the UI:
 | UC-10 | Tenant | Close a resolved maintenance request | Request `resolved` | Status → `closed`, no further action button |
 | UC-11 | Tenant | Try to reopen a closed request | Request `closed` | UI offers "Raise New Request" instead — original stays closed |
 | UC-12 | Co-tenant | Approve another co-tenant's termination | Pending termination exists | All approvals recorded; PM can now terminate |
+| UC-13 | Public | Register an organization | On the public sign-up page | Org created as `Pending`; appears in Super Admin's queue |
+| UC-14 | Super Admin | Approve or reject a pending org | Org is `Pending` | Approve → workspace provisioned + Admin credentials emailed; Reject → declined with reason, no workspace (NR-5/NR-6) |
+| UC-15 | Admin | Impersonate a PM to troubleshoot | Admin in own org | Acts as the PM; every action logged against the Admin (NR-7); cannot target Super Admin or other orgs |
+| UC-16 | Admin | Switch a property to per-room leasing | Property has no active lease | Mode set to room-based; locked while any active lease exists (NR-1) |
+| UC-17 | Admin | Deactivate a Master Data entry in use | Entry referenced by active records | Blocked with a reason on the control until references are retired (NR-4) |
 
 ---
 
@@ -244,7 +341,7 @@ These rules **must be enforced by the backend**, not just the UI:
 - Don't blank-flash on data load — use skeleton screens.
 
 ### Engineering — Do
-- Enforce **all 23 business rules at the API/DB level**, not just in the UI. The UI is the second line of defence.
+- Enforce **all hard rules (BL-01 → BL-23 + NR-1 → NR-8) at the API/DB level**, not just in the UI. The UI is the second line of defence.
 - Keep payments append-only — every recorded payment is immutable; corrections happen via reversing entries with a reason.
 - Treat `retired` and `closed` as terminal states. No code path should resurrect them.
 - Use property-local timezone (Asia/Kolkata) for display; store UTC.
@@ -252,17 +349,19 @@ These rules **must be enforced by the backend**, not just the UI:
 - Use semantic HTML (`<header>`, `<nav>`, `<main>`, `<table><caption>`) — required for screen readers and the WCAG AA target.
 
 ### Engineering — Don't
-- Don't allow tenants to write payments — even via API. **BL-10 is a hard rule.**
-- Don't add public sign-up. Accounts are admin/PM-created only.
+- Don't allow tenants to write payments — even via API. **BL-10 is a hard rule** (only PM + Admin record payments).
+- Public **Organization** sign-up **is** in scope (Super Admin approval gate, NR-5/NR-6). **Tenant self-signup is not** — tenant accounts auto-create at lease signing; PM/Maintenance are Admin-created.
 - Don't compound late fees retroactively. 2% × outstanding × full-weeks-overdue, evaluated per period.
 - Don't auto-approve co-tenant terminations after a timeout. **BL-09: no silent approvals.**
-- Don't introduce SMS/email/WhatsApp notifications — explicitly **out of scope** for v1.
-- Don't accept file uploads (lease scans, ID copies, damage photos) — **out of scope** for v1.
-- Don't expose cross-property data to a PM, even read-only. Single property scope is hard.
+- Don't introduce SMS/email/WhatsApp **business** notifications — out of scope (transactional auth emails like password reset are allowed).
+- Don't accept file uploads (lease scans, ID copies, damage photos) — out of scope.
+- Don't expose data outside a PM's **assigned properties**, and never across organizations. A PM may hold multiple properties, but only those assigned (NR-5).
 
 ---
 
-## 9. Out of Scope (v1)
+## 9. Out of Scope
+
+Still out of scope for the current engagement. (Features that *were* out in v1 but are now **in** scope — Super Admin / SAAS, public org sign-up, Subscription Plans, per-room leasing, Visitor Management, Master Data Administration, Settings, Admin Impersonation, Task Delegation — are covered in §2, §4 and §5.)
 
 | Feature | Reason |
 |---|---|
@@ -275,6 +374,8 @@ These rules **must be enforced by the backend**, not just the UI:
 | External vendor login (third-party plumbers/electricians) | Internal staff only |
 | Two-factor authentication (2FA / TOTP) | Deferred — single-factor (email + password) for v1 |
 | Multi-session management UI | No "sign out all other sessions", no session list, no last-sign-in display in profile. Server still issues short-lived access tokens + revocable refresh tokens; the UI is just simpler. |
+| Subscription **billing integration** | Plans exist and cap usage, but billing is **manual-invoice only** — no payment gateway, no automated invoicing. |
+| Custom domains + per-organization branding | All organizations share the GharSetu domain and brand; no per-org theming or vanity domains. |
 
 ---
 
@@ -314,7 +415,8 @@ The stack below is **fixed**. Any deviation requires explicit user approval.
 | Engine | **PostgreSQL 18** | Latest major; uses native JSONB, partial indexes, `GENERATED ALWAYS AS` for computed columns |
 | Migrations | **Prisma Migrate** | Append-only history, reviewed in PRs |
 | Time/locale | UTC timestamps in DB; `Asia/Kolkata` rendered at API/UI boundary |
-| Critical indexes | Partial unique on `leases(unit_id) WHERE status='active'` (BL-01); partial unique on `properties(active_pm_id)` (BL-19); index on `audit_log(actor_id, created_at)` |
+| **Multi-tenancy** | **Shared schema + `organization_id`** on every org-scoped table + **Postgres Row-Level Security** to enforce NR-5 isolation at the DB. Platform masters (cities / states / payment-methods / business-types) carry no `organization_id`. |
+| Critical indexes | Partial unique on `leases(unit_id) WHERE status='active'` (BL-01); a **`property_managers(property_id, pm_id)`** join for multi-property PM assignment (BL-19 amended — the single-PM partial-unique is removed); `organization_id` composite indexes on org-scoped tables; index on `audit_log(actor_id, created_at)` |
 | Append-only tables | `audit_log`, `payments` — no UPDATE/DELETE triggers |
 
 ### 10.4 Tooling & Ops (working defaults)
@@ -345,18 +447,25 @@ The stack below is **fixed**. Any deviation requires explicit user approval.
 | Listed Unit | Unit currently advertised for rent (no active lease) |
 | Period | One calendar month of rent for one lease |
 | Prepaid | Payment exceeding what's due — auto-applied to next period |
-| Retired | Soft-deleted unit; permanently inactive |
-| PM | Property Manager (Module 1, role 2) |
+| Retired | Soft-retired unit — accepts no new leases; reversible (BL-05) |
+| PM | Property Manager |
+| Organization | A tenant of the SAAS platform; the isolation boundary for all org-scoped data |
+| Super Admin | Platform-level role above all organizations (approves orgs, manages plans) |
+| Subscription Plan | Basic / Standard / Premium — caps an organization's active users + properties and toggles features |
+| Leasing mode | Whole-unit vs per-room leasing for a property; locks once an active lease exists (NR-1) |
+| Master Data | Admin/Super-Admin-managed reference lists that forms read from (NR-3) |
+| Impersonation | An Admin acting as a PM/Maintenance/Tenant in their org; actions logged against the Admin (NR-7) |
+| Delegation | A task an Admin grants a PM/Maintenance for a date window; actions logged against the delegate (NR-8) |
 
 ---
 
-## 11. API Contract Authority & Spec Reconciliation
+## 12. API Contract Authority & Spec Reconciliation
 
 The detailed REST API contract — entities, fields, endpoints, error codes, role-based access matrix — lives in **[v1/GharSetu_Model_API_Spec.md](v1/GharSetu_Model_API_Spec.md)** (markdown rendition of the canonical `.docx` in the same folder).
 
 That spec is the **authoritative source** for backend implementation: field types, endpoint paths, error codes, and the role-based access matrix.
 
-### 11.1 Spec ↔ SRS reconciliation (decided 10/05/2026)
+### 12.1 Spec ↔ SRS reconciliation (decided 10/05/2026)
 
 When the API spec and this SRS conflict, the resolutions below apply. The API spec markdown has been annotated with these decisions inline.
 
@@ -366,7 +475,7 @@ When the API spec and this SRS conflict, the resolutions below apply. The API sp
 | **Business rule numbering** | `BR-01 → BR-20` | This SRS keeps **`BL-01 → BL-23`** as primary identifiers (adds tenant-only close, IST display, DD/MM/YYYY). The `BR-NN` set is a strict subset and remains valid for backend implementation references. |
 | **Status flag duplication on units** | `status=RETIRED` AND `is_retired=true` | **Keep both.** `is_retired` enables the trivial partial-index query for retire checks. |
 
-### 11.2 Endpoints added by this reconciliation (gap fill)
+### 12.2 Endpoints added by this reconciliation (gap fill)
 
 The original spec did not list these, but the prototype already shows the UI. They are **in scope for v1**:
 
@@ -381,7 +490,7 @@ The original spec did not list these, but the prototype already shows the UI. Th
 
 Transactional auth emails (password reset link only) are in scope. **General business notifications (rent due, lease expiry, maintenance status changes) remain out of scope** per Section 9.
 
-### 11.3 Endpoints explicitly removed from the v1 plan
+### 12.3 Endpoints explicitly removed from the v1 plan
 
 The original plan included these; user has descoped them. **Do not implement for v1:**
 
@@ -392,14 +501,16 @@ The original plan included these; user has descoped them. **Do not implement for
 
 The server still issues short-lived access tokens + revocable refresh tokens for security, but there is no user-facing session-management UI.
 
-### 11.4 Conventions adopted from the API spec
+### 12.4 Conventions adopted from the API spec
 
 - **Currency: paise as `BIGINT`** (1 INR = 100 paise; ₹18,000 stored as `1800000`). No floating-point math.
 - **Error envelope:** `{ error: { code, message, details? } }` on every error response.
 - **Error codes:** use the named codes from API spec §5 verbatim (`LEASE_UNIT_OCCUPIED`, `DUPLICATE_ACTIVE_LEASE`, etc.).
 - **Pagination:** cursor-based, default 20 rows, `?cursor=` + `meta: { next_cursor, has_more }`.
 - **Rate limit:** 100 requests / minute per authenticated user → `429 RATE_LIMIT_EXCEEDED`.
-- **Role enum (uppercase):** `ADMIN | MANAGER | MAINTENANCE | TENANT`.
+- **Role enum (uppercase):** `ADMIN | MANAGER | MAINTENANCE | TENANT` (v1 spec). **v8 uses five wire-stable smallint roles:** `ADMIN=0 · PROPERTY_MANAGER=1 · MAINTENANCE=2 · TENANT=3 · SUPER_ADMIN=4` (`MANAGER` → `PROPERTY_MANAGER`). Never renumber; new states take the next free integer.
 - **Voided payments:** `is_voided = true` flag with `voided_by` + `void_reason`. Original record never deleted (append-only).
 - **Prepaid credits:** stored in a separate `prepaid_credits` table, not inline on `rent_periods`.
 - **Property timezone:** stored per-property (default `Asia/Kolkata`). Allows future expansion to other Indian cities.
+
+> **v8 API surface.** The v8 endpoint families — `organizations` (+ approve / reject / deactivate), `subscription-plans`, `master-data/*` (org + platform), `visitors`, `impersonation` sessions, and `delegations` — extend the v1 contract above. They live in the v8 API spec; the conventions here (error envelope, paise BIGINT, append-only audit, `organization_id` + RLS scoping) apply to them unchanged.

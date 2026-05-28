@@ -68,21 +68,44 @@
         <button type="button" class="filter-tile" data-tile-for="tbl-tenant-maintenance" data-tile-filter="closed" onclick="Paginator.setFilter('tbl-tenant-maintenance','closed',this)"><span class="filter-tile-count" data-pg-count>1</span><span class="filter-tile-label">Closed</span></button>
       </div>
 
-      <!-- Search -->
+      <!-- Filters: unit (searchable, shows property + unit) + priority + search -->
       <section class="card mb-6">
-        <label class="label" for="mSearch">Search</label>
-        <input id="mSearch" class="input" data-pg-search="tbl-tenant-maintenance" placeholder="Search by ticket or issue…" />
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="flt-unit">Unit</label>
+            <select id="flt-unit" class="input" data-searchable onchange="Paginator.setAttrFilter('tbl-tenant-maintenance','data-unit', this.value)">
+              <option value="">All units</option>
+              <option value="3A">Green Valley, Dwarka · Unit 3A</option>
+              <option value="7B">Green Valley, Dwarka · Unit 7B</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-priority">Priority</label>
+            <select id="flt-priority" class="input" onchange="Paginator.setAttrFilter('tbl-tenant-maintenance','data-priority', this.value)">
+              <option value="">All priorities</option>
+              <option value="emergency">Emergency</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="mSearch">Search</label>
+            <input id="mSearch" class="input" data-pg-search="tbl-tenant-maintenance" placeholder="Ticket or issue" />
+          </div>
+        </div>
       </section>
 
       <!-- Requests table -->
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-tenant-maintenance">
           <thead>
-            <tr><th>Ticket</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised by</th><th>Raised</th><th>Action</th></tr>
+            <tr><th class="w-12">#</th><th>Ticket</th><th>Property · Unit</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised by</th><th>Raised</th><th>Action</th></tr>
           </thead>
           <tbody>
-            <tr data-status="progress">
+            <tr data-status="progress" data-priority="emergency" data-unit="3A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs">#MR-3041</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>Water leakage in kitchen</td>
               <td><span class="badge badge-emergency">Emergency</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
@@ -90,8 +113,9 @@
               <td class="text-xs">05/05/2026 23:42</td>
               <td><a href="maintenance-detail.html?id=MR-3041" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="open">
+            <tr data-status="open" data-priority="high" data-unit="3A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs">#MR-3052</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>Bathroom ceiling paint peeling — water damage</td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-open">Open</span></td>
@@ -99,8 +123,9 @@
               <td class="text-xs">08/05/2026</td>
               <td><a href="maintenance-detail.html?id=MR-3052" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="resolved">
+            <tr data-status="resolved" data-priority="high" data-unit="3A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs">#MR-3019</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>AC not cooling</td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-resolved">Resolved</span></td>
@@ -108,8 +133,9 @@
               <td class="text-xs">10/04/2026</td>
               <td><a href="maintenance-detail.html?id=MR-3019" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="closed">
+            <tr data-status="closed" data-priority="medium" data-unit="7B"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs">#MR-2987</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 7B</div></td>
               <td>Door lock broken</td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-closed">Closed</span></td>
@@ -140,32 +166,42 @@
   <div class="modal-backdrop" id="newReqModal">
     <form class="modal" style="max-width:560px;" onsubmit="event.preventDefault(); document.getElementById('newReqModal').classList.remove('open');">
       <h3>Raise New Request</h3>
-      <p class="muted text-sm mt-1 mb-5">Tell us what's wrong. Your Property Manager will see it immediately.</p>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="label" for="cat">Category</label>
-          <select id="cat" class="input">
-            <option>Plumbing</option>
-            <option>Electrical</option>
-            <option>Carpentry</option>
-            <option>Appliance</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="label">Priority</label>
-          <select class="input">
-            <option>Low</option>
-            <option selected>Medium</option>
-            <option>High</option>
-            <option>Emergency</option>
-          </select>
+      <div class="mt-4">
+        <label class="label" for="req-unit">Unit</label>
+        <select id="req-unit" class="input" data-searchable>
+          <option value="3A">Green Valley, Dwarka · Unit 3A</option>
+          <option value="7B">Green Valley, Dwarka · Unit 7B</option>
+        </select>
+      </div>
+
+      <div class="mt-4">
+        <label class="label" for="cat">Category</label>
+        <select id="cat" class="input">
+          <option>Plumbing</option>
+          <option>Electrical</option>
+          <option>Carpentry</option>
+          <option>Appliance</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="mt-4">
+        <label class="label">Priority</label>
+        <div class="filter-tiles">
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> Low</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio" checked/> Medium</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> High</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> Emergency</label>
         </div>
       </div>
 
       <div class="mt-4">
-        <label class="label" for="desc">Describe the issue (min 30 characters)</label>
+        <label class="label" for="req-title">Title</label>
+        <input id="req-title" name="title" class="input" required placeholder="e.g. Water leakage in kitchen ceiling" />
+        <div class="field-error"></div>
+
+        <label class="label mt-4" for="desc">Description (min 30 characters)</label>
         <textarea id="desc" class="input" rows="4" required minlength="30" placeholder="e.g. The kitchen tap has been leaking since yesterday morning. Water is collecting on the floor." oninput="
           const v = this.value.length;
           const c = document.getElementById('counter');
@@ -175,8 +211,6 @@
         "></textarea>
         <div class="counter error" id="counter">0/30</div>
       </div>
-
-      <p class="text-xs muted mt-2">A clear description helps the maintenance team come prepared with the right tools.</p>
 
       <div class="flex justify-end gap-3 mt-6">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('newReqModal').classList.remove('open')">Cancel</button>
@@ -196,6 +230,7 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/impersonation.js"></script>
+  <script src="../assets/searchable-select.js"></script>
   <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
   <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="account-sheet-handle" aria-hidden="true"></div>

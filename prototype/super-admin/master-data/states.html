@@ -77,10 +77,10 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-state">
           <thead>
-            <tr><th>Name</th><th>Code</th><th>Used by (properties + cities)</th><th>Status</th><th>Actions</th></tr>
+            <tr><th class="w-12">#</th><th>Name</th><th>Code</th><th>Used by (properties + cities)</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr data-name="Delhi" data-status="active">
+            <tr data-name="Delhi" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Delhi</td>
               <td>DL</td>
               <td>9 properties · 1 city</td>
@@ -90,7 +90,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 9 properties + 1 city. Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Haryana" data-status="active">
+            <tr data-name="Haryana" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Haryana</td>
               <td>HR</td>
               <td>4 properties · 2 cities</td>
@@ -100,7 +100,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 4 properties + 2 cities. Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Uttar Pradesh" data-status="active">
+            <tr data-name="Uttar Pradesh" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Uttar Pradesh</td>
               <td>UP</td>
               <td>5 properties · 2 cities</td>
@@ -110,7 +110,7 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 5 properties + 2 cities. Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Maharashtra" data-status="active">
+            <tr data-name="Maharashtra" data-status="active"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Maharashtra</td>
               <td>MH</td>
               <td>0 properties · 0 cities</td>
@@ -120,7 +120,7 @@
                 <button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm('maharashtra','Maharashtra')">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Rajasthan" data-status="active" id="row-rajasthan">
+            <tr data-name="Rajasthan" data-status="active" id="row-rajasthan"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rajasthan</td>
               <td>RJ</td>
               <td>0 properties · 0 cities</td>

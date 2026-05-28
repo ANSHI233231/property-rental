@@ -166,3 +166,138 @@ Plan `2026-05-27-admin-leases-page.md`. NEW `admin/leases.html` (org-wide list +
 - `claude-progress.md` §2 (items 10–15) + `prototype-changes.md` (6 rows) updated.
 - `pnpm` gates N/A — prototype + docs only; `apps/*` untouched.
 - Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — Admin Users overhaul + Specializations master + serial-# column)
+
+**Admin Users page (`admin/users.html`):**
+- Merged the Edit-User and Reset-Password forms into one (single Save; password optional). Email field **disabled** (immutable). Phones **unmasked** (Admin scope). **Admin self-row removed**. **Scope** column removed → `# · Name · Role · Phone · Status · Actions`.
+- **Activate/Deactivate** per row with a confirmation modal (`openStatusToggle`/`confirmStatusToggle`/`closeStatusToggle`) — soft status, flips badge, hides Impersonate while inactive, toasts, refreshes paginator.
+- **Role-aware Edit/Reset** (`openEditUser`): tenant rows read **Reset** and open a password-only modal; PM/Maintenance get full edit. `(co-tenant)` label removed.
+- **Confirm-password** added to both Add-User (`saveAddUser`) and Edit/Reset (`saveEditUser`) with match validation. All below-input helper-caption sentences removed (per user rule).
+- **Status filter = dropdown next to Search** (replaced Active/Inactive tiles); role tiles remain.
+- Add-User **Specialization → multi-checkbox** rendered from `assets/specializations.js`.
+
+**Specializations master (org-level):**
+- NEW `assets/specializations.js` (`GHARSETU_SPECIALIZATIONS` 7 seed + `renderSpecializationCheckboxes`).
+- NEW `admin/master-data/specializations.html` (clone of amenities; 7 rows, 4 in-use disabled-deactivate tooltips, Painter deactivated) — built by the gharsetu-frontend sub-agent (which crashed mid-run; orchestrator finished the rollouts).
+- Landing **card** on `admin/master-data.html`; **sidebar + more-sheet sublink** (after Amenities) rolled out to all **19** admin surfaces.
+
+**`#` serial column (all roles):**
+- `assets/paginate.js`: stamps a running, pagination/filter-aware number into `[data-pg-serial]` cells; also added `Paginator.setAttrFilter()` (secondary dropdown filter, AND-combined, counts respect it).
+- `#` header + `data-pg-serial` first cell rolled out to **26** paginated listing tables across Admin/PM/Maintenance/Super Admin + masters. `super-admin/server-logs.html` JS row template updated to emit the serial cell.
+- `assets/styles.css`: + `.action-link.danger`.
+
+**Verification:** 66/66 HTML tag-balanced; `paginate.js` / `specializations.js` / `toast.js` / `validation.js` + users.html & server-logs inline JS all `node --check` clean. Per-page sublink parity (Amenities == Specializations) confirmed on all 19 admin pages.
+
+**Docs:** SRS §3 page map (+specializations), Module 1 (user edit/reset/activate + multi-specialization), Module 7 (Specializations master), NR-3 updated; `prototype-changes.md` +5 rows; 3 planning files added (users-page-overhaul, specializations-master, listing-serial-numbers).
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — PM Tenants → people directory + sidebar reorder)
+
+- **PM sidebar reorder:** **Leases now precedes Tenants** on all 13 PM pages (active states preserved; mobile tabbar/more-sheet left as the deliberate mobile subset).
+- **PM Tenants page rebuilt** (`pm/tenants.html`) as a lean Users-style people directory: `# · Tenant · Unit · Phone · Status`, **one row per person** (co-tenants expanded), Status = account Active/Inactive, Search + Status **dropdown** (`setAttrFilter`) + serial `#` + pagination. Removed "+ Add Tenant", the Sort control, and all lease/rent/deposit columns. 18 seed rows (16 active, 2 inactive former tenants).
+- **`pm/tenant-detail.html` deleted** (user: "not worth it") — directory has **no View/actions column**; 0 remaining `tenant-detail` references repo-wide.
+- **Docs:** SRS §3 PM page map updated (tenant-detail removed, Tenants reframed); `prototype-changes.md` +1 row; planning file `2026-05-27-pm-tenants-directory.md` written + marked shipped.
+- **Verify:** `pm/tenants.html` tag-balanced; header 5 `<th>` == 5 `<td>`/row; 18 serial cells; `setAttrFilter` wired; 0 Add-Tenant / 0 View links. All 13 PM pages tag-balanced after reorder.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — Maintenance listing rework: Admin + PM)
+
+Reworked `admin/maintenance.html` then cloned the design to `pm/maintenance.html` (PM = own properties, Admin = all):
+- **Tiles:** one row of **status** filter tiles — All · Open · In-Progress · Resolved · **Closed** (was 5 priority tiles + a redundant KPI grid; KPI grid removed → single tile row).
+- **Tenant column removed** (any role can raise → often blank). **Unit + Property merged** into one **"Property · Unit"** column (property name + unit beneath — the standing convention, saved to memory `property-unit-combined-cell`).
+- **One-row filter bar** (`md:grid-cols-5`): Property → Unit **cascade** (`setAttrFilter` on `data-property`/`data-unit`; Unit lists only units with ≥1 request) · **Priority** (`data-priority`) · **Assignee** (`data-assignee`, incl. Unassigned) · Search. Rows carry `data-status`/`data-priority`/`data-property`/`data-unit`/`data-assignee`.
+- **Row action = View only** (Reassign removed from admin; PM Reopen/Close removed) — those move to the detail page.
+- **"+ Raise Request"** now on **both** Admin and PM (Admin's modal also selects Property). Cross-property Reassign modal removed from admin.
+- Status data: open 5 · in-progress 4 · resolved 1 · closed 2 (12 rows, identical dataset both pages).
+
+**Verify:** both pages tag-balanced; header 9 `<th>` == 9 `<td>`/row × 12 rows; tiles = all/open/progress/resolved/closed; inline JS `node --check` clean; 65/65 HTML tag-balanced overall.
+
+**Docs:** SRS Module 4 updated (raise by Tenant/PM/Admin, Closed workflow, listing filters, Property·Unit column); `prototype-changes.md` maintenance row revised; memory `property-unit-combined-cell` added.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — Searchable Property/Unit dropdowns, rule #18)
+
+- **New CLAUDE.md rule #18:** any Property or Unit `<select>` must be a searchable combobox. Saved to memory `searchable-property-unit-dropdowns`.
+- **NEW `assets/searchable-select.js`** + `.gs-combobox*` CSS in `styles.css` — vanilla, accessible (combobox/listbox/option ARIA, ↑/↓/Enter/Esc), progressive enhancement of `<select data-searchable>`. Native select stays the value + validation source and re-dispatches `change` (filters/cascades unaffected). `SearchableSelect.refresh(id)` for dynamic/cascading lists; native-select focus forwards to the visible input (validation focus).
+- **Audit + rollout (17 selects / 9 pages):** create-lease (cl-property, cl-unit), leases (propertyFilter), maintenance-detail (ra-prop, ra-unit), admin maintenance (flt-prop, flt-unit, req-prop, req-unit), property-detail (cl-unit), rent (ap-lease — included per user), pm/leases (unit), pm maintenance (flt-prop, flt-unit, req-unit **+ new req-prop Property field on the raise modal**), pm rent-collection (unit-select). Maintenance cascade wired to `refresh('flt-unit')`.
+- Excluded (kept native): status/role/category/plan caps/property-type/per-page/expected-count selects.
+- Planning file `2026-05-27-searchable-property-unit-dropdowns.md` (full audit table + component design + TC-SDD-001..012), marked shipped.
+
+**Verify:** `searchable-select.js` `node --check` OK; 17 `data-searchable` across 9 pages; 2 cascade-refresh calls; 65/65 HTML tag-balanced.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — Maintenance-role All Requests aligned to Admin/PM)
+
+`maintenance/all-requests.html` brought in line with the Admin/PM maintenance design:
+- **Combined "Property · Unit" column** (was separate Unit + Property).
+- **Status filter tiles** (All · Assigned · In-Progress · Resolved · Closed) replace the old priority tiles; rows carry `data-status`.
+- **One-row filter bar:** Property → Unit **cascade** (searchable, rule #18) · **Priority** dropdown (`data-priority`) · Search. No Assignee filter (role is self-scoped — every request is the staff's own).
+- Sample dataset expanded 3 → **6** assigned requests so the status filter is meaningful (assigned 2 · in-progress 2 · resolved 1 · closed 1).
+- Loaded `searchable-select.js`; cascade calls `SearchableSelect.refresh('flt-unit')`.
+
+**Verify:** tag-balanced; header 7 `<th>` == 7 `<td>`/row × 6 rows; tiles all/assigned/progress/resolved/closed; 2 searchable selects; inline JS `node --check` clean; 65/65 HTML tag-balanced; 19 `data-searchable` prototype-wide.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — Tenant My-Maintenance aligned to Admin/PM)
+
+`tenant/maintenance.html`:
+- Kept status tiles (All · Open · In-Progress · Resolved · Closed); added the **combined "Property · Unit" column** (rows carry `data-unit` + `data-priority`).
+- Filter bar = **Unit only** (searchable, rule #18; options labelled **"Green Valley, Dwarka · Unit 3A"** etc.) + **Priority** + Search. **No Property filter** (per user — a tenant has only a few units).
+- Raise-request modal gains a searchable **Unit** picker (property·unit labels); removed the two below-input modal caption sentences.
+- Loaded `searchable-select.js`. 2 searchable selects on the page.
+
+**Verify:** tag-balanced; header 9 `<th>` == 9 `<td>`/row × 4 rows; status tiles intact; unit filter present + property filter absent; 65/65 HTML tag-balanced; 21 `data-searchable` prototype-wide.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Continuation (2026-05-27, late — edit-form specializations + priority-input consistency)
+
+- **Edit User form (`admin/users.html`):** added the **Specializations multi-checkbox** to the role-aware edit modal — shown only for Maintenance users (`#editSpecRow`/`#editSpecCheckboxes`), rendered from `specializations.js`, pre-checking the user's current trade(s) parsed from the row (e.g. "(Plumber)" → plumber). Hidden for PM/Tenant.
+- **Priority input consistency:** the maintenance **Raise Request** modal used a radio list on Admin/PM but a `<select>` on Tenant. Standardised to the **radio list on all roles** (`tenant/maintenance.html` priority dropdown → radios). All 3 raise modals now identical (Low/Medium/High/Emergency radios, Medium default).
+
+**Verify:** `admin/users.html` + `tenant/maintenance.html` tag-balanced; inline JS `node --check` clean; 3/3 raise modals use radio priority; 65/65 HTML tag-balanced.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Session close (2026-05-28)
+
+### Late additions (same session, continued into 2026-05-28)
+
+**Visitor lifecycle — complete overhaul:**
+- `admin/visitors.html` **NEW** — org-wide visitor page (all 6 status tiles, Property→Unit cascade filters, 11 rows across 4 properties, full Approve/Deny/Check-in/Check-out actions).
+- `pm/visitors.html` **fixed** — Property·Unit combined cell, Denied tile, `data-visitor-code` on each row, check-in modal now validates the VIS-XXXX code the visitor presents (PM types it; wrong code = error), fixed off-by-1 JS cell-index bugs, footer caption removed, pending-approvals alert removed.
+- **Visitors added to all 21 admin sidebar + more-sheet nav surfaces** (after Maintenance, before Rent).
+- Visitor code design decision: code is NOT shown to PM/Admin — it is a **gate validation token** (visitor shows it, PM enters it at check-in to confirm identity).
+
+**Other fixes same session:**
+- `searchable-select.js` — native `<select>` moved inside the wrapper (was a sibling → wrong positioned ancestor causing page horizontal scroll on all pages with searchable dropdowns); CSS override with `\!important` to beat `select.input` specificity.
+- `admin/maintenance.html` + `pm/maintenance.html` raise-request: `req-prop` / `req-unit` blank-first placeholder + `required`; `req-unit` starts disabled and cascades from `req-prop` via new `REQ_UNITS` map + `onReqPropChange`.
+- Title field added before Description on all 3 raise-request modals (Admin, PM, Tenant).
+- `tenant/maintenance.html` — Priority radio list (was a `<select>`); aligned with Admin/PM pattern.
+
+**Verify:** 66/66 HTML tag-balanced; all inline JS `node --check` clean.
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched.
+Commit/push pending explicit user authorization (Working rule §1).

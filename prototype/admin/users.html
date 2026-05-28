@@ -22,6 +22,7 @@
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
         <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-section collapsed">
@@ -32,6 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -82,11 +84,6 @@
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">All</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-users" data-tile-filter="admin"
-                  onclick="Paginator.setFilter('tbl-users','admin',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Admins</span>
-          </button>
           <button type="button" class="filter-tile" data-tile-for="tbl-users" data-tile-filter="property-manager"
                   onclick="Paginator.setFilter('tbl-users','property-manager',this)">
             <span class="filter-tile-count" data-pg-count></span>
@@ -105,12 +102,21 @@
         </div>
       </section>
 
-      <!-- Search -->
+      <!-- Search + status filter -->
       <section class="card mb-6">
         <div class="grid md:grid-cols-2 gap-4">
           <div>
             <label class="label" for="user-search">Search</label>
-            <input id="user-search" class="input" placeholder="Name, phone, scope" data-pg-search="tbl-users" />
+            <input id="user-search" class="input" placeholder="Name or phone" data-pg-search="tbl-users" />
+          </div>
+          <div>
+            <label class="label" for="user-status-filter">Status</label>
+            <select id="user-status-filter" class="input"
+                    onchange="Paginator.setAttrFilter('tbl-users','data-status', this.value)">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
           </div>
         </div>
       </section>
@@ -120,479 +126,525 @@
         <table class="data-table" id="tbl-users">
           <thead>
             <tr>
-              <th>Name</th><th>Role</th><th>Scope</th><th>Phone</th><th>Status</th><th></th>
+              <th class="w-12">#</th><th>Name</th><th>Role</th><th>Phone</th><th>Status</th><th></th>
             </tr>
           </thead>
           <tbody>
-            <!-- Admin row (own user) — Edit only. No Impersonate per NR-7: own row + Admin cannot impersonate Admin. -->
-            <tr data-role="admin">
-              <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
-              <td>Admin</td>
-              <td class="muted">All properties</td>
-              <td>98xxxxxx12</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td><a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a></td>
-            </tr>
+            <!-- Admin's own account is managed from My Profile, not listed here (no new Admins are added on this page). -->
             <!-- PM rows — Edit + Impersonate (NR-7: PM is impersonable by Admin) -->
-            <tr data-role="property-manager">
+            <tr data-role="property-manager" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
               <td>Property Manager</td>
-              <td class="muted">Green Valley, Dwarka</td>
-              <td>98xxxxxx34</td>
+              <td>9876543234</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Sunita Arora"
                    data-target-role="Property Manager"
                    data-target-scope="Green Valley, Dwarka"
                    data-target-dashboard="../pm/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="property-manager">
+            <tr data-role="property-manager" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
               <td>Property Manager</td>
-              <td class="muted">Sai Heights, Lajpat Nagar</td>
-              <td>98xxxxxx56</td>
+              <td>9876543256</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Manoj Verma"
                    data-target-role="Property Manager"
                    data-target-scope="Sai Heights, Lajpat Nagar"
                    data-target-dashboard="../pm/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="property-manager">
+            <tr data-role="property-manager" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Pooja Khanna</td>
               <td>Property Manager</td>
-              <td class="muted">Mayur Vihar Residency</td>
-              <td>98xxxxxx67</td>
+              <td>9876543267</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Pooja Khanna"
                    data-target-role="Property Manager"
                    data-target-scope="Mayur Vihar Residency"
                    data-target-dashboard="../pm/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="property-manager">
+            <tr data-role="property-manager" data-status="inactive">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Anil Kapoor</td>
               <td>Property Manager</td>
-              <td class="muted">Rohini Greens</td>
-              <td>98xxxxxx89</td>
-              <td><span class="badge badge-active">Active</span></td>
+              <td>9876543289</td>
+              <td><span class="badge badge-closed">Inactive</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true" style="display:none">&middot;</span>
+                <a href="#" class="action-link imper-link" style="display:none"
                    data-target-name="Anil Kapoor"
                    data-target-role="Property Manager"
                    data-target-scope="Rohini Greens"
                    data-target-dashboard="../pm/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link">Activate</a>
               </td>
             </tr>
             <!-- Maintenance rows — Edit + Impersonate -->
-            <tr data-role="maintenance">
+            <tr data-role="maintenance" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Raju Kumar <span class="muted text-xs">(Plumber)</span></td>
               <td>Maintenance</td>
-              <td class="muted">Read + Update only</td>
-              <td>98xxxxxx78</td>
+              <td>9876543278</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Raju Kumar"
                    data-target-role="Maintenance"
                    data-target-scope="Green Valley"
                    data-target-dashboard="../maintenance/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="maintenance">
+            <tr data-role="maintenance" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Anil Bhardwaj <span class="muted text-xs">(Electrician)</span></td>
               <td>Maintenance</td>
-              <td class="muted">Read + Update only</td>
-              <td>98xxxxxx79</td>
+              <td>9876543279</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Anil Bhardwaj"
                    data-target-role="Maintenance"
                    data-target-scope="Green Valley"
                    data-target-dashboard="../maintenance/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="maintenance">
+            <tr data-role="maintenance" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Deepak Sharma <span class="muted text-xs">(Carpenter)</span></td>
               <td>Maintenance</td>
-              <td class="muted">Read + Update only</td>
-              <td>98xxxxxx80</td>
+              <td>9876543280</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Deepak Sharma"
                    data-target-role="Maintenance"
                    data-target-scope="Sai Heights"
                    data-target-dashboard="../maintenance/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="maintenance">
+            <tr data-role="maintenance" data-status="inactive">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Ramesh Yadav <span class="muted text-xs">(HVAC)</span></td>
               <td>Maintenance</td>
-              <td class="muted">Read + Update only</td>
-              <td>98xxxxxx81</td>
-              <td><span class="badge badge-active">Active</span></td>
+              <td>9876543281</td>
+              <td><span class="badge badge-closed">Inactive</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true" style="display:none">&middot;</span>
+                <a href="#" class="action-link imper-link" style="display:none"
                    data-target-name="Ramesh Yadav"
                    data-target-role="Maintenance"
                    data-target-scope="Mayur Vihar"
                    data-target-dashboard="../maintenance/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link">Activate</a>
               </td>
             </tr>
             <!-- Tenant rows — Edit + Impersonate -->
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Raj Sharma</td>
               <td>Tenant</td>
-              <td class="muted">Unit 3A, Green Valley</td>
-              <td>98xxxxxx90</td>
+              <td>9876543290</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Raj Sharma"
                    data-target-role="Tenant"
                    data-target-scope="Unit 3A, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
-              <td class="font-poppins font-semibold text-charcoal">Priya Sharma <span class="muted text-xs">(co-tenant)</span></td>
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Priya Sharma</td>
               <td>Tenant</td>
-              <td class="muted">Unit 3A, Green Valley</td>
-              <td>98xxxxxx91</td>
+              <td>9876543291</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Priya Sharma"
                    data-target-role="Tenant"
                    data-target-scope="Unit 3A, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td>
               <td>Tenant</td>
-              <td class="muted">Unit 2B, Green Valley</td>
-              <td>98xxxxxx92</td>
+              <td>9876543292</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Vikram Mehta"
                    data-target-role="Tenant"
                    data-target-scope="Unit 2B, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Anjali Verma</td>
               <td>Tenant</td>
-              <td class="muted">Unit 4B, Sai Heights</td>
-              <td>98xxxxxx93</td>
+              <td>9876543293</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Anjali Verma"
                    data-target-role="Tenant"
                    data-target-scope="Unit 4B, Sai Heights"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="inactive">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
               <td>Tenant</td>
-              <td class="muted">Unit 7C, Green Valley</td>
-              <td>98xxxxxx94</td>
-              <td><span class="badge badge-active">Active</span></td>
+              <td>9876543294</td>
+              <td><span class="badge badge-closed">Inactive</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true" style="display:none">&middot;</span>
+                <a href="#" class="action-link imper-link" style="display:none"
                    data-target-name="Rohan Mehta"
                    data-target-role="Tenant"
                    data-target-scope="Unit 7C, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link">Activate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Priya Patel</td>
               <td>Tenant</td>
-              <td class="muted">Unit 2A, Green Valley</td>
-              <td>98xxxxxx95</td>
+              <td>9876543295</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Priya Patel"
                    data-target-role="Tenant"
                    data-target-scope="Unit 2A, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td>
               <td>Tenant</td>
-              <td class="muted">Unit 1A, Sai Heights</td>
-              <td>98xxxxxx96</td>
+              <td>9876543296</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Suresh Kumar"
                    data-target-role="Tenant"
                    data-target-scope="Unit 1A, Sai Heights"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Meena Gupta</td>
               <td>Tenant</td>
-              <td class="muted">Unit 3B, Sai Heights</td>
-              <td>98xxxxxx97</td>
+              <td>9876543297</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Meena Gupta"
                    data-target-role="Tenant"
                    data-target-scope="Unit 3B, Sai Heights"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Akash Joshi</td>
               <td>Tenant</td>
-              <td class="muted">Unit 4A, Mayur Vihar</td>
-              <td>98xxxxxx98</td>
+              <td>9876543298</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Akash Joshi"
                    data-target-role="Tenant"
                    data-target-scope="Unit 4A, Mayur Vihar"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Kavita Singh</td>
               <td>Tenant</td>
-              <td class="muted">Unit 5C, Mayur Vihar</td>
-              <td>98xxxxxx99</td>
+              <td>9876543299</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Kavita Singh"
                    data-target-role="Tenant"
                    data-target-scope="Unit 5C, Mayur Vihar"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Aman Khan</td>
               <td>Tenant</td>
-              <td class="muted">Unit 1C, Rohini Greens</td>
-              <td>98xxxxxx00</td>
+              <td>9876543200</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Aman Khan"
                    data-target-role="Tenant"
                    data-target-scope="Unit 1C, Rohini Greens"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Divya Nair</td>
               <td>Tenant</td>
-              <td class="muted">Unit 2D, Rohini Greens</td>
-              <td>98xxxxxx01</td>
+              <td>9876543201</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Divya Nair"
                    data-target-role="Tenant"
                    data-target-scope="Unit 2D, Rohini Greens"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td>
               <td>Tenant</td>
-              <td class="muted">Unit 5B, Mayur Vihar</td>
-              <td>98xxxxxx02</td>
+              <td>9876543202</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Vikram Singh"
                    data-target-role="Tenant"
                    data-target-scope="Unit 5B, Mayur Vihar"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Sanjay Rawat</td>
               <td>Tenant</td>
-              <td class="muted">Unit 6A, Green Valley</td>
-              <td>98xxxxxx03</td>
+              <td>9876543203</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Sanjay Rawat"
                    data-target-role="Tenant"
                    data-target-scope="Unit 6A, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Neha Jain</td>
               <td>Tenant</td>
-              <td class="muted">Unit 8B, Sai Heights</td>
-              <td>98xxxxxx04</td>
+              <td>9876543204</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Neha Jain"
                    data-target-role="Tenant"
                    data-target-scope="Unit 8B, Sai Heights"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rahul Tiwari</td>
               <td>Tenant</td>
-              <td class="muted">Unit 9A, Mayur Vihar</td>
-              <td>98xxxxxx05</td>
+              <td>9876543205</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Rahul Tiwari"
                    data-target-role="Tenant"
                    data-target-scope="Unit 9A, Mayur Vihar"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Chauhan</td>
               <td>Tenant</td>
-              <td class="muted">Unit 3C, Rohini Greens</td>
-              <td>98xxxxxx06</td>
+              <td>9876543206</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Sunita Chauhan"
                    data-target-role="Tenant"
                    data-target-scope="Unit 3C, Rohini Greens"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Mohan Das</td>
               <td>Tenant</td>
-              <td class="muted">Unit 10B, Green Valley</td>
-              <td>98xxxxxx07</td>
+              <td>9876543207</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Mohan Das"
                    data-target-role="Tenant"
                    data-target-scope="Unit 10B, Green Valley"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
-            <tr data-role="tenant">
+            <tr data-role="tenant" data-status="active">
+              <td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Pooja Bhatia</td>
               <td>Tenant</td>
-              <td class="muted">Unit 11C, Sai Heights</td>
-              <td>98xxxxxx08</td>
+              <td>9876543208</td>
               <td><span class="badge badge-active">Active</span></td>
               <td>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('editUserModal').classList.add('open')" class="action-link">Edit</a>
-                <span class="action-link-sep" aria-hidden="true">&middot;</span>
-                <a href="#" class="action-link"
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Reset</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
                    data-target-name="Pooja Bhatia"
                    data-target-role="Tenant"
                    data-target-scope="Unit 11C, Sai Heights"
                    data-target-dashboard="../tenant/dashboard.html"
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
           </tbody>
@@ -614,8 +666,6 @@
           </div>
         </div>
       </section>
-
-      <p class="text-sm muted mt-4">No public sign-up. Tenants are auto-created at lease signing. Co-tenants get individual logins linked to the same lease.</p>
     </main>
   </div>
 
@@ -623,9 +673,8 @@
   <div class="modal-backdrop" id="addUserModal">
     <div class="modal">
       <h3>Add New User</h3>
-      <p class="muted text-sm mt-1 mb-5">Add a Property Manager or Maintenance Team member. Admins are created during organization sign-up; tenants are auto-created at lease signing.</p>
 
-      <form id="addUserForm" novalidate>
+      <form id="addUserForm" novalidate onsubmit="return saveAddUser()">
         <label class="label" for="role">Role</label>
         <select id="role" name="role" class="input" onchange="document.getElementById('specRow').style.display = this.value === 'MAINTENANCE' ? 'block' : 'none'">
           <option value="PROPERTY_MANAGER" selected>Property Manager</option>
@@ -658,24 +707,22 @@
           </div>
         </div>
 
-        <div class="mt-4">
-          <label class="label" for="password">Initial password</label>
-          <input id="password" name="password" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters, with a letter and a digit" />
-          <div class="field-error"></div>
-          <p class="text-xs muted mt-1">Share this password with the new user privately. They can change it after first login.</p>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="label" for="password">Initial password</label>
+            <input id="password" name="password" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters" />
+            <div class="field-error"></div>
+          </div>
+          <div>
+            <label class="label" for="confirmInitialPassword">Confirm password</label>
+            <input id="confirmInitialPassword" name="confirmInitialPassword" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="Re-enter the password" />
+            <div class="field-error"></div>
+          </div>
         </div>
 
         <div class="mt-4" id="specRow" style="display:none">
-          <label class="label" for="specialization">Specialization</label>
-          <select id="specialization" name="specialization" class="input">
-            <option value="" disabled selected>Select a specialization</option>
-            <option value="Plumber">Plumber</option>
-            <option value="Electrician">Electrician</option>
-            <option value="Carpenter">Carpenter</option>
-            <option value="HVAC">HVAC</option>
-            <option value="Cleaner">Cleaner</option>
-            <option value="General">General</option>
-          </select>
+          <label class="label">Specializations <span class="muted font-normal">(select one or more)</span></label>
+          <div id="specCheckboxes" class="grid grid-cols-2 gap-2 mt-1"></div>
           <div class="field-error"></div>
         </div>
 
@@ -687,34 +734,52 @@
     </div>
   </div>
 
-  <!-- Edit User Modal -->
+  <!-- Edit / Reset User Modal (role-aware — tenants see password-only) -->
   <div class="modal-backdrop" id="editUserModal">
     <div class="modal">
-      <h3>Edit — Sunita Arora</h3>
+      <h3 id="editModalTitle">Edit — Sunita Arora</h3>
 
-      <form id="editUserForm" novalidate class="mt-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="label" for="editFirstName">First name</label>
-            <input id="editFirstName" name="firstName" class="input" required value="Sunita" />
+      <form id="editUserForm" novalidate class="mt-4" onsubmit="return saveEditUser()">
+        <div id="editProfileFields">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label" for="editFirstName">First name</label>
+              <input id="editFirstName" name="firstName" class="input" required value="Sunita" />
+              <div class="field-error"></div>
+            </div>
+            <div>
+              <label class="label" for="editLastName">Last name</label>
+              <input id="editLastName" name="lastName" class="input" required value="Arora" />
+              <div class="field-error"></div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="label" for="editPhone">Phone</label>
+            <input id="editPhone" name="phone" class="input" required pattern="[0-9]{10}" maxlength="10" value="9876543234" />
             <div class="field-error"></div>
           </div>
-          <div>
-            <label class="label" for="editLastName">Last name</label>
-            <input id="editLastName" name="lastName" class="input" required value="Arora" />
-            <div class="field-error"></div>
+
+          <div class="mt-4">
+            <label class="label" for="editEmail">Email</label>
+            <input id="editEmail" name="email" type="email" class="input" value="sunita@gharsetu.in" autocomplete="email" disabled />
           </div>
+
+          <div class="mt-4" id="editSpecRow" style="display:none">
+            <label class="label">Specializations <span class="muted font-normal">(select one or more)</span></label>
+            <div id="editSpecCheckboxes" class="grid grid-cols-2 gap-2 mt-1"></div>
+          </div>
+
+          <hr class="my-5 border-mid-gray" />
         </div>
 
-        <div class="mt-4">
-          <label class="label" for="editPhone">Phone</label>
-          <input id="editPhone" name="phone" class="input" required pattern="[0-9]{10}" maxlength="10" value="9876543434" />
-          <div class="field-error"></div>
-        </div>
+        <label class="label" for="newPassword">Reset password <span class="muted font-normal" id="newPasswordOptional">(optional)</span></label>
+        <input id="newPassword" name="newPassword" type="password" class="input" minlength="10" autocomplete="new-password" placeholder="At least 10 characters" />
+        <div class="field-error"></div>
 
         <div class="mt-4">
-          <label class="label" for="editEmail">Email</label>
-          <input id="editEmail" name="email" type="email" class="input" required value="sunita@gharsetu.in" autocomplete="email" />
+          <label class="label" for="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" class="input" minlength="10" autocomplete="new-password" placeholder="Re-enter the new password" />
           <div class="field-error"></div>
         </div>
 
@@ -723,21 +788,18 @@
           <button type="submit" class="btn btn-primary">Save changes</button>
         </div>
       </form>
+    </div>
+  </div>
 
-      <hr class="my-6 border-mid-gray" />
-
-      <form id="resetPasswordForm" novalidate>
-        <h4 class="font-poppins font-semibold text-charcoal text-sm">Reset Password</h4>
-        <p class="text-xs muted mt-1 mb-3">Sets a new password for this user. They can log in with it immediately. Share it with them privately — no email is sent.</p>
-
-        <label class="label" for="newPassword">New password</label>
-        <input id="newPassword" name="newPassword" type="password" class="input" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters, with a letter and a digit" />
-        <div class="field-error"></div>
-
-        <div class="flex justify-end mt-4">
-          <button type="submit" class="btn btn-secondary !py-2 !text-sm">Reset Password</button>
-        </div>
-      </form>
+  <!-- Activate / Deactivate confirmation (populated by openStatusToggle()) -->
+  <div class="modal-backdrop" id="statusToggleModal" role="dialog" aria-modal="true" aria-labelledby="statusToggleTitle">
+    <div class="modal">
+      <h3 id="statusToggleTitle">Deactivate user?</h3>
+      <p class="muted text-sm" id="statusToggleBody" style="margin-top:8px;margin-bottom:20px">—</p>
+      <div style="display:flex;justify-content:flex-end;gap:12px">
+        <button type="button" class="btn btn-secondary" onclick="closeStatusToggle()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="statusToggleConfirmBtn" onclick="confirmStatusToggle()">Deactivate</button>
+      </div>
     </div>
   </div>
 
@@ -771,7 +833,13 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/specializations.js"></script>
   <script>
+    // Populate the Add-User "Specializations" checkbox list from the org master.
+    if (typeof renderSpecializationCheckboxes === 'function') {
+      renderSpecializationCheckboxes('specCheckboxes');
+    }
+
     // Start-session flow — reads data-* attrs from the clicked Impersonate link,
     // populates the confirmation modal, stores the target for confirmStartImpersonation().
     var _impersTarget = null;
@@ -819,6 +887,166 @@
       window.location.assign(_impersTarget.dashboard);
     }
 
+    // ----- Edit / Reset User (role-aware) -----
+    // PM & Maintenance get the full profile form + optional password reset.
+    // Tenants are auto-created at lease signing — their profile isn't editable here,
+    // so the modal collapses to a password-reset only (row action reads "Reset").
+    function openEditUser(el) {
+      var tr   = el.closest('tr');
+      var role = tr.getAttribute('data-role');
+      var nameCell = tr.querySelector('td.font-poppins');
+      var fullName = nameCell ? nameCell.textContent.replace(/\s*\([^)]*\)\s*/g, ' ').trim() : '';
+      var parts = fullName.split(/\s+/);
+      var isTenant = role === 'tenant';
+
+      document.getElementById('editFirstName').value = parts[0] || '';
+      document.getElementById('editLastName').value  = parts.slice(1).join(' ') || '';
+      // Columns after Scope removal: [#, Name, Role, Phone, Status, Actions] → phone is cells[3]
+      var phoneCell = tr.cells[3];
+      document.getElementById('editPhone').value = phoneCell ? phoneCell.textContent.trim() : '';
+
+      var pwInput = document.getElementById('newPassword');
+      var pwConfirm = document.getElementById('confirmPassword');
+      pwInput.value = '';
+      pwConfirm.value = '';
+      if (isTenant) {
+        document.getElementById('editModalTitle').textContent = 'Reset password — ' + fullName;
+        document.getElementById('editProfileFields').style.display = 'none';
+        document.getElementById('newPasswordOptional').style.display = 'none';
+        pwInput.setAttribute('required', '');
+        pwConfirm.setAttribute('required', '');
+      } else {
+        document.getElementById('editModalTitle').textContent = 'Edit — ' + fullName;
+        document.getElementById('editProfileFields').style.display = '';
+        document.getElementById('newPasswordOptional').style.display = '';
+        pwInput.removeAttribute('required');
+        pwConfirm.removeAttribute('required');
+      }
+
+      // Specializations — only for Maintenance users; pre-check their current trade(s).
+      var specRow = document.getElementById('editSpecRow');
+      if (role === 'maintenance') {
+        var current = [];
+        var specSpan = nameCell ? nameCell.querySelector('.muted') : null;
+        if (specSpan) {
+          specSpan.textContent.replace(/[()]/g, '').split(',').forEach(function (s) {
+            var id = s.trim().toLowerCase();
+            if (id) current.push(id);
+          });
+        }
+        if (typeof renderSpecializationCheckboxes === 'function') {
+          renderSpecializationCheckboxes('editSpecCheckboxes', current);
+        }
+        specRow.style.display = '';
+      } else {
+        specRow.style.display = 'none';
+      }
+
+      document.getElementById('editUserModal').classList.add('open');
+    }
+
+    function saveEditUser() {
+      // Password-match check (runs after native field validity passes).
+      var pw = document.getElementById('newPassword');
+      var cf = document.getElementById('confirmPassword');
+      var err = cf.nextElementSibling; // the .field-error div
+      if ((pw.value || cf.value) && pw.value !== cf.value) {
+        if (err) { err.textContent = 'Passwords do not match.'; err.classList.add('show'); }
+        cf.classList.add('error'); cf.setAttribute('aria-invalid', 'true');
+        cf.focus();
+        return false;
+      }
+      if (err) { err.textContent = ''; err.classList.remove('show'); }
+      cf.classList.remove('error'); cf.removeAttribute('aria-invalid');
+
+      document.getElementById('editUserModal').classList.remove('open');
+      var name = (document.getElementById('editFirstName').value + ' ' +
+                  document.getElementById('editLastName').value).trim();
+      if (typeof gsToast === 'function') gsToast(name + '’s details have been saved.', 'success');
+      return false; // prototype: no navigation
+    }
+
+    function saveAddUser() {
+      var pw = document.getElementById('password');
+      var cf = document.getElementById('confirmInitialPassword');
+      var err = cf.nextElementSibling; // the .field-error div
+      if (pw.value !== cf.value) {
+        if (err) { err.textContent = 'Passwords do not match.'; err.classList.add('show'); }
+        cf.classList.add('error'); cf.setAttribute('aria-invalid', 'true');
+        cf.focus();
+        return false;
+      }
+      if (err) { err.textContent = ''; err.classList.remove('show'); }
+      cf.classList.remove('error'); cf.removeAttribute('aria-invalid');
+
+      document.getElementById('addUserModal').classList.remove('open');
+      var name = (document.getElementById('firstName').value + ' ' +
+                  document.getElementById('lastName').value).trim();
+      if (typeof gsToast === 'function') gsToast(name + '’s account has been created.', 'success');
+      return false; // prototype: no navigation
+    }
+
+    // ----- Activate / Deactivate -----
+    var _statusTarget = null;
+    function openStatusToggle(el) {
+      var tr = el.closest('tr');
+      var nameCell = tr.querySelector('td.font-poppins');
+      var name = nameCell ? nameCell.textContent.replace(/\s*\([^)]*\)\s*/g, ' ').trim() : 'this user';
+      var deactivating = el.textContent.trim() === 'Deactivate';
+      _statusTarget = { tr: tr, deactivating: deactivating, name: name };
+
+      document.getElementById('statusToggleTitle').textContent =
+        (deactivating ? 'Deactivate' : 'Reactivate') + ' user?';
+      document.getElementById('statusToggleBody').innerHTML = deactivating
+        ? 'Deactivate <strong>' + name + '</strong>? They will be signed out and won’t be able to log in until reactivated. Their records and history are kept.'
+        : 'Reactivate <strong>' + name + '</strong>? They will be able to log in again with their existing password.';
+      var btn = document.getElementById('statusToggleConfirmBtn');
+      btn.textContent = deactivating ? 'Deactivate' : 'Reactivate';
+      btn.className = 'btn ' + (deactivating ? 'btn-danger' : 'btn-primary');
+
+      var modal = document.getElementById('statusToggleModal');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function () { modal.querySelector('.btn-secondary').focus(); }, 50);
+    }
+
+    function closeStatusToggle() {
+      document.getElementById('statusToggleModal').classList.remove('open');
+      document.body.style.overflow = '';
+      _statusTarget = null;
+    }
+
+    function confirmStatusToggle() {
+      var t = _statusTarget;
+      if (!t) return;
+      var tr = t.tr;
+      var badge   = tr.cells[4].querySelector('.badge');
+      var action  = tr.querySelector('a[onclick*="openStatusToggle"]');
+      var imper   = tr.querySelector('.imper-link');
+      var imperSep = tr.querySelector('.imper-sep');
+      if (t.deactivating) {
+        tr.setAttribute('data-status', 'inactive');
+        badge.className = 'badge badge-closed'; badge.textContent = 'Inactive';
+        action.textContent = 'Activate'; action.classList.remove('danger');
+        if (imper)    imper.style.display = 'none';
+        if (imperSep) imperSep.style.display = 'none';
+      } else {
+        tr.setAttribute('data-status', 'active');
+        badge.className = 'badge badge-active'; badge.textContent = 'Active';
+        action.textContent = 'Deactivate'; action.classList.add('danger');
+        if (imper)    imper.style.display = '';
+        if (imperSep) imperSep.style.display = '';
+      }
+      if (typeof gsToast === 'function')
+        gsToast(t.name + (t.deactivating ? ' has been deactivated.' : ' has been reactivated.'), 'success');
+      closeStatusToggle();
+      if (window.Paginator) Paginator.refresh('tbl-users');
+    }
+
+    document.getElementById('statusToggleModal').addEventListener('click', function (e) {
+      if (e.target === this) closeStatusToggle();
+    });
+
     // Close on backdrop click
     document.getElementById('startImpersonationModal').addEventListener('click', function (e) {
       if (e.target === this) closeStartImpersonation();
@@ -830,6 +1058,8 @@
       if (e.key === 'Escape') {
         var m = document.getElementById('startImpersonationModal');
         if (m && m.classList.contains('open')) closeStartImpersonation();
+        var s = document.getElementById('statusToggleModal');
+        if (s && s.classList.contains('open')) closeStatusToggle();
       }
     });
   </script>
@@ -841,10 +1071,12 @@
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

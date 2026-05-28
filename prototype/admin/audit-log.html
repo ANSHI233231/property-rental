@@ -22,6 +22,7 @@
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
         <a href="audit-log.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-section collapsed">
@@ -32,6 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -125,7 +127,7 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-audit">
           <thead>
-            <tr>
+            <tr><th class="w-12">#</th>
               <th>When (IST)</th>
               <th>Actor</th>
               <th>Role</th>
@@ -135,7 +137,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">14/05/2026 09:42</td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
               <td>PM</td>
@@ -143,7 +145,7 @@
               <td>Lease #L-2103 · Unit 1A · Green Valley</td>
               <td class="text-xs">₹18,000 → ₹19,500 effective 15/07/2026</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">14/05/2026 09:11</td>
               <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
               <td>Admin</td>
@@ -151,7 +153,7 @@
               <td>User #U-148 · Raju Kumar</td>
               <td class="text-xs">Password reset by Admin</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">14/05/2026 08:55</td>
               <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
               <td>Tenant</td>
@@ -159,7 +161,7 @@
               <td>User #U-204</td>
               <td class="text-xs">IP 49.207.x.x · Mobile Safari</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">13/05/2026 17:30</td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
               <td>PM</td>
@@ -167,7 +169,7 @@
               <td>Ticket #MR-2990 · Unit 3A</td>
               <td class="text-xs">Resolved → Closed</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">13/05/2026 11:02</td>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
               <td>PM</td>
@@ -175,7 +177,7 @@
               <td>Lease #L-2118 · Unit 4B · Sai Heights</td>
               <td class="text-xs">11-mo lease · Anjali Verma · ₹32,000</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">12/05/2026 21:14</td>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
               <td>PM</td>
@@ -183,7 +185,7 @@
               <td>Lease #L-2086 · Unit 6D</td>
               <td class="text-xs">₹54,000 refunded (full)</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">12/05/2026 16:00</td>
               <td class="font-poppins font-semibold text-charcoal">Priya Patel</td>
               <td>Tenant</td>
@@ -191,7 +193,7 @@
               <td>Lease #L-2095 · Unit 2A</td>
               <td class="text-xs">Consented to termination request</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">12/05/2026 09:00</td>
               <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
               <td>Admin</td>
@@ -199,7 +201,7 @@
               <td>Rohini Greens</td>
               <td class="text-xs">Anil Kapoor → Manoj Verma (interim)</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">11/05/2026 14:22</td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
               <td>PM</td>
@@ -207,7 +209,7 @@
               <td>Lease #L-2086 · Unit 6D</td>
               <td class="text-xs">Early termination · tenant relocating</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">11/05/2026 10:05</td>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
               <td>PM</td>
@@ -215,7 +217,7 @@
               <td>Lease #L-2091 · Unit 3B · Sai Heights</td>
               <td class="text-xs">₹26,000 applied from 01/05/2026</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">10/05/2026 18:40</td>
               <td class="font-poppins font-semibold text-charcoal">Pooja Khanna</td>
               <td>PM</td>
@@ -223,7 +225,7 @@
               <td>Lease #L-2120 · Unit 7A · Mayur Vihar</td>
               <td class="text-xs">12-mo lease · Rahul Tiwari · ₹35,000</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">10/05/2026 09:14</td>
               <td class="font-poppins font-semibold text-charcoal">Raju Kumar</td>
               <td>Maintenance</td>
@@ -231,7 +233,7 @@
               <td>Ticket #MR-3018 · Unit 2A</td>
               <td class="text-xs">In-Progress → Resolved</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">09/05/2026 22:11</td>
               <td class="font-poppins font-semibold text-charcoal">Raj Sharma</td>
               <td>Tenant</td>
@@ -239,7 +241,7 @@
               <td>User #U-188</td>
               <td class="text-xs">IP 182.64.x.x · Chrome on Android</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">09/05/2026 16:30</td>
               <td class="font-poppins font-semibold text-charcoal">Anil Kapoor</td>
               <td>PM</td>
@@ -247,7 +249,7 @@
               <td>Lease #L-2077 · Unit 1C · Rohini Greens</td>
               <td class="text-xs">₹15,500 → ₹17,000 effective 01/07/2026</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">09/05/2026 11:00</td>
               <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
               <td>Admin</td>
@@ -255,7 +257,7 @@
               <td>User #U-212 · Anjali Verma</td>
               <td class="text-xs">Password reset by Admin</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">08/05/2026 20:05</td>
               <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td>
               <td>Tenant</td>
@@ -263,7 +265,7 @@
               <td>Lease #L-2108 · Unit 5B</td>
               <td class="text-xs">Rejected termination request</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">08/05/2026 14:18</td>
               <td class="font-poppins font-semibold text-charcoal">Pooja Khanna</td>
               <td>PM</td>
@@ -271,7 +273,7 @@
               <td>Lease #L-2099 · Unit 9A</td>
               <td class="text-xs">₹70,000 refunded (full)</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">07/05/2026 09:00</td>
               <td class="font-poppins font-semibold text-charcoal">Sunita Arora</td>
               <td>PM</td>
@@ -279,7 +281,7 @@
               <td>User #U-112 · Sunita Arora</td>
               <td class="text-xs">Session ended</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">06/05/2026 11:30</td>
               <td class="font-poppins font-semibold text-charcoal">Manoj Verma</td>
               <td>PM</td>
@@ -287,7 +289,7 @@
               <td>Lease #L-2104 · Unit 9B · Sai Heights</td>
               <td class="text-xs">Lease expired — natural end</td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="text-xs whitespace-nowrap">05/05/2026 08:45</td>
               <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
               <td>Admin</td>
@@ -337,10 +339,12 @@
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

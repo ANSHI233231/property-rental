@@ -55,69 +55,125 @@
         </div>
       </header>
 
-      <!-- Filter tiles — scoped to your assigned requests only -->
-      <div class="filter-tiles mb-6">
-        <button type="button" class="filter-tile active" data-tile-for="tbl-my-requests" data-tile-filter="all"
-                onclick="Paginator.setFilter('tbl-my-requests','all',this)">
-          <span class="filter-tile-count" data-pg-count>3</span>
-          <span class="filter-tile-label">All</span>
-        </button>
-        <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="emergency"
-                onclick="Paginator.setFilter('tbl-my-requests','emergency',this)">
-          <span class="filter-tile-count" data-pg-count>1</span>
-          <span class="filter-tile-label">Emergency</span>
-        </button>
-        <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="high"
-                onclick="Paginator.setFilter('tbl-my-requests','high',this)">
-          <span class="filter-tile-count" data-pg-count>1</span>
-          <span class="filter-tile-label">High</span>
-        </button>
-        <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="medium"
-                onclick="Paginator.setFilter('tbl-my-requests','medium',this)">
-          <span class="filter-tile-count" data-pg-count>1</span>
-          <span class="filter-tile-label">Medium</span>
-        </button>
-        <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="low"
-                onclick="Paginator.setFilter('tbl-my-requests','low',this)">
-          <span class="filter-tile-count" data-pg-count>0</span>
-          <span class="filter-tile-label">Low</span>
-        </button>
-      </div>
+      <!-- Filter tiles (status) -->
+      <section class="section">
+        <div class="filter-tiles">
+          <button type="button" class="filter-tile active" data-tile-for="tbl-my-requests" data-tile-filter="all"
+                  onclick="Paginator.setFilter('tbl-my-requests','all',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">All</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="assigned"
+                  onclick="Paginator.setFilter('tbl-my-requests','assigned',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">Assigned</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="progress"
+                  onclick="Paginator.setFilter('tbl-my-requests','progress',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">In-Progress</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="resolved"
+                  onclick="Paginator.setFilter('tbl-my-requests','resolved',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">Resolved</span>
+          </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-my-requests" data-tile-filter="closed"
+                  onclick="Paginator.setFilter('tbl-my-requests','closed',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">Closed</span>
+          </button>
+        </div>
+      </section>
 
+      <!-- Filters: property → unit cascade + priority + search -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-4 gap-4">
+          <div>
+            <label class="label" for="flt-prop">Property</label>
+            <select id="flt-prop" class="input" data-searchable onchange="onMaintPropChange(this)">
+              <option value="">All properties</option>
+              <option value="green-valley">Green Valley, Dwarka</option>
+              <option value="mayur-vihar">Mayur Vihar Residency</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-unit">Unit</label>
+            <select id="flt-unit" class="input" data-searchable onchange="onMaintUnitChange(this)" disabled>
+              <option value="">All units</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-priority">Priority</label>
+            <select id="flt-priority" class="input" onchange="Paginator.setAttrFilter('tbl-my-requests','data-priority', this.value)">
+              <option value="">All priorities</option>
+              <option value="emergency">Emergency</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="req-search">Search</label>
+            <input id="req-search" class="input" placeholder="Issue or unit" data-pg-search="tbl-my-requests" />
+          </div>
+        </div>
+      </section>
 
       <!-- My assigned requests -->
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-my-requests">
           <thead>
-            <tr><th>Unit</th><th>Property</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised</th><th>Action</th></tr>
+            <tr><th class="w-12">#</th><th>Property · Unit</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised</th><th>Action</th></tr>
           </thead>
           <tbody>
-            <tr data-priority="emergency">
-              <td class="font-poppins font-semibold text-charcoal">7C</td>
-              <td>Green Valley, Dwarka</td>
+            <tr data-priority="emergency" data-status="progress" data-property="green-valley" data-unit="7C"><td data-pg-serial class="muted"></td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 7C</div></td>
               <td>Water leakage in kitchen ceiling</td>
               <td><span class="badge badge-emergency">Emergency</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>05/05/2026 23:42</td>
               <td><a href="maintenance-detail.html?id=MR-3041" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-priority="high">
-              <td class="font-poppins font-semibold text-charcoal">2A</td>
-              <td>Green Valley, Dwarka</td>
+            <tr data-priority="high" data-status="progress" data-property="green-valley" data-unit="2A"><td data-pg-serial class="muted"></td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 2A</div></td>
               <td>AC not cooling, leaking water</td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>03/05/2026 11:20</td>
               <td><a href="maintenance-detail.html?id=MR-3018" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-priority="medium">
-              <td class="font-poppins font-semibold text-charcoal">5B</td>
-              <td>Mayur Vihar Residency</td>
+            <tr data-priority="medium" data-status="assigned" data-property="mayur-vihar" data-unit="5B"><td data-pg-serial class="muted"></td>
+              <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5B</div></td>
               <td>Front door lock broken</td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-open">Assigned</span></td>
               <td>08/05/2026 18:00</td>
               <td><a href="maintenance-detail.html?id=MR-3044" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-priority="high" data-status="assigned" data-property="mayur-vihar" data-unit="10A"><td data-pg-serial class="muted"></td>
+              <td>Mayur Vihar Residency<div class="text-xs muted">Unit 10A</div></td>
+              <td>Sewage blockage in bathroom</td>
+              <td><span class="badge badge-partial">High</span></td>
+              <td><span class="badge badge-open">Assigned</span></td>
+              <td>06/05/2026 09:00</td>
+              <td><a href="maintenance-detail.html?id=MR-3028" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-priority="medium" data-status="resolved" data-property="green-valley" data-unit="6A"><td data-pg-serial class="muted"></td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 6A</div></td>
+              <td>Kitchen exhaust fan stopped working</td>
+              <td><span class="badge badge-prepaid">Medium</span></td>
+              <td><span class="badge badge-resolved">Resolved</span></td>
+              <td>04/05/2026 12:15</td>
+              <td><a href="maintenance-detail.html?id=MR-3020" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+            </tr>
+            <tr data-priority="low" data-status="closed" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
+              <td>Bathroom tap dripping — minor</td>
+              <td><span class="badge badge-closed">Low</span></td>
+              <td><span class="badge badge-closed">Closed</span></td>
+              <td>02/05/2026</td>
+              <td><a href="maintenance-detail.html?id=MR-2990" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
           </tbody>
         </table>
@@ -147,6 +203,31 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/impersonation.js"></script>
+  <script src="../assets/searchable-select.js"></script>
+  <script>
+    // Property → Unit cascade (units shown = only those with a request assigned to you).
+    var MAINT_UNITS = {
+      'green-valley': ['7C', '2A', '6A', '3A'],
+      'mayur-vihar':  ['5B', '10A']
+    };
+    function onMaintPropChange(sel) {
+      var prop = sel.value;
+      var unitSel = document.getElementById('flt-unit');
+      unitSel.innerHTML = '<option value="">All units</option>';
+      (MAINT_UNITS[prop] || []).forEach(function (u) {
+        var o = document.createElement('option');
+        o.value = u; o.textContent = 'Unit ' + u;
+        unitSel.appendChild(o);
+      });
+      unitSel.disabled = !prop;
+      if (window.SearchableSelect) SearchableSelect.refresh('flt-unit');
+      Paginator.setAttrFilter('tbl-my-requests', 'data-unit', '');
+      Paginator.setAttrFilter('tbl-my-requests', 'data-property', prop);
+    }
+    function onMaintUnitChange(sel) {
+      Paginator.setAttrFilter('tbl-my-requests', 'data-unit', sel.value);
+    }
+  </script>
   <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
   <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
     <div class="account-sheet-handle" aria-hidden="true"></div>

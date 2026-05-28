@@ -22,6 +22,7 @@
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
         <a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
         <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-section collapsed">
@@ -32,6 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -71,19 +73,10 @@
         <div>
           <h1 class="page-title">Maintenance</h1>
         </div>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('newReqModal').classList.add('open')">+ Raise Request</button>
       </header>
 
-      <!-- KPIs -->
-      <section class="section">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Emergency</div><div class="kpi-value" style="color:var(--color-status-overdue)">2</div></div>
-          <div class="kpi"><div class="kpi-label">High</div><div class="kpi-value">5</div></div>
-          <div class="kpi"><div class="kpi-label">Open total</div><div class="kpi-value">14</div></div>
-          <div class="kpi"><div class="kpi-label">Resolved (7d)</div><div class="kpi-value" style="color:var(--color-status-paid)">22</div></div>
-        </div>
-      </section>
-
-      <!-- Filter tiles -->
+      <!-- Filter tiles (status) -->
       <section class="section">
         <div class="filter-tiles">
           <button type="button" class="filter-tile active" data-tile-for="tbl-maintenance" data-tile-filter="all"
@@ -91,36 +84,72 @@
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">All</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="emergency"
-                  onclick="Paginator.setFilter('tbl-maintenance','emergency',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="open"
+                  onclick="Paginator.setFilter('tbl-maintenance','open',this)">
             <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Emergency</span>
+            <span class="filter-tile-label">Open</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="high"
-                  onclick="Paginator.setFilter('tbl-maintenance','high',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="progress"
+                  onclick="Paginator.setFilter('tbl-maintenance','progress',this)">
             <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">High</span>
+            <span class="filter-tile-label">In-Progress</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="medium"
-                  onclick="Paginator.setFilter('tbl-maintenance','medium',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="resolved"
+                  onclick="Paginator.setFilter('tbl-maintenance','resolved',this)">
             <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Medium</span>
+            <span class="filter-tile-label">Resolved</span>
           </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="low"
-                  onclick="Paginator.setFilter('tbl-maintenance','low',this)">
+          <button type="button" class="filter-tile" data-tile-for="tbl-maintenance" data-tile-filter="closed"
+                  onclick="Paginator.setFilter('tbl-maintenance','closed',this)">
             <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Low</span>
+            <span class="filter-tile-label">Closed</span>
           </button>
         </div>
       </section>
 
-      <!-- Filters -->
+      <!-- Filters: property → unit cascade + priority + assignee + search -->
       <section class="card mb-6">
-        <div class="grid md:grid-cols-4 gap-4">
-          <div><label class="label" for="prop">Property</label><select id="prop" class="input"><option>All</option><option>Green Valley</option><option>Sai Heights</option><option>Mayur Vihar</option><option>Rohini Greens</option></select></div>
-          <div><label class="label" for="stat">Status</label><select id="stat" class="input"><option>Any</option><option>Open</option><option>Assigned</option><option>In-Progress</option><option>Resolved</option><option>Closed</option></select></div>
-          <div><label class="label" for="cat">Category</label><select id="cat" class="input"><option>All</option><option>Plumbing</option><option>Electrical</option><option>Carpentry</option></select></div>
-          <div><label class="label" for="maint-search">Search</label><input id="maint-search" class="input" placeholder="Ticket, unit, tenant" data-pg-search="tbl-maintenance" /></div>
+        <div class="grid md:grid-cols-5 gap-4">
+          <div>
+            <label class="label" for="flt-prop">Property</label>
+            <select id="flt-prop" class="input" onchange="onMaintPropChange(this)" data-searchable>
+              <option value="">All properties</option>
+              <option value="green-valley">Green Valley, Dwarka</option>
+              <option value="sai-heights">Sai Heights, Lajpat Nagar</option>
+              <option value="mayur-vihar">Mayur Vihar Residency</option>
+              <option value="rohini-greens">Rohini Greens</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-unit">Unit</label>
+            <select id="flt-unit" class="input" onchange="onMaintUnitChange(this)" disabled data-searchable>
+              <option value="">All units</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-priority">Priority</label>
+            <select id="flt-priority" class="input" onchange="Paginator.setAttrFilter('tbl-maintenance','data-priority', this.value)">
+              <option value="">All priorities</option>
+              <option value="emergency">Emergency</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="flt-assignee">Assignee</label>
+            <select id="flt-assignee" class="input" onchange="Paginator.setAttrFilter('tbl-maintenance','data-assignee', this.value)">
+              <option value="">All assignees</option>
+              <option value="raju-kumar">Raju Kumar</option>
+              <option value="anil-bhardwaj">Anil Bhardwaj</option>
+              <option value="deepak-sharma">Deepak Sharma</option>
+              <option value="unassigned">Unassigned</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="maint-search">Search</label>
+            <input id="maint-search" class="input" placeholder="Ticket or title" data-pg-search="tbl-maintenance" />
+          </div>
         </div>
       </section>
 
@@ -134,11 +163,9 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-maintenance">
           <thead>
-            <tr>
+            <tr><th class="w-12">#</th>
               <th>Ticket</th>
-              <th>Unit</th>
-              <th>Property</th>
-              <th>Tenant</th>
+              <th>Property · Unit</th>
               <th>Title</th>
               <th>Priority</th>
               <th>Status</th>
@@ -148,197 +175,125 @@
             </tr>
           </thead>
           <tbody>
-            <tr data-priority="emergency">
+            <tr data-priority="emergency" data-status="progress" data-property="green-valley" data-unit="7C" data-assignee="raju-kumar"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3041</a></td>
-              <td class="font-poppins font-semibold text-charcoal">7C</td>
-              <td>Green Valley, Dwarka</td>
-              <td>Rohan Mehta</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 7C</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Water leakage in kitchen ceiling — overnight</a></td>
               <td><span class="badge badge-emergency">Emergency</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>Raju Kumar</td>
               <td class="text-xs">05/05/2026 23:42</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3041')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="emergency">
+            <tr data-priority="emergency" data-status="open" data-property="sai-heights" data-unit="4B" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3052</a></td>
-              <td class="font-poppins font-semibold text-charcoal">4B</td>
-              <td>Sai Heights, Lajpat Nagar</td>
-              <td>Anjali Verma</td>
+              <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 4B</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Suspected gas leak near stove</a></td>
               <td><span class="badge badge-emergency">Emergency</span></td>
               <td><span class="badge badge-open">Open</span></td>
               <td class="muted">—</td>
               <td class="text-xs">09/05/2026 06:15</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3052')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="high">
+            <tr data-priority="high" data-status="progress" data-property="green-valley" data-unit="2A" data-assignee="raju-kumar"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3018</a></td>
-              <td class="font-poppins font-semibold text-charcoal">2A</td>
-              <td>Green Valley, Dwarka</td>
-              <td>Priya Patel</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 2A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">AC not cooling, leaking water on floor</a></td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>Raju Kumar</td>
               <td class="text-xs">03/05/2026 11:20</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3018')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="high">
+            <tr data-priority="high" data-status="open" data-property="sai-heights" data-unit="8A" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3035</a></td>
-              <td class="font-poppins font-semibold text-charcoal">8A</td>
-              <td>Sai Heights, Lajpat Nagar</td>
-              <td>Suresh Kumar</td>
+              <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 8A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Main electricity board tripping repeatedly</a></td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-open">Open</span></td>
               <td class="muted">—</td>
               <td class="text-xs">07/05/2026 14:30</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3035')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="high">
+            <tr data-priority="high" data-status="progress" data-property="mayur-vihar" data-unit="10A" data-assignee="raju-kumar"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3028</a></td>
-              <td class="font-poppins font-semibold text-charcoal">10A</td>
-              <td>Mayur Vihar Residency</td>
-              <td>Rahul Tiwari</td>
+              <td>Mayur Vihar Residency<div class="text-xs muted">Unit 10A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Sewage blockage in bathroom</a></td>
               <td><span class="badge badge-partial">High</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>Raju Kumar</td>
               <td class="text-xs">06/05/2026 09:00</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3028')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="medium">
+            <tr data-priority="medium" data-status="open" data-property="mayur-vihar" data-unit="5B" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3044</a></td>
-              <td class="font-poppins font-semibold text-charcoal">5B</td>
-              <td>Mayur Vihar Residency</td>
-              <td>Vikram Singh</td>
+              <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5B</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Front door lock broken; cannot lock</a></td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-open">Open</span></td>
               <td class="muted">—</td>
               <td class="text-xs">08/05/2026 18:00</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3044')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="medium">
+            <tr data-priority="medium" data-status="open" data-property="mayur-vihar" data-unit="3B" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3038</a></td>
-              <td class="font-poppins font-semibold text-charcoal">3B</td>
-              <td>Mayur Vihar Residency</td>
-              <td>Kavita Singh</td>
+              <td>Mayur Vihar Residency<div class="text-xs muted">Unit 3B</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Window blind rod broken</a></td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-open">Open</span></td>
               <td class="muted">—</td>
               <td class="text-xs">07/05/2026 16:45</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3038')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="medium">
+            <tr data-priority="medium" data-status="open" data-property="green-valley" data-unit="6A" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3020</a></td>
-              <td class="font-poppins font-semibold text-charcoal">6A</td>
-              <td>Green Valley, Dwarka</td>
-              <td>Sanjay Rawat</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 6A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Kitchen exhaust fan stopped working</a></td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-open">Open</span></td>
               <td class="muted">—</td>
               <td class="text-xs">04/05/2026 12:15</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3020')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="medium">
+            <tr data-priority="medium" data-status="progress" data-property="sai-heights" data-unit="1B" data-assignee="anil-bhardwaj"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-3011</a></td>
-              <td class="font-poppins font-semibold text-charcoal">1B</td>
-              <td>Sai Heights, Lajpat Nagar</td>
-              <td>Meena Gupta</td>
+              <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 1B</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Water pressure very low in all taps</a></td>
               <td><span class="badge badge-prepaid">Medium</span></td>
               <td><span class="badge badge-progress">In-Progress</span></td>
               <td>Anil Bhardwaj</td>
               <td class="text-xs">02/05/2026 10:00</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-3011')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="low">
+            <tr data-priority="low" data-status="resolved" data-property="green-valley" data-unit="3A" data-assignee="raju-kumar"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-2990</a></td>
-              <td class="font-poppins font-semibold text-charcoal">3A</td>
-              <td>Green Valley, Dwarka</td>
-              <td>Raj Sharma</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Bathroom tap dripping — minor</a></td>
               <td><span class="badge badge-closed">Low</span></td>
               <td><span class="badge badge-resolved">Resolved</span></td>
               <td>Raju Kumar</td>
               <td class="text-xs">02/05/2026</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-2990')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="low">
+            <tr data-priority="low" data-status="closed" data-property="sai-heights" data-unit="9B" data-assignee="unassigned"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-2981</a></td>
-              <td class="font-poppins font-semibold text-charcoal">9B</td>
-              <td>Sai Heights, Lajpat Nagar</td>
-              <td>Neha Jain</td>
+              <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 9B</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Paint peeling on bedroom wall</a></td>
               <td><span class="badge badge-closed">Low</span></td>
-              <td><span class="badge badge-open">Open</span></td>
+              <td><span class="badge badge-closed">Closed</span></td>
               <td class="muted">—</td>
               <td class="text-xs">01/05/2026</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-2981')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
-            <tr data-priority="low">
+            <tr data-priority="low" data-status="closed" data-property="rohini-greens" data-unit="4A" data-assignee="deepak-sharma"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="maintenance-detail.html" class="action-link">#MR-2972</a></td>
-              <td class="font-poppins font-semibold text-charcoal">4A</td>
-              <td>Rohini Greens</td>
-              <td>Aman Khan</td>
+              <td>Rohini Greens<div class="text-xs muted">Unit 4A</div></td>
               <td><a href="maintenance-detail.html" class="action-link">Balcony drain clogged with leaves</a></td>
               <td><span class="badge badge-closed">Low</span></td>
-              <td><span class="badge badge-resolved">Resolved</span></td>
+              <td><span class="badge badge-closed">Closed</span></td>
               <td>Deepak Sharma</td>
               <td class="text-xs">29/04/2026</td>
-              <td class="text-xs" style="white-space:nowrap;">
-                <a href="maintenance-detail.html" class="action-link">View</a>
-                <span class="action-link-sep">|</span>
-                <button class="action-link" style="background:none;border:none;padding:0;cursor:pointer;" onclick="openReassignModal('MR-2972')">Reassign</button>
-              </td>
+              <td class="text-xs"><a href="maintenance-detail.html" class="action-link">View</a></td>
             </tr>
           </tbody>
         </table>
@@ -363,51 +318,110 @@
     </main>
   </div>
 
-  <!-- Cross-property reassign modal (Admin only) -->
-  <div class="modal-backdrop" id="adminReassignModal">
-    <div class="modal" style="max-width:520px;">
-      <h3>Cross-Property Reassign</h3>
-      <p class="text-sm muted mt-1 mb-5">Move this request to a different property and assign a new technician.</p>
+  <!-- Raise request modal -->
+  <div class="modal-backdrop" id="newReqModal">
+    <form class="modal" style="max-width:560px;" onsubmit="event.preventDefault(); document.getElementById('newReqModal').classList.remove('open'); gsToast('Maintenance request raised.');">
+      <h3>Raise Maintenance Request</h3>
 
-      <div class="mb-4">
-        <label class="label" for="modal-ra-prop">Property</label>
-        <select id="modal-ra-prop" class="input">
-          <option>Green Valley, Dwarka</option>
-          <option>Sai Heights, Lajpat Nagar</option>
-          <option>Mayur Vihar Residency</option>
-          <option>Rohini Greens</option>
-        </select>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="label" for="req-prop">Property</label>
+          <select id="req-prop" class="input" data-searchable required onchange="onReqPropChange(this)">
+            <option value="" disabled selected>Select a property</option>
+            <option value="green-valley">Green Valley, Dwarka</option>
+            <option value="sai-heights">Sai Heights, Lajpat Nagar</option>
+            <option value="mayur-vihar">Mayur Vihar Residency</option>
+            <option value="rohini-greens">Rohini Greens</option>
+          </select>
+          <div class="field-error"></div>
+        </div>
+        <div>
+          <label class="label" for="req-unit">Unit</label>
+          <select id="req-unit" class="input" data-searchable required disabled>
+            <option value="" disabled selected>Select a unit</option>
+          </select>
+          <div class="field-error"></div>
+        </div>
       </div>
 
-      <div class="mb-4">
-        <label class="label" for="modal-ra-unit">Unit</label>
-        <select id="modal-ra-unit" class="input">
-          <option>7C</option>
-          <option>2A</option>
-          <option>3B</option>
-        </select>
+      <div class="mt-4">
+        <label class="label" for="req-cat">Category</label>
+        <select id="req-cat" class="input"><option>Plumbing</option><option>Electrical</option><option>Carpentry</option><option>Appliance</option><option>Other</option></select>
       </div>
 
-      <div class="mb-4">
-        <label class="label" for="modal-ra-tech">Technician (optional)</label>
-        <select id="modal-ra-tech" class="input">
-          <option value="">— Unassigned —</option>
-          <option>Raju Kumar</option>
-          <option>Deepak Sharma</option>
-          <option>Anil Yadav</option>
-        </select>
+      <div class="mt-4">
+        <label class="label">Priority</label>
+        <div class="filter-tiles">
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> Low</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio" checked/> Medium</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> High</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="prio"/> Emergency</label>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label" for="req-title">Title</label>
+        <input id="req-title" name="title" class="input" required placeholder="e.g. Water leakage in kitchen ceiling" />
+        <div class="field-error"></div>
+
+        <label class="label mt-4" for="req-desc">Description (min 30 characters)</label>
+        <textarea id="req-desc" class="input" rows="4" required minlength="30" placeholder="Describe the issue clearly so the maintenance team can prepare." oninput="document.getElementById('req-counter').textContent = this.value.length + '/30'"></textarea>
+        <div class="counter" id="req-counter">0/30</div>
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('adminReassignModal').classList.remove('open')">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('adminReassignModal').classList.remove('open'); gsToast('Request reassigned. Admin action recorded in audit log.');">Confirm Reassignment</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('newReqModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Request</button>
       </div>
-    </div>
+    </form>
   </div>
 
   <script>
-    function openReassignModal(ticketId) {
-      document.getElementById('adminReassignModal').classList.add('open');
+    // Property → Unit cascade. Units list only those with at least one request,
+    // derived from the rows actually present in the table. Both filters AND-combine
+    // with the status tiles + search via the shared paginator.
+    // Units with at least one request — for the filter cascade.
+    var MAINT_UNITS = {
+      'green-valley':  ['7C', '2A', '6A', '3A'],
+      'sai-heights':   ['4B', '8A', '1B', '9B'],
+      'mayur-vihar':   ['10A', '5B', '3B'],
+      'rohini-greens': ['4A']
+    };
+    // All occupied units per property — for the raise-request cascade.
+    var REQ_UNITS = {
+      'green-valley':  ['2A','3A','4A','5B','6A','7C','8B','9A','10C','11A'],
+      'sai-heights':   ['1A','1B','2B','3C','4B','5A','6B','7A','8A','9B'],
+      'mayur-vihar':   ['1B','2A','3B','4A','5B','6C','7A','8B','10A'],
+      'rohini-greens': ['1A','2B','3A','4A','5C','6B']
+    };
+    function onReqPropChange(sel) {
+      var prop = sel.value;
+      var unitSel = document.getElementById('req-unit');
+      unitSel.innerHTML = '<option value="" disabled selected>Select a unit</option>';
+      (REQ_UNITS[prop] || []).forEach(function (u) {
+        var o = document.createElement('option');
+        o.value = u; o.textContent = 'Unit ' + u;
+        unitSel.appendChild(o);
+      });
+      unitSel.disabled = !prop;
+      if (window.SearchableSelect) SearchableSelect.refresh('req-unit');
+    }
+    function onMaintPropChange(sel) {
+      var prop = sel.value;
+      var unitSel = document.getElementById('flt-unit');
+      unitSel.innerHTML = '<option value="">All units</option>';
+      (MAINT_UNITS[prop] || []).forEach(function (u) {
+        var o = document.createElement('option');
+        o.value = u; o.textContent = 'Unit ' + u;
+        unitSel.appendChild(o);
+      });
+      unitSel.disabled = !prop;
+      if (window.SearchableSelect) SearchableSelect.refresh('flt-unit');
+      Paginator.setAttrFilter('tbl-maintenance', 'data-unit', '');   // reset unit when property changes
+      Paginator.setAttrFilter('tbl-maintenance', 'data-property', prop);
+    }
+    function onMaintUnitChange(sel) {
+      Paginator.setAttrFilter('tbl-maintenance', 'data-unit', sel.value);
     }
   </script>
 
@@ -429,10 +443,12 @@
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
@@ -461,5 +477,6 @@
     </a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script src="../assets/searchable-select.js"></script>
 </body>
 </html>

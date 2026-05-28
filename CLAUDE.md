@@ -97,7 +97,7 @@ Plus `document-agent` for `.docx` / `.xlsx` work — see [.claude/agents/documen
 6. **Apps are git submodules.** `apps/api` and `apps/web` live in their own repos; commits + pushes happen there. The meta repo only bumps the submodule pointer.
 7. **Relative paths in markdown.** Internal links use `./path/...`, never absolute `/Users/...` paths.
 8. **CONTEXT.md mirrors the actual repo.** When a top-level file or folder appears, disappears, or changes purpose, update it.
-9. **Prototype is kept in sync with the live app.** New / changed application features require a corresponding prototype update; capture the change list in `docs/planning/prototype-changes.md`.
+9. **SRS, prototype, and live app stay in sync — always.** Any new or changed feature is reflected in all three in the same change: the `prototype/` HTML, the **SRS** ([docs/product/SRS_Document.md](./docs/product/SRS_Document.md) — §3 pages · §4 modules · §5 BL/NR rules · §9 scope), and the eventual `apps/`. Never let the prototype drift ahead of the SRS or vice-versa. Capture the change list in `docs/planning/prototype-changes.md`.
 10. **`.docx` and `.xlsx` are generated from JS** in `doc-assets/templates/`. Never hand-edit the binary; edit the generator and regenerate.
 11. **CLAUDE.md ≤ 200 lines · AGENTS.md ≤ 250 lines.** Topic docs split out; cross-link freely.
 
@@ -109,6 +109,7 @@ Plus `document-agent` for `.docx` / `.xlsx` work — see [.claude/agents/documen
 15. **Every mutation writes an `audit_log` row.** `audit_log` is append-only — no UPDATE, no DELETE on it ever.
 16. **Frontend validation (Zod) mirrors backend validation (class-validator)** for every field. The browser's native HTML5 validation (`required`, `pattern`, `min`, `:invalid` tooltips) is not used — errors render below the field per the UI/UX contract.
 17. **Sensitive files never enter git.** `.env`, `.env.*`, log files, runtime files, temp files, Office lock files (`~$*.docx`, `~$*.xlsx`). Use `.env.example` as the template.
+18. **Property and Unit pickers are searchable dropdowns** — any `<select>` that lists **properties** or **units** must be a type-to-filter combobox (shared `assets/searchable-select.js`, `data-searchable`), never a plain `<select>`. Other selects (status, role, plan, master types, etc.) stay native unless asked.
 
 ## Scope rules — what the product is
 

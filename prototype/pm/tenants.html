@@ -19,8 +19,8 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-        <a href="tenants.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="tenants.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
@@ -58,95 +58,49 @@
         <div>
           <h1 class="page-title">Tenants</h1>
         </div>
-        <button class="btn btn-primary !py-2 !text-sm">+ Add Tenant</button>
       </header>
 
       <section class="card mb-6">
-        <div class="grid md:grid-cols-3 gap-4">
-          <div><label class="label" for="search">Search</label><input id="search" class="input" data-pg-search="tbl-pm-tenants" placeholder="Tenant name, phone, unit"/></div>
-          <div><label class="label" for="status">Status</label><select id="status" class="input"><option>Any</option><option>Active</option><option>Notice given</option></select></div>
-          <div><label class="label" for="sort">Sort</label><select id="sort" class="input"><option>Unit number</option><option>Lease end date</option><option>Rent status</option></select></div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="search">Search</label>
+            <input id="search" class="input" data-pg-search="tbl-pm-tenants" placeholder="Name, phone, property or unit" />
+          </div>
+          <div>
+            <label class="label" for="status">Status</label>
+            <select id="status" class="input" onchange="Paginator.setAttrFilter('tbl-pm-tenants','data-status', this.value)">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </section>
 
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-pm-tenants">
           <thead>
-            <tr><th>Tenant(s)</th><th>Unit</th><th>Lease</th><th>Rent</th><th>Phone</th><th>Status</th><th></th></tr>
+            <tr><th class="w-12">#</th><th>Tenant</th><th>Property · Unit</th><th>Phone</th><th>Status</th></tr>
           </thead>
           <tbody>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Rohan Mehta</div><div class="text-xs muted">+ Priya Mehta (co-tenant)</div></td>
-              <td>3A</td><td>01/04/2025 → 31/03/2026</td><td>₹18,000/mo</td><td>98xxxxxx90</td>
-              <td><span class="badge badge-overdue">Overdue</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Gupta family</div><div class="text-xs muted">3 co-tenants</div></td>
-              <td>1B</td><td>01/06/2024 → 25/05/2026</td><td>₹22,000/mo</td><td>98xxxxxx32</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Vikram Mehta</div></td>
-              <td>2B</td><td>01/01/2025 → 31/12/2025</td><td>₹22,000/mo</td><td>98xxxxxx41</td>
-              <td><span class="badge badge-partial">Partial</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Akash Joshi</div></td>
-              <td>4A</td><td>01/02/2026 → 31/01/2027</td><td>₹20,000/mo</td><td>98xxxxxx55</td>
-              <td><span class="badge badge-prepaid">Prepaid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="notice">
-              <td><div class="font-poppins font-semibold text-charcoal">Sneha Reddy</div></td>
-              <td>5C</td><td>01/03/2025 → 28/02/2026</td><td>₹19,500/mo</td><td>98xxxxxx67</td>
-              <td><span class="badge badge-partial">Notice given</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Imran Khan</div></td>
-              <td>6A</td><td>15/05/2025 → 14/05/2026</td><td>₹21,000/mo</td><td>98xxxxxx78</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Lakshmi Iyer</div><div class="text-xs muted">+ Suresh Iyer (co-tenant)</div></td>
-              <td>7B</td><td>01/07/2025 → 30/06/2026</td><td>₹24,000/mo</td><td>98xxxxxx89</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Deepak Nair</div></td>
-              <td>8A</td><td>01/02/2025 → 31/01/2026</td><td>₹18,500/mo</td><td>98xxxxxx12</td>
-              <td><span class="badge badge-overdue">Overdue</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Ananya Bose</div></td>
-              <td>9C</td><td>01/04/2025 → 31/03/2026</td><td>₹20,500/mo</td><td>98xxxxxx23</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="notice">
-              <td><div class="font-poppins font-semibold text-charcoal">Rahul Verma</div></td>
-              <td>2C</td><td>01/05/2025 → 30/04/2026</td><td>₹19,000/mo</td><td>98xxxxxx34</td>
-              <td><span class="badge badge-partial">Notice given</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Meera Pillai</div></td>
-              <td>10A</td><td>01/06/2025 → 31/05/2026</td><td>₹23,000/mo</td><td>98xxxxxx45</td>
-              <td><span class="badge badge-prepaid">Prepaid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
-            <tr data-status="active">
-              <td><div class="font-poppins font-semibold text-charcoal">Karan Malhotra</div></td>
-              <td>11B</td><td>01/03/2025 → 28/02/2026</td><td>₹21,500/mo</td><td>98xxxxxx56</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td><a href="tenant-detail.html" class="text-royal-blue font-poppins font-semibold">View</a></td>
-            </tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td>Green Valley Apartments<div class="text-xs muted">Unit 3A</div></td><td>98xxxxxx90</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Priya Mehta</td><td>Green Valley Apartments<div class="text-xs muted">Unit 3A</div></td><td>98xxxxxx91</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Anil Gupta</td><td>Sai Heights<div class="text-xs muted">Unit 1B</div></td><td>98xxxxxx32</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Sunita Gupta</td><td>Sai Heights<div class="text-xs muted">Unit 1B</div></td><td>98xxxxxx33</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Rohit Gupta</td><td>Sai Heights<div class="text-xs muted">Unit 1B</div></td><td>98xxxxxx30</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td><td>Green Valley Apartments<div class="text-xs muted">Unit 2B</div></td><td>98xxxxxx41</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Akash Joshi</td><td>Mayur Vihar Residency<div class="text-xs muted">Unit 4A</div></td><td>98xxxxxx55</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Sneha Reddy</td><td>Rohini Greens<div class="text-xs muted">Unit 5C</div></td><td>98xxxxxx67</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Imran Khan</td><td>Mayur Vihar Residency<div class="text-xs muted">Unit 6A</div></td><td>98xxxxxx78</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Lakshmi Iyer</td><td>Sai Heights<div class="text-xs muted">Unit 7B</div></td><td>98xxxxxx89</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Suresh Iyer</td><td>Sai Heights<div class="text-xs muted">Unit 7B</div></td><td>98xxxxxx88</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Deepak Nair</td><td>Rohini Greens<div class="text-xs muted">Unit 8A</div></td><td>98xxxxxx12</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Ananya Bose</td><td>Dwarka West Tower<div class="text-xs muted">Unit 9C</div></td><td>98xxxxxx23</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Rahul Verma</td><td>Green Valley Apartments<div class="text-xs muted">Unit 2C</div></td><td>98xxxxxx34</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Meera Pillai</td><td>Dwarka West Tower<div class="text-xs muted">Unit 10A</div></td><td>98xxxxxx45</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="active"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Karan Malhotra</td><td>Rohini Greens<div class="text-xs muted">Unit 11B</div></td><td>98xxxxxx56</td><td><span class="badge badge-active">Active</span></td></tr>
+            <tr data-status="inactive"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Pooja Shah</td><td class="muted">—</td><td>98xxxxxx01</td><td><span class="badge badge-closed">Inactive</span></td></tr>
+            <tr data-status="inactive"><td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">Manish Tiwari</td><td class="muted">—</td><td>98xxxxxx02</td><td><span class="badge badge-closed">Inactive</span></td></tr>
           </tbody>
         </table>
         <div class="pagination" data-paginate-for="tbl-pm-tenants" data-per-page="10" aria-label="Pagination">

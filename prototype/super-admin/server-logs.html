@@ -112,7 +112,7 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-logs">
           <thead>
-            <tr>
+            <tr><th class="w-12">#</th>
               <th>File</th>
               <th>Date</th>
               <th>Size</th>
@@ -230,6 +230,7 @@
       var tbody = document.getElementById('logRows');
       tbody.innerHTML = files.map(function(f, i) {
         return '<tr data-name="' + f.name + '" data-date="' + f.dateISO + '">' +
+          '<td data-pg-serial class="muted"></td>' +
           '<td class="font-poppins font-semibold text-charcoal" style="font-family:\'JetBrains Mono\',monospace;font-size:13px;">' + f.name + '</td>' +
           '<td>' + f.dateIN + '</td>' +
           '<td>' + fmtSize(f.sizeKB) + '</td>' +

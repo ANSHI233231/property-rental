@@ -19,8 +19,8 @@
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
         <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
         <a href="rent-collection.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
@@ -64,7 +64,7 @@
         <div class="grid md:grid-cols-3 gap-4">
           <div>
             <label class="label" for="unit-select">Unit</label>
-            <select id="unit-select" class="input">
+            <select id="unit-select" class="input" data-searchable>
               <option>3A — Raj + Priya Sharma · ₹18,000</option>
               <option>1B — Gupta family · ₹22,000</option>
               <option>2B — Vikram Mehta · ₹22,000</option>
@@ -100,10 +100,10 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-pm-rent">
           <thead>
-            <tr><th>Period</th><th>Due Date</th><th>Status</th><th>Due</th><th>Paid</th><th>Late Fee</th><th>Action</th></tr>
+            <tr><th class="w-12">#</th><th>Period</th><th>Due Date</th><th>Status</th><th>Due</th><th>Paid</th><th>Late Fee</th><th>Action</th></tr>
           </thead>
           <tbody>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">May 2026</td>
               <td>05/05/2026</td>
               <td><span class="badge badge-overdue">Overdue</span></td>
@@ -112,7 +112,7 @@
               <td style="color:var(--color-status-overdue)">₹360</td>
               <td><button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('payModal').classList.add('open')">Record Payment</button></td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Apr 2026</td>
               <td>05/04/2026</td>
               <td><span class="badge badge-paid">Paid</span></td>
@@ -121,7 +121,7 @@
               <td>—</td>
               <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Mar 2026</td>
               <td>05/03/2026</td>
               <td><span class="badge badge-paid">Paid</span></td>
@@ -130,7 +130,7 @@
               <td>—</td>
               <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Feb 2026</td>
               <td>05/02/2026</td>
               <td><span class="badge badge-prepaid">Prepaid</span></td>
@@ -139,7 +139,7 @@
               <td>—</td>
               <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
             </tr>
-            <tr>
+            <tr><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Jan 2026</td>
               <td>05/01/2026</td>
               <td><span class="badge badge-paid">Paid</span></td>
@@ -253,5 +253,6 @@
     </a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script src="../assets/searchable-select.js"></script>
 </body>
 </html>

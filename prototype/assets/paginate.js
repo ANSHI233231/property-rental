@@ -76,7 +76,7 @@
       var pp = parseInt(getUrlParam(tableId + '_per'), 10) || null;
       var q  = getUrlParam(tableId + '_q') || '';
       var f  = getUrlParam(tableId + '_f') || 'all';
-      STATE[tableId] = { page: pg, perPage: pp, q: q, filter: f };
+      STATE[tableId] = { page: pg, perPage: pp, q: q, filter: f, attr: {} };
     }
     return STATE[tableId];
   }
@@ -99,10 +99,24 @@
     return text.indexOf(q.toLowerCase()) !== -1;
   }
 
+  // Secondary attribute filters (e.g. a Status <select> alongside the tile filter).
+  // AND-combined with search + tile filter. Empty/absent value = no constraint.
+  function trMatchesAttrs(tr, attr) {
+    if (!attr) return true;
+    for (var a in attr) {
+      if (!attr.hasOwnProperty(a)) continue;
+      var want = attr[a];
+      if (!want) continue;
+      var have = tr.getAttribute(a);
+      if (have == null || have.toLowerCase() !== String(want).toLowerCase()) return false;
+    }
+    return true;
+  }
+
   // -------------------- Tile-count recompute --------------------
 
-  function refreshTileCounts(tableId, allRows, currentSearch) {
-    // Counts are computed against the search-filtered set (but NOT the filter-tile set),
+  function refreshTileCounts(tableId, allRows, currentSearch, attrFilters) {
+    // Counts are computed against the search + secondary-attr set (but NOT the filter-tile set),
     // so tile counts represent "if I picked this filter, how many would I see".
     var tiles = $$('[data-tile-for="' + tableId + '"]');
     tiles.forEach(function (tile) {
@@ -111,6 +125,7 @@
       for (var i = 0; i < allRows.length; i++) {
         var tr = allRows[i];
         if (!trMatchesSearch(tr, currentSearch)) continue;
+        if (!trMatchesAttrs(tr, attrFilters)) continue;
         if (trMatchesFilter(tr, key)) count++;
       }
       var slot = tile.querySelector('[data-pg-count]');
@@ -170,11 +185,13 @@
     // 1) Apply search → matched rows
     var searched = allRows.filter(function (tr) { return trMatchesSearch(tr, state.q); });
 
-    // 2) Tile counts use the searched set, INDEPENDENT of the active filter.
-    refreshTileCounts(tableId, allRows, state.q);
+    // 2) Tile counts use the searched + secondary-attr set, INDEPENDENT of the active tile.
+    refreshTileCounts(tableId, allRows, state.q, state.attr);
 
-    // 3) Apply tile filter on top of searched set → filtered rows
-    var filtered = searched.filter(function (tr) { return trMatchesFilter(tr, state.filter); });
+    // 3) Apply tile filter + secondary attribute filters on top of searched set → filtered rows
+    var filtered = searched.filter(function (tr) {
+      return trMatchesFilter(tr, state.filter) && trMatchesAttrs(tr, state.attr);
+    });
 
     // 4) Pagination math
     var perPage = state.perPage || parseInt(pg.dataset.perPage, 10) || 10;
@@ -187,10 +204,14 @@
     var from = total === 0 ? 0 : (page - 1) * perPage + 1;
     var to   = Math.min(total, page * perPage);
 
-    // 5) Hide all rows, then show only the current page slice of filtered rows
+    // 5) Hide all rows, then show only the current page slice of filtered rows.
+    //    Stamp a running serial number into any [data-pg-serial] cell so it
+    //    continues across pages/filters (page 2 picks up where page 1 ended).
     allRows.forEach(function (tr) { tr.style.display = 'none'; });
     for (var i = from - 1; i < to; i++) {
       filtered[i].style.display = '';
+      var serialCell = filtered[i].querySelector('[data-pg-serial]');
+      if (serialCell) serialCell.textContent = fmtNum(i + 1);
     }
 
     // 6) Update info + per-page selector + page buttons
@@ -277,6 +298,16 @@
     setSearch: function (tableId, q) {
       var state = getState(tableId);
       state.q = q || '';
+      state.page = 1;
+      paginate(tableId);
+    },
+    // Secondary filter via a dropdown/select, AND-combined with the tile filter.
+    // value '' / null clears the constraint on that attribute.
+    setAttrFilter: function (tableId, attr, value) {
+      var state = getState(tableId);
+      if (!state.attr) state.attr = {};
+      if (value === null || value === undefined || value === '') delete state.attr[attr];
+      else state.attr[attr] = value;
       state.page = 1;
       paginate(tableId);
     },

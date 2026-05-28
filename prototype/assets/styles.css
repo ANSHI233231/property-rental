@@ -1058,6 +1058,9 @@ body.impers-active .app-main {
 .action-link:hover {
   text-decoration: underline;
 }
+.action-link.danger {
+  color: var(--color-status-overdue);              /* #C62828 — destructive row action */
+}
 .action-link-sep {
   color: var(--color-mid-gray);                    /* #CFD8DC — line 13 */
   margin: 0 6px;
@@ -1100,3 +1103,35 @@ body.impers-active .app-main {
 @media (max-width: 479px) {
   .gs-toast-region { left: 16px; right: 16px; max-width: none; }
 }
+
+/* ---- Searchable select / combobox (assets/searchable-select.js · rule #18) ---- */
+.gs-cb-native {
+  /* Moved inside .gs-combobox (position:relative) so absolute positioning is
+     correctly contained. !important beats the select.input rule (specificity 0,1,1). */
+  position: absolute !important;
+  top: 0 !important; left: 0 !important;
+  width: 100% !important; height: 100% !important;
+  margin: 0 !important; padding: 0 !important; border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+.gs-combobox { position: relative; }
+.gs-cb-input { padding-right: 34px; cursor: text; }
+.gs-combobox::after {
+  content: ""; position: absolute; right: 14px; top: 50%; width: 8px; height: 8px;
+  border-right: 2px solid var(--color-slate); border-bottom: 2px solid var(--color-slate);
+  transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+.gs-cb-list {
+  position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px);
+  max-height: 240px; overflow-y: auto; margin: 0; padding: 4px; list-style: none;
+  background: #fff; border: 1px solid var(--color-mid-gray); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(13, 23, 87, 0.12);
+}
+.gs-cb-opt {
+  padding: 9px 10px; border-radius: 6px; font-family: 'Inter', sans-serif;
+  font-size: 14px; color: var(--color-charcoal); cursor: pointer;
+}
+.gs-cb-opt:hover, .gs-cb-opt.active { background: var(--bg-prepaid); }
+.gs-cb-opt[aria-selected="true"] { font-weight: 600; color: var(--color-royal-blue); }

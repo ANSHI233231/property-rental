@@ -22,6 +22,7 @@
         <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
         <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
         <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+        <a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
         <a href="rent.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
         <a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
         <div class="sidebar-section collapsed">
@@ -32,6 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -166,105 +168,105 @@
         <div class="card p-0 overflow-x-auto">
           <table class="data-table" id="tbl-rent">
             <thead>
-              <tr><th>Tenant</th><th>Unit</th><th>Property</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th><th>Actions</th></tr>
+              <tr><th class="w-12">#</th><th>Tenant</th><th>Unit</th><th>Property</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td>7C</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹22,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Anjali Verma</td><td>4B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹32,000</td><td>₹32,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>1A</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹26,000</td><td>₹26,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Priya Patel</td><td>2A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹19,500</td><td>₹19,500</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Akash Joshi</td><td>4A</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹33,000</td><td>₹33,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Kavita Singh</td><td>5C</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹28,000</td><td>₹28,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>2D</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹21,000</td><td>₹21,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Sanjay Rawat</td><td>6A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹20,500</td><td>₹20,500</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Meena Gupta</td><td>3B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹27,000</td><td>₹27,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid">
+              <tr data-status="paid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Neha Jain</td><td>8B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹29,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial">
+              <tr data-status="partial"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td><td>2B</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹10,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial">
+              <tr data-status="partial"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Rahul Tiwari</td><td>9A</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹35,000</td><td>₹20,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial">
+              <tr data-status="partial"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Mohan Das</td><td>10B</td><td>Green Valley</td><td>Sunita Arora</td><td>₹25,000</td><td>₹15,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue">
+              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Raj Sharma + Priya</td><td>3A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹18,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue">
+              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Aman Khan</td><td>1C</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹15,500</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue">
+              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Sunita Chauhan</td><td>3C</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹18,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue">
+              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Pooja Bhatia</td><td>11C</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹31,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid">
+              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td><td>5B</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹34,000</td><td>₹40,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid">
+              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>6D</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹23,000</td><td>₹28,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid">
+              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
                 <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>6C</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹35,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
@@ -300,7 +302,7 @@
 
       <div class="mb-4">
         <label class="label" for="ap-lease">Lease (Tenant · Unit · Property)</label>
-        <select id="ap-lease" class="input">
+        <select id="ap-lease" class="input" data-searchable>
           <option>Raj + Priya Sharma · Unit 3A · Green Valley (PM: Sunita Arora)</option>
           <option>Vikram Mehta · Unit 2B · Green Valley (PM: Sunita Arora)</option>
           <option>Anjali Verma · Unit 4B · Sai Heights (PM: Manoj Verma)</option>
@@ -370,10 +372,12 @@
     <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
     <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
     <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
@@ -402,5 +406,6 @@
     </a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script src="../assets/searchable-select.js"></script>
 </body>
 </html>
