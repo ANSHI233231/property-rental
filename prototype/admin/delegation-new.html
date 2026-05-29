@@ -258,26 +258,32 @@
               <!-- Group 2 — Leases -->
               <div class="task-group" data-group-id="leases">
                 <div class="task-group-header">
-                  <h4 class="task-group-title">Leases <span class="task-group-count" data-group-count>0 / 4</span></h4>
+                  <h4 class="task-group-title">Leases <span class="task-group-count" data-group-count>0 / 3</span></h4>
                   <label class="task-group-select-all"><input type="checkbox" data-group-select-all onchange="toggleGroupSelectAll(this)"> Select all</label>
                 </div>
+                <!-- Leases are immutable once created. There is no Edit Lease
+                     action in the system: corrections to dates / rent / parties
+                     happen via Terminate + Re-create or Schedule Rent Change,
+                     never by editing the original lease in-place. -->
                 <div class="checkbox-group">
                   <label class="checkbox-item"><input type="checkbox" name="tasks" value="Create Lease" onchange="updateChips()"><div class="checkbox-item-label"><strong>Create Lease</strong><span>Open a new lease — unit-wise or room-wise</span></div></label>
-                  <label class="checkbox-item"><input type="checkbox" name="tasks" value="Edit Lease" onchange="updateChips()"><div class="checkbox-item-label"><strong>Edit Lease</strong><span>Modify the limited fields editable post-create</span></div></label>
                   <label class="checkbox-item"><input type="checkbox" name="tasks" value="Terminate Lease" onchange="updateChips()"><div class="checkbox-item-label"><strong>Terminate Lease</strong><span>Initiate the early-termination consent flow</span></div></label>
                   <label class="checkbox-item"><input type="checkbox" name="tasks" value="Schedule Rent Change" onchange="updateChips()"><div class="checkbox-item-label"><strong>Schedule Rent Change</strong><span>Add a future rent revision to an existing lease</span></div></label>
                 </div>
               </div>
 
               <!-- Group 3 — Rent & Payments -->
+              <!-- Payments are record-only by design. There is no edit/adjust
+                   action in the system (payment records are append-only), so
+                   no such task can be delegated. Corrections happen via a new
+                   recorded payment, not by editing the original. -->
               <div class="task-group" data-group-id="payments">
                 <div class="task-group-header">
-                  <h4 class="task-group-title">Rent &amp; Payments <span class="task-group-count" data-group-count>0 / 2</span></h4>
+                  <h4 class="task-group-title">Rent &amp; Payments <span class="task-group-count" data-group-count>0 / 1</span></h4>
                   <label class="task-group-select-all"><input type="checkbox" data-group-select-all onchange="toggleGroupSelectAll(this)"> Select all</label>
                 </div>
                 <div class="checkbox-group">
                   <label class="checkbox-item"><input type="checkbox" name="tasks" value="Record Payment" onchange="updateChips()"><div class="checkbox-item-label"><strong>Record Payment</strong><span>Log manual rent payments against leases (BL-10)</span></div></label>
-                  <label class="checkbox-item"><input type="checkbox" name="tasks" value="Edit / Adjust Payment" onchange="updateChips()"><div class="checkbox-item-label"><strong>Edit / Adjust Payment</strong><span>Correct amount, mode, or notes on a recorded payment</span></div></label>
                 </div>
               </div>
 

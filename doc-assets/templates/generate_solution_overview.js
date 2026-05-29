@@ -3,35 +3,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Source-of-truth generator for docs/product/Solution_Overview.docx
 //
-// v8 — Delta-style document. Cover marker now reads "DRAFT" (no version).
-// Scope: gap closure on existing modules + new features (per-room leasing,
-// Admin Impersonation, Task Delegation, Visitor Management, Master Data
-// Administration, Settings, SAAS / Organization Management layer) +
-// a new Super Admin role + the new business rules that come with them.
-//
-// The timeline (phase plan + module-by-module schedule) is no longer in
-// this document — it lives in the companion Timeline.xlsx, generated from
-// doc-assets/templates/generate_timeline.js.
-//
-// Out of this document: impersonation and task delegation (still deferred);
-// subscription billing / payment processing (manual only); custom domains
-// and per-organization branding.
-//
-// Why the redesign (rejection feedback on v6.5):
-//   1. Too much repetition of v1 material already in prior Solution Overviews.
-//   2. The Modules table mixed v1 features (already shipped) with new work.
-//   3. Assumptions section was carrying nothing new since v6.5.
-// Fixes applied:
-//   - Single-line framing replaces the Before/After table.
-//   - Existing modules show ONLY gaps (features column dropped — every
-//     listed item is a feature that is not working or missing).
-//   - Master Data Administration and Settings appear as missing-module gaps
-//     (they should have been in v1 but were baked into code instead).
-//   - "New Modules" renamed to "New Features".
-//   - Business Rules split into "New" and "Updated"; pure duplicates of
-//     existing v1 BLs are removed.
-//   - Assumptions section removed (no new assumptions since v6.5).
-//   - Out of Scope trimmed to items still relevant.
+// Restructured 29 May 2026 per client feedback. Document shape:
+//   1. Cover (date · prepared-by · prepared-for)
+//   2. Introduction (what GharSetu is + what this document covers)
+//   3. Incomplete Features in Current System (8 modules — features in
+//      the current build that are not working or are missing; pointer
+//      to a separate Bugs & Gaps Excel sheet)
+//   4. New Features as Per Requirement (5 sub-sections):
+//        3.1 Leases & Tenants — Per-Room Leasing
+//        3.2 Users & Access — Admin Impersonation
+//        3.3 Users & Access — Task Delegation
+//        3.4 Visitor Management
+//        3.5 Organization Management (SAAS layer — incl. Super Admin role)
+//   5. Business Rules (NR-1 … NR-8 — unchanged)
+//   6. Out of Scope (custom domains/branding + manual billing — unchanged)
+//   7. Next Steps (unchanged)
 //
 // Per Rule 28: this JS is the source of truth. Never hand-edit the .docx.
 // Regenerate with:
@@ -126,6 +112,18 @@ const capsLabel = (text) => new Paragraph({
     size: 20,
     font: 'Arial',
     characterSpacing: 20,
+  })],
+});
+
+// Sub-header within a capsLabel section — navy bold, sentence case, no tracking.
+const subLabel = (text) => new Paragraph({
+  spacing: { before: 120, after: 60 },
+  children: [new TextRun({
+    text,
+    bold: true,
+    color: COLOR.navy,
+    size: 22,
+    font: 'Arial',
   })],
 });
 
@@ -292,107 +290,143 @@ const cellPara = (text, opts = {}) => new Paragraph({
 // Content data
 // ─────────────────────────────────────────────────────────────────────────────
 
-// §2 — Gaps in Existing Modules (v3.1).
-// Two-column table: Module / Features that are not working today.
-// (v6.5's Features column is dropped — every entry here is a feature that
-//  does not work or is missing. The whole table IS the gap list.)
+// §3 — Incomplete Features in Current System.
+// Features in the current system that are not working or are missing — to be
+// addressed in this engagement. The first 6 rows describe gaps in modules that
+// already exist in v1; the last 2 rows surface modules that should exist but
+// were baked into code instead.
+// Short feature-label bullets per module — the document names the broken
+// feature areas; the companion Bugs & Gaps Excel sheet carries every
+// individual bug. This keeps the section to ≤ 2 pages.
 const GAPS_IN_EXISTING_MODULES = [
   ['Users & Access',
     [
-      'Create User form lets Admin pick any role; only Property Manager and Maintenance Team should be selectable. Tenants must come from lease signing, not direct creation.',
+      'User Management',
     ],
   ],
   ['Properties & Units',
     [
-      'Property reassignment exposed in the UI but the action never completes.',
-      'No amenities field on the property form — amenity selection cannot be recorded against a unit.',
+      'Property Management',
+      'Unit Management',
+      'Reassign Property Manager',
     ],
   ],
   ['Leases & Tenants',
     [
-      'Admin has no UI path to create a lease.',
-      'Lease renewal cannot add or remove tenants.',
-      'Early termination flow does not complete end-to-end (including tenant consent).',
+      'Lease Creation',
+      'Lease Renewal',
+      'Lease Termination',
+      'Rent Change Schedule',
+      'Tenant Creation',
     ],
   ],
   ['Maintenance Requests',
     [
-      'No per-request detail view — only flat summary, no history.',
-      'No role can close or reopen a request — status flow never ends.',
-      'Admin cannot reassign across properties. Maintenance Team cannot change priority.',
-      'PM-raised requests on a tenant’s unit do not appear on the tenant’s portal.',
-      'Requests can be raised against vacant units (no active-lease gate); maintenance categories not modelled, no category field on the form.',
-      '5+ maintenance requests alert missing on the Admin dashboard — when a single lease (or a single room in shared accommodation) raises 5 or more requests in one calendar month, the Admin should see an alert on the dashboard; this is not surfaced today.',
+      'Request Detail View',
+      'Status Lifecycle (Close & Reopen)',
+      'Priority Change During Request',
+      'High-Volume Request Alert',
     ],
   ],
   ['Rent Collection',
     [
-      'Admin has no UI path to record a payment.',
-      'Late fee and outstanding amount only refresh once a day — figures on screen can be a day out of date between refreshes.',
+      'Record Payment',
+      'Partial Payment Tracking',
+      'Period Filters',
     ],
   ],
   ['Dashboard',
     [
-      'Admin and Property Manager dashboards incomplete — missing rent collection %, overdue tenant count, open maintenance by priority, and upcoming lease expirations.',
-      'Maintenance Team has no working dashboard — landing errors. Needs a daily queue (assigned tickets by priority and status).',
-      'Tenant has no dashboard — only a lease snapshot today. Needs rent status, outstanding, recent payments and active maintenance in one place.',
-    ],
-  ],
-];
-
-// §4 — New Features.
-// Three brand-new feature areas to be built in this engagement.
-// Same shape as the gaps table — Module / feature bullets.
-const NEW_FEATURES = [
-  ['Leases & Tenants — Per-Room Leasing',
-    [
-      [bn('Room-based leasing mode '), r('— a property is set to Room-based at creation; each room of a unit can carry its own active lease. A 4-BHK can hold up to 4 independent leases.')],
-      [bn('Per-room rent, deposit, term, end date '), r('— each room lease is independent of the others on the same unit.')],
-      [bn('Shared common areas '), r('— maintenance on shared areas is visible to every room tenant; room-specific work is private to the room’s tenant.')],
-    ],
-  ],
-  ['Users & Access — Admin Impersonation',
-    [
-      [bn('Login-as '), r('— Admin can start an impersonation session as any Property Manager, Maintenance Team member or Tenant within their own Organization; the Admin can end the session at any time.')],
-    ],
-  ],
-  ['Users & Access — Task Delegation',
-    [
-      [bn('Delegate from Admin '), r('— Admin assigns specific tasks to a Property Manager or Maintenance Team member for a defined date range.')],
-      [bn('Window-bounded rights '), r('— the delegate has the extra rights only inside the window; before or after it, normal role-scope rules apply.')],
-    ],
-  ],
-  ['Visitor Management',
-    [
-      [bn('Tenant pre-approval '), r('— name, phone, purpose, expected date and time.')],
-      [bn('PM approval + check-in / out '), r('— approve or deny; arrival and departure timestamped.')],
-    ],
-  ],
-  ['Master Data Administration',
-    [
-      [bn('Reference lists '), r('— Amenities, Maintenance Categories, Payment Methods, City, State; Admin creates, edits and deactivates them from the UI.')],
-      [bn('Deactivate '), r('— deactivated entries become unselectable on new records (deactivation is only permitted once no records reference them).')],
+      'Admin Dashboard',
+      'Property Manager Dashboard',
+      'Maintenance Team Dashboard',
+      'Tenant Dashboard',
     ],
   ],
   ['Settings',
     [
-      [bn('Tunable values '), r('— late-fee rate, grace period and rent-change notice window; Admin tunes them from the UI.')],
+      'Late-Fee Rate',
+      'Grace Period',
+      'Rent-Change Notice Window',
     ],
   ],
-  ['Organization Management (SAAS layer)',
+  ['Master Data Management',
     [
-      [bn('Public organization sign-up '), r('— prospects submit an organization application; the request queues for Super Admin review.')],
-      [bn('Super Admin approval '), r('— on approval the organization is provisioned and its first Admin is auto-created.')],
-      [bn('Subscription plans '), r('— Basic / Standard / Premium catalogue managed by Super Admin; the plan caps active users.')],
-      [bn('Organization lifecycle '), r('— Super Admin can view, deactivate or change the plan on any organization.')],
+      'Amenities',
+      'Maintenance Categories',
+    ],
+  ],
+  ['Server Hardening',
+    [
+      'Access control — tenant / Property Manager / Maintenance each scoped to their own data only',
+      'Data integrity — balances, late fees and period status derived at query time; deposit refunds append-only',
+      'Concurrency — database-level guards against two active leases on a unit and double-credited payments',
+      'Observability — append-only audit log on every critical mutation (lease, termination, refund, rent change, maintenance)',
+      'Performance — all list endpoints paginated; rolling 30-day maintenance counts indexed, not full-table-scanned',
+      'Security — tenant PII and bank reference numbers redacted from search results except where explicitly needed',
     ],
   ],
 ];
 
-// §5 — Business Rules — only the rules that did not already appear in a
-// previous Solution Overview. Restatements of existing rules (whether v1 BLs
-// or rules already documented in v6.5 and earlier) are not repeated here —
-// the client has those documents.
+// §4 — New Features as Per Requirement
+// Each sub-section is rendered as a capsLabel + either bullets or a single
+// body paragraph (depending on the sub-section's natural shape).
+
+// 3.1 — Leases & Tenants — Per-Room Leasing
+const PER_ROOM_LEASING_BULLETS = [
+  [r('You can now add '), bn('rooms'), r(' under any unit.')],
+  [r('You can now create two types of lease — '), bn('unit-wise'), r(' or '), bn('room-wise'), r(' — directly from the Create Lease page.')],
+  [bn('Shared areas'), r(' can now be added at unit creation time, with an option to manage them from Master Data.')],
+  [bn('Maintenance requests'), r(' are now two types for any lease — unit-wise or room-wise. On a room-based lease, the tenant can also select a '), bn('shared area'), r(' or a '), bn('specific room'), r(' as the location of the maintenance request.')],
+];
+
+// 3.2 — Users & Access — Admin Impersonation (bullets)
+const IMPERSONATION_BULLETS = [
+  [r('An Admin can '), bn('sign in as any other user'), r(' in their Organization (Property Manager, Maintenance Team member or Tenant) and perform actions on that user’s behalf.')],
+  [r('Every action taken during the impersonation session is recorded against the '), bn('Admin'), r(', not the impersonated user.')],
+];
+
+// 3.3 — Users & Access — Task Delegation (bullets)
+const DELEGATION_BULLETS = [
+  [r('An Admin can '), bn('delegate selected tasks'), r(' to a Property Manager or a Maintenance Team member for a specified date range, and can revoke the delegation at any time.')],
+  [r('Any action the delegate performs while the delegation is active is recorded against the '), bn('delegate'), r(', not the Admin.')],
+];
+
+// 3.3 — Delegatable tasks, grouped by area (mirrors the New Delegation page).
+// Rendered as a sub-table under the Delegation sub-section.
+const DELEGATION_TASKS = [
+  ['Property & Inventory', 'Add Property, Edit Property Settings, Retire Property, Add Unit, Edit Unit, Edit Unit Rent, Retire Unit, Manage Rooms'],
+  ['Leases', 'Create Lease, Terminate Lease, Schedule Rent Change'],
+  ['Rent & Payments', 'Record Payment'],
+  ['Maintenance', 'Create Maintenance Request, Assign Maintenance Staff, Close Maintenance Request, Reopen Maintenance Request'],
+  ['Visitors', 'Approve / Deny Visitors, Check-in / Check-out Visitors'],
+  ['Users & Team', 'Add User (PM / Maintenance), Edit User, Reset User Password, Activate / Deactivate User'],
+  ['Master Data', 'Manage Property Types, Manage Amenities, Manage Specializations, Manage Categories, Manage Visit Purposes'],
+  ['Audit & Reports', 'View Audit Log'],
+];
+
+// 3.4 — Visitor Management (bullets)
+const VISITOR_BULLETS = [
+  [r('A new '), bn('Visitor Management'), r(' page is added.')],
+  [r('Tenants can '), bn('register expected visitors'), r('.')],
+  [r('The Property Manager or Admin can '), bn('approve, deny and mark check-in / check-out'), r(' for each visit.')],
+];
+
+// 3.5 — Organization Management (SAAS layer) — bullets with bold-lead first phrase
+const ORG_MGMT_BULLETS = [
+  [bn('Multi-organization migration '), r('— the current system is converted into a multi-organization platform; existing data is migrated into a new "default" organization.')],
+  [bn('Public organization sign-up '), r('— any organization can now sign up to the platform from the Sign Up page.')],
+  [bn('Public website + legal pages '), r('— the current homepage is reworked into a public marketing site that displays the subscription plans, and three new public pages are added: Contact, Privacy Policy, and Terms & Conditions.')],
+  [bn('New Super Admin role '), r('— a new platform-level role is introduced. The Super Admin reviews and approves organization sign-up requests; on approval the organization is provisioned and its first Admin is auto-created.')],
+  [bn('Subscription Plan catalogue '), r('— the Super Admin manages the Subscription Plan catalogue (Basic / Standard / Premium) and assigns or changes the plan on any organization.')],
+  [bn('Organization lifecycle '), r('— the Super Admin can view, deactivate or reactivate any organization on the platform.')],
+  [bn('Invoicing '), r('— the Super Admin can manage invoices for every organization.')],
+  [bn('Legal pages and contact queries '), r('— the Super Admin manages the public Legal pages (Privacy Policy, Terms & Conditions) and can view incoming Contact queries and mark their status.')],
+  [bn('Platform-level Master Data '), r('— the Super Admin manages a few platform-level master lists (city, state, payment methods, etc.) so that these values stay uniform across every organization on the platform.')],
+  [bn('Admin Organization view '), r('— every Admin now has a new page showing their own organization’s details, subscription plan and invoices.')],
+];
+
+// §5 — Business Rules — kept verbatim from v8.
 const NEW_BUSINESS_RULES = [
   ['NR-1', 'Leasing mode (Unit-based or Room-based) locks once any active lease exists on a property; switching requires terminating all active leases first.'],
   ['NR-2', 'Shared (whole-unit) maintenance requests are visible to every room tenant on the unit, the Property Manager and the Maintenance Team. Room-specific requests are visible to that room’s tenant, the Property Manager and the Maintenance Team only.'],
@@ -402,48 +436,6 @@ const NEW_BUSINESS_RULES = [
   ['NR-6', 'Each Organization has exactly one Subscription Plan (Basic / Standard / Premium). The plan caps active users; the Super Admin can change an Organization’s plan at any time, and the new cap applies immediately to subsequent user additions.'],
   ['NR-7', 'During an Admin impersonation session, every action is recorded against the Admin in the audit log — never the impersonated user. The Admin cannot impersonate the Super Admin, and cannot impersonate users outside their own Organization.'],
   ['NR-8', 'A delegated task runs under the delegate (Property Manager or Maintenance Team) inside the Admin-defined date range. Actions during the delegation window are recorded against the delegate, not the Admin. Outside the window the delegate has no extra rights.'],
-];
-
-// Timeline moved out — see doc-assets/templates/generate_timeline.js
-// (Phase Overview + Module Schedule sheets in docs/product/Timeline.xlsx).
-
-// ─────────────────────────────────────────────────────────────────────────────
-// §5 — Details data: Subscription Plans, Impersonation Scope, Settings Defaults
-// (Delegation is rendered as a single-paragraph broad-framing statement —
-//  no table needed for it.)
-// ─────────────────────────────────────────────────────────────────────────────
-
-const SUBSCRIPTION_PLANS = [
-  ['Plan',     'Active-user cap', 'Scope'],
-  ['Basic',    '5 users',         'Limited features'],
-  ['Standard', '20 users',        'Core features'],
-  ['Premium',  'Unlimited',       'All features'],
-];
-
-const IMPERSONATION_SCOPE = [
-  ['Target role',      'Within own Organization', 'Cross-organization'],
-  ['Property Manager', '✓',                       '✗'],
-  ['Maintenance Team', '✓',                       '✗'],
-  ['Tenant',           '✓',                       '✗'],
-  ['Super Admin',      '✗',                       '✗'],
-];
-
-const SETTINGS_DEFAULTS = [
-  ['Setting',                 'Default',             'Tunable range'],
-  ['Late-fee rate',           '2% per full week',    '0% – 10%'],
-  ['Grace period',            '5 days',              '0 – 15 days'],
-  ['Rent-change notice window','60 days',            '30 – 90 days'],
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// §6 — Assumptions
-// Kept tight (5 bullets max). Bullets stating what the platform assumes
-// about data, IDs, communications and sign-off cadence.
-// ─────────────────────────────────────────────────────────────────────────────
-const ASSUMPTIONS = [
-  [bn('Data migration '), r('— existing v1 data (users, properties, units, leases, payments, audit log) is moved into a single default Organization. Working name: '), r('GharSetu Solutions', { bold: true }), r(' — final name to be confirmed before kickoff.')],
-  [bn('ID continuity '), r('— existing user, property, unit, lease and payment IDs are preserved through the migration; no external integration breaks.')],
-  [bn('Email scope '), r('— existing transactional emails (password reset, rent-change notification) continue working unchanged.')],
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -530,7 +522,7 @@ const doc = new Document({
           spacing: { before: 0, after: 200 },
           children: [
             new TextRun({ text: 'Date: ', bold: true, size: 26, color: COLOR.charcoal, font: 'Arial' }),
-            new TextRun({ text: '26 May 2026', size: 26, color: COLOR.charcoal, font: 'Arial' }),
+            new TextRun({ text: '29 May 2026', size: 26, color: COLOR.charcoal, font: 'Arial' }),
           ],
         }),
         new Paragraph({
@@ -591,11 +583,33 @@ const doc = new Document({
       },
       children: [
         // ────────────────────────────────────────────────────────────────────
-        // §1 — Fixes in Existing Modules
-        // (Single-column gap list — each row names the module and the fixes
-        //  we will deliver for it in this engagement.)
+        // §1 — Introduction
+        // Two short paragraphs: what GharSetu is, what this document covers.
         // ────────────────────────────────────────────────────────────────────
-        solidBanner('Fixes in Existing Modules'),
+        solidBanner('Introduction'),
+
+        body('GharSetu is a property-rental management platform that helps property owners and their teams run their day-to-day operations — properties, units, tenants, leases, rent collection, maintenance and visitors — in a single web-based system.', { after: 160 }),
+        body('This document captures the current state of the existing GharSetu system, the new features being added in this engagement, and the rules and scope that frame the work.', { after: 200 }),
+        spacer(160),
+
+        // ────────────────────────────────────────────────────────────────────
+        // §2 — Incomplete Features in Current System
+        // Features in the current system that are not working or are missing —
+        // to be addressed in this engagement. 8 modules total: 6 inherited
+        // from the v1 gap list + 2 new module-level rows (Settings, Master
+        // Data Management) that should have existed but were baked into code.
+        // A closing pointer paragraph defers per-bug detail to a separate
+        // Bugs & Gaps Excel sheet so this document stays readable.
+        // ────────────────────────────────────────────────────────────────────
+        solidBanner('Incomplete Features in Current System'),
+
+        // Audit summary — sets the scale before the per-module table.
+        // Sourced from the GharSetu Bug Report audit (100 individual issues
+        // across every operational module). Patterns are grouped so the
+        // client can see the systemic nature of the defects rather than a
+        // long flat bug list. The full enumeration is in the companion
+        // Bugs & Gaps Excel sheet shared with this document.
+        body('An audit of the existing system identified approximately 100 individual issues across every operational module — bugs, missing features and incomplete user journeys. The full enumeration is provided as a separate Bugs & Gaps Excel sheet shared alongside this document. The table below names the major incomplete features per module.', { after: 160 }),
 
         new Table({
           width: { size: 10080, type: WidthType.DXA },
@@ -606,7 +620,7 @@ const doc = new Document({
               tableHeader: true,
               children: [
                 headerCell('Module', 2400),
-                headerCell('Fixes', 7680),
+                headerCell('Incomplete features', 7680),
               ],
             }),
             ...GAPS_IN_EXISTING_MODULES.map(([label, gaps], i) => new TableRow({
@@ -620,167 +634,61 @@ const doc = new Document({
         spacer(240),
 
         // ────────────────────────────────────────────────────────────────────
-        // §2 — New Roles
-        // One new role: Super Admin (platform-level, above all organizations).
-        // The four existing roles (Admin, Property Manager, Maintenance Team,
-        // Tenant) continue unchanged — Admin remains scoped to its own
-        // organization; only Super Admin crosses organization boundaries.
+        // §3 — New Features as Per Requirement
+        // Five sub-sections, each introduced with a saffron capsLabel and
+        // followed by either bullets or a single body paragraph depending on
+        // its natural shape. The Super Admin role is described inside §3.5
+        // Organization Management (no separate "New Roles" section).
         // ────────────────────────────────────────────────────────────────────
-        solidBanner('New Roles'),
+        solidBanner('New Features as Per Requirement'),
 
+        // 3.1 — Per-Room Leasing
+        capsLabel('Leases & Tenants — Per-Room Leasing'),
+        ...PER_ROOM_LEASING_BULLETS.map(runs => bullet(runs)),
+        spacer(160),
+
+        // 3.2 — Users & Access (Impersonation + Delegation)
+        capsLabel('Users & Access'),
+        subLabel('Impersonation'),
+        ...IMPERSONATION_BULLETS.map(runs => bullet(runs)),
+        subLabel('Delegation'),
+        ...DELEGATION_BULLETS.map(runs => bullet(runs)),
+        spacer(80),
+        cellPara('Tasks an Admin can delegate', { bold: true, color: COLOR.navy, after: 60 }),
         new Table({
           width: { size: 10080, type: WidthType.DXA },
-          columnWidths: [2400, 7680],
+          columnWidths: [2700, 7380],
           layout: TableLayoutType.FIXED,
           rows: [
             new TableRow({
               tableHeader: true,
               children: [
-                headerCell('Role', 2400),
-                headerCell('Key capabilities', 7680),
+                headerCell('Area', 2700),
+                headerCell('Tasks that can be delegated', 7380),
               ],
             }),
-            new TableRow({
+            ...DELEGATION_TASKS.map(([area, tasks], i) => new TableRow({
               children: [
-                bodyCell('Super Admin', 2400, { bold: true, color: COLOR.navy }),
-                multiCell([
-                  cellBullet('Review and approve organization sign-up requests; on approval, provision the organization and auto-create its first Admin.'),
-                  cellBullet('Manage the Subscription Plan catalogue (Basic / Standard / Premium) and assign or change the plan on any organization.'),
-                  cellBullet('View, deactivate or reactivate any organization on the platform.'),
-                  cellBullet('Cross-organization visibility — the only role that reads across organization boundaries.'),
-                ], 7680),
+                bodyCell(area, 2700, { bold: true, color: COLOR.navy, stripe: i % 2 === 1 }),
+                bodyCell(tasks, 7380, { stripe: i % 2 === 1 }),
               ],
-            }),
-          ],
-        }),
-        spacer(240),
-
-        // ────────────────────────────────────────────────────────────────────
-        // §3 — New Features
-        // (Renamed from "New Modules". Same shape as §1: Module / bullets.)
-        // ────────────────────────────────────────────────────────────────────
-        solidBanner('New Features'),
-
-        new Table({
-          width: { size: 10080, type: WidthType.DXA },
-          columnWidths: [2400, 7680],
-          layout: TableLayoutType.FIXED,
-          rows: [
-            new TableRow({
-              tableHeader: true,
-              children: [
-                headerCell('Module', 2400),
-                headerCell('Features added', 7680),
-              ],
-            }),
-            ...NEW_FEATURES.map(([label, features], i) => new TableRow({
-              children: [
-                bodyCell(label, 2400, { bold: true, color: COLOR.navy, stripe: i % 2 === 1 }),
-                multiCell(features.map(t => cellBullet(t)), 7680, { stripe: i % 2 === 1 }),
-              ],
-            })),
-          ],
-        }),
-        spacer(240),
-
-        // ────────────────────────────────────────────────────────────────────
-        // §4 — Business Rules
-        // Only rules that are genuinely new in this engagement. Restatements
-        // of v1 BLs or of rules already documented in earlier Solution
-        // Overviews are not repeated — the client has those documents.
-        // ────────────────────────────────────────────────────────────────────
-        solidBanner('Business Rules'),
-
-        ...NEW_BUSINESS_RULES.map(([, text]) => bullet([r(text)])),
-        spacer(240),
-
-        // ────────────────────────────────────────────────────────────────────
-        // §5 — Details
-        // Three reference tables that turn the vague phrases in §3 / §4 into
-        // concrete numbers + scope grids:
-        //   • Subscription Plans (caps + scope)
-        //   • Admin Impersonation Scope (who can be impersonated)
-        //   • Settings Defaults (default values + tunable ranges)
-        // Plus a single-paragraph framing for Admin Task Delegation.
-        // ────────────────────────────────────────────────────────────────────
-        solidBanner('Details'),
-
-        capsLabel('Subscription Plans'),
-        new Table({
-          width: { size: 10080, type: WidthType.DXA },
-          columnWidths: [2400, 3000, 4680],
-          layout: TableLayoutType.FIXED,
-          rows: [
-            new TableRow({
-              tableHeader: true,
-              children: SUBSCRIPTION_PLANS[0].map((h, i) =>
-                headerCell(h, [2400, 3000, 4680][i])
-              ),
-            }),
-            ...SUBSCRIPTION_PLANS.slice(1).map((row, i) => new TableRow({
-              children: row.map((v, c) =>
-                bodyCell(v, [2400, 3000, 4680][c], { bold: c === 0, color: c === 0 ? COLOR.navy : COLOR.charcoal, stripe: i % 2 === 1 })
-              ),
             })),
           ],
         }),
         spacer(200),
 
-        capsLabel('Admin Impersonation Scope'),
-        new Table({
-          width: { size: 10080, type: WidthType.DXA },
-          columnWidths: [3360, 3360, 3360],
-          layout: TableLayoutType.FIXED,
-          rows: [
-            new TableRow({
-              tableHeader: true,
-              children: IMPERSONATION_SCOPE[0].map((h, i) =>
-                headerCell(h, [3360, 3360, 3360][i])
-              ),
-            }),
-            ...IMPERSONATION_SCOPE.slice(1).map((row, i) => new TableRow({
-              children: row.map((v, c) =>
-                bodyCell(v, [3360, 3360, 3360][c], { bold: c === 0, color: c === 0 ? COLOR.navy : COLOR.charcoal, stripe: i % 2 === 1 })
-              ),
-            })),
-          ],
-        }),
-        spacer(200),
+        // 3.4 — Visitor Management
+        capsLabel('Visitor Management'),
+        ...VISITOR_BULLETS.map(runs => bullet(runs)),
+        spacer(160),
 
-        capsLabel('Admin Task Delegation'),
-        body('An Admin can delegate any action they themselves are authorised to perform, to a Property Manager or Maintenance Team member within their own Organization, for a defined date range. Outside that window the delegate has no extra rights.', { after: 200 }),
-
-        capsLabel('Settings — Defaults and Tunable Ranges'),
-        new Table({
-          width: { size: 10080, type: WidthType.DXA },
-          columnWidths: [3360, 3360, 3360],
-          layout: TableLayoutType.FIXED,
-          rows: [
-            new TableRow({
-              tableHeader: true,
-              children: SETTINGS_DEFAULTS[0].map((h, i) =>
-                headerCell(h, [3360, 3360, 3360][i])
-              ),
-            }),
-            ...SETTINGS_DEFAULTS.slice(1).map((row, i) => new TableRow({
-              children: row.map((v, c) =>
-                bodyCell(v, [3360, 3360, 3360][c], { bold: c === 0, color: c === 0 ? COLOR.navy : COLOR.charcoal, stripe: i % 2 === 1 })
-              ),
-            })),
-          ],
-        }),
+        // 3.5 — Organization Management (SAAS layer) — includes Super Admin role
+        capsLabel('Organization Management (SAAS layer)'),
+        ...ORG_MGMT_BULLETS.map(runs => bullet(runs)),
         spacer(240),
 
         // ────────────────────────────────────────────────────────────────────
-        // §6 — Assumptions
-        // ────────────────────────────────────────────────────────────────────
-        solidBanner('Assumptions'),
-
-        ...ASSUMPTIONS.map(runs => bullet(runs)),
-        spacer(240),
-
-        // ────────────────────────────────────────────────────────────────────
-        // §7 — Out of Scope
+        // §5 — Out of Scope
         // Two items only — both restated here (despite appearing in v6.5)
         // because the new SAAS scope makes them easy to assume incorrectly.
         // ────────────────────────────────────────────────────────────────────
@@ -791,7 +699,7 @@ const doc = new Document({
         spacer(240),
 
         // ────────────────────────────────────────────────────────────────────
-        // §8 — Next Steps
+        // §6 — Next Steps
         // Draft. No formal sign-off block — once the scope is locked, a final
         // version will be issued with the approval block re-added.
         // ────────────────────────────────────────────────────────────────────
