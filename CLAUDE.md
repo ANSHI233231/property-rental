@@ -38,7 +38,7 @@ Current stack (fixed, see [SRS §10](docs/product/SRS_Document.md)):
 | [docs/testing/v1/bl-traceability-matrix.md](./docs/testing/v1/bl-traceability-matrix.md) | BL → passing-test mapping. Sync with `feature_list.json`. |
 | [docs/product/Solution_Overview.docx](./docs/product/Solution_Overview.docx) | **Current engagement scope (v8).** Generated from `doc-assets/templates/generate_solution_overview.js`. |
 | [docs/product/UIUX_Design_Document.docx](./docs/product/UIUX_Design_Document.docx) | **UI/UX design spec — prototype builds against this.** Generated from `doc-assets/templates/generate_design_document.js`. |
-| [docs/product/Timeline.xlsx](./docs/product/Timeline.xlsx) | Companion timeline (Phase Overview + Module Schedule). Generated from `doc-assets/templates/generate_timeline.js`. Do not reference by filename in client-facing copy. |
+| [docs/product/Timeline.xlsx](./docs/product/Timeline.xlsx) | Companion delivery timeline (Phase Overview + Schedule). Mirrors the Solution Overview order — Phase A Close the Gaps → Phase B New Features → Phase C Integration/VAPT/Release. Parallel multi-AI-agent paced, relative working days (Day 1…N, no calendar dates), ~8 days total, no prototype phase. Generated from `doc-assets/templates/generate_timeline.js`. Do not reference by filename in client-facing copy. |
 | [docs/planning/FEATURE_PLANNING.md](./docs/planning/FEATURE_PLANNING.md) | Process + template for per-feature planning files. |
 | [prototype/](./prototype/) | 29 static HTML pages — the design contract. Tokens in `prototype/assets/styles.css`. |
 

@@ -78,3 +78,35 @@ Date: 2026-05-29
 - No commit/push (Rule #1 — no explicit instruction).
 
 ---
+
+## Task 3 — Timeline.xlsx · full rebuild to match current Solution Overview
+
+- Status: ✅ Completed
+- All edits in the generator JS (`doc-assets/templates/generate_timeline.js`) per Rule 28; .xlsx regenerated.
+
+### Why
+The old Timeline was a compressed 5-day **Plan → Prototype → Build → Test → UAT** model whose schedule items no longer matched the current Solution Overview, and it carried a prototype/design phase the client no longer wants in the delivery clock.
+
+### Changes
+- **Removed the prototype/design phase entirely** — the schedule now starts at build, after the Solution Overview + prototype are shared and signed off.
+- **Restructured to mirror the Solution Overview 1:1 and in the same order** so the two documents share a single reference:
+  - Phase A — Close the Gaps (the 9 Incomplete-Feature modules, incl. Server Hardening)
+  - Phase B — New Features (Per-Room Leasing → Impersonation → Delegation → Visitor Management → Organization Management, with the SAAS layer broken into its 10 sub-items)
+  - Phase C — Integration, VAPT & Release
+- **Pacing model = multiple autonomous AI agent teams working in parallel** (Backend, Frontend, DBA, QA, Security), not human developers. Items sharing a Day run concurrently (up to 6/day).
+- **Per-item lifecycle**: each feature is built + automated-tested + manual-QA'd + VAPT-checked within its day; a **consolidated full-platform VAPT** + UAT sit in Phase C (per-feature VAPT + final pass).
+- **Time expressed as relative working days (Day 1 … Day N), not calendar dates** — Day 1 = first working day after sign-off; calendar dates fixed later once start is agreed. (User decision: client cares about days/duration, not committed dates pre-sign-off.)
+- **Total: 8 working days** (was an incorrect 49-day sequential draft mid-session; corrected after user flagged that parallel AI agents + a finished prototype should land ≤10 days).
+- Two sheets: **Phase Overview** (phases, milestones in days, notes/legend incl. peak-parallelism) and **Schedule** (27 rows, grouped by Day with a navy divider, columns: #, Day, Phase, Module/Area, Work Item, Includes-per-item, AI Agent Team).
+- Updated the CLAUDE.md source-of-truth table row for Timeline.xlsx to describe the new model.
+
+### Files Changed
+- doc-assets/templates/generate_timeline.js (full rewrite)
+- docs/product/Timeline.xlsx (regenerated)
+- CLAUDE.md (Timeline.xlsx description row)
+
+### Notes
+- Start date is an assumption-free relative model; no `START_DATE` constant remains.
+- Open option flagged to user: can compress to ~6 days or add a UAT-buffer day; left at 8 pending direction.
+
+---
