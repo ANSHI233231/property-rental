@@ -107,11 +107,11 @@
           </div>
           <div>
             <label class="label" for="from-date">From</label>
-            <input id="from-date" type="date" class="input" />
+            <input data-datepicker data-pair-max="to-date" placeholder="DD/MM/YYYY" id="from-date" type="text" class="input" />
           </div>
           <div>
             <label class="label" for="to-date">To</label>
-            <input id="to-date" type="date" class="input" />
+            <input data-datepicker data-pair-min="from-date" placeholder="DD/MM/YYYY" id="to-date" type="text" class="input" />
           </div>
           <div>
             <label class="label" for="actor-search">Actor name</label>
@@ -330,6 +330,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
   <!-- More bottom sheet (Admin overflow nav) -->

@@ -197,11 +197,11 @@
         </div>
         <div>
           <label class="label" for="start">Start date</label>
-          <input id="start" class="input" type="text" placeholder="DD/MM/YYYY" />
+          <input data-datepicker data-pair-max="end" id="start" class="input" type="text" placeholder="DD/MM/YYYY" />
         </div>
         <div>
           <label class="label" for="end">End date</label>
-          <input id="end" class="input" type="text" placeholder="DD/MM/YYYY" />
+          <input data-datepicker data-pair-min="start" id="end" class="input" type="text" placeholder="DD/MM/YYYY" />
         </div>
         <div>
           <label class="label" for="deposit">Security deposit (₹)</label>
@@ -236,6 +236,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->

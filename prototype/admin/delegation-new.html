@@ -362,7 +362,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="label" for="delegStart">Start date <span style="color:var(--color-saffron)">*</span></label>
-                <input type="date" id="delegStart" name="startDate" class="input"
+                <input data-min-date="today" data-pair-max="delegEnd" data-datepicker placeholder="DD/MM/YYYY" type="text" id="delegStart" name="startDate" class="input"
                   aria-label="Start date (DD/MM/YYYY)"
                   oninput="updateWindowNote()" onblur="validateDelegDate('delegStart')" />
                 <div class="field-error" id="delegStartError"></div>
@@ -370,7 +370,7 @@
               </div>
               <div>
                 <label class="label" for="delegEnd">End date <span style="color:var(--color-saffron)">*</span></label>
-                <input type="date" id="delegEnd" name="endDate" class="input"
+                <input data-min-date="today" data-pair-min="delegStart" data-datepicker placeholder="DD/MM/YYYY" type="text" id="delegEnd" name="endDate" class="input"
                   aria-label="End date (DD/MM/YYYY)"
                   oninput="updateWindowNote()" onblur="validateDelegDate('delegEnd')" />
                 <div class="field-error" id="delegEndError"></div>
@@ -434,6 +434,7 @@
   </div>
 
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/toast.js"></script>
   <script>

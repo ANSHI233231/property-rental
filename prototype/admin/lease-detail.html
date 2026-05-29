@@ -232,7 +232,7 @@
 
         <div class="mb-4">
           <label class="label" for="sm-date">Effective date (DD/MM/YYYY) <span style="color:var(--color-saffron)" aria-hidden="true">*</span></label>
-          <input id="sm-date" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearScheduleErr('sm-date')" />
+          <input data-max-date="today" data-datepicker id="sm-date" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearScheduleErr('sm-date')" />
           <div class="field-error" id="sm-date-error"></div>
         </div>
 
@@ -271,6 +271,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
 
   <!-- More bottom sheet (Admin overflow nav) -->

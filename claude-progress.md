@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-05-27 · Admin role build-out (Property Types master · Leases page · property/unit edit+retire) + global success toast + signup State→City cascade · maintained by `gharsetu-lead`
+**Last updated:** 2026-05-30 · Create Lease wizard end-to-end overhaul (modernization + Step 5 restructure + trim + history-card relocate + step strip + numeric-id mock-data refactor + quick-create deep-link) + NEW `assets/date-picker.js` + bulk rollout to 12 pages / 20 inputs + 5 range pairs wired + CLAUDE.md rule #19 strengthened · maintained by `gharsetu-lead`
 
 ---
 
@@ -16,7 +16,29 @@
 
 ---
 
-## 2. Last session summary (2026-05-29 — anchor-day billing + Admin Organization page + plans polish)
+## 2. Last session summary (2026-05-30 — Create Lease wizard overhaul + date-picker rollout)
+
+**Scope.** Single Opus session (with one `gharsetu-frontend` dispatch for the modernization pass). All work in `prototype/` + `CLAUDE.md` + docs. No app code.
+
+**Shipped (10 tasks, all in `agent-team-change-logs/gharsetu-frontend-2026-05-30.md`):**
+1. **Create Lease modernization pass** (`gharsetu-frontend` agent) — 32 px step circles with saffron glow ring, `aria-current="step"`, `panelFadeIn` (180 ms, reduced-motion-aware), 5-step `step-heading`/`step-subheading`, saffron-tinted selected-card states with checkmark badge, 44 px colored card bands (initials, hashed-from-id navy/blue palette), promoted conflict error to `cl-conflict-banner`, live sticky 268 px summary rail from Step 2 onward, `wizard-shell` two-column grid, "Step N of 5" bottom counter, accordion context panels with chevron-rotate toggle.
+2. **Step 5 restructure** (same agent dispatch) — 4 sub-sections (Lease term / Rent & charges / Rules / Notes) under `.step5-section-label`; new fields (Lock-in, Maintenance, Escalation, Notes); right column replaced with Selected-tenants panel; lease-history panels relocated to a 6:6 `step5-history-grid` below the form.
+3. **Step 5 trim — user-driven** (orchestrator-direct) — Lock-in, Rent escalation, Notes, the entire Rules section (Late fee, Notice period, Rent due day) all removed; tenant lease history rows enriched with property/unit/room/rent; Selected-tenants panel given `max-height: 520px + overflow-y: auto` so adding many tenants no longer destabilises the layout.
+4. **History card relocated + combined** — moved outside the wizard panel, below the action bar, wrapped in `<section class="card" id="step5-history-card">`; unit-wise + room-wise leases collapsed into one Unit Lease History card with scope chips; empty-state tenants skipped; **bug fix**: `UNIT_LEASES` rows added for `gv-1A`/`gv-2B`/`pg202-C` (units were Occupied but had no record), two date mismatches corrected.
+5. **Step indicator stretched** to full card width via `flex: 1 1 0` connectors.
+6. **Mock-data refactor to numeric ids** (`create-lease.html`) — `PROPERTIES`/`UNITS`/`ROOMS`/`TENANTS`/`UNIT_LEASES` all flat arrays keyed by numeric `id`, relations via numeric FK; ~20 onclick handlers updated; helpers added (`findPropertyById`, `findUnitById`, etc.); `dataset` string-coercion bug fixed; Step 2 stale-grid bug fixed.
+7. **Quick-create-lease deep-link flow** — `+ Create Lease for this Unit` (top) and `+ Create Lease` (per-room rows) added to admin `unit-detail.html`; wizard reads `?unitId=<n>&roomId=<m>`, validates, seeds state, jumps to Step 4. PM equivalent intentionally not added (cross-folder Admin link would surround the wizard with the PM sidebar).
+8. **Step 5 context strip** — saffron-tinted card at top of Step 5: lease-type chip (`UNIT-WISE LEASE` / `ROOM-WISE LEASE`) + breadcrumb `Property › Unit (› Room)`. Required because the summary rail is hidden on Step 5.
+9. **NEW `prototype/assets/date-picker.js`** — vanilla JS DD/MM/YYYY calendar picker, no deps. `data-min-date="today"|D/M/Y|ISO`, `data-max-date=…`, `data-pair-min`/`data-pair-max` for range sync. `GsDatePicker.initAll(root?)`/`refresh(root?)` API. Mon-start week (Indian convention). **Bulk-rolled to 12 prototype files / 20 inputs.** **5 range pairs wired**: `cl-start↔cl-end`, `start↔end` (pm/leases), `from-date↔to-date` (audit-log), `delegStart↔delegEnd`, `rl-start↔rl-end`.
+10. **CLAUDE.md rule #19 strengthened** — extended from "PK = id INTEGER auto-increment" to also bind cross-table relations and prototype mock data: every relation references numeric `id` only (no slug/email/name); Prisma `@relation` always at the integer PK; mock arrays must use numeric ids and reference each other via those ids so the prototype teaches the right pattern.
+
+**Docs:** Change-log appended to [agent-team-change-logs/gharsetu-frontend-2026-05-30.md](./agent-team-change-logs/gharsetu-frontend-2026-05-30.md) (tasks 1–10). 8 rows appended to [docs/planning/prototype-changes.md](./docs/planning/prototype-changes.md). CLAUDE.md rule #19 rewritten.
+
+**Carry-over:** PM `unit-detail.html` quick-create-lease affordance is deferred (needs a `pm/create-lease.html` mirror first). `app-port` note in prototype-changes: do not migrate the Lock-in/Escalation/Notes columns from earlier ledger entry — those are removed; only Maintenance stays as a per-lease column.
+
+---
+
+## 2a. Earlier session summary (2026-05-29 — anchor-day billing + Admin Organization page + plans polish)
 
 **Scope.** Single Opus session, orchestrator-direct (no specialist agents). All work in `prototype/` + `docs/`. No app code.
 
@@ -37,7 +59,7 @@
 
 ---
 
-## 2a. Earlier session summary (2026-05-27 PM — Admin role build-out + Property Types master + global success toast)
+## 2b. Earlier session summary (2026-05-27 PM — Admin role build-out + Property Types master + global success toast)
 
 **Scope.** Continued the screen-by-screen review, focused on the **Admin role** plus two cross-cutting features (Property Types master, global toast). Prototype-only — no app code, no business-rule changes. (The morning's homepage redesign + public-chrome work is committed in `994bfa4`; see §7.)
 
@@ -66,7 +88,7 @@
 
 ---
 
-## 2b. Earlier session summary (2026-05-26 / 27 — v8 prototype build-out)
+## 2c. Earlier session summary (2026-05-26 / 27 — v8 prototype build-out)
 
 **Scope.** Implement v8 across the static prototype: ship the 7 new features (with Per-Room Leasing as planning-only this pass) and the 6 module gap closures from Solution Overview v8. Public auth pages refreshed; sidebar pattern updated to a compact account menu.
 
@@ -102,7 +124,7 @@
 
 ---
 
-## 2c. Earlier session summary (2026-05-26 — CLAUDE.md overhaul + Feature Planning template)
+## 2d. Earlier session summary (2026-05-26 — CLAUDE.md overhaul + Feature Planning template)
 
 **CLAUDE.md rewrite.** Fixed: stale 2026-05-25 header; the Rule #2 vs Rule #12 contradiction on public sign-up (the v1 "No public sign-up" framing never updated for v8 SAAS scope); UIUX_Design_Document.docx missing from source-of-truth table; prototype page count (19 → actual 29). Restructured into clear bands: **Working rules** (11 process rules — never-commit-without-instruction, plan-first, lead-orchestrates, worker≠checker, per-task change log, submodule discipline, relative paths, CONTEXT.md mirror, prototype sync, JS-source-of-truth for binaries, line caps) + **Technical conventions** (6 code conventions — snake_case DB, no FK constraints with relations declared in Prisma, Prisma migrations append-only, audit_log on every mutation, FE/BE validation parity with no HTML5 native, sensitive files never in git) + renamed **Hard rules → Scope rules** (11 business/scope rules A–K). Added a Conflict-resolution section (JSON wins over markdown, CONTEXT.md wins over CLAUDE.md, ask user when working vs scope rules conflict). All internal links converted to relative `./` paths. Final size: 134 lines (under the 200 cap).
 
@@ -112,7 +134,7 @@
 
 ---
 
-## 2d. Earlier session summary (2026-05-26 — UIUX Design Document delivered)
+## 2e. Earlier session summary (2026-05-26 — UIUX Design Document delivered)
 
 This session continued past the earlier "final close" with a substantial new artifact and several scope refinements.
 
@@ -175,6 +197,9 @@ Solution Overview was iterated end-to-end (v6.5 → v8) over a long single sessi
 | **Plan UI polish** (Core/Optional unified flat list across 4 surfaces · signup tile redesign · ?plan URL auto-select · Priority Support + Task Delegation/Standard removed) | ✅ shipped 2026-05-29 |
 | **Delegation New** (30 tasks × 8 groups · per-group Select all · chips preview with count) | ✅ shipped 2026-05-29 |
 | **SearchableSelect.refresh** wrap-lookup bug fix (signup City cascade) | ✅ shipped 2026-05-29 |
+| **Create Lease wizard overhaul** (modernization · Step 5 restructure · trim · history-card relocate+combine · step-strip · numeric-id mock-data refactor · quick-create deep-link from unit-detail) | ✅ shipped 2026-05-30 |
+| **NEW `assets/date-picker.js`** (DD/MM/YYYY, Mon-start, range-pair sync) + bulk rollout to 12 pages / 20 inputs + 5 range pairs wired | ✅ shipped 2026-05-30 |
+| **CLAUDE.md rule #19 strengthened** (numeric-id PKs + relations via id only — applies to prototype mock data too) | ✅ shipped 2026-05-30 |
 | Visitor pages card→table + tiles | ✅ shipped (PM + tenant) |
 | Tenant My Leases + Tenant Lease Detail | ✅ shipped |
 | Units IA refactor → per-role Unit Detail | ✅ shipped |
@@ -211,6 +236,7 @@ Prototype is now feature-rich across all 5 roles AND the SAAS/billing layer (anc
 4. **Fold SRS amendments + regenerate Solution Overview** — pending business-rule changes from earlier sessions not yet reflected in the docx: (a) one-PM-per-property retired → multi-property + tenure history; (b) maintenance role cannot self-assign or close; (c) lease anchored to unit not property. Plus Master Data platform/org split + Server Logs as new Super Admin surfaces. NR-13/14 already updated in the SRS this session — Solution Overview docx hasn't been regenerated yet.
 5. **Begin application port.** Pick highest-leverage first: ENG-F06 Org Management/SAAS + Super Admin (gates user-scoping) or ENG-F01 Per-Room Leasing (biggest schema change). Create `feature_list.json` rows. The 4 planning files dated 2026-05-27 + the plans-and-billing file dated 2026-05-28 are binding specs.
 6. **Sign off on open decisions** still pending: 5 Per-Room Leasing questions · 2 Impersonation (active-org gate, nested guard) · PM tenure-window data-scope confirmation.
+7. **Smaller follow-ups from 2026-05-30:** (a) build a `pm/create-lease.html` mirror so the PM `unit-detail.html` can also surface the quick-create-lease buttons; (b) extend the numeric-id mock-data pattern to the remaining prototype pages whose mock arrays still key by slug (sweep candidates: `admin/leases.html`, `admin/tenants.html`, `pm/properties.html`).
 
 If the user has none in mind: surface this list and ask which to start.
 
@@ -236,6 +262,7 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 
 | Date | HEAD | Agent | What changed |
 |---|---|---|---|
+| 2026-05-30 | _pending_ | orchestrator (Opus) + gharsetu-frontend | **Create Lease wizard end-to-end overhaul** — modernization pass (gharsetu-frontend agent: 32 px step circles + saffron glow ring, `panelFadeIn`, card colored bands, conflict banner, sticky 268 px summary rail, `wizard-shell`, "Step N of 5", accordion context panels) · Step 5 restructure → trim → history-card relocate+combine+wrap+fix-empty-state → wizard step indicator stretched full-width → Step 5 **context strip** (`UNIT-WISE LEASE` chip + Property › Unit › Room breadcrumb) → **mock-data refactor to numeric ids** (`PROPERTIES`/`UNITS`/`ROOMS`/`TENANTS`/`UNIT_LEASES` flat arrays with numeric `id` + numeric FKs; ~20 onclick handlers + 9 helper lookups + dataset string-coercion fix + Step 2 stale-grid bug fix) → **quick-create-lease deep-link flow** (admin `unit-detail.html` + Create Lease for Unit + per-room + Create Lease buttons; wizard reads `?unitId=<n>&roomId=<m>` and jumps to Step 4 pre-seeded). **NEW `prototype/assets/date-picker.js`** (DD/MM/YYYY, Mon-start, `data-min-date`/`-max-date`/`-pair-min`/`-pair-max`) + **bulk rollout to 12 prototype files / 20 inputs** + **5 date-range pairs wired** (`cl-start↔cl-end`, `start↔end` pm/leases, `from-date↔to-date` audit-log, `delegStart↔delegEnd`, `rl-start↔rl-end`). **CLAUDE.md rule #19 strengthened** to bind cross-table relations and prototype mock data to numeric ids only. |
 | 2026-05-29 | _pending_ | orchestrator (Opus) | **Anchor-day billing** introduced: per-org `billing_anchor_day`, daily cron, 5 surfaces re-anchored, SRS NR-13/14 rewritten, planning doc aligned. **Approve modal redesigned** — org summary table + Primary Contact editable + email-collision detection + billing anchor day picker with live preview. **Admin `billing.html` → `admin/organization.html`** (full org-detail page, 25 admin files updated, new `admin/invoice-detail.html`). **Mark Paid wired to Payment Methods master** (`assets/payment-methods.js`, dynamic ref label per method). **Plan UI polish** — Core/Optional unified flat 2-col feature list across 4 surfaces · signup tile redesign (floating badge, big price, KPI chips) · `?plan=<id>` auto-select · Priority Support removed · Task Delegation removed from Standard · Generate Invoice button removed. **Delegation New** 30 tasks × 8 groups. **`SearchableSelect.refresh`** wrap-lookup bug fix. Change-log + prototype-changes ledger + claude-progress sections 2/3/5/7 updated. |
 | 2026-05-27 | _pending_ | orchestrator | Admin role build-out + 2 cross-cutting features. **Property Types master** (org-level: `property-types.html` + `property-types.js` + Add-Property dropdown + sublink ×17). **Admin Leases page** (`admin/leases.html`, org-wide + Leases nav ×17). Property detail: Current-Tenant column, **Add/Edit Unit** modal (status locked while occupied) + **Retire** (reason, soft status), removed Active-Leases/Edit-Property/Create-Lease, unmasked PM phone. Property listing: **Edit Property** (shared modal, manager hidden in edit) + read-only summary tiles. Add/Edit Property amenities → checkboxes. Dashboard: Overdue-Leases + Recent-Open-Maintenance. **Signup State→City cascade** (`locations.js`) + Pincode. **Global success toast** (`toast.js`) across all 64 pages (38 alerts + 12 announce + signup/contact). Visit-Purposes note→tooltip. `gharsetu-frontend` model → `claude-sonnet-4-6`. 3 planning files added. |
 | 2026-05-27 | `994bfa4` | orchestrator + gharsetu-frontend | Homepage redesign shipped (glass nav, hero+dashboard-mock+stats strip, alternating capability rows, how-it-works, bento roles, popular-glow plans, merged navy CTA, scroll-reveal) · footer deep-navy `#0D1757` separation · **`public-chrome.js` single source** for nav+footer across index/contact/privacy/terms (auth pages chrome-free) · profile Role row → badge only (5 roles) + Edit-Profile modal (Name+Mobile only) · Server Logs Lines column removed · Super Admin sidebar fixed (payment-methods missing Business Types) · master-data deactivate reason → disabled-button `title` tooltip (6 masters, 27 notes) · Plans Super-Admin "Set as Most Popular" control + signup helper de-hardcoded ("Most Popular", no plan name). `prototype-changes.md` created. |
@@ -245,9 +272,7 @@ All five are tracked in `feature_list.json` under `carry_over_v1_post_release`.
 | 2026-05-27 | _pending_ | gharsetu-lead | Master Data ownership split (platform vs org): Cities/States/Payment Methods moved from Admin to Super Admin · `prototype/super-admin/master-data/` subfolder created with 3 sub-pages (Super Admin chrome — Dashboard/Orgs/Plans sidebar + Aayush/Super Admin/AK identity + 4-tab tabbar) · new `super-admin/master-data.html` 3-card landing · Master Data sub-menu added to 5 Super Admin sidebar pages · Admin sub-menu trimmed from 6→3 (Amenities, Categories, Visit Purposes) across 16 admin files · `admin/master-data.html` rewritten as 3-card landing · 3 platform pages deleted from admin · planning file `2026-05-27-master-data-ownership-split.md` authored BEFORE code per Working rule §2 · documents schema model carry-over for app port (platform tables WITHOUT `organization_id`, org tables WITH NOT-NULL `organization_id`). |
 | 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | Master Data restructure + Visit Purposes master: split `master-data.html` into 6 entity pages under `prototype/admin/master-data/` (Amenities, Categories, Payment Methods, Cities, States, Visit Purposes — NEW) · 6-card landing replaces the old tabbed page · expandable Master Data sub-menu in sidebar + More-sheet rolled out to all 12 admin pages · `tenant/visitors.html` purpose select wired to the 6 master values + "managed in Master Data" helper + "Other" free-text reveal · planning file `2026-05-27-master-data-restructure.md` authored BEFORE code (per Working rule §2). Agent stalled mid-task; orchestrator delivered 2 missing sub-pages + landing + sidebar sweep + visitor wiring. |
 | 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | Common UI cleanup: 11 cleanup categories across 37 prototype pages · planning file `2026-05-26-common-ui-cleanup.md` (47 TCs across 7 namespaces, authored retroactively as binding spec for app port) · sidebar logo → role dashboard · topbar-user removed (12 pages) · account-menu v2 with avatar+name+role header · mobile bottom-sheet · `My Profile` moved into account menu · `Logout`→`Sign out` rename · subtitles removed (37) · profile pages standardized + Recent Activity table · tenant identity unified · `Dashboard` label uniform across all roles. |
-| 2026-05-27 | _pending_ | gharsetu-lead + gharsetu-frontend | v8 prototype build-out: Per-Room Leasing planning (589 lines, 42 TCs) · Visitor Management + Admin Module Additions + Admin Impersonation + v8 6-module gap closures all implemented across prototype/ · sidebar account-menu refactor (37 pages) · impersonation.js + 153 lines CSS in styles.css (520-673) + new MoreSheet mobile pattern · 12 admin pages + 29 role pages updated. Three agent stalls recovered manually. |
-
-> Older milestones (2026-05-26 CLAUDE.md overhaul · 2026-05-26 UIUX Design Document v3 · 2026-05-26 `f26752f` Solution Overview v8 close · 2026-05-25 harness rollout · 2026-05-22 v6.5 draft · 2026-05-11 Phase 8 closeout `d0805bc` + final regression `02d6a53`) trimmed per the ≤10-entry cap; see git history + `agent-team-change-logs/` + `docs/testing/v1/phase-8-closeout.md`.
+> Older milestones (2026-05-27 v8 prototype build-out · 2026-05-26 CLAUDE.md overhaul · 2026-05-26 UIUX Design Document v3 · 2026-05-26 `f26752f` Solution Overview v8 close · 2026-05-25 harness rollout · 2026-05-22 v6.5 draft · 2026-05-11 Phase 8 closeout `d0805bc` + final regression `02d6a53`) trimmed per the ≤10-entry cap; see git history + `agent-team-change-logs/` + `docs/testing/v1/phase-8-closeout.md`.
 
 ---
 

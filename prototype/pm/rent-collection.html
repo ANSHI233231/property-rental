@@ -181,7 +181,7 @@
         </div>
         <div>
           <label class="label" for="paydate">Date</label>
-          <input id="paydate" class="input" type="text" placeholder="DD/MM/YYYY" value="09/05/2026"/>
+          <input data-max-date="today" data-datepicker id="paydate" class="input" type="text" placeholder="DD/MM/YYYY" value="09/05/2026"/>
         </div>
         <div>
           <label class="label" for="method">Method</label>
@@ -219,6 +219,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->

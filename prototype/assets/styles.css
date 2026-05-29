@@ -1151,3 +1151,127 @@ body.impers-active .app-main {
   letter-spacing: 0.2px;
   white-space: nowrap;
 }
+
+/* ---- Date picker (assets/date-picker.js) — DD/MM/YYYY calendar popover.
+   Any <input data-datepicker> becomes a click-to-open calendar. The native
+   input keeps its value contract so existing validators / oninput handlers
+   keep working untouched. ---- */
+.gs-dp-wrap {
+  position: relative;
+  display: block;
+}
+.gs-dp-wrap .input { padding-right: 36px; }
+.gs-dp-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--color-slate);
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gs-dp-icon:hover { color: var(--color-charcoal); }
+.gs-dp-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--color-mid-gray);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(13, 23, 87, 0.14);
+  padding: 12px;
+  width: 280px;
+}
+.gs-dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.gs-dp-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-charcoal);
+}
+.gs-dp-nav {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-slate);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gs-dp-nav:hover { background: var(--color-light-gray); color: var(--color-charcoal); }
+.gs-dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.gs-dp-dow {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  color: var(--color-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 6px 0 4px;
+}
+.gs-dp-empty { aspect-ratio: 1 / 1; }
+.gs-dp-day {
+  aspect-ratio: 1 / 1;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--color-charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms, color 120ms;
+}
+.gs-dp-day:hover:not(.gs-dp-day-disabled):not(.gs-dp-day-selected) {
+  background: var(--bg-prepaid);
+  color: var(--color-status-prepaid);
+}
+.gs-dp-day-today {
+  font-weight: 700;
+  color: var(--color-saffron);
+}
+.gs-dp-day-selected {
+  background: var(--color-saffron);
+  color: #fff;
+  font-weight: 600;
+}
+.gs-dp-day-disabled {
+  color: var(--color-mid-gray);
+  cursor: not-allowed;
+}
+/* Mobile bottom-sheet — the popover floats from the bottom of the viewport
+   on narrow screens so users don't get a tiny calendar at the top of a small
+   form field. */
+@media (max-width: 480px) {
+  .gs-dp-pop {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 18px;
+  }
+}

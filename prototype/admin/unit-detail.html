@@ -71,9 +71,15 @@
     <main class="app-main">
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <div>
+        <div style="flex:1;min-width:0">
           <h1 class="page-title">Unit 3A</h1>
         </div>
+        <!-- Quick-create lease for this unit — deep-links into create-lease.html
+             with the unit pre-selected and the wizard jumping straight to Step 4
+             (Tenants). Lease type is unit-wise. unitId=105 matches the gv-5B mock
+             in create-lease.html that has rooms; see also the per-room buttons in
+             the Rooms table below. -->
+        <a href="create-lease.html?unitId=105" class="btn btn-primary !py-2 !text-sm">+ Create Lease for this Unit</a>
       </header>
 
       <!-- Prototype status simulator -->
@@ -214,7 +220,7 @@
               <tr><th>Label</th><th>Monthly Rent</th><th>Status</th><th>Current Tenant</th><th>Notes</th><th>Actions</th></tr>
             </thead>
             <tbody id="rooms-tbody">
-              <!-- Room A — Available -->
+              <!-- Room A — Available — roomId=10501 maps to gv-5B-A in create-lease mock -->
               <tr id="room-row-A">
                 <td class="font-poppins font-semibold text-charcoal">Room A</td>
                 <td>₹6,500</td>
@@ -222,13 +228,17 @@
                 <td class="muted">—</td>
                 <td class="text-sm muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Sunny side">Sunny side</td>
                 <td>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <a href="create-lease.html?unitId=105&amp;roomId=10501" class="btn btn-primary !py-1 !px-3 !text-sm">+ Create Lease</a>
                     <button type="button" id="edit-room-A-btn" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openEditRoomModal('A')">Edit</button>
                     <button type="button" id="retire-room-A-btn" class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRetireRoomModal('A')">Retire</button>
                   </div>
                 </td>
               </tr>
-              <!-- Room B — Occupied -->
+              <!-- Room B — Occupied — roomId=10502 maps to gv-5B-B in create-lease mock.
+                   "+ Create Lease" stays enabled even when occupied — the new lease can
+                   be `upcoming` (start after the current lease ends); the Step 5 conflict
+                   check on create-lease.html enforces the overlap rule. -->
               <tr id="room-row-B">
                 <td class="font-poppins font-semibold text-charcoal">Room B</td>
                 <td>₹7,000</td>
@@ -236,13 +246,14 @@
                 <td>Rohan Mehta</td>
                 <td class="text-sm muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Attached bathroom">Attached bathroom</td>
                 <td>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <a href="create-lease.html?unitId=105&amp;roomId=10502" class="btn btn-primary !py-1 !px-3 !text-sm">+ Create Lease</a>
                     <button type="button" id="edit-room-B-btn" class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot edit — room has an active or upcoming lease.">Edit</button>
                     <button type="button" id="retire-room-B-btn" class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot retire — room has an active or upcoming lease.">Retire</button>
                   </div>
                 </td>
               </tr>
-              <!-- Room C — Available -->
+              <!-- Room C — Available — roomId=10503 maps to gv-5B-C in create-lease mock -->
               <tr id="room-row-C">
                 <td class="font-poppins font-semibold text-charcoal">Room C</td>
                 <td>₹6,500</td>
@@ -250,7 +261,8 @@
                 <td class="muted">—</td>
                 <td class="text-sm muted">—</td>
                 <td>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <a href="create-lease.html?unitId=105&amp;roomId=10503" class="btn btn-primary !py-1 !px-3 !text-sm">+ Create Lease</a>
                     <button type="button" id="edit-room-C-btn" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openEditRoomModal('C')">Edit</button>
                     <button type="button" id="retire-room-C-btn" class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRetireRoomModal('C')">Retire</button>
                   </div>

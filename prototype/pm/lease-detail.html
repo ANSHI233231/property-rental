@@ -129,7 +129,7 @@
               </div>
               <div>
                 <label class="label" for="rent-schedule-effective-date">Effective Date</label>
-                <input id="rent-schedule-effective-date" class="input" type="date" />
+                <input data-min-date="today" data-datepicker placeholder="DD/MM/YYYY" id="rent-schedule-effective-date" class="input" type="text" />
                 <div class="field-error"></div>
                 <p class="text-xs muted mt-1">Effective date must be at least 60 days from today. Tenant will be notified.</p>
               </div>
@@ -268,7 +268,7 @@
 
           <div class="mt-4">
             <label class="label" for="modify-date">Effective Date</label>
-            <input id="modify-date" class="input" type="date" value="2026-07-15" required />
+            <input data-datepicker placeholder="DD/MM/YYYY" id="modify-date" class="input" type="text" value="2026-07-15" required />
             <div class="field-error"></div>
           </div>
 
@@ -307,11 +307,11 @@
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label class="label" for="rl-start">New Start Date</label>
-            <input id="rl-start" class="input" type="text" placeholder="DD/MM/YYYY" value="15/03/2027" />
+            <input data-min-date="today" data-pair-max="rl-end" data-datepicker id="rl-start" class="input" type="text" placeholder="DD/MM/YYYY" value="15/03/2027" />
           </div>
           <div>
             <label class="label" for="rl-end">New End Date</label>
-            <input id="rl-end" class="input" type="text" placeholder="DD/MM/YYYY" value="14/03/2028" />
+            <input data-min-date="today" data-pair-min="rl-start" data-datepicker id="rl-end" class="input" type="text" placeholder="DD/MM/YYYY" value="14/03/2028" />
           </div>
         </div>
 
@@ -557,6 +557,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
   <!-- More bottom sheet (PM overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>

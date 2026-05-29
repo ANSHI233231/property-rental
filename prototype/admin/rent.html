@@ -320,7 +320,7 @@
         </div>
         <div>
           <label class="label" for="ap-date">Payment Date</label>
-          <input id="ap-date" type="text" class="input" placeholder="DD/MM/YYYY" value="09/05/2026" />
+          <input data-max-date="today" data-datepicker id="ap-date" type="text" class="input" placeholder="DD/MM/YYYY" value="09/05/2026" />
           <div class="field-error" id="ap-date-err">Enter a valid date (DD/MM/YYYY).</div>
         </div>
       </div>
@@ -363,6 +363,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
   <!-- More bottom sheet (Admin overflow nav) -->

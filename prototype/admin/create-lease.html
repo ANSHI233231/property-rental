@@ -13,13 +13,28 @@
   <style>
     /* Page-scoped styles for the 5-step wizard. No new design tokens. */
 
-    /* Step progress indicator */
+    /* ── Wizard outer shell: two-column layout (body + summary rail) ───────── */
+    .wizard-shell {
+      display: grid;
+      grid-template-columns: 1fr 268px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 1023px) {
+      .wizard-shell { grid-template-columns: 1fr; }
+      .wizard-summary-rail { display: none !important; }
+    }
+
+    /* ── Step progress indicator ────────────────────────────────────────────── */
+    /* Stretches across the full card width — connectors flex-grow to fill
+       all available space between the step circles, so the rail spans the
+       whole wizard surface no matter how wide the card is. */
     .wizard-progress {
       display: flex;
       align-items: center;
       gap: 0;
+      width: 100%;
       margin-bottom: 32px;
-      overflow-x: auto;
       padding-bottom: 4px;
     }
     .wizard-step {
@@ -30,8 +45,8 @@
       flex-shrink: 0;
     }
     .wizard-step-num {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -43,21 +58,25 @@
       color: var(--color-slate);
       background: #fff;
       flex-shrink: 0;
+      transition: background 200ms, border-color 200ms, transform 200ms;
     }
     .wizard-step-label {
       font-family: 'Poppins', sans-serif;
       font-size: 13px;
       font-weight: 500;
       color: var(--color-slate);
+      transition: color 150ms;
     }
     .wizard-step.is-active .wizard-step-num {
       border-color: var(--color-saffron);
       background: var(--color-saffron);
       color: #fff;
+      transform: scale(1.1);
+      box-shadow: 0 0 0 4px rgba(255,111,0,0.15);
     }
     .wizard-step.is-active .wizard-step-label {
       color: var(--color-charcoal);
-      font-weight: 600;
+      font-weight: 700;
     }
     .wizard-step.is-complete .wizard-step-num {
       border-color: var(--color-status-paid);
@@ -68,16 +87,46 @@
       color: var(--color-slate);
     }
     .wizard-connector {
-      width: 32px;
       height: 2px;
       background: var(--color-mid-gray);
-      flex-shrink: 0;
+      flex: 1 1 0;             /* fills all available space between step circles */
+      min-width: 16px;         /* never collapse tighter than this */
+      margin: 0 4px;           /* small breathing room either side of the circle */
+      transition: background 300ms ease;
     }
     .wizard-connector.is-complete {
       background: var(--color-status-paid);
     }
 
-    /* Lease type radio cards */
+    /* ── Step panel transitions ──────────────────────────────────────────────── */
+    .wizard-panel {
+      animation: panelFadeIn 180ms ease both;
+    }
+    @keyframes panelFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .wizard-panel { animation: none; }
+    }
+
+    /* ── Step headings ───────────────────────────────────────────────────────── */
+    .step-heading {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-charcoal);
+      margin: 0 0 4px;
+      line-height: 1.3;
+    }
+    .step-subheading {
+      font-size: 14px;
+      color: var(--color-slate);
+      margin: 0 0 20px;
+      line-height: 1.5;
+    }
+
+    /* ── Lease type radio cards ──────────────────────────────────────────────── */
     .lease-type-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -88,21 +137,39 @@
     }
     .lease-type-card {
       border: 2px solid var(--color-mid-gray);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 24px 20px;
       cursor: pointer;
-      transition: border-color 150ms, box-shadow 150ms;
+      transition: border-color 150ms, box-shadow 150ms, transform 150ms;
       background: #fff;
       min-height: 140px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       position: relative;
+      outline: none;
     }
-    .lease-type-card:hover { border-color: var(--color-royal-blue); }
+    .lease-type-card:hover { border-color: var(--color-royal-blue); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+    .lease-type-card:focus-visible { outline: 2px solid var(--color-saffron); outline-offset: 2px; border-radius: 10px; }
     .lease-type-card.is-selected {
       border-color: var(--color-saffron);
-      box-shadow: 0 0 0 1px var(--color-saffron);
+      border-width: 2.5px;
+      background: rgba(255,111,0,0.03);
+      box-shadow: 0 0 0 3px rgba(255,111,0,0.12);
+    }
+    .lease-type-card.is-selected::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--color-saffron);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-size: 13px;
+      background-repeat: no-repeat;
+      background-position: center;
     }
     .lease-type-card input[type="radio"] {
       position: absolute;
@@ -111,11 +178,14 @@
       width: 18px;
       height: 18px;
       accent-color: var(--color-saffron);
+      /* Hidden when selected (replaced by the ::after checkmark) */
     }
+    .lease-type-card.is-selected input[type="radio"] { opacity: 0; }
     .lease-type-card-icon {
       width: 36px;
       height: 36px;
       color: var(--color-royal-blue);
+      transition: color 150ms;
     }
     .lease-type-card.is-selected .lease-type-card-icon { color: var(--color-saffron); }
     .lease-type-card-title {
@@ -130,7 +200,7 @@
       line-height: 1.5;
     }
 
-    /* Property / Unit / Room card grids */
+    /* ── Property / Unit / Room card grids ──────────────────────────────────── */
     .prop-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -144,40 +214,190 @@
     }
     .sel-card {
       border: 2px solid var(--color-mid-gray);
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 10px;
+      padding: 0;
       cursor: pointer;
-      transition: border-color 150ms;
+      transition: border-color 150ms, box-shadow 150ms, transform 150ms;
       background: #fff;
+      overflow: hidden;
+      outline: none;
     }
-    .sel-card:hover:not(.is-dimmed) { border-color: var(--color-royal-blue); }
+    .sel-card:focus-visible { outline: 2px solid var(--color-saffron); outline-offset: 2px; border-radius: 10px; }
+    .sel-card:hover:not(.is-dimmed) {
+      border-color: var(--color-royal-blue);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
     .sel-card.is-selected {
       border-color: var(--color-saffron);
-      box-shadow: 0 0 0 1px var(--color-saffron);
+      border-width: 2.5px;
+      background: rgba(255,111,0,0.02);
+      box-shadow: 0 0 0 3px rgba(255,111,0,0.12);
     }
     .sel-card.is-dimmed {
       opacity: 0.5;
       cursor: not-allowed;
       pointer-events: none;
     }
+    /* Card header band with initials */
+    .sel-card-band {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      position: relative;
+    }
+    .sel-card-initials {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: 0.5px;
+    }
+    /* Selected checkmark badge on the band */
+    .sel-card-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sel-card.is-selected .sel-card-check {
+      display: flex;
+    }
+    .sel-card-check svg { color: var(--color-saffron); }
+    /* Card body (was the whole card before) */
+    .sel-card-body {
+      padding: 12px 14px 14px;
+    }
     .sel-card-name {
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       font-size: 14px;
       color: var(--color-charcoal);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .sel-card-sub {
       font-size: 12px;
       color: var(--color-slate);
       margin-bottom: 8px;
     }
-    .sel-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .sel-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 
-    /* Tenant row */
+    /* ── Conflict alert banner ───────────────────────────────────────────────── */
+    .cl-conflict-banner {
+      display: none;
+      background: #FFF8E1;
+      border: 1.5px solid #F57F17;
+      border-left: 4px solid #F57F17;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 8px;
+      gap: 12px;
+    }
+    .cl-conflict-banner.show {
+      display: flex;
+      align-items: flex-start;
+    }
+    .cl-conflict-banner-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: #F57F17;
+      margin-top: 1px;
+    }
+    .cl-conflict-banner-body { flex: 1; min-width: 0; }
+    .cl-conflict-banner-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: #7B4F00;
+      margin-bottom: 4px;
+    }
+    .cl-conflict-banner-detail {
+      font-size: 13px;
+      color: #5D3A00;
+      line-height: 1.5;
+    }
+    .cl-conflict-banner-hint {
+      font-size: 12px;
+      color: #7B4F00;
+      margin-top: 6px;
+    }
+
+    /* ── Lease summary right rail ────────────────────────────────────────────── */
+    .wizard-summary-rail {
+      position: sticky;
+      top: 80px;
+    }
+    .summary-card {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .summary-card-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-slate);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+    .summary-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--color-light-gray);
+      font-size: 13px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row-label {
+      color: var(--color-slate);
+      font-size: 12px;
+      flex: 0 0 88px;
+      padding-top: 1px;
+    }
+    .summary-row-value {
+      color: var(--color-charcoal);
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+    }
+    .summary-empty {
+      font-size: 12px;
+      color: var(--color-mid-gray);
+      font-style: italic;
+      margin-top: 4px;
+    }
+    .summary-type-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-prepaid);
+      color: var(--color-status-prepaid);
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* ── Tenant row ──────────────────────────────────────────────────────────── */
     .tenant-row {
       border: 1px solid var(--color-mid-gray);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 16px;
       margin-bottom: 12px;
       background: #fff;
@@ -356,7 +576,7 @@
       font-weight: 500;
     }
 
-    /* Step 5 — two-column layout */
+    /* ── Step 5 — two-column layout ─────────────────────────────────────────── */
     .step5-layout {
       display: grid;
       grid-template-columns: 3fr 2fr;
@@ -367,13 +587,236 @@
       .step5-layout { grid-template-columns: 1fr; }
     }
 
-    /* Wizard bottom bar */
+    /* Step 5 context strip — sits at the top of the panel and tells the user
+       at-a-glance which lease they're creating (the summary rail is hidden on
+       Step 5, so without this the type/property/unit aren't visible anywhere). */
+    .step5-context-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-prepaid);
+      border: 1px solid color-mix(in srgb, var(--color-status-prepaid) 22%, transparent);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .step5-context-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-status-prepaid);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      white-space: nowrap;
+    }
+    .step5-context-path {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      color: var(--color-deep-navy);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .step5-context-path .sep {
+      color: var(--color-mid-gray);
+      font-weight: 400;
+    }
+    .step5-context-path .strong {
+      font-weight: 600;
+    }
+
+    /* Sub-section labels inside Step 5 form */
+    .step5-section-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-slate);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--color-saffron);
+      display: block;
+    }
+    .step5-section {
+      margin-bottom: 20px;
+    }
+    .step5-section:last-child { margin-bottom: 0; }
+
+    /* Selected tenants panel (right column of step5-layout).
+       Capped height + internal scroll so adding 6+ tenants doesn't push the
+       right column taller than the form and reflow the page below. */
+    .step5-tenants-panel {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 10px;
+      overflow: hidden;
+      align-self: start;             /* don't stretch to match the form's height */
+      display: flex;
+      flex-direction: column;
+      max-height: 520px;             /* hard ceiling — keeps step 5 layout stable */
+    }
+    .step5-tenants-panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-light-gray);
+      flex-shrink: 0;
+    }
+    /* The body is the part that scrolls when there are many tenants. */
+    #step5-tenants-body {
+      overflow-y: auto;
+      flex: 1 1 auto;
+    }
+    /* Subtle scrollbar — not the OS default, but unobtrusive. */
+    #step5-tenants-body::-webkit-scrollbar { width: 8px; }
+    #step5-tenants-body::-webkit-scrollbar-thumb {
+      background: var(--color-mid-gray);
+      border-radius: 4px;
+    }
+    #step5-tenants-body::-webkit-scrollbar-thumb:hover {
+      background: var(--color-slate);
+    }
+    /* On mobile the layout stacks (no horizontal neighbour to mismatch with),
+       so the cap + internal scroll add no value — let the panel grow naturally
+       and use the page's own scroll. */
+    @media (max-width: 1023px) {
+      .step5-tenants-panel { max-height: none; }
+      #step5-tenants-body { overflow-y: visible; }
+    }
+    .step5-tenants-panel-header h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-charcoal);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    .step5-tenant-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .step5-tenant-item:last-child { border-bottom: none; }
+    .step5-tenant-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-royal-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .step5-tenant-avatar.is-new {
+      background: var(--color-slate);
+    }
+    .step5-tenant-info { flex: 1; min-width: 0; }
+    .step5-tenant-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--color-charcoal);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .step5-tenant-primary-chip {
+      font-size: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      background: var(--color-saffron);
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+    .step5-tenant-sub {
+      font-size: 12px;
+      color: var(--color-slate);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .step5-tenant-badge { margin-top: 4px; }
+    .step5-tenants-empty {
+      padding: 16px;
+      font-size: 13px;
+      color: var(--color-slate);
+      font-style: italic;
+    }
+
+    /* Step 5 — 6:6 history grid below the main layout */
+    .step5-history-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    @media (max-width: 1023px) {
+      .step5-history-grid { grid-template-columns: 1fr; }
+    }
+    /* Flat (non-accordion) variant of context-panel for the history grid */
+    .context-panel-flat {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .context-panel-flat-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .context-panel-flat-header h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-charcoal);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    .context-panel-flat-body {
+      padding: 10px 16px 14px;
+    }
+
+    /* ── Wizard bottom bar ───────────────────────────────────────────────────── */
     .wizard-bottom-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 0 32px;
+      padding: 20px 0 32px;
       gap: 12px;
+    }
+    .wizard-step-counter {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-slate);
+      text-align: center;
+      flex: 1;
+    }
+    @media (max-width: 600px) {
+      .wizard-step-counter { display: none; }
     }
 
     /* Inline reset notice */
@@ -392,23 +835,45 @@
     /* Step search */
     .step-search { margin-bottom: 16px; }
 
-    /* Context panels */
+    /* ── Context panels (accordion) ─────────────────────────────────────────── */
     .context-panel {
       background: var(--color-off-white);
       border: 1px solid var(--color-mid-gray);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
     }
+    .context-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .context-panel-header:hover { background: var(--color-light-gray); }
     .context-panel h4 {
       font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       color: var(--color-charcoal);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin: 0 0 12px;
+      letter-spacing: 0.5px;
+      margin: 0;
     }
+    .context-panel-chev {
+      width: 16px;
+      height: 16px;
+      color: var(--color-slate);
+      transition: transform 200ms ease;
+      flex-shrink: 0;
+    }
+    .context-panel.is-open .context-panel-chev { transform: rotate(180deg); }
+    .context-panel-body {
+      padding: 0 16px 14px;
+      display: none;
+    }
+    .context-panel.is-open .context-panel-body { display: block; }
     .context-lease-item {
       display: flex;
       align-items: center;
@@ -422,6 +887,84 @@
     .context-lease-id { font-family: monospace; color: var(--color-slate); }
     .context-lease-tenant { font-weight: 500; color: var(--color-charcoal); }
     .context-lease-dates { color: var(--color-slate); font-size: 12px; }
+
+    /* Richer two-line lease row used in the tenant history panel — surfaces
+       property, unit/room, dates, and monthly rent on each lease entry. */
+    .tenant-lease-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .tenant-lease-row:last-child { border-bottom: none; }
+    .tenant-lease-row-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--color-charcoal);
+    }
+    .tenant-lease-row-primary .context-lease-id { font-size: 12px; }
+    .tenant-lease-row-property {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: var(--color-charcoal);
+    }
+    .tenant-lease-row-unit { color: var(--color-slate); }
+    .tenant-lease-row-secondary {
+      font-size: 12px;
+      color: var(--color-slate);
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tenant-lease-row-rent {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: var(--color-charcoal);
+    }
+    .tenant-lease-row-badge { justify-self: end; align-self: start; }
+
+    /* Scope chip used on the Unit lease history rows to indicate whether
+       a lease was unit-wide or scoped to a specific room. */
+    .scope-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .scope-chip-unit  { background: var(--bg-prepaid);  color: var(--color-status-prepaid); }
+    .scope-chip-room  { background: var(--color-light-gray); color: var(--color-slate); }
+
+    /* Tenant block header inside the tenant-history panel */
+    .tenant-history-tenant {
+      margin-bottom: 14px;
+    }
+    .tenant-history-tenant:last-child { margin-bottom: 0; }
+    .tenant-history-tenant-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--color-charcoal);
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid var(--color-mid-gray);
+    }
+    .tenant-history-empty {
+      font-size: 13px;
+      color: var(--color-slate);
+      padding: 6px 0 2px;
+    }
   </style>
 </head>
 <body>
@@ -486,13 +1029,17 @@
           <!-- Rendered by JS -->
         </div>
 
-        <!-- Step panels -->
+        <!-- Two-column shell: wizard body + summary rail -->
+        <div class="wizard-shell">
+
+        <!-- Step panels (left column) -->
         <div id="wizard-body">
 
         <!-- STEP 1 — Lease Type -->
         <div id="step-1" class="wizard-panel">
           <div>
-            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">What kind of lease is this?</h2>
+            <h2 class="step-heading">What kind of lease is this?</h2>
+            <p class="step-subheading">The lease type determines whether a tenant takes the whole unit or a single room.</p>
             <div class="lease-type-grid">
               <label class="lease-type-card is-selected" id="card-unit-wise" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectLeaseType('unit-wise');}">
                 <input type="radio" name="cl-lease-type" value="unit-wise" id="lt-unit-wise" checked onchange="selectLeaseType('unit-wise')" aria-required="true" />
@@ -513,7 +1060,8 @@
         <!-- STEP 2 — Select Property -->
         <div id="step-2" class="wizard-panel" style="display:none">
           <div>
-            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 16px;">Which property?</h2>
+            <h2 class="step-heading">Select a property</h2>
+            <p class="step-subheading" id="step2-subheading">The lease will be registered under this property.</p>
             <div class="wizard-reset-notice" id="step2-reset-notice">Property and unit selections have been reset.</div>
             <div class="step-search">
               <input id="prop-search" class="input" placeholder="Search by name or address" oninput="filterPropertyCards(this.value)" aria-label="Search properties" />
@@ -529,7 +1077,8 @@
         <!-- STEP 3 — Select Unit + Room -->
         <div id="step-3" class="wizard-panel" style="display:none">
           <div>
-            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 16px;">Which unit?</h2>
+            <h2 class="step-heading" id="step3-heading">Select a unit</h2>
+            <p class="step-subheading" id="step3-subheading">Choose the unit for this lease. Occupied units are selectable — just ensure the start date is after the current lease ends.</p>
             <div class="wizard-reset-notice" id="step3-reset-notice">Unit and room selections have been reset.</div>
             <div class="prop-grid" id="unit-grid">
               <!-- Rendered by renderUnitGrid() -->
@@ -538,8 +1087,9 @@
             <div class="field-error" id="step3-unit-error" style="margin-top:12px;"></div>
 
             <!-- Room grid — shows after unit selected in room-wise mode -->
-            <div id="room-grid-section" style="display:none;margin-top:24px;">
-              <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 12px;">Which room?</h2>
+            <div id="room-grid-section" style="display:none;margin-top:28px;">
+              <h2 class="step-heading" style="font-size:17px;margin-bottom:4px;">Select a room</h2>
+              <p class="step-subheading">Available rooms in the selected unit. Occupied rooms can be selected for future leases.</p>
               <div class="prop-grid" id="room-grid">
                 <!-- Rendered by renderRoomGrid() -->
               </div>
@@ -551,7 +1101,8 @@
         <!-- STEP 4 — Tenants & Co-tenants -->
         <div id="step-4" class="wizard-panel" style="display:none">
           <div>
-            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">Who's renting?</h2>
+            <h2 class="step-heading">Who's renting?</h2>
+            <p class="step-subheading">Add the primary tenant and any co-tenants. New tenants will get a login account when the lease is created.</p>
             <div id="tenant-rows-container">
               <!-- Rendered by addTenantRow() -->
             </div>
@@ -562,78 +1113,147 @@
 
         <!-- STEP 5 — Lease Details -->
         <div id="step-5" class="wizard-panel" style="display:none">
+
+          <!-- Context strip — shows lease type + property/unit/room path so the
+               user always knows what they're creating (the summary rail is
+               hidden on this step). Populated by prepareStep5(). -->
+          <div class="step5-context-strip" id="step5-context-strip" aria-live="polite">
+            <span class="step5-context-type" id="step5-context-type">Unit-wise</span>
+            <span class="step5-context-path" id="step5-context-path"></span>
+          </div>
+
+          <!-- Top two-column block: form (left) + selected tenants (right) -->
           <div class="step5-layout">
-            <!-- Left column: form -->
+            <!-- Left column: grouped form -->
             <div>
-              <div>
-                <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">Lease terms</h2>
+              <h2 class="step-heading">Set the lease terms</h2>
+              <p class="step-subheading">Dates, rent, charges, rules, and any special terms. Pre-filled values come from the selected unit.</p>
+
+              <!-- ── Lease term ── -->
+              <div class="step5-section">
+                <span class="step5-section-label">Lease term</span>
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
                     <label class="label" for="cl-start">Start date <span style="color:var(--color-saffron)">*</span></label>
-                    <input id="cl-start" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-start');scheduleConflictCheck()" />
+                    <input data-min-date="today" data-pair-max="cl-end" data-datepicker id="cl-start" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-start');scheduleConflictCheck();updateSummary()" />
                     <div class="field-error" id="cl-start-error"></div>
                   </div>
                   <div>
                     <label class="label" for="cl-end">End date <span style="color:var(--color-saffron)">*</span></label>
-                    <input id="cl-end" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-end');scheduleConflictCheck()" />
+                    <input data-min-date="today" data-pair-min="cl-start" data-datepicker id="cl-end" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-end');scheduleConflictCheck();updateSummary()" />
                     <div class="field-error" id="cl-end-error"></div>
-                    <div class="field-error" id="cl-conflict-error" style="margin-top:6px;"></div>
                   </div>
-                  <div>
-                    <label class="label" for="cl-rent">Monthly rent (₹) <span style="color:var(--color-saffron)">*</span></label>
-                    <input id="cl-rent" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-rent');autoFillDeposit()" />
-                    <div class="field-error" id="cl-rent-error"></div>
-                  </div>
-                  <div>
-                    <label class="label" for="cl-deposit">Security deposit (₹) <span style="color:var(--color-saffron)">*</span></label>
-                    <input id="cl-deposit" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-deposit');depositManuallyEdited=true;" />
-                    <div class="field-error" id="cl-deposit-error"></div>
-                  </div>
-                  <div>
-                    <label class="label" for="cl-dueday">Rent due day</label>
-                    <select id="cl-dueday" class="input">
-                      <option>1st of each month</option>
-                      <option selected>5th of each month</option>
-                      <option>10th of each month</option>
-                      <option>Last day of each month</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="label" for="cl-notice">Notice period (days)</label>
-                    <input id="cl-notice" class="input" type="number" min="0" value="30" />
-                  </div>
-                  <div>
-                    <label class="label" for="cl-latefee">Late fee (%)</label>
-                    <input id="cl-latefee" class="input" type="number" min="0" step="0.1" value="2" />
+                </div>
+                <!-- Conflict banner — spans the row -->
+                <div class="cl-conflict-banner" id="cl-conflict-banner" style="margin-top:12px;">
+                  <svg class="cl-conflict-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <div class="cl-conflict-banner-body">
+                    <div class="cl-conflict-banner-title">Schedule conflict</div>
+                    <div class="cl-conflict-banner-detail" id="cl-conflict-detail"></div>
+                    <div class="cl-conflict-banner-hint">Adjust the dates or terminate the existing lease before proceeding.</div>
                   </div>
                 </div>
               </div>
+
+              <!-- ── Rent & charges ── -->
+              <div class="step5-section">
+                <span class="step5-section-label">Rent &amp; charges</span>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="label" for="cl-rent">Monthly rent (₹) <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-rent" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-rent');autoFillDeposit();updateSummary()" />
+                    <div class="field-error" id="cl-rent-error"></div>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-maintenance">Maintenance charges (₹/month)</label>
+                    <input id="cl-maintenance" class="input" type="number" min="0" value="0" oninput="updateSummary()" />
+                  </div>
+                  <div>
+                    <label class="label" for="cl-deposit">Security deposit (₹) <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-deposit" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-deposit');depositManuallyEdited=true;updateSummary()" />
+                    <div class="field-error" id="cl-deposit-error"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rules section removed — Rent due day derives from the lease
+                   start date (rent due on the same day-of-month every month);
+                   Notice period and Late fee are platform-level Settings, not
+                   per-lease. The global grace period also lives in Settings and
+                   is applied at payment-collection time. -->
+
             </div>
-            <!-- Right column: context panels -->
+
+            <!-- Right column: selected tenants -->
             <div id="step5-context">
-              <div class="context-panel" id="panel-unit-history">
-                <h4>Lease history</h4>
-                <div id="panel-unit-history-body"><!-- Rendered by renderContextPanels() --></div>
+              <div class="step5-tenants-panel" id="step5-tenants-panel">
+                <div class="step5-tenants-panel-header">
+                  <h4>Selected tenants</h4>
+                </div>
+                <div id="step5-tenants-body">
+                  <div class="step5-tenants-empty">No tenants selected yet.</div>
+                </div>
               </div>
-              <div class="context-panel" id="panel-tenant-history">
-                <h4>Tenant lease history</h4>
-                <div id="panel-tenant-history-body"><!-- Rendered by renderContextPanels() --></div>
-              </div>
+            </div>
+          </div>
+
+          <!-- History grid lives below the wizard action bar (after Cancel/Back/Create Lease).
+               It's reference-only — the user can scroll past the action buttons to consult it. -->
+
+        </div>
+
+        </div><!-- /wizard-body -->
+
+        <!-- Summary rail (right column, visible from Step 2) -->
+        <div class="wizard-summary-rail" id="wizard-summary-rail" style="display:none;" aria-label="Lease summary">
+          <div class="summary-card">
+            <div class="summary-card-title">Lease being created</div>
+            <div id="summary-rows">
+              <div class="summary-empty">Fill in the steps to see a summary.</div>
             </div>
           </div>
         </div>
 
-        </div><!-- /wizard-body -->
+        </div><!-- /wizard-shell -->
       </section><!-- /wizard outer card -->
 
       <!-- Wizard bottom bar -->
       <div class="wizard-bottom-bar">
-        <a href="leases.html" class="text-royal-blue font-poppins font-semibold text-sm">Cancel</a>
-        <div class="flex gap-3">
+        <a href="leases.html" class="text-royal-blue font-poppins font-semibold text-sm" style="white-space:nowrap;">Cancel</a>
+        <span class="wizard-step-counter" id="wizard-step-counter">Step 1 of 5</span>
+        <div class="flex gap-3" style="flex-shrink:0;">
           <button type="button" id="btn-back" class="btn btn-secondary" onclick="wizardBack()" style="display:none;">Back</button>
           <button type="button" id="btn-next" class="btn btn-primary" onclick="wizardNext()">Next</button>
         </div>
       </div>
+
+      <!-- Reference history (visible only on Step 5).
+           Wrapped in a card so it visually matches the wizard surface above.
+           Read-only context — sits BELOW the wizard action bar so it never
+           competes with the decision surface; the user can scroll down past
+           the buttons to consult it. -->
+      <section class="card" id="step5-history-card" style="display:none;padding:28px;margin-bottom:24px;">
+        <div class="step5-history-grid">
+          <!-- Unit lease history — combined view of every lease on the chosen
+               unit, regardless of scope. Unit-wise leases AND room-wise leases
+               for any room in the unit appear together with a scope chip per
+               row so the user can see whether a future unit-wise lease overlaps
+               with active room leases (or vice versa). -->
+          <div class="context-panel-flat" id="panel-unit-history">
+            <div class="context-panel-flat-header">
+              <h4>Unit lease history</h4>
+            </div>
+            <div class="context-panel-flat-body" id="panel-unit-history-body"><!-- Rendered by renderContextPanels() --></div>
+          </div>
+          <!-- Tenant lease history (flat card, no accordion) -->
+          <div class="context-panel-flat" id="panel-tenant-history">
+            <div class="context-panel-flat-header">
+              <h4>Tenant lease history</h4>
+            </div>
+            <div class="context-panel-flat-body" id="panel-tenant-history-body"><!-- Rendered by renderContextPanels() --></div>
+          </div>
+        </div>
+      </section>
 
     </main>
   </div>
@@ -646,6 +1266,7 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/toast.js"></script>
   <!-- More bottom sheet (Admin overflow nav) -->
@@ -693,87 +1314,162 @@
      MOCK DATA
   --------------------------------------------------------------- */
 
-  /* Mock property catalogue */
+  /* ────────────────────────────────────────────────────────────────────────
+     MOCK DATA — every table follows CLAUDE.md rule #19:
+       • Primary key is `id INTEGER AUTOINCREMENT` owned by the DB
+       • All cross-table relations reference that numeric `id`, never a slug
+         or any other column
+       • Slugs are at most a `slug` secondary field for human-readable URLs
+       • Relations: UNIT.propertyId → PROPERTY.id
+                    ROOM.unitId → UNIT.id
+                    UNIT_LEASE.unitId → UNIT.id
+                    UNIT_LEASE.roomId → ROOM.id (nullable — null for unit-wise)
+                    UNIT_LEASE.tenantId → TENANT.id (nullable — historical entries
+                      may pre-date the platform; tenant.name retained for display)
+                    TENANT.leases[].propertyId / .unitId / .roomId → numeric ids
+     This is the prototype's binding spec for the eventual apps/api Prisma schema.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* PROPERTIES — int PK, slug as secondary. */
   var PROPERTIES = [
-    { id: 'green-valley',   name: 'Green Valley Apartments', addr: 'Sector 12, Dwarka',      units: 12, roomCount: 4, roomUnitCount: 1 },
-    { id: 'sai-heights',    name: 'Sai Heights',             addr: 'Lajpat Nagar',           units: 8,  roomCount: 7, roomUnitCount: 2 },
-    { id: 'mayur-vihar',    name: 'Mayur Vihar Residency',   addr: 'Mayur Vihar Ph 1',       units: 6,  roomCount: 0, roomUnitCount: 0 },
-    { id: 'rohini-greens',  name: 'Rohini Greens',           addr: 'Sector 18, Rohini',      units: 10, roomCount: 0, roomUnitCount: 0 }
+    { id: 1, slug: 'green-valley',  name: 'Green Valley Apartments', addr: 'Sector 12, Dwarka',  units: 12, roomCount: 4, roomUnitCount: 1 },
+    { id: 2, slug: 'sai-heights',   name: 'Sai Heights',             addr: 'Lajpat Nagar',       units: 8,  roomCount: 7, roomUnitCount: 2 },
+    { id: 3, slug: 'mayur-vihar',   name: 'Mayur Vihar Residency',   addr: 'Mayur Vihar Ph 1',   units: 6,  roomCount: 0, roomUnitCount: 0 },
+    { id: 4, slug: 'rohini-greens', name: 'Rohini Greens',           addr: 'Sector 18, Rohini',  units: 10, roomCount: 0, roomUnitCount: 0 }
   ];
 
-  /* Mock unit catalogue per property */
-  var UNITS = {
-    'green-valley': [
-      { id: 'gv-1A', label: '1A', floor: 1, type: '2 BHK', area: 820, rent: 18000, status: 'occupied', occupied: true,  occupiedUntil: '31/03/2026', hasRooms: false, rooms: 0 },
-      { id: 'gv-2B', label: '2B', floor: 2, type: '3 BHK', area: 1140, rent: 24000, status: 'occupied', occupied: true, occupiedUntil: '30/06/2026', hasRooms: false, rooms: 0 },
-      { id: 'gv-3A', label: '3A', floor: 3, type: '2 BHK', area: 820, rent: 20000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
-      { id: 'gv-7C', label: '7C', floor: 7, type: '2 BHK', area: 880, rent: 22000, status: 'listed',    occupied: false, hasRooms: false, rooms: 0 },
-      { id: 'gv-5B', label: '5B', floor: 5, type: '3 BHK', area: 1100, rent: 26000, status: 'available', occupied: false, hasRooms: true,  rooms: 4 }
-    ],
-    'sai-heights': [
-      { id: 'sh-PG101', label: 'PG-101', floor: 1, type: 'PG Unit', area: 600, rent: 24500, status: 'available', occupied: false, hasRooms: true, rooms: 4 },
-      { id: 'sh-PG202', label: 'PG-202', floor: 2, type: 'PG Unit', area: 600, rent: 17000, status: 'available', occupied: false, hasRooms: true, rooms: 3 }
-    ],
-    'mayur-vihar': [
-      { id: 'mv-1A', label: '1A', floor: 1, type: '2 BHK', area: 800, rent: 16000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
-      { id: 'mv-2B', label: '2B', floor: 2, type: '2 BHK', area: 800, rent: 22000, status: 'available', occupied: false, hasRooms: false, rooms: 0 }
-    ],
-    'rohini-greens': [
-      { id: 'rg-2C', label: '2C', floor: 2, type: '2 BHK', area: 900, rent: 19000, status: 'available', occupied: false, hasRooms: false, rooms: 0 }
-    ]
-  };
+  /* UNITS — flat array, each carries propertyId → PROPERTIES.id.
+     Id ranges by property are conventional (1xx = property 1, 2xx = property 2 …)
+     for human readability; the DB would auto-increment globally. */
+  var UNITS = [
+    // Green Valley (propertyId: 1)
+    { id: 101, propertyId: 1, slug: 'gv-1A', label: '1A', floor: 1, type: '2 BHK', area: 820,  rent: 18000, status: 'occupied',  occupied: true,  occupiedUntil: '31/03/2026', hasRooms: false, rooms: 0 },
+    { id: 102, propertyId: 1, slug: 'gv-2B', label: '2B', floor: 2, type: '3 BHK', area: 1140, rent: 24000, status: 'occupied',  occupied: true,  occupiedUntil: '30/06/2026', hasRooms: false, rooms: 0 },
+    { id: 103, propertyId: 1, slug: 'gv-3A', label: '3A', floor: 3, type: '2 BHK', area: 820,  rent: 20000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
+    { id: 104, propertyId: 1, slug: 'gv-7C', label: '7C', floor: 7, type: '2 BHK', area: 880,  rent: 22000, status: 'listed',    occupied: false, hasRooms: false, rooms: 0 },
+    { id: 105, propertyId: 1, slug: 'gv-5B', label: '5B', floor: 5, type: '3 BHK', area: 1100, rent: 26000, status: 'available', occupied: false, hasRooms: true,  rooms: 4 },
+    // Sai Heights (propertyId: 2)
+    { id: 201, propertyId: 2, slug: 'sh-PG101', label: 'PG-101', floor: 1, type: 'PG Unit', area: 600, rent: 24500, status: 'available', occupied: false, hasRooms: true, rooms: 4 },
+    { id: 202, propertyId: 2, slug: 'sh-PG202', label: 'PG-202', floor: 2, type: 'PG Unit', area: 600, rent: 17000, status: 'available', occupied: false, hasRooms: true, rooms: 3 },
+    // Mayur Vihar (propertyId: 3)
+    { id: 301, propertyId: 3, slug: 'mv-1A', label: '1A', floor: 1, type: '2 BHK', area: 800, rent: 16000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
+    { id: 302, propertyId: 3, slug: 'mv-2B', label: '2B', floor: 2, type: '2 BHK', area: 800, rent: 22000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
+    // Rohini Greens (propertyId: 4)
+    { id: 401, propertyId: 4, slug: 'rg-2C', label: '2C', floor: 2, type: '2 BHK', area: 900, rent: 19000, status: 'available', occupied: false, hasRooms: false, rooms: 0 }
+  ];
 
-  /* Mock rooms per unit */
-  var ROOMS = {
-    'gv-5B': [
-      { id: 'gv-5B-A', label: 'Room A', rent: 6500, status: 'occupied', occupied: true,  occupiedUntil: '15/02/2027' },
-      { id: 'gv-5B-B', label: 'Room B', rent: 6500, status: 'available', occupied: false },
-      { id: 'gv-5B-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
-      { id: 'gv-5B-D', label: 'Room D', rent: 6000, status: 'available', occupied: false }
-    ],
-    'sh-PG101': [
-      { id: 'pg101-A', label: 'Room A', rent: 6500, status: 'available', occupied: false },
-      { id: 'pg101-B', label: 'Room B', rent: 7000, status: 'occupied',  occupied: true,  occupiedUntil: '31/12/2026' },
-      { id: 'pg101-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
-      { id: 'pg101-D', label: 'Room D', rent: 6000, status: 'available', occupied: false }
-    ],
-    'sh-PG202': [
-      { id: 'pg202-A', label: 'Room A', rent: 5500, status: 'available', occupied: false },
-      { id: 'pg202-B', label: 'Room B', rent: 5500, status: 'available', occupied: false },
-      { id: 'pg202-C', label: 'Room C', rent: 6000, status: 'occupied',  occupied: true,  occupiedUntil: '30/09/2026' }
-    ]
-  };
+  /* ROOMS — flat array, each carries unitId → UNITS.id. */
+  var ROOMS = [
+    // Unit gv-5B (unitId: 105)
+    { id: 10501, unitId: 105, slug: 'gv-5B-A', label: 'Room A', rent: 6500, status: 'occupied',  occupied: true,  occupiedUntil: '15/02/2027' },
+    { id: 10502, unitId: 105, slug: 'gv-5B-B', label: 'Room B', rent: 6500, status: 'occupied',  occupied: true,  occupiedUntil: '31/03/2026' },
+    { id: 10503, unitId: 105, slug: 'gv-5B-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
+    { id: 10504, unitId: 105, slug: 'gv-5B-D', label: 'Room D', rent: 6000, status: 'available', occupied: false },
+    // Unit sh-PG101 (unitId: 201)
+    { id: 20101, unitId: 201, slug: 'pg101-A', label: 'Room A', rent: 6500, status: 'available', occupied: false },
+    { id: 20102, unitId: 201, slug: 'pg101-B', label: 'Room B', rent: 7000, status: 'occupied',  occupied: true,  occupiedUntil: '31/12/2026' },
+    { id: 20103, unitId: 201, slug: 'pg101-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
+    { id: 20104, unitId: 201, slug: 'pg101-D', label: 'Room D', rent: 6000, status: 'available', occupied: false },
+    // Unit sh-PG202 (unitId: 202)
+    { id: 20201, unitId: 202, slug: 'pg202-A', label: 'Room A', rent: 5500, status: 'available', occupied: false },
+    { id: 20202, unitId: 202, slug: 'pg202-B', label: 'Room B', rent: 5500, status: 'available', occupied: false },
+    { id: 20203, unitId: 202, slug: 'pg202-C', label: 'Room C', rent: 6000, status: 'occupied',  occupied: true,  occupiedUntil: '30/09/2026' }
+  ];
 
-  /* Mock tenant directory (org-scoped) */
+  /* TENANTS — int PK. Each tenant's prior-lease entries reference
+     propertyId / unitId / (optional roomId) — never property name strings. */
   var TENANTS = [
-    { id: 't1', name: 'Rohan Mehta',  phone: '+91 98765 43290', email: 'rohan.mehta@example.com',  leases: [{ id: 'L-2103', status: 'active',   end: '31/03/2026' }] },
-    { id: 't2', name: 'Priya Mehta',  phone: '+91 98765 43291', email: 'priya.mehta@example.com',  leases: [] },
-    { id: 't3', name: 'Anita Verma',  phone: '+91 98730 11122', email: 'anita.verma@example.com',  leases: [{ id: 'L-2101', status: 'active', end: '31/12/2026' }, { id: 'L-2110', status: 'active', end: '30/06/2026' }] },
-    { id: 't4', name: 'Sunil Kapoor', phone: '+91 98760 99821', email: 'sunil.kapoor@example.com', leases: [{ id: 'L-2204', status: 'upcoming', end: '31/05/2027' }] },
-    { id: 't5', name: 'Aditi Joshi',  phone: '+91 98700 22244', email: 'aditi.joshi@example.com',  leases: [{ id: 'L-2245', status: 'upcoming', end: '31/03/2027' }] }
+    { id: 1, name: 'Rohan Mehta',  phone: '+91 98765 43290', email: 'rohan.mehta@example.com',
+      leases: [
+        { id: 2103, propertyId: 1, unitId: 103, roomId: null, start: '01/04/2025', end: '31/03/2026', rent: 18000, status: 'active' }
+      ] },
+    { id: 2, name: 'Priya Mehta',  phone: '+91 98765 43291', email: 'priya.mehta@example.com',
+      leases: [] },
+    { id: 3, name: 'Anita Verma',  phone: '+91 98730 11122', email: 'anita.verma@example.com',
+      leases: [
+        { id: 2101, propertyId: 2, unitId: 201, roomId: 20103, start: '01/01/2026', end: '31/12/2026', rent: 6500,  status: 'active' },
+        { id: 2110, propertyId: 3, unitId: 302, roomId: null,  start: '01/07/2025', end: '30/06/2026', rent: 22000, status: 'active' }
+      ] },
+    { id: 4, name: 'Sunil Kapoor', phone: '+91 98760 99821', email: 'sunil.kapoor@example.com',
+      leases: [
+        { id: 2204, propertyId: 4, unitId: 401, roomId: null, start: '01/06/2026', end: '31/05/2027', rent: 19000, status: 'upcoming' }
+      ] },
+    { id: 5, name: 'Aditi Joshi',  phone: '+91 98700 22244', email: 'aditi.joshi@example.com',
+      leases: [
+        { id: 2245, propertyId: 1, unitId: 103, roomId: null, start: '01/04/2026', end: '31/03/2027', rent: 20000, status: 'upcoming' }
+      ] }
   ];
 
-  /* Mock lease history per unit (for conflict check + panel A) */
-  var UNIT_LEASES = {
-    'gv-3A': [
-      { id: 'L-2103', tenant: 'Rohan Mehta',  start: '01/04/2025', end: '31/03/2026', status: 'active' },
-      { id: 'L-2245', tenant: 'Aditi Joshi',   start: '01/04/2026', end: '31/03/2027', status: 'upcoming' },
-      { id: 'L-1842', tenant: 'Anita Verma',   start: '01/04/2023', end: '31/03/2025', status: 'expired' },
-      { id: 'L-1521', tenant: 'Sunil Kapoor',  start: '01/06/2022', end: '31/03/2023', status: 'terminated' }
-    ],
-    'gv-5B': [
-      { id: 'L-2150', tenant: 'Vikram Singh',  start: '01/01/2025', end: '31/12/2025', status: 'expired' }
-    ],
-    'gv-5B-A': [
-      { id: 'L-2180', tenant: 'Ravi Kumar',    start: '01/04/2025', end: '31/03/2026', status: 'active' }
-    ],
-    'sh-PG101': [
-      { id: 'L-2200', tenant: 'Neha Sharma',   start: '15/03/2026', end: '14/03/2027', status: 'upcoming' }
-    ],
-    'pg101-B': [
-      { id: 'L-2201', tenant: 'Arun Yadav',    start: '01/02/2026', end: '31/01/2027', status: 'active' }
-    ]
-  };
+  /* UNIT_LEASES — flat array of all unit/room-scoped leases. Each carries:
+       • id        — lease PK
+       • unitId    → UNITS.id        (required)
+       • roomId    → ROOMS.id        (null for unit-wise leases)
+       • tenantId  → TENANTS.id      (null if the tenant is historical / not on platform)
+       • tenant    — display name (kept for historical entries whose tenantId is null)
+       • start/end/rent/status
+
+     INVARIANT: every unit/room marked `occupied: true` in UNITS / ROOMS MUST
+     have a matching active lease entry here whose `end` date equals its
+     `occupiedUntil` — otherwise the Unit Lease History card on Step 5 looks
+     empty for a unit the user can plainly see is occupied. */
+  var UNIT_LEASES = [
+    // unitId 101 (gv-1A) — occupied until 31/03/2026
+    { id: 2105, unitId: 101, roomId: null, tenantId: null, tenant: 'Karthik Iyer',  start: '01/04/2025', end: '31/03/2026', rent: 18000, status: 'active' },
+    { id: 1903, unitId: 101, roomId: null, tenantId: null, tenant: 'Megha Sharma',  start: '01/04/2023', end: '31/03/2025', rent: 17000, status: 'expired' },
+    // unitId 102 (gv-2B) — occupied until 30/06/2026
+    { id: 2120, unitId: 102, roomId: null, tenantId: null, tenant: 'Deepak Mehta',  start: '01/07/2025', end: '30/06/2026', rent: 24000, status: 'active' },
+    { id: 1955, unitId: 102, roomId: null, tenantId: null, tenant: 'Rakesh Kumar',  start: '01/07/2023', end: '30/06/2025', rent: 22500, status: 'expired' },
+    // unitId 103 (gv-3A) — available; has full unit-wise history including the active L-2103
+    { id: 2103, unitId: 103, roomId: null, tenantId: 1,    tenant: 'Rohan Mehta',   start: '01/04/2025', end: '31/03/2026', rent: 18000, status: 'active' },
+    { id: 2245, unitId: 103, roomId: null, tenantId: 5,    tenant: 'Aditi Joshi',   start: '01/04/2026', end: '31/03/2027', rent: 20000, status: 'upcoming' },
+    { id: 1842, unitId: 103, roomId: null, tenantId: 3,    tenant: 'Anita Verma',   start: '01/04/2023', end: '31/03/2025', rent: 17000, status: 'expired' },
+    { id: 1521, unitId: 103, roomId: null, tenantId: 4,    tenant: 'Sunil Kapoor',  start: '01/06/2022', end: '31/03/2023', rent: 16500, status: 'terminated' },
+    // unitId 105 (gv-5B) — unit-wise history + upcoming
+    { id: 2150, unitId: 105, roomId: null,  tenantId: null, tenant: 'Vikram Singh',  start: '01/01/2025', end: '31/12/2025', rent: 26000, status: 'expired' },
+    { id: 2310, unitId: 105, roomId: null,  tenantId: null, tenant: 'Karan Bhatia',  start: '01/07/2027', end: '30/06/2028', rent: 28000, status: 'upcoming' },
+    // unitId 105 rooms — room-wise leases
+    { id: 2180, unitId: 105, roomId: 10501, tenantId: null, tenant: 'Ravi Kumar',    start: '01/03/2026', end: '15/02/2027', rent: 6500,  status: 'active' },
+    { id: 2181, unitId: 105, roomId: 10502, tenantId: null, tenant: 'Pooja Iyer',    start: '01/04/2025', end: '31/03/2026', rent: 6500,  status: 'active' },
+    // unitId 201 (sh-PG101) — upcoming unit-wise + room lease
+    { id: 2200, unitId: 201, roomId: null,  tenantId: null, tenant: 'Neha Sharma',   start: '15/03/2026', end: '14/03/2027', rent: 24500, status: 'upcoming' },
+    { id: 2201, unitId: 201, roomId: 20102, tenantId: null, tenant: 'Arun Yadav',    start: '01/01/2026', end: '31/12/2026', rent: 7000,  status: 'active' },
+    // unitId 202 (sh-PG202) — room lease on pg202-C
+    { id: 2220, unitId: 202, roomId: 20203, tenantId: null, tenant: 'Shreya Nair',   start: '01/10/2025', end: '30/09/2026', rent: 6000,  status: 'active' },
+    { id: 2050, unitId: 202, roomId: 20203, tenantId: null, tenant: 'Vishal Rao',    start: '01/10/2024', end: '30/09/2025', rent: 5500,  status: 'expired' }
+  ];
+
+  /* ────────────────────────────────────────────────────────────────────────
+     LOOKUP HELPERS — every cross-table access goes through these.
+     They mirror what would be Prisma `findUnique` / `findMany` calls.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  function findPropertyById(id)  { return PROPERTIES.filter(function (p) { return p.id === id; })[0] || null; }
+  function findUnitById(id)      { return UNITS.filter(function (u) { return u.id === id; })[0] || null; }
+  function findRoomById(id)      { return ROOMS.filter(function (r) { return r.id === id; })[0] || null; }
+  /* Coerces id to a Number because tenant ids that come from DOM dataset
+     attributes arrive as strings — the helper accepts either form. */
+  function findTenantById(id)    { var n = Number(id); return TENANTS.filter(function (t) { return t.id === n; })[0] || null; }
+  function unitsForProperty(propertyId) {
+    return UNITS.filter(function (u) { return u.propertyId === propertyId; });
+  }
+  function roomsForUnit(unitId) {
+    return ROOMS.filter(function (r) { return r.unitId === unitId; });
+  }
+  /* All leases attached to a unit — unit-wise AND any room-wise lease for any
+     room in this unit. Returns one flat array (caller can group by roomId). */
+  function leasesForUnit(unitId) {
+    return UNIT_LEASES.filter(function (l) { return l.unitId === unitId; });
+  }
+  /* Only the unit-wise leases (roomId is null). Used by the scheduling
+     conflict check when the new lease being created is unit-wise. */
+  function unitWiseLeasesForUnit(unitId) {
+    return UNIT_LEASES.filter(function (l) { return l.unitId === unitId && l.roomId == null; });
+  }
+  /* Only the leases scoped to a specific room. Used by the scheduling
+     conflict check when the new lease is room-wise. */
+  function leasesForRoom(roomId) {
+    return UNIT_LEASES.filter(function (l) { return l.roomId === roomId; });
+  }
 
   /* ---------------------------------------------------------------
      WIZARD STATE
@@ -802,19 +1498,23 @@
       var cls = '';
       if (i < wizardState.step) cls = 'is-complete';
       else if (i === wizardState.step) cls = 'is-active';
-      html += '<div class="wizard-step ' + cls + '">';
+      var ariaCurrent = (i === wizardState.step) ? ' aria-current="step"' : '';
+      html += '<div class="wizard-step ' + cls + '"' + ariaCurrent + '>';
       if (i < wizardState.step) {
-        html += '<div class="wizard-step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>';
+        html += '<div class="wizard-step-num"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>';
       } else {
         html += '<div class="wizard-step-num">' + i + '</div>';
       }
       html += '<div class="wizard-step-label">' + STEP_LABELS[i - 1] + '</div>';
       html += '</div>';
       if (i < 5) {
-        html += '<div class="wizard-connector' + (i < wizardState.step ? ' is-complete' : '') + '"></div>';
+        html += '<div class="wizard-connector' + (i < wizardState.step ? ' is-complete' : '') + '" aria-hidden="true"></div>';
       }
     }
     document.getElementById('wizard-progress').innerHTML = html;
+    /* Update bottom-bar step counter */
+    var counter = document.getElementById('wizard-step-counter');
+    if (counter) counter.textContent = 'Step ' + wizardState.step + ' of 5';
   }
 
   /* ---------------------------------------------------------------
@@ -823,7 +1523,17 @@
   function showStep(n) {
     for (var i = 1; i <= 5; i++) {
       var panel = document.getElementById('step-' + i);
-      if (panel) panel.style.display = (i === n) ? '' : 'none';
+      if (panel) {
+        if (i === n) {
+          panel.style.display = '';
+          /* Trigger re-animation by forcing a reflow */
+          panel.style.animation = 'none';
+          void panel.offsetWidth;
+          panel.style.animation = '';
+        } else {
+          panel.style.display = 'none';
+        }
+      }
     }
     var backBtn = document.getElementById('btn-back');
     var nextBtn = document.getElementById('btn-next');
@@ -832,6 +1542,37 @@
     nextBtn.className = n === 5 ? 'btn btn-primary' : 'btn btn-primary';
     wizardState.step = n;
     renderProgress();
+
+    /* Show / hide summary rail.
+       - Hidden on Step 1 (lease type — too little context yet).
+       - Visible on Steps 2–4 (orient the user as they pick property/unit/tenants).
+       - Hidden on Step 5 because the form itself is collecting that data and
+         the Selected Tenants panel already mirrors it — a side rail would
+         just duplicate. Hiding it also lets the reference history grid below
+         the action bar claim full wizard width. */
+    var rail = document.getElementById('wizard-summary-rail');
+    var shell = document.querySelector('.wizard-shell');
+    if (rail)  rail.style.display = (n >= 2 && n < 5) ? '' : 'none';
+    /* Collapse the shell to a single column when the rail is hidden, so the
+       wizard-body claims the full width (otherwise the 268px column track
+       stays reserved by grid-template-columns even with the child gone). */
+    if (shell) shell.style.gridTemplateColumns = (n >= 2 && n < 5) ? '' : '1fr';
+
+    /* The reference history card (lease history + tenant lease history) sits
+       BELOW the wizard action bar — visible only on Step 5. */
+    var histCard = document.getElementById('step5-history-card');
+    if (histCard) histCard.style.display = (n === 5) ? '' : 'none';
+
+    updateSummary();
+
+    /* Update step 3 heading based on lease type */
+    var h3 = document.getElementById('step3-heading');
+    var s3sub = document.getElementById('step3-subheading');
+    if (h3) h3.textContent = wizardState.leaseType === 'room-wise' ? 'Select a unit and room' : 'Select a unit';
+    if (s3sub) s3sub.textContent = wizardState.leaseType === 'room-wise'
+      ? 'First pick a unit, then choose the room within it.'
+      : 'Choose the unit for this lease. Occupied units are selectable — just ensure the start date is after the current lease ends.';
+
     window.scrollTo(0, 0);
   }
 
@@ -982,8 +1723,12 @@
       wizardState.selectedUnitId = null;
       wizardState.selectedRoomId = null;
       document.getElementById('step2-reset-notice').classList.add('show');
-      renderPropertyGrid('');
     }
+    /* Always re-render the property grid so it reflects the current lease type.
+       Without this, the initial unit-wise render persists into Step 2 even after
+       the user picks room-wise on Step 1 — the first click on Step 2 then drops
+       properties without rooms, looking like cards were "removed" on selection. */
+    if (prevType !== type) renderPropertyGrid('');
   }
 
   /* ---------------------------------------------------------------
@@ -1011,10 +1756,19 @@
       if (isRoomWise && p.roomCount > 0) {
         badgeHtml += ' <span class="badge badge-prepaid" style="font-size:11px;">' + p.roomCount + ' rooms across ' + p.roomUnitCount + ' unit' + (p.roomUnitCount !== 1 ? 's' : '') + '</span>';
       }
-      return '<div class="sel-card' + (sel ? ' is-selected' : '') + '" onclick="selectProperty(\'' + p.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectProperty(\'' + p.id + '\')}">' +
-        '<div class="sel-card-name">' + esc(p.name) + '</div>' +
-        '<div class="sel-card-sub">' + esc(p.addr) + '</div>' +
-        '<div class="sel-card-badges">' + badgeHtml + '</div>' +
+      var bandColor = cardBandColor(p.id);
+      var initials = buildCardInitials(p.name);
+      var checkHtml = '<div class="sel-card-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
+      return '<div class="sel-card' + (sel ? ' is-selected' : '') + '" onclick="selectProperty(' + p.id + ')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectProperty(' + p.id + ')}">' +
+        '<div class="sel-card-band" style="background:' + bandColor + ';">' +
+          '<span class="sel-card-initials">' + esc(initials) + '</span>' +
+          checkHtml +
+        '</div>' +
+        '<div class="sel-card-body">' +
+          '<div class="sel-card-name">' + esc(p.name) + '</div>' +
+          '<div class="sel-card-sub">' + esc(p.addr) + '</div>' +
+          '<div class="sel-card-badges">' + badgeHtml + '</div>' +
+        '</div>' +
         '</div>';
     }).join('');
   }
@@ -1029,6 +1783,7 @@
     wizardState.selectedRoomId = null;
     clearWizErr('step2-error');
     renderPropertyGrid(document.getElementById('prop-search').value);
+    updateSummary();
   }
 
   /* ---------------------------------------------------------------
@@ -1036,7 +1791,7 @@
   --------------------------------------------------------------- */
   function renderUnitGrid() {
     var propId = wizardState.selectedPropertyId;
-    var units = (propId && UNITS[propId]) ? UNITS[propId] : [];
+    var units = propId ? unitsForProperty(propId) : [];
     var isRoomWise = wizardState.leaseType === 'room-wise';
     var grid = document.getElementById('unit-grid');
     var emptyEl = document.getElementById('unit-empty');
@@ -1059,14 +1814,22 @@
         var statusBadge = unitStatusBadgeHtml(u.status);
         var occupiedHint = '';
         if (!isRoomWise && u.occupied && u.occupiedUntil) {
-          occupiedHint = '<div class="text-xs muted mt-1">Currently occupied until ' + esc(u.occupiedUntil) + ' — new lease must start after this date.</div>';
+          occupiedHint = '<div style="font-size:11px;color:var(--color-slate);margin-top:6px;">Occupied until ' + esc(u.occupiedUntil) + '</div>';
         }
+        var bandColor = cardBandColor(u.id);
+        var checkHtml = '<div class="sel-card-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
         return '<div class="sel-card' + (sel ? ' is-selected' : '') + '"' +
-          ' onclick="selectUnit(\'' + u.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectUnit(\'' + u.id + '\')}">' +
-          '<div class="sel-card-name">Unit ' + esc(u.label) + '</div>' +
-          '<div class="sel-card-sub">Floor ' + u.floor + ' · ' + esc(u.type) + ' · ' + u.area + ' sq ft</div>' +
-          '<div class="sel-card-badges">' + statusBadge + ' <span class="badge badge-closed" style="font-size:11px;">' + rentOrRooms + '</span></div>' +
-          occupiedHint +
+          ' onclick="selectUnit(' + u.id + ')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectUnit(' + u.id + ')}">' +
+          '<div class="sel-card-band" style="background:' + bandColor + ';">' +
+            '<span class="sel-card-initials">' + esc(u.label) + '</span>' +
+            checkHtml +
+          '</div>' +
+          '<div class="sel-card-body">' +
+            '<div class="sel-card-name">Unit ' + esc(u.label) + '</div>' +
+            '<div class="sel-card-sub">Floor ' + u.floor + ' · ' + esc(u.type) + ' · ' + u.area + ' sq ft</div>' +
+            '<div class="sel-card-badges">' + statusBadge + ' <span class="badge badge-closed" style="font-size:11px;">' + rentOrRooms + '</span></div>' +
+            occupiedHint +
+          '</div>' +
           '</div>';
       }).join('');
     }
@@ -1086,10 +1849,11 @@
     if (wizardState.leaseType === 'room-wise') {
       renderRoomGrid(unitId);
     }
+    updateSummary();
   }
 
   function renderRoomGrid(unitId) {
-    var rooms = ROOMS[unitId] || [];
+    var rooms = roomsForUnit(unitId);
     var section = document.getElementById('room-grid-section');
     var grid = document.getElementById('room-grid');
     if (rooms.length === 0) { section.style.display = 'none'; return; }
@@ -1102,14 +1866,23 @@
         ? '<span class="badge badge-prepaid" style="font-size:11px;">Occupied</span>'
         : '<span class="badge badge-paid" style="font-size:11px;">Available</span>';
       var occupiedHint = (r.occupied && r.occupiedUntil)
-        ? '<div class="text-xs muted mt-1">Currently occupied until ' + esc(r.occupiedUntil) + ' — new lease must start after this date.</div>'
+        ? '<div style="font-size:11px;color:var(--color-slate);margin-top:6px;">Occupied until ' + esc(r.occupiedUntil) + '</div>'
         : '';
+      /* Room band uses a softer navy tint */
+      var bandColor = r.occupied ? 'var(--color-royal-blue)' : 'var(--color-status-paid)';
+      var checkHtml = '<div class="sel-card-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
       return '<div class="sel-card' + (sel ? ' is-selected' : '') + '"' +
-        ' onclick="selectRoom(\'' + r.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectRoom(\'' + r.id + '\')}">' +
-        '<div class="sel-card-name">' + esc(r.label) + '</div>' +
-        '<div class="sel-card-sub">₹' + formatRupee(r.rent) + '/mo</div>' +
-        '<div class="sel-card-badges">' + statusBadge + '</div>' +
-        occupiedHint +
+        ' onclick="selectRoom(' + r.id + ')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectRoom(' + r.id + ')}">' +
+        '<div class="sel-card-band" style="background:' + bandColor + ';">' +
+          '<span class="sel-card-initials">' + esc(r.label) + '</span>' +
+          checkHtml +
+        '</div>' +
+        '<div class="sel-card-body">' +
+          '<div class="sel-card-name">' + esc(r.label) + '</div>' +
+          '<div class="sel-card-sub">₹' + formatRupee(r.rent) + '/mo</div>' +
+          '<div class="sel-card-badges">' + statusBadge + '</div>' +
+          occupiedHint +
+        '</div>' +
         '</div>';
     }).join('');
   }
@@ -1119,6 +1892,7 @@
     clearWizErr('step3-room-error');
     /* Re-render room grid to show selection */
     renderRoomGrid(wizardState.selectedUnitId);
+    updateSummary();
   }
 
   /* ---------------------------------------------------------------
@@ -1244,11 +2018,13 @@
     var q = (filterText || '').trim().toLowerCase();
     var dd = document.getElementById('tenant-ac-' + idx);
     if (!dd) return;
-    /* Hide tenants already selected on other rows so a tenant can't be added twice. */
+    /* Hide tenants already selected on other rows so a tenant can't be added twice.
+       DOM dataset values are strings; we collect them as numbers to compare against
+       the numeric ids on TENANTS. */
     var takenIds = [];
     document.querySelectorAll('.tenant-row').forEach(function (r) {
       if (r.id !== ('tenant-row-' + idx) && r.dataset.existingTenantId) {
-        takenIds.push(r.dataset.existingTenantId);
+        takenIds.push(Number(r.dataset.existingTenantId));
       }
     });
     var matches = TENANTS.filter(function (t) {
@@ -1264,7 +2040,7 @@
     } else {
       html += matches.map(function (t) {
         var leaseStr = buildLeaseSub(t);
-        return '<div class="tenant-ac-item" onclick="selectExistingTenant(' + idx + ', \'' + t.id + '\')">' +
+        return '<div class="tenant-ac-item" onclick="selectExistingTenant(' + idx + ', ' + t.id + ')">' +
           '<div class="tenant-ac-name">' + esc(t.name) + '</div>' +
           '<div class="tenant-ac-sub">' + esc(t.email) + ' · ' + esc(leaseStr) + '</div>' +
           '</div>';
@@ -1300,7 +2076,7 @@
   }
 
   function selectExistingTenant(idx, tenantId) {
-    var tenant = TENANTS.filter(function (t) { return t.id === tenantId; })[0];
+    var tenant = findTenantById(tenantId);
     if (!tenant) return;
     var row = document.getElementById('tenant-row-' + idx);
     if (!row) return;
@@ -1334,6 +2110,7 @@
 
     /* Update Step 5 context panel B if already on step 5 */
     if (wizardState.step === 5) renderContextPanels();
+    updateSummary();
   }
 
   /* Switch a row into "new tenant" mode — show the input form. */
@@ -1366,6 +2143,7 @@
     if (dd) dd.classList.remove('open');
 
     if (wizardState.step === 5) renderContextPanels();
+    updateSummary();
   }
 
   /* Reset a row back to the search state — used by both "Change" buttons. */
@@ -1399,6 +2177,7 @@
     if (badgeEl) badgeEl.innerHTML = '';
 
     if (wizardState.step === 5) renderContextPanels();
+    updateSummary();
   }
 
   function buildAvatarInitials(name) {
@@ -1412,17 +2191,13 @@
      STEP 5 — Lease Details
   --------------------------------------------------------------- */
   function prepareStep5() {
-    /* Auto-fill rent from selected unit/room */
+    /* Auto-fill rent from selected unit/room (lookups by numeric id). */
     var rent = 0;
     if (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId) {
-      var allRooms = [];
-      Object.keys(ROOMS).forEach(function (k) { allRooms = allRooms.concat(ROOMS[k]); });
-      var room = allRooms.filter(function (r) { return r.id === wizardState.selectedRoomId; })[0];
+      var room = findRoomById(wizardState.selectedRoomId);
       if (room) rent = room.rent;
     } else if (wizardState.selectedUnitId) {
-      var allUnits = [];
-      Object.keys(UNITS).forEach(function (k) { allUnits = allUnits.concat(UNITS[k]); });
-      var unit = allUnits.filter(function (u) { return u.id === wizardState.selectedUnitId; })[0];
+      var unit = findUnitById(wizardState.selectedUnitId);
       if (unit) rent = unit.rent;
     }
     var rentEl = document.getElementById('cl-rent');
@@ -1436,6 +2211,34 @@
     clearConflict();
     /* Render context panels */
     renderContextPanels();
+    renderStep5ContextStrip();
+    updateSummary();
+  }
+
+  /* Top-of-Step-5 context strip — lease type chip + Property → Unit (→ Room).
+     The summary rail is hidden on Step 5, so this strip is the only on-screen
+     reminder of what lease the user is configuring. */
+  function renderStep5ContextStrip() {
+    var typeEl = document.getElementById('step5-context-type');
+    var pathEl = document.getElementById('step5-context-path');
+    if (!typeEl || !pathEl) return;
+
+    var isRoom = wizardState.leaseType === 'room-wise';
+    typeEl.textContent = isRoom ? 'Room-wise lease' : 'Unit-wise lease';
+
+    var prop = wizardState.selectedPropertyId ? findPropertyById(wizardState.selectedPropertyId) : null;
+    var unit = wizardState.selectedUnitId     ? findUnitById(wizardState.selectedUnitId)         : null;
+    var room = (isRoom && wizardState.selectedRoomId) ? findRoomById(wizardState.selectedRoomId) : null;
+
+    var parts = [];
+    parts.push('<span class="strong">' + esc(prop ? prop.name : '—') + '</span>');
+    parts.push('<span class="sep">›</span>');
+    parts.push('<span class="strong">Unit ' + esc(unit ? unit.label : '—') + '</span>');
+    if (isRoom) {
+      parts.push('<span class="sep">›</span>');
+      parts.push('<span class="strong">Room ' + esc(room ? room.label : '—') + '</span>');
+    }
+    pathEl.innerHTML = parts.join(' ');
   }
 
   function autoFillDeposit() {
@@ -1478,40 +2281,29 @@
     var sd = parseDate(start), ed = parseDate(end);
     if (!sd || !ed || ed <= sd) { clearConflict(); return; }
 
-    /* Determine which lease history to check against */
-    var historyKey = null;
-    var scopeLabel = '';
-    if (wizardState.leaseType === 'unit-wise' && wizardState.selectedUnitId) {
-      historyKey = wizardState.selectedUnitId;
-      scopeLabel = 'unit';
-    } else if (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId) {
-      historyKey = wizardState.selectedRoomId;
-      scopeLabel = 'room';
-      /* Also check for unit-wise lease on same unit (cross-scope conflict) */
-    }
-    if (!historyKey) { clearConflict(); return; }
+    /* Collect the lease set that the new lease's window must not overlap.
+       Uses helper functions; every lookup is by numeric id. */
+    var unitId = wizardState.selectedUnitId;
+    var roomId = wizardState.selectedRoomId;
+    if (!unitId) { clearConflict(); return; }
+    if (wizardState.leaseType === 'room-wise' && !roomId) { clearConflict(); return; }
 
-    var leases = UNIT_LEASES[historyKey] || [];
-    /* Only upcoming + active participate in conflict check */
-    var activeLeases = leases.filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
-
-    /* Cross-scope: for room-wise, also check unit-wise leases on the parent unit */
-    if (wizardState.leaseType === 'room-wise' && wizardState.selectedUnitId) {
-      var unitLeases = (UNIT_LEASES[wizardState.selectedUnitId] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
-      activeLeases = activeLeases.concat(unitLeases);
-    }
-    /* Cross-scope: for unit-wise, check room leases on all rooms of the unit */
-    if (wizardState.leaseType === 'unit-wise' && wizardState.selectedUnitId) {
-      var rooms = ROOMS[wizardState.selectedUnitId] || [];
-      rooms.forEach(function (r) {
-        var rLeases = (UNIT_LEASES[r.id] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
-        activeLeases = activeLeases.concat(rLeases);
-      });
+    var activeLike = function (l) { return l.status === 'active' || l.status === 'upcoming'; };
+    var candidates = [];
+    if (wizardState.leaseType === 'unit-wise') {
+      /* Conflict if a unit-wise lease on this unit overlaps OR any room-wise
+         lease (on any room of this unit) overlaps. */
+      candidates = leasesForUnit(unitId).filter(activeLike);
+    } else {
+      /* Room-wise — conflict if this specific room has an overlapping lease
+         OR a unit-wise lease on the parent unit overlaps. */
+      candidates = leasesForRoom(roomId).filter(activeLike)
+        .concat(unitWiseLeasesForUnit(unitId).filter(activeLike));
     }
 
     var conflict = null;
-    for (var i = 0; i < activeLeases.length; i++) {
-      var l = activeLeases[i];
+    for (var i = 0; i < candidates.length; i++) {
+      var l = candidates[i];
       var ls = parseDate(l.start), le = parseDate(l.end);
       if (ls && le && datesOverlap(sd, ed, ls, le)) {
         conflict = l;
@@ -1522,19 +2314,20 @@
     if (conflict) {
       var msg;
       if (wizardState.leaseType === 'unit-wise') {
-        msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies this unit from ' + conflict.start + ' to ' + conflict.end + '. Choose dates outside this range or terminate the existing lease first.';
+        if (conflict.roomId == null) {
+          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies this unit from ' + conflict.start + ' to ' + conflict.end + '. Choose dates outside this range or terminate the existing lease first.';
+        } else {
+          var conflictRoom = findRoomById(conflict.roomId);
+          var rl = conflictRoom ? conflictRoom.label : 'a room of this unit';
+          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies ' + rl + ' of this unit from ' + conflict.start + ' to ' + conflict.end + '. Choose dates outside this range or terminate the existing lease first.';
+        }
       } else {
-        /* Determine if it's the room or the unit-wise that conflicts */
-        var unitLeaseIds = ((UNIT_LEASES[wizardState.selectedUnitId] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; })).map(function (l) { return l.id; });
-        if (unitLeaseIds.indexOf(conflict.id) >= 0) {
+        if (conflict.roomId == null) {
           msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies this unit unit-wise from ' + conflict.start + ' to ' + conflict.end + '. Choose a different room, choose dates outside this range, or terminate the existing lease first.';
         } else {
-          var roomLabel = 'this room';
-          var allR = [];
-          Object.keys(ROOMS).forEach(function (k) { allR = allR.concat(ROOMS[k]); });
-          var rObj = allR.filter(function (r) { return r.id === wizardState.selectedRoomId; })[0];
-          if (rObj) roomLabel = rObj.label;
-          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies ' + roomLabel + ' from ' + conflict.start + ' to ' + conflict.end + '. Choose a different room, choose dates outside this range, or terminate the existing lease first.';
+          var pickedRoom = findRoomById(roomId);
+          var pickedLabel = pickedRoom ? pickedRoom.label : 'this room';
+          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies ' + pickedLabel + ' from ' + conflict.start + ' to ' + conflict.end + '. Choose a different room, choose dates outside this range, or terminate the existing lease first.';
         }
       }
       showConflict(msg);
@@ -1545,8 +2338,10 @@
 
   function showConflict(msg) {
     wizardState.conflictError = true;
-    var el = document.getElementById('cl-conflict-error');
-    if (el) { el.textContent = msg; el.classList.add('show'); }
+    var banner = document.getElementById('cl-conflict-banner');
+    var detail = document.getElementById('cl-conflict-detail');
+    if (banner) banner.classList.add('show');
+    if (detail) detail.textContent = msg;
     /* Disable create button */
     var btn = document.getElementById('btn-next');
     if (btn) { btn.classList.add('btn-disabled'); btn.classList.remove('btn-primary'); btn.setAttribute('disabled', ''); }
@@ -1554,8 +2349,10 @@
 
   function clearConflict() {
     wizardState.conflictError = false;
-    var el = document.getElementById('cl-conflict-error');
-    if (el) { el.textContent = ''; el.classList.remove('show'); }
+    var banner = document.getElementById('cl-conflict-banner');
+    var detail = document.getElementById('cl-conflict-detail');
+    if (banner) banner.classList.remove('show');
+    if (detail) detail.textContent = '';
     var btn = document.getElementById('btn-next');
     if (btn && wizardState.step === 5) {
       btn.classList.remove('btn-disabled');
@@ -1565,75 +2362,195 @@
   }
 
   /* ---------------------------------------------------------------
-     STEP 5 — Context Panels
+     STEP 5 — Context Panels + Selected Tenants
   --------------------------------------------------------------- */
   function renderContextPanels() {
-    /* Panel A — unit/room lease history */
-    var histKey = (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId)
-      ? wizardState.selectedRoomId
-      : wizardState.selectedUnitId;
-    var leases = histKey ? (UNIT_LEASES[histKey] || []) : [];
+    /* Panel A — Unit lease history (always unit-scoped).
+       Pulls every UNIT_LEASES row whose `unitId` matches the picked unit —
+       partitioned at render time into unit-wise (roomId == null) and
+       room-wise (roomId references a room of this unit) so each row can be
+       labelled with a scope chip. Sorted by start date desc so the user
+       the user can see at a glance whether each lease was unit-wide or scoped
+       to a single room. This makes future-conflict spotting easy — e.g. an
+       upcoming unit-wise lease while room-wise leases are still active. */
+    var unitId = wizardState.selectedUnitId;
     var panelA = document.getElementById('panel-unit-history-body');
-    if (leases.length === 0) {
-      panelA.innerHTML = '<div style="font-size:13px;color:var(--color-slate);">No lease history for this ' + (wizardState.leaseType === 'room-wise' ? 'room' : 'unit') + '.</div>';
+    if (!panelA) return;
+
+    var combined = [];
+    if (unitId) {
+      /* All leases attached to this unit, partitioned by scope:
+           - leases with roomId == null are unit-wise
+           - leases with a roomId are scoped to that room (look up room label) */
+      leasesForUnit(unitId).forEach(function (l) {
+        if (l.roomId == null) {
+          combined.push(Object.assign({}, l, { scope: 'unit', scopeLabel: 'Unit-wise' }));
+        } else {
+          var room = findRoomById(l.roomId);
+          combined.push(Object.assign({}, l, { scope: 'room', scopeLabel: room ? room.label : 'Room' }));
+        }
+      });
+    }
+
+    if (combined.length === 0) {
+      panelA.innerHTML = '<div class="tenant-history-empty">No lease history for this unit.</div>';
     } else {
-      /* Sort descending by start date */
-      var sorted = leases.slice().sort(function (a, b) {
+      combined.sort(function (a, b) {
         var da = parseDate(a.start), db = parseDate(b.start);
         if (!da || !db) return 0;
         return db - da;
       });
-      panelA.innerHTML = sorted.map(function (l) {
-        return '<div class="context-lease-item">' +
-          '<div><span class="context-lease-id">#' + esc(l.id) + '</span> <span class="context-lease-tenant">' + esc(l.tenant) + '</span></div>' +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<span class="context-lease-dates">' + esc(l.start) + ' – ' + esc(l.end) + '</span>' +
-            statusBadgeHtml(l.status) +
-          '</div>' +
-        '</div>';
+      panelA.innerHTML = combined.map(function (l) {
+        var rentLabel = l.rent ? '₹' + formatRupee(l.rent) + '/mo' : '';
+        var chipClass = l.scope === 'unit' ? 'scope-chip scope-chip-unit' : 'scope-chip scope-chip-room';
+        return '<div class="tenant-lease-row">'
+          + '<div class="tenant-lease-row-primary">'
+          +   '<span class="context-lease-id">#L-' + esc(l.id) + '</span>'
+          +   '<span class="' + chipClass + '">' + esc(l.scopeLabel) + '</span>'
+          +   '<span class="tenant-lease-row-property">' + esc(l.tenant) + '</span>'
+          + '</div>'
+          + '<div class="tenant-lease-row-badge">' + statusBadgeHtml(l.status) + '</div>'
+          + '<div class="tenant-lease-row-secondary">'
+          +   '<span>' + esc(l.start) + ' → ' + esc(l.end) + '</span>'
+          +   (rentLabel ? '<span class="tenant-lease-row-rent">' + rentLabel + '</span>' : '')
+          + '</div>'
+          + '</div>';
       }).join('');
     }
 
-    /* Panel B — tenant lease history */
+    /* Panel B — tenant lease history (richer rows: property + unit/room + dates + monthly rent).
+       Skip tenants who have no prior leases — new tenants and existing tenants
+       with an empty leases[] never produce a row here. If NO picked tenant has
+       any history, the panel shows a single empty-state line. */
     var panelB = document.getElementById('panel-tenant-history-body');
     var rows = document.querySelectorAll('.tenant-row');
+    var blocks = [];
+    rows.forEach(function (row) {
+      var tenantId = row.dataset.existingTenantId;
+      if (!tenantId) return;  // new tenant — no history to show
+      var tenant = findTenantById(tenantId);
+      if (!tenant || !tenant.leases || tenant.leases.length === 0) return;
+
+      var leaseRows = tenant.leases.map(function (l) {
+        /* Resolve display labels from numeric FKs — never read property/unit/room
+           names from the lease entry itself (per CLAUDE.md rule #19). */
+        var prop = l.propertyId ? findPropertyById(l.propertyId) : null;
+        var unit = l.unitId     ? findUnitById(l.unitId)         : null;
+        var room = l.roomId     ? findRoomById(l.roomId)         : null;
+        var propLabel = prop ? prop.name : '—';
+        var unitLabel = unit ? unit.label : '—';
+        var scopeLabel = room
+          ? ('Unit ' + unitLabel + ' · ' + room.label)
+          : ('Unit ' + unitLabel);
+        var rentLabel = l.rent ? '₹' + formatRupee(l.rent) + '/mo' : '';
+        return '<div class="tenant-lease-row">'
+          + '<div class="tenant-lease-row-primary">'
+          +   '<span class="context-lease-id">#L-' + esc(l.id) + '</span>'
+          +   '<span class="tenant-lease-row-property">' + esc(propLabel) + '</span>'
+          +   '<span class="tenant-lease-row-unit">· ' + esc(scopeLabel) + '</span>'
+          + '</div>'
+          + '<div class="tenant-lease-row-badge">' + statusBadgeHtml(l.status) + '</div>'
+          + '<div class="tenant-lease-row-secondary">'
+          +   '<span>' + esc(l.start || '—') + ' → ' + esc(l.end || '—') + '</span>'
+          +   (rentLabel ? '<span class="tenant-lease-row-rent">' + rentLabel + '</span>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
+
+      blocks.push(
+        '<div class="tenant-history-tenant">'
+        + '<div class="tenant-history-tenant-name">' + esc(tenant.name) + '</div>'
+        + leaseRows
+        + '</div>'
+      );
+    });
+
     var panelHtml = '';
     if (rows.length === 0) {
-      panelHtml = '<div style="font-size:13px;color:var(--color-slate);">No tenants selected yet.</div>';
+      panelHtml = '<div class="tenant-history-empty">No tenants selected yet.</div>';
+    } else if (blocks.length === 0) {
+      panelHtml = '<div class="tenant-history-empty">None of the selected tenants have prior leases on the platform.</div>';
     } else {
-      rows.forEach(function (row) {
-        var tenantId = row.dataset.existingTenantId;
-        var nameEl = row.querySelector('.t-name');
-        var rowLabel = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : 'Tenant';
-        if (tenantId) {
-          var tenant = TENANTS.filter(function (t) { return t.id === tenantId; })[0];
-          if (tenant) {
-            panelHtml += '<div style="margin-bottom:12px;">';
-            panelHtml += '<div style="font-size:12px;font-weight:600;color:var(--color-slate);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">' + esc(tenant.name) + '</div>';
-            if (tenant.leases.length === 0) {
-              panelHtml += '<div style="font-size:13px;color:var(--color-slate);">No prior leases.</div>';
-            } else {
-              tenant.leases.forEach(function (l) {
-                panelHtml += '<div class="context-lease-item">' +
-                  '<span class="context-lease-id">#' + esc(l.id) + '</span>' +
-                  '<div style="display:flex;align-items:center;gap:6px;">' +
-                    '<span class="context-lease-dates">ends ' + esc(l.end) + '</span>' +
-                    statusBadgeHtml(l.status) +
-                  '</div>' +
-                  '</div>';
-              });
-            }
-            panelHtml += '</div>';
-          }
-        } else {
-          panelHtml += '<div style="margin-bottom:12px;">';
-          panelHtml += '<div style="font-size:12px;font-weight:600;color:var(--color-slate);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">' + esc(rowLabel) + '</div>';
-          panelHtml += '<span class="tenant-new-pill">New tenant — no prior leases</span>';
-          panelHtml += '</div>';
-        }
-      });
+      panelHtml = blocks.join('');
     }
-    panelB.innerHTML = panelHtml;
+    if (panelB) panelB.innerHTML = panelHtml;
+
+    /* Render the selected-tenants panel in the right column */
+    renderSelectedTenants();
+  }
+
+  /* ---------------------------------------------------------------
+     SELECTED TENANTS PANEL (Step 5 right column)
+  --------------------------------------------------------------- */
+  function renderSelectedTenants() {
+    var container = document.getElementById('step5-tenants-body');
+    if (!container) return;
+
+    var rows = document.querySelectorAll('.tenant-row');
+    if (rows.length === 0) {
+      container.innerHTML = '<div class="step5-tenants-empty">No tenants selected yet.</div>';
+      return;
+    }
+
+    /* Determine which row has primary checked */
+    var primaryRadio = document.querySelector('.t-primary:checked');
+    var primaryIdx = primaryRadio ? primaryRadio.value : null;
+
+    var html = '';
+    rows.forEach(function (row) {
+      var idx = row.id.replace('tenant-row-', '');
+      var isPrimary = (idx === String(primaryIdx));
+      var mode = row.dataset.mode || 'search';
+
+      if (mode === 'existing') {
+        var tenantId = row.dataset.existingTenantId;
+        var tenant = tenantId ? findTenantById(tenantId) : null;
+        if (!tenant) return;
+        var initials = buildAvatarInitials(tenant.name);
+        var leaseBadge = buildLeaseBadge(tenant);
+        html += '<div class="step5-tenant-item">' +
+          '<div class="step5-tenant-avatar">' + esc(initials) + '</div>' +
+          '<div class="step5-tenant-info">' +
+            '<div class="step5-tenant-name">' + esc(tenant.name) +
+              (isPrimary ? '<span class="step5-tenant-primary-chip">Primary</span>' : '') +
+            '</div>' +
+            '<div class="step5-tenant-sub">' + esc(tenant.email) + '</div>' +
+            '<div class="step5-tenant-badge">' + leaseBadge + '</div>' +
+          '</div>' +
+        '</div>';
+
+      } else if (mode === 'new') {
+        var nameInp  = document.getElementById('t-name-'  + idx);
+        var emailInp = document.getElementById('t-email-' + idx);
+        var phoneInp = document.getElementById('t-phone-' + idx);
+        var tName  = nameInp  && nameInp.value.trim()  ? nameInp.value.trim()  : 'New tenant';
+        var tEmail = emailInp && emailInp.value.trim() ? emailInp.value.trim() : '';
+        var tPhone = phoneInp && phoneInp.value.trim() ? phoneInp.value.trim() : '';
+        var initials = buildAvatarInitials(tName);
+        html += '<div class="step5-tenant-item">' +
+          '<div class="step5-tenant-avatar is-new">' + esc(initials) + '</div>' +
+          '<div class="step5-tenant-info">' +
+            '<div class="step5-tenant-name">' + esc(tName) +
+              (isPrimary ? '<span class="step5-tenant-primary-chip">Primary</span>' : '') +
+            '</div>' +
+            (tEmail ? '<div class="step5-tenant-sub">' + esc(tEmail) + '</div>' : '') +
+            (tPhone ? '<div class="step5-tenant-sub">' + esc(tPhone) + '</div>' : '') +
+            '<div class="step5-tenant-badge"><span class="tenant-new-pill">New tenant</span></div>' +
+          '</div>' +
+        '</div>';
+
+      } else {
+        /* mode === 'search' — row not yet filled; skip or show placeholder */
+        html += '<div class="step5-tenant-item">' +
+          '<div class="step5-tenant-avatar" style="background:var(--color-mid-gray);">?</div>' +
+          '<div class="step5-tenant-info">' +
+            '<div class="step5-tenant-name" style="color:var(--color-slate);">Not yet selected</div>' +
+          '</div>' +
+        '</div>';
+      }
+    });
+
+    container.innerHTML = html || '<div class="step5-tenants-empty">No tenants selected yet.</div>';
   }
 
   /* ---------------------------------------------------------------
@@ -1691,12 +2608,146 @@
   }
 
   /* ---------------------------------------------------------------
+     CARD BAND HELPERS
+  --------------------------------------------------------------- */
+  var BAND_COLORS = [
+    'var(--color-navy)',
+    'var(--color-royal-blue)',
+    '#2E5596',
+    '#1B5E7B',
+    '#0D47A1',
+    '#1565A8'
+  ];
+  function cardBandColor(id) {
+    /* Hash the string id to pick a consistent band color */
+    var hash = 0;
+    var s = String(id || '');
+    for (var i = 0; i < s.length; i++) {
+      hash = (hash * 31 + s.charCodeAt(i)) & 0xffff;
+    }
+    return BAND_COLORS[hash % BAND_COLORS.length];
+  }
+  function buildCardInitials(name) {
+    var parts = String(name || '').trim().split(/\s+/);
+    var a = parts[0] ? parts[0].charAt(0) : '';
+    var b = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (a + b).toUpperCase();
+  }
+
+  /* ---------------------------------------------------------------
+     CONTEXT PANEL ACCORDION
+  --------------------------------------------------------------- */
+  function toggleContextPanel(panelId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var isOpen = panel.classList.contains('is-open');
+    panel.classList.toggle('is-open', !isOpen);
+    /* Update aria-expanded on the header button */
+    var header = panel.querySelector('.context-panel-header');
+    if (header) header.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+  }
+
+  /* ---------------------------------------------------------------
+     LIVE SUMMARY RAIL
+  --------------------------------------------------------------- */
+  function updateSummary() {
+    var rail = document.getElementById('wizard-summary-rail');
+    if (!rail || rail.style.display === 'none') return;
+
+    var rows = [];
+
+    /* Lease type */
+    var typeLabel = wizardState.leaseType === 'room-wise'
+      ? '<span class="summary-type-pill">Room-wise</span>'
+      : '<span class="summary-type-pill">Unit-wise</span>';
+    rows.push({ label: 'Type', value: typeLabel, raw: true });
+
+    /* Property */
+    var propObj = wizardState.selectedPropertyId ? findPropertyById(wizardState.selectedPropertyId) : null;
+    rows.push({ label: 'Property', value: propObj ? esc(propObj.name) : '—' });
+
+    /* Unit */
+    var unitObj = wizardState.selectedUnitId ? findUnitById(wizardState.selectedUnitId) : null;
+    rows.push({ label: 'Unit', value: unitObj ? 'Unit ' + esc(unitObj.label) : '—' });
+
+    /* Room (room-wise only) */
+    if (wizardState.leaseType === 'room-wise') {
+      var roomObj = wizardState.selectedRoomId ? findRoomById(wizardState.selectedRoomId) : null;
+      rows.push({ label: 'Room', value: roomObj ? esc(roomObj.label) : '—' });
+    }
+
+    /* Primary tenant (from Step 4 selection) */
+    var primaryTenantName = '';
+    var primaryRadio = document.querySelector('.t-primary:checked');
+    if (primaryRadio) {
+      var rowIdx = primaryRadio.value;
+      var tRow = document.getElementById('tenant-row-' + rowIdx);
+      if (tRow) {
+        var tId = tRow.dataset.existingTenantId;
+        if (tId) {
+          var tObj = findTenantById(tId);
+          if (tObj) primaryTenantName = tObj.name;
+        } else if (tRow.dataset.mode === 'new') {
+          var nameInp = document.getElementById('t-name-' + rowIdx);
+          if (nameInp && nameInp.value.trim()) primaryTenantName = nameInp.value.trim();
+        }
+      }
+    }
+    rows.push({ label: 'Primary tenant', value: primaryTenantName ? esc(primaryTenantName) : '—' });
+
+    /* Dates */
+    var startVal = (document.getElementById('cl-start') || {}).value || '';
+    var endVal   = (document.getElementById('cl-end')   || {}).value || '';
+    rows.push({ label: 'Start', value: startVal || '—' });
+    rows.push({ label: 'End',   value: endVal   || '—' });
+
+    /* Rent + maintenance + deposit (lock-in / escalation / notes removed — pure
+       form theatre in v1; no system behaviour reads them. Add back when termination
+       penalties or annual-increment crons exist.) */
+    var rentVal  = (document.getElementById('cl-rent')        || {}).value || '';
+    var depVal   = (document.getElementById('cl-deposit')     || {}).value || '';
+    var maintVal = (document.getElementById('cl-maintenance') || {}).value || '';
+    rows.push({ label: 'Monthly rent',  value: rentVal ? '₹' + formatRupee(rentVal) : '—' });
+    if (maintVal && parseInt(maintVal, 10) > 0) {
+      rows.push({ label: 'Maintenance', value: '₹' + formatRupee(maintVal) + '/mo' });
+    }
+    rows.push({ label: 'Deposit',       value: depVal  ? '₹' + formatRupee(depVal)  : '—' });
+
+    var html = rows.map(function (r) {
+      return '<div class="summary-row">' +
+        '<span class="summary-row-label">' + r.label + '</span>' +
+        '<span class="summary-row-value">' + r.value + '</span>' +
+        '</div>';
+    }).join('');
+
+    var container = document.getElementById('summary-rows');
+    if (container) container.innerHTML = html;
+
+    /* Also refresh the selected-tenants panel whenever we're on step 5 */
+    if (wizardState.step === 5) renderSelectedTenants();
+  }
+
+  /* ---------------------------------------------------------------
      INIT
   --------------------------------------------------------------- */
+  /* Update summary when Primary radio changes */
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.classList.contains('t-primary')) {
+      updateSummary();
+    }
+  });
+
   /* Mark deposit as manually edited when changed */
   document.addEventListener('input', function (e) {
     if (e.target && e.target.id === 'cl-deposit') {
       depositManuallyEdited = true;
+    }
+    /* Keep selected-tenants panel in sync as the user types new-tenant details */
+    if (e.target && (e.target.classList.contains('t-name') ||
+                     e.target.classList.contains('t-email') ||
+                     e.target.classList.contains('t-phone'))) {
+      if (wizardState.step === 5) renderSelectedTenants();
+      updateSummary();
     }
   });
 
@@ -1712,6 +2763,60 @@
   /* Initial render */
   renderProgress();
   renderPropertyGrid('');
+
+  /* --------------------------------------------------------------------
+     DEEP-LINK ENTRY — `?unitId=<n>` or `?unitId=<n>&roomId=<m>`
+     -------------------------------------------------------------------
+     Lets pages like admin/unit-detail.html and pm/unit-detail.html open
+     the wizard with property + unit (+ optional room) pre-selected and
+     jump straight to Step 4 (Tenants). The lease type is inferred:
+       unitId only          → unit-wise
+       unitId + valid roomId → room-wise
+     If the room doesn't actually belong to the unit, we fall back to
+     unit-wise and ignore the bogus roomId. Invalid unitId silently
+     opens the wizard at Step 1 like a normal direct visit. */
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var unitParam = parseInt(params.get('unitId'), 10);
+    var roomParam = parseInt(params.get('roomId'), 10);
+    if (!unitParam) return;
+    var unit = findUnitById(unitParam);
+    if (!unit) return;
+
+    wizardState.selectedPropertyId = unit.propertyId;
+    wizardState.selectedUnitId = unit.id;
+
+    var room = roomParam ? findRoomById(roomParam) : null;
+    var roomBelongsToUnit = room && room.unitId === unit.id;
+    if (roomBelongsToUnit) {
+      wizardState.leaseType = 'room-wise';
+      wizardState.selectedRoomId = room.id;
+    } else {
+      wizardState.leaseType = 'unit-wise';
+      wizardState.selectedRoomId = null;
+    }
+
+    /* Reflect lease type on the Step 1 radio cards so going Back shows the right pick. */
+    document.getElementById('lt-unit-wise').checked = (wizardState.leaseType === 'unit-wise');
+    document.getElementById('lt-room-wise').checked = (wizardState.leaseType === 'room-wise');
+    document.getElementById('card-unit-wise').classList.toggle('is-selected', wizardState.leaseType === 'unit-wise');
+    document.getElementById('card-room-wise').classList.toggle('is-selected', wizardState.leaseType === 'room-wise');
+
+    /* Pre-render Steps 2/3 grids so the chosen items show as `is-selected`
+       if the user goes Back from Step 4 to revise. */
+    renderPropertyGrid('');
+    renderUnitGrid();
+    if (wizardState.leaseType === 'room-wise') renderRoomGrid(unit.id);
+
+    /* wizardNext normally seeds a tenant row on entry to Step 4 — we bypass
+       wizardNext here, so seed it ourselves. */
+    if (document.getElementById('tenant-rows-container').children.length === 0) {
+      addTenantRow();
+    }
+
+    /* Land on Step 4 (Tenants). */
+    showStep(4);
+  })();
 
   </script>
 </body>
