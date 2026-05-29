@@ -26,6 +26,9 @@
         <a href="organizations.html" class="sidebar-link active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
         </a>
+        <a href="invoices.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices
+        </a>
         <div class="sidebar-divider"></div>
         <a href="plans.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
@@ -85,7 +88,6 @@
         <div class="flex gap-2 flex-wrap" id="topbar-actions">
           <button id="btn-approve" class="btn btn-primary !py-2 !text-sm" onclick="openModal('approveModal')">Approve</button>
           <button id="btn-reject" class="btn btn-danger !py-2 !text-sm" onclick="openModal('rejectModal')">Reject</button>
-          <button id="btn-impersonate" class="btn btn-primary !py-2 !text-sm" style="display:none" onclick="openModal('startImpersonationModal')" aria-haspopup="dialog">Impersonate Admin</button>
           <button id="btn-changeplan" class="btn btn-secondary !py-2 !text-sm" style="display:none" onclick="openModal('changePlanModal')">Change Plan</button>
           <button id="btn-deactivate" class="btn btn-danger !py-2 !text-sm" style="display:none" onclick="openModal('deactivateModal')">Deactivate</button>
           <button id="btn-reactivate" class="btn btn-primary !py-2 !text-sm" style="display:none" onclick="openModal('reactivateModal')">Reactivate Organization</button>
@@ -132,7 +134,6 @@
         <div class="profile-card">
           <h3>Organization Details</h3>
           <div class="profile-row"><span class="field">Name</span><span class="value">Saffron Stays Pvt Ltd</span></div>
-          <div class="profile-row"><span class="field">URL slug</span><span class="value"><code style="font-family:'JetBrains Mono',monospace;background:var(--color-light-gray);padding:2px 8px;border-radius:6px;font-size:13px;">saffron-stays</code></span></div>
           <div class="profile-row"><span class="field">Type of business</span><span class="value">Co-living / Paying Guest</span></div>
           <div class="profile-row"><span class="field">Expected unit count</span><span class="value">35 units</span></div>
           <div class="profile-row"><span class="field">City + State</span><span class="value">Delhi, Delhi</span></div>
@@ -143,25 +144,23 @@
         <div class="profile-card">
           <h3>Subscription</h3>
           <div class="profile-row"><span class="field">Plan</span><span class="value">Standard</span></div>
+          <div class="profile-row"><span class="field">Billing anchor day</span><span class="value">5<span class="muted" style="font-weight:400;font-size:12px;margin-left:6px;">(next invoice 05/06/2026)</span></span></div>
           <div class="profile-row"><span class="field">Active-user cap</span><span class="value">20 users</span></div>
           <div class="profile-row"><span class="field">Active users</span><span class="value" id="active-users-count">0 of 20</span></div>
           <div class="profile-row">
-            <span class="field">Utilization</span>
-            <span class="value" style="width:100%">
-              <div style="background:var(--color-mid-gray);border-radius:4px;height:8px;width:100%;margin-top:4px">
-                <div id="util-bar" style="background:var(--color-saffron);border-radius:4px;height:8px;width:0%" aria-label="0% utilized"></div>
-              </div>
-            </span>
+            <span class="field">Features available</span>
+            <span class="value" id="features-included" style="display:flex;flex-wrap:wrap;gap:6px;"></span>
           </div>
         </div>
       </section>
 
-      <!-- Tabs: Organization Users · Platform-Level Audit · Subscription Plan History -->
+      <!-- Tabs: Organization Users · Platform-Level Audit · Subscription Plan History · Invoices -->
       <section class="section">
         <div role="tablist" class="flex gap-2 flex-wrap mb-4" aria-label="Organization sections">
           <button role="tab" class="btn btn-primary !py-2 !text-sm" data-tab="users" aria-selected="true" onclick="switchOrgTab('users',this)">Organization Users</button>
           <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-tab="audit" aria-selected="false" onclick="switchOrgTab('audit',this)">Platform-Level Audit</button>
           <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-tab="subs" aria-selected="false" onclick="switchOrgTab('subs',this)">Subscription Plan History</button>
+          <button role="tab" class="btn btn-secondary !py-2 !text-sm" data-tab="inv" aria-selected="false" onclick="switchOrgTab('inv',this)">Invoices</button>
         </div>
 
         <!-- Panel: Organization Users -->
@@ -181,9 +180,8 @@
             <table class="data-table">
               <thead><tr><th>When</th><th>Action</th><th>By</th><th>Notes</th></tr></thead>
               <tbody>
-                <tr><td>24/05/2026 09:15</td><td>Plan changed</td><td>Aayush Kumar (Super Admin)</td><td>Basic → Standard</td></tr>
-                <tr><td>24/05/2026 09:12</td><td>Approved</td><td>Aayush Kumar (Super Admin)</td><td>Admin credentials emailed to contact@saffronstays.in</td></tr>
-                <tr><td>21/05/2026 14:30</td><td>Submitted</td><td>Priya Mehta (Applicant)</td><td>Organization sign-up submitted</td></tr>
+                <tr><td>24/05/2026 09:12</td><td>Approved</td><td>Aayush Kumar (Super Admin)</td><td>Admin credentials emailed to contact@saffronstays.in · billing anchor day 5</td></tr>
+                <tr><td>21/05/2026 14:30</td><td>Submitted</td><td>Priya Mehta (Applicant)</td><td>Organization sign-up submitted on Standard plan</td></tr>
               </tbody>
             </table>
           </div>
@@ -195,9 +193,63 @@
             <table class="data-table">
               <thead><tr><th>Effective</th><th>Plan</th><th>User cap</th><th>Change</th><th>By</th></tr></thead>
               <tbody>
-                <tr><td>02/06/2026</td><td><span class="badge badge-prepaid">Premium</span></td><td>Unlimited</td><td>Upgraded · Standard → Premium</td><td>Aayush Kumar (Super Admin)</td></tr>
                 <tr><td>24/05/2026</td><td><span class="badge badge-active">Standard</span></td><td>20 users</td><td>Activated on approval</td><td>Aayush Kumar (Super Admin)</td></tr>
                 <tr><td>21/05/2026</td><td>Standard</td><td>20 users</td><td>Selected at sign-up</td><td>Priya Mehta (Applicant)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel: Invoices (org-scoped) -->
+        <div class="org-tab-panel" id="panel-inv" style="display:none">
+          <div class="card p-0 overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Invoice #</th><th>Plan</th><th>Period</th><th>Amount</th><th>Status</th><th>Issued</th><th>Due</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td class="font-mono text-xs">INV-2026-05-0042</td>
+                  <td><span class="muted" style="font-size:12px;">Standard</span></td>
+                  <td class="muted text-xs">01/05/2026 → 31/05/2026</td>
+                  <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
+                  <td><span class="badge badge-paid">Paid</span></td>
+                  <td class="text-xs muted">01/05/2026</td>
+                  <td class="text-xs muted">08/05/2026</td>
+                  <td><a href="invoice-detail.html?id=INV-2026-05-0042" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td class="font-mono text-xs">INV-2026-04-0031</td>
+                  <td><span class="muted" style="font-size:12px;">Standard</span></td>
+                  <td class="muted text-xs">01/04/2026 → 30/04/2026</td>
+                  <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
+                  <td><span class="badge badge-prepaid">Issued</span></td>
+                  <td class="text-xs muted">01/04/2026</td>
+                  <td class="text-xs" style="color:var(--color-status-partial);">08/04/2026</td>
+                  <td><a href="invoice-detail.html?id=INV-2026-04-0031" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td class="font-mono text-xs">INV-2026-03-0018</td>
+                  <td><span class="muted" style="font-size:12px;">Standard</span></td>
+                  <td class="muted text-xs">01/03/2026 → 31/03/2026</td>
+                  <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
+                  <td><span class="badge badge-prepaid">Issued</span></td>
+                  <td class="text-xs muted">01/03/2026</td>
+                  <td class="text-xs" style="color:var(--color-status-overdue);">08/03/2026</td>
+                  <td><a href="invoice-detail.html?id=INV-2026-03-0018" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td class="font-mono text-xs">INV-2026-02-0008</td>
+                  <td><span class="muted" style="font-size:12px;">Basic</span></td>
+                  <td class="muted text-xs">01/02/2026 → 28/02/2026</td>
+                  <td class="font-poppins font-semibold text-charcoal">₹999</td>
+                  <td><span class="badge badge-closed">Cancelled</span></td>
+                  <td class="text-xs muted">01/02/2026</td>
+                  <td class="text-xs muted">08/02/2026</td>
+                  <td><a href="invoice-detail.html?id=INV-2026-02-0008" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -206,14 +258,112 @@
     </main>
   </div>
 
-  <!-- Approve Modal -->
+  <!-- Approve Modal — review-and-decide surface. Shows what the applicant
+       submitted, lets the Super Admin amend the Primary Contact (the only
+       field that may need fixing — e.g. an email collision), and explains
+       how the initial password flows to the new Admin user. -->
   <div class="modal-backdrop" id="approveModal" role="dialog" aria-modal="true" aria-labelledby="approveTitle">
-    <div class="modal">
-      <h3 id="approveTitle">Approve Saffron Stays?</h3>
-      <p class="text-sm muted mt-2 mb-6">Provisions the organization and emails Admin credentials to <strong>contact@saffronstays.in</strong>. Cannot be undone — only deactivation reverses this.</p>
+    <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto;">
+      <h3 id="approveTitle">Review &amp; Approve Saffron Stays</h3>
+      <p class="text-sm muted mt-2 mb-4">Check what the applicant submitted. Once approved the workspace is provisioned, an Admin user is created from the Primary Contact, and the action is irreversible — only deactivation reverses it.</p>
+
+      <!-- Prototype-only: toggle the email-collision state so reviewers can see
+           both happy-path and conflict resolution. Hidden behind a comment in the live build. -->
+      <div class="card mb-4" style="border-style:dashed;background:var(--color-off-white);padding:10px 12px;">
+        <div class="flex items-center gap-3 flex-wrap" style="font-size:12px;">
+          <span class="label" style="margin:0;font-size:12px;">Preview email state</span>
+          <div class="flex gap-2 flex-wrap" role="group" aria-label="Preview email collision">
+            <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-email-sim="none"     onclick="setEmailCollisionSim('none', this)">No conflict</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-email-sim="conflict" onclick="setEmailCollisionSim('conflict', this)">Email already in use</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A. Organization summary (read-only, table format) -->
+      <h4 class="font-poppins font-semibold text-charcoal mb-2" style="font-size:14px;">Organization details</h4>
+      <div class="card p-0 overflow-x-auto mb-5">
+        <table class="data-table">
+          <tbody>
+            <tr><th style="width:38%">Name</th><td>Saffron Stays Pvt Ltd</td></tr>
+            <tr><th>Type of business</th><td>Co-living / Paying Guest</td></tr>
+            <tr><th>Expected unit count</th><td>35 units</td></tr>
+            <tr><th>Location</th><td>Delhi, Delhi · 110001</td></tr>
+            <tr><th>Plan chosen</th><td>Standard · ₹2,999/mo</td></tr>
+            <tr><th>Submitted on</th><td>21/05/2026 14:30 IST</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- B. Primary Contact card — editable. Default = read-only display of
+           what the applicant submitted. Toggle "Change contact" to enable inputs. -->
+      <h4 class="font-poppins font-semibold text-charcoal mb-2" style="font-size:14px;">Primary Contact <span class="muted" style="font-weight:400;font-size:12px;">(becomes the Admin user)</span></h4>
+      <div class="card mb-2" id="primary-contact-card">
+        <!-- Email-collision alert (toggled by setEmailCollisionSim) -->
+        <div id="email-collision-alert" class="alert alert-emergency mb-4" role="alert" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong class="font-poppins">Email already registered in GharSetu</strong>
+            <div style="font-size:13px;margin-top:2px;"><span id="email-collision-email">contact@saffronstays.in</span> is in use by another account. Change the contact's email below before approving — or cancel and ask the applicant to resubmit with a different address.</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+          <span class="muted" style="font-size:12px;">Editing these fields overrides what the applicant submitted.</span>
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--color-charcoal);cursor:pointer;">
+            <input type="checkbox" id="contact-edit-toggle" onchange="toggleContactEdit()" style="width:14px;height:14px;accent-color:var(--color-saffron);"> Change contact
+          </label>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="approve-contact-name">Full name <span style="color:var(--color-saffron)">*</span></label>
+            <input id="approve-contact-name" class="input" type="text" value="Priya Mehta" readonly aria-readonly="true" />
+            <div class="field-error" id="approve-contact-name-error"></div>
+          </div>
+          <div>
+            <label class="label" for="approve-contact-email">Email <span style="color:var(--color-saffron)">*</span></label>
+            <input id="approve-contact-email" class="input" type="email" value="contact@saffronstays.in" readonly aria-readonly="true" oninput="onApproveEmailChange()" />
+            <div class="field-error" id="approve-contact-email-error"></div>
+          </div>
+          <div>
+            <label class="label" for="approve-contact-phone">Mobile <span style="color:var(--color-saffron)">*</span></label>
+            <input id="approve-contact-phone" class="input" type="tel" inputmode="numeric" value="+91 98765 43210" readonly aria-readonly="true" />
+            <div class="field-error" id="approve-contact-phone-error"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- C. Billing cycle — anchored to a day chosen at approval, NOT the 1st
+           of the calendar month. The applicant's billing experience matches when
+           they signed up (e.g., approved on 15th → billed on the 15th of every month).
+           Operator can override if the org wants calendar-month or fiscal alignment. -->
+      <h4 class="font-poppins font-semibold text-charcoal mb-2 mt-5" style="font-size:14px;">Billing cycle</h4>
+      <div class="card mb-5">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="approve-billing-anchor">Billing anchor day <span style="color:var(--color-saffron)">*</span></label>
+            <select id="approve-billing-anchor" class="input" onchange="onAnchorDayChange()">
+              <!-- Days 1–28 (28 is the safe cap — orgs anchored on 29/30/31 would skip Feb). -->
+            </select>
+            <div class="muted" style="font-size:12px;margin-top:4px;">Defaults to today's date. Pick 1 for calendar-month billing, or any other day to anchor billing to the applicant's signup date.</div>
+          </div>
+          <div>
+            <label class="label">Billing cycle preview</label>
+            <div id="approve-billing-preview" class="card" style="background:var(--color-off-white);padding:10px 12px;font-size:13px;line-height:1.6;">
+              <!-- Rendered by updateBillingPreview() -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- (Password handling lives in the Users page Reset Password flow — not duplicated here.
+           At approval, the applicant's Argon2id hash is moved as-is to the new Admin user row.
+           If the Admin later needs a fresh password, an operator uses Users → Reset Password.) -->
+
+      <!-- D. Actions -->
       <div class="flex justify-end gap-3">
         <button class="btn btn-secondary" id="approveCancelBtn" onclick="closeModal('approveModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="confirmApprove()">Approve</button>
+        <button class="btn btn-primary" id="approveSubmitBtn" onclick="confirmApprove()">Approve &amp; Provision Admin</button>
       </div>
     </div>
   </div>
@@ -237,30 +387,23 @@
 
   <!-- Change Plan Modal -->
   <div class="modal-backdrop" id="changePlanModal" role="dialog" aria-modal="true" aria-labelledby="changePlanTitle">
-    <div class="modal">
+    <div class="modal" style="max-width:600px;">
       <h3 id="changePlanTitle">Change Plan</h3>
-      <p class="text-sm muted mt-2 mb-4">The new cap applies to new users immediately. Existing users above the new cap stay active until they are individually deactivated.</p>
+      <p class="text-sm muted mt-2 mb-4">The new cap and features apply immediately. The current month's invoice is not amended; billing changes from the next cycle.</p>
       <form novalidate onsubmit="event.preventDefault();confirmPlanChange()">
         <fieldset class="border-0 p-0 m-0">
           <legend class="label mb-3">Select plan</legend>
           <div class="flex flex-col gap-3" id="plan-radio-group">
-            <label class="card" style="cursor:pointer;padding:16px;display:flex;align-items:center;gap:12px">
-              <input type="radio" name="plan" value="basic" id="plan-basic" />
-              <div><strong class="font-poppins font-semibold text-charcoal">Basic</strong> <span class="text-sm muted">· 5 users</span></div>
-            </label>
-            <label class="card" style="cursor:pointer;padding:16px;display:flex;align-items:center;gap:12px;border-color:var(--color-royal-blue)">
-              <input type="radio" name="plan" value="standard" id="plan-standard" checked />
-              <div><strong class="font-poppins font-semibold text-charcoal">Standard</strong> <span class="text-sm muted">· 20 users (current)</span></div>
-            </label>
-            <label class="card" style="cursor:pointer;padding:16px;display:flex;align-items:center;gap:12px">
-              <input type="radio" name="plan" value="premium" id="plan-premium" />
-              <div><strong class="font-poppins font-semibold text-charcoal">Premium</strong> <span class="text-sm muted">· Unlimited users</span></div>
-            </label>
+            <!-- tiles rendered by JS -->
           </div>
         </fieldset>
+
+        <!-- Change impact panel -->
+        <div id="change-plan-impact" class="card mb-4 mt-4" style="display:none;background:var(--color-off-white);padding:16px;"></div>
+
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" id="changePlanCancelBtn" onclick="closeModal('changePlanModal')">Cancel</button>
-          <button type="submit" class="btn btn-disabled" id="savePlanBtn" disabled>Save</button>
+          <button type="submit" class="btn btn-disabled" id="changePlanSaveBtn" disabled>Save</button>
         </div>
       </form>
     </div>
@@ -282,26 +425,6 @@
           <button type="submit" class="btn btn-disabled" id="deactivateBtn" disabled>Deactivate</button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- Start Impersonation Modal — Super Admin impersonates the Org's Admin -->
-  <div class="modal-backdrop" id="startImpersonationModal" role="dialog" aria-modal="true" aria-labelledby="startImpersTitle">
-    <div class="modal">
-      <h3 id="startImpersTitle">Start impersonation session?</h3>
-      <p class="muted text-sm" style="margin-top:8px;margin-bottom:16px">
-        You are about to act as <strong>Priya Mehta (Admin)</strong> at
-        <strong>Saffron Stays Pvt Ltd</strong>. While the session is active, you will see
-        their dashboard, their data, and their Admin permissions.
-      </p>
-      <div class="alert" style="margin-bottom:20px">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>Every action you take during this session is recorded in the audit log against <strong>your</strong> Super Admin account (Aayush Kumar). The impersonated user is not the actor.</span>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:12px">
-        <button type="button" class="btn btn-secondary" id="startImpersCancelBtn" onclick="closeModal('startImpersonationModal')">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="confirmStartImpersonation()">Start session</button>
-      </div>
     </div>
   </div>
 
@@ -332,8 +455,12 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/plans.js"></script>
   <script>
     var ORG_NAME = 'Saffron Stays Pvt Ltd';
+    // Mock org usage for cap-breach checks
+    var MOCK_ACTIVE_USERS = 18;
+    var MOCK_PROPERTIES = 8;
 
     /* ---- Prototype status simulator ---- */
     var MOCK_USERS = [
@@ -366,7 +493,6 @@
       var show = {
         'btn-approve': status==='pending',
         'btn-reject': status==='pending',
-        'btn-impersonate': status==='active',
         'btn-changeplan': status==='active',
         'btn-deactivate': status==='active',
         'btn-reactivate': status==='deactivated'
@@ -378,7 +504,6 @@
       var tbody = document.getElementById('users-tbody');
       var empty = document.getElementById('users-empty');
       var count = document.getElementById('active-users-count');
-      var bar = document.getElementById('util-bar');
       if (status === 'pending' || status === 'rejected') {
         tbody.innerHTML = '';
         empty.style.display = 'block';
@@ -386,7 +511,7 @@
         empty.textContent = status === 'rejected'
           ? 'No users — this organization’s registration was rejected.'
           : 'No users yet — organization is pending approval.';
-        count.textContent = '0 of 20'; bar.style.width = '0%';
+        count.textContent = '0 of 20';
       } else {
         empty.style.display = 'none';
         tbody.innerHTML = MOCK_USERS.map(function(u){
@@ -396,7 +521,7 @@
           var seen = status==='deactivated' ? '—' : u[4];
           return '<tr><td class="font-poppins font-semibold text-charcoal">'+u[0]+'</td><td>'+u[1]+'</td><td>'+u[2]+'</td><td>'+st+'</td><td class="text-xs muted">'+seen+'</td></tr>';
         }).join('');
-        count.textContent = '6 of 20'; bar.style.width = '30%';
+        count.textContent = '6 of 20';
         if (status === 'deactivated') {
           empty.style.display = 'block';
           empty.textContent = 'Organization is deactivated — all users are locked out until reactivated.';
@@ -405,6 +530,25 @@
       }
     }
 
+    /* Render the org's available features as chips — Core entities + the
+       plan's optional features, in a single flat list (matches the plan cards). */
+    (function renderOrgFeatures() {
+      var ORG_PLAN_SLUG = 'standard';  // Saffron Stays is on Standard in this mock
+      var plan = (window.GHARSETU_PLANS || []).filter(function (p) { return p.slug === ORG_PLAN_SLUG; })[0];
+      var container = document.getElementById('features-included');
+      if (!plan || !container) return;
+
+      var coreChips = (window.GHARSETU_CORE_FEATURES || []).map(function (f) {
+        return '<span class="feature-chip">' + f.label + '</span>';
+      });
+      var optionalChips = (window.GHARSETU_FEATURE_CATALOG || [])
+        .filter(function (fc) { return plan.features.indexOf(fc.id) !== -1; })
+        .map(function (fc) {
+          return '<span class="feature-chip">' + fc.label + '</span>';
+        });
+      container.innerHTML = coreChips.concat(optionalChips).join('');
+    })();
+
     function switchOrgTab(name, btn) {
       document.querySelectorAll('[role="tab"][data-tab]').forEach(function(b){
         var on = b === btn;
@@ -412,7 +556,7 @@
         b.classList.toggle('btn-secondary', !on);
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      ['users','audit','subs'].forEach(function(p){
+      ['users','audit','subs','inv'].forEach(function(p){
         document.getElementById('panel-'+p).style.display = (p===name) ? 'block' : 'none';
       });
     }
@@ -423,8 +567,16 @@
       // Focus Cancel button by default
       var cancel = m.querySelector('.btn-secondary');
       if (cancel) setTimeout(function () { cancel.focus(); }, 50);
-      // Trap focus
       document.body.style.overflow = 'hidden';
+      // Wire Change Plan modal on open
+      if (id === 'changePlanModal') {
+        renderChangePlanTiles();
+        renderChangePlanImpact();
+      }
+      // Wire Approve modal on open — populate anchor day dropdown + reset state
+      if (id === 'approveModal') {
+        initApproveModal();
+      }
     }
 
     function closeModal(id) {
@@ -457,9 +609,189 @@
       });
     });
 
+    /* ============================================================
+       APPROVE MODAL — review surface for new org sign-ups
+       ============================================================
+       Mock state for the prototype. In the live build the applicant's submission
+       (name, email, mobile, plan, *hashed* password) comes from the orgs row;
+       this constant simulates what would be loaded into the modal. */
+    var APPLICANT_SUBMISSION = {
+      orgName: 'Saffron Stays Pvt Ltd',
+      contact: { name: 'Priya Mehta', email: 'contact@saffronstays.in', phone: '+91 98765 43210' },
+      // Mock approval date (today). Drives the default anchor day + the billing preview.
+      approvalDate: new Date(),
+      // Mock plan id (Standard).
+      planSlug: 'standard'
+    };
+    var emailCollisionMode = 'none';   // 'none' | 'conflict'
+
+    function initApproveModal() {
+      // 1. Populate the Primary Contact inputs from the applicant submission.
+      document.getElementById('approve-contact-name').value  = APPLICANT_SUBMISSION.contact.name;
+      document.getElementById('approve-contact-email').value = APPLICANT_SUBMISSION.contact.email;
+      document.getElementById('approve-contact-phone').value = APPLICANT_SUBMISSION.contact.phone;
+
+      // 2. Lock the Primary Contact card by default (Super Admin must explicitly opt in to edit).
+      document.getElementById('contact-edit-toggle').checked = false;
+      applyContactEditState(false);
+
+      // 3. Build the Billing anchor day dropdown (1–28) and default to today's date.
+      var sel = document.getElementById('approve-billing-anchor');
+      var todayDay = APPLICANT_SUBMISSION.approvalDate.getDate();
+      var defaultAnchor = Math.min(todayDay, 28);
+      var html = '';
+      for (var d = 1; d <= 28; d++) {
+        html += '<option value="' + d + '"' + (d === defaultAnchor ? ' selected' : '') + '>' + d + (d === todayDay ? ' (today — recommended)' : '') + '</option>';
+      }
+      sel.innerHTML = html;
+      updateBillingPreview();
+
+      // 4. Reset email collision mode to whatever the simulator button shows
+      //    (default = no conflict; the dashed-border simulator card lets reviewers flip).
+      setEmailCollisionSim('none', document.querySelector('[data-email-sim="none"]'));
+
+      // 5. Refresh approve-button state.
+      refreshApproveButtonState();
+    }
+
+    /* Prototype-only — toggle the email-already-exists conflict state. */
+    function setEmailCollisionSim(mode, btn) {
+      emailCollisionMode = mode;
+      document.querySelectorAll('[data-email-sim]').forEach(function (b) {
+        b.classList.toggle('btn-primary',   b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
+      });
+      var alertEl = document.getElementById('email-collision-alert');
+      var emailInput = document.getElementById('approve-contact-email');
+      var emailErr = document.getElementById('approve-contact-email-error');
+      var collisionEmailLabel = document.getElementById('email-collision-email');
+      if (mode === 'conflict') {
+        alertEl.style.display = 'flex';
+        emailInput.classList.add('error');
+        emailErr.textContent = 'This email is already in use. Change it (above) or cancel and ask the applicant to resubmit.';
+        emailErr.classList.add('show');
+        collisionEmailLabel.textContent = emailInput.value;
+        // Force-enable Change Contact so they can fix the email.
+        document.getElementById('contact-edit-toggle').checked = true;
+        applyContactEditState(true);
+      } else {
+        alertEl.style.display = 'none';
+        emailInput.classList.remove('error');
+        emailErr.textContent = '';
+        emailErr.classList.remove('show');
+      }
+      refreshApproveButtonState();
+    }
+
+    /* Editing the email after the simulator flagged a conflict — re-evaluate.
+       In the live build this would hit a debounced server check; here the
+       simulator stays in 'conflict' mode until the Super Admin types ANY
+       different email (then it auto-clears the alert). */
+    function onApproveEmailChange() {
+      if (emailCollisionMode !== 'conflict') return;
+      var current = document.getElementById('approve-contact-email').value.trim();
+      if (current && current !== APPLICANT_SUBMISSION.contact.email) {
+        // Operator changed the email — clear the conflict.
+        setEmailCollisionSim('none', document.querySelector('[data-email-sim="none"]'));
+      }
+    }
+
+    /* Toggle the Primary Contact fields between read-only and editable. */
+    function toggleContactEdit() {
+      var on = document.getElementById('contact-edit-toggle').checked;
+      applyContactEditState(on);
+    }
+    function applyContactEditState(editable) {
+      ['approve-contact-name','approve-contact-email','approve-contact-phone'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (editable) { el.removeAttribute('readonly'); el.setAttribute('aria-readonly','false'); }
+        else          { el.setAttribute('readonly','readonly'); el.setAttribute('aria-readonly','true'); }
+      });
+    }
+
+    /* Anchor-day picker changed — refresh the cycle preview card. */
+    function onAnchorDayChange() {
+      updateBillingPreview();
+    }
+    function updateBillingPreview() {
+      var anchorDay = parseInt(document.getElementById('approve-billing-anchor').value, 10);
+      if (isNaN(anchorDay)) return;
+      var approval = APPLICANT_SUBMISSION.approvalDate;
+      var approvalDay = approval.getDate();
+      var anchorEqualsToday = (anchorDay === Math.min(approvalDay, 28));
+      var firstPeriodLabel, firstAmountLabel;
+      var plan = (window.GHARSETU_PLANS || []).find(function (p) { return p.slug === APPLICANT_SUBMISSION.planSlug; });
+      var fullPrice = plan ? plan.priceInr / 100 : 0;
+
+      if (anchorEqualsToday) {
+        // Clean full-cycle first invoice: approval → anchor-1 of next month.
+        var firstEnd = new Date(approval.getFullYear(), approval.getMonth() + 1, anchorDay - 1);
+        firstPeriodLabel = formatDDMMYYYY(approval) + ' → ' + formatDDMMYYYY(firstEnd);
+        firstAmountLabel = '₹' + fullPrice.toLocaleString('en-IN') + ' (full cycle)';
+      } else {
+        // Pro-rated first invoice: approval → next occurrence of (anchor - 1).
+        // Find the next anchor-day boundary.
+        var nextAnchorDate;
+        if (anchorDay > approvalDay) {
+          nextAnchorDate = new Date(approval.getFullYear(), approval.getMonth(), anchorDay);
+        } else {
+          nextAnchorDate = new Date(approval.getFullYear(), approval.getMonth() + 1, anchorDay);
+        }
+        var firstEnd2 = new Date(nextAnchorDate.getTime() - 24 * 60 * 60 * 1000);
+        var daysCovered = Math.round((firstEnd2 - approval) / (24 * 60 * 60 * 1000)) + 1;
+        var prorated = Math.round((fullPrice * daysCovered) / 30); // approximate; real cron uses days-in-month math
+        firstPeriodLabel = formatDDMMYYYY(approval) + ' → ' + formatDDMMYYYY(firstEnd2);
+        firstAmountLabel = '₹' + prorated.toLocaleString('en-IN') + ' <span class="muted" style="font-size:11px;">(pro-rated, ~' + daysCovered + ' days)</span>';
+      }
+
+      var html = ''
+        + '<div><strong class="font-poppins">First invoice</strong></div>'
+        + '<div>Period: ' + firstPeriodLabel + '</div>'
+        + '<div>Amount: ' + firstAmountLabel + '</div>'
+        + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--color-mid-gray);"><strong class="font-poppins">Then monthly</strong> on the <strong>' + anchorDay + getOrdinalSuffix(anchorDay) + '</strong> of every month at ₹' + fullPrice.toLocaleString('en-IN') + '.</div>';
+      document.getElementById('approve-billing-preview').innerHTML = html;
+    }
+    function formatDDMMYYYY(d) {
+      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+      return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    }
+    function getOrdinalSuffix(n) {
+      var v = n % 100;
+      if (v >= 11 && v <= 13) return 'th';
+      switch (n % 10) { case 1: return 'st'; case 2: return 'nd'; case 3: return 'rd'; default: return 'th'; }
+    }
+
+    /* Disable Approve while there's an unresolved email collision. */
+    function refreshApproveButtonState() {
+      var btn = document.getElementById('approveSubmitBtn');
+      var disable = emailCollisionMode === 'conflict';
+      if (disable) {
+        btn.classList.add('btn-disabled'); btn.classList.remove('btn-primary'); btn.disabled = true;
+      } else {
+        btn.classList.remove('btn-disabled'); btn.classList.add('btn-primary'); btn.disabled = false;
+      }
+    }
+
     function confirmApprove() {
+      // Final guards — both should already be enforced by refreshApproveButtonState,
+      // but defend against any path where it wasn't refreshed.
+      if (emailCollisionMode === 'conflict') {
+        gsToast('Resolve the email conflict before approving.');
+        return;
+      }
+      var emailEl = document.getElementById('approve-contact-email');
+      var emailVal = emailEl.value.trim();
+      if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        var err = document.getElementById('approve-contact-email-error');
+        err.textContent = 'Enter a valid email for the Primary Contact.'; err.classList.add('show');
+        emailEl.classList.add('error'); emailEl.focus();
+        return;
+      }
+      var anchor = parseInt(document.getElementById('approve-billing-anchor').value, 10);
       closeModal('approveModal');
-      gsToast('Organization approved. Admin credentials sent to contact@saffronstays.in.');
+      var msg = 'Organization approved. Admin user provisioned for ' + emailVal
+              + ' · billing anchor day ' + anchor + getOrdinalSuffix(anchor) + '.';
+      gsToast(msg);
       window.location.reload();
     }
 
@@ -476,29 +808,142 @@
       gsToast('Organization rejected. The applicant has been notified.');
     }
 
-    // Change Plan: enable Save only when selection differs from current
-    var currentPlan = 'standard';
-    document.querySelectorAll('input[name="plan"]').forEach(function(radio) {
-      radio.addEventListener('change', function() {
-        var btn = document.getElementById('savePlanBtn');
-        if (radio.value !== currentPlan) {
-          btn.classList.remove('btn-disabled');
-          btn.classList.add('btn-primary');
-          btn.disabled = false;
-        } else {
-          btn.classList.add('btn-disabled');
-          btn.classList.remove('btn-primary');
-          btn.disabled = true;
-        }
-      });
-    });
+    // Change Plan — dynamic plan tiles + impact panel
+    // currentPlan holds the numeric plan id (DB PK).
+    var currentPlan = 2; // 2 = Standard
+
+    function renderChangePlanTiles() {
+      var group = document.getElementById('plan-radio-group');
+      if (!group || !window.GHARSETU_PLANS) return;
+      group.innerHTML = window.GHARSETU_PLANS.filter(function(p){ return p.status === 'active'; }).map(function(p) {
+        var isCurrent = p.id === Number(currentPlan);
+        var border = isCurrent ? 'border-color:var(--color-royal-blue);' : '';
+        var priceLabel = window.gsPriceLabel ? window.gsPriceLabel(p) : '';
+        var capLabel = p.cap === null ? 'Unlimited users' : 'Up to ' + p.cap + ' users';
+        var currentTag = isCurrent ? ' <span class="muted" style="font-size:12px;">(current)</span>' : '';
+        return '<label class="card" style="cursor:pointer;padding:16px;display:flex;align-items:center;gap:12px;' + border + '">'
+             + '<input type="radio" name="plan" value="' + p.id + '"' + (isCurrent ? ' checked' : '') + ' onchange="onPlanTileChange()" />'
+             + '<div><strong class="font-poppins font-semibold text-charcoal">' + p.name + '</strong>' + currentTag
+             + ' <span class="text-sm muted">· ' + capLabel + ' · ' + priceLabel + '</span></div>'
+             + '</label>';
+      }).join('');
+    }
+
+    function onPlanTileChange() {
+      renderChangePlanImpact();
+    }
+
+    function renderChangePlanImpact() {
+      var selected = document.querySelector('input[name="plan"]:checked');
+      var impactEl = document.getElementById('change-plan-impact');
+      var saveBtn = document.getElementById('changePlanSaveBtn');
+      if (!selected || !window.GHARSETU_PLANS) return;
+
+      var targetId = Number(selected.value);
+      var current = window.GHARSETU_PLANS.filter(function(p){ return p.id === currentPlan; })[0];
+      var target  = window.GHARSETU_PLANS.filter(function(p){ return p.id === targetId; })[0];
+
+      if (!current || !target) return;
+
+      // Same plan — hide impact, disable save
+      if (targetId === currentPlan) {
+        impactEl.style.display = 'none';
+        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary','btn-danger','btn-secondary');
+        saveBtn.disabled = true; saveBtn.textContent = 'Save';
+        return;
+      }
+
+      // Build impact HTML
+      var html = '';
+      var hasBlocker = false;
+
+      // Block 1 — Caps comparison
+      var capsHtml = '';
+      // User cap
+      var curUserCap = current.cap;
+      var tgtUserCap = target.cap;
+      var userCapLabel = tgtUserCap === null ? 'Unlimited' : tgtUserCap;
+      var curUserCapLabel = curUserCap === null ? 'Unlimited' : curUserCap;
+      var userBreached = tgtUserCap !== null && MOCK_ACTIVE_USERS > tgtUserCap;
+      var userRowStyle = userBreached ? 'background:var(--bg-overdue);padding:8px;border-radius:6px;' : 'padding:4px 0;';
+      capsHtml += '<div style="' + userRowStyle + '">';
+      capsHtml += '<span style="font-family:\'Inter\',sans-serif;font-size:14px;">Active users: <strong>' + MOCK_ACTIVE_USERS + '</strong> / ' + curUserCapLabel + ' → <strong>' + userCapLabel + '</strong></span>';
+      if (userBreached) {
+        capsHtml += '<div style="color:var(--color-status-overdue);font-size:13px;margin-top:4px;">⚠ This org has ' + MOCK_ACTIVE_USERS + ' active users; the new plan caps at ' + tgtUserCap + '. You must reduce users before downgrading.</div>';
+        hasBlocker = true;
+      }
+      capsHtml += '</div>';
+
+      // Property cap
+      var curPropCap = current.propertyCap;
+      var tgtPropCap = target.propertyCap;
+      var propCapLabel = tgtPropCap === null ? 'Unlimited' : tgtPropCap;
+      var curPropCapLabel = curPropCap === null ? 'Unlimited' : curPropCap;
+      var propBreached = tgtPropCap !== null && MOCK_PROPERTIES > tgtPropCap;
+      var propRowStyle = propBreached ? 'background:var(--bg-overdue);padding:8px;border-radius:6px;margin-top:6px;' : 'padding:4px 0;margin-top:4px;';
+      capsHtml += '<div style="' + propRowStyle + '">';
+      capsHtml += '<span style="font-family:\'Inter\',sans-serif;font-size:14px;">Properties: <strong>' + MOCK_PROPERTIES + '</strong> / ' + curPropCapLabel + ' → <strong>' + propCapLabel + '</strong></span>';
+      if (propBreached) {
+        capsHtml += '<div style="color:var(--color-status-overdue);font-size:13px;margin-top:4px;">⚠ This org has ' + MOCK_PROPERTIES + ' properties; the new plan caps at ' + tgtPropCap + '. You must reduce properties before downgrading.</div>';
+        hasBlocker = true;
+      }
+      capsHtml += '</div>';
+
+      html += '<div style="margin-bottom:12px;"><strong class="font-poppins" style="font-size:13px;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-slate);">Capacity</strong>' + capsHtml + '</div>';
+
+      // Block 2 — Features GAINED
+      var gained = target.features.filter(function(f){ return current.features.indexOf(f) === -1; });
+      if (gained.length > 0) {
+        var gainedHtml = '<div style="margin-bottom:12px;"><strong class="font-poppins" style="font-size:13px;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-slate);">Features Gained</strong><ul style="list-style:none;padding:0;margin:6px 0 0;">';
+        gained.forEach(function(fid) {
+          var fc = window.GHARSETU_FEATURE_CATALOG.filter(function(x){ return x.id === fid; })[0];
+          gainedHtml += '<li style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--color-charcoal);padding:2px 0;"><span style="color:var(--color-status-paid);font-weight:700;">✓</span> ' + (fc ? fc.label : fid) + '</li>';
+        });
+        gainedHtml += '</ul></div>';
+        html += gainedHtml;
+      }
+
+      // Block 3 — Features LOST
+      var lost = current.features.filter(function(f){ return target.features.indexOf(f) === -1; });
+      if (lost.length > 0) {
+        var lostHtml = '<div><strong class="font-poppins" style="font-size:13px;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-slate);">Features Lost</strong><ul style="list-style:none;padding:0;margin:6px 0 4px;">';
+        lost.forEach(function(fid) {
+          var fc = window.GHARSETU_FEATURE_CATALOG.filter(function(x){ return x.id === fid; })[0];
+          lostHtml += '<li style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--color-status-overdue);padding:2px 0;"><span style="font-weight:700;">✗</span> ' + (fc ? fc.label : fid) + '</li>';
+        });
+        lostHtml += '</ul><div style="font-size:13px;color:var(--color-slate);font-style:italic;">Existing data is preserved but these features become read-only or hidden until the plan is upgraded again.</div></div>';
+        html += lostHtml;
+      }
+
+      impactEl.innerHTML = html;
+      impactEl.style.display = 'block';
+
+      // Update save button
+      if (hasBlocker) {
+        saveBtn.classList.add('btn-disabled'); saveBtn.classList.remove('btn-primary','btn-danger','btn-secondary');
+        saveBtn.disabled = true;
+        saveBtn.textContent = target.priceInr > current.priceInr ? 'Upgrade Plan' : 'Downgrade Plan';
+      } else if (target.priceInr > current.priceInr) {
+        saveBtn.classList.remove('btn-disabled','btn-danger','btn-secondary'); saveBtn.classList.add('btn-primary');
+        saveBtn.disabled = false; saveBtn.textContent = 'Upgrade Plan';
+      } else if (target.priceInr < current.priceInr) {
+        saveBtn.classList.remove('btn-disabled','btn-primary','btn-secondary'); saveBtn.classList.add('btn-danger');
+        saveBtn.disabled = false; saveBtn.textContent = 'Downgrade Plan';
+      } else {
+        saveBtn.classList.remove('btn-disabled','btn-primary','btn-danger'); saveBtn.classList.add('btn-secondary');
+        saveBtn.disabled = false; saveBtn.textContent = 'Change Plan';
+      }
+    }
 
     function confirmPlanChange() {
       var selected = document.querySelector('input[name="plan"]:checked');
-      if (!selected || selected.value === currentPlan) return;
+      if (!selected || Number(selected.value) === currentPlan) return;
+      var saveBtn = document.getElementById('changePlanSaveBtn');
+      if (saveBtn.disabled) return;
+      var targetPlan = window.GHARSETU_PLANS.filter(function(p){ return p.id === Number(selected.value); })[0];
       closeModal('changePlanModal');
-      gsToast('Plan changed to ' + selected.value.charAt(0).toUpperCase() + selected.value.slice(1) + '.');
-      currentPlan = selected.value;
+      gsToast('Plan changed to ' + (targetPlan ? targetPlan.name : 'new plan') + '.');
+      currentPlan = Number(selected.value);
     }
 
     // Deactivate: type-confirm
@@ -533,22 +978,6 @@
       alert('All 12 users — expand view would load all rows in a production implementation.');
     }
 
-    function confirmStartImpersonation() {
-      closeModal('startImpersonationModal');
-      var state = {
-        active: true,
-        originalUser: 'Aayush Kumar · Super Admin',
-        impersonatedUser: 'Priya Mehta · Admin',
-        impersonatedOrg: 'Saffron Stays Pvt Ltd',
-        impersonatedOrgSlug: 'saffron-stays',
-        startedAt: new Date().toISOString(),
-        returnDashboard: '../super-admin/dashboard.html'
-      };
-      try { sessionStorage.setItem('gharsetu_impersonation', JSON.stringify(state)); } catch(e) {}
-      // Redirect to the Admin dashboard for Saffron Stays (prototype: use generic admin/dashboard)
-      window.location.assign('../admin/dashboard.html');
-    }
-
     /* Initialize to Pending on load */
     setSimStatus('pending', document.querySelector('[data-sim="pending"]'));
   </script>
@@ -557,6 +986,7 @@
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
+    <a href="invoices.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
     <a href="master-data/states.html" class="more-sheet-sublink">States</a>

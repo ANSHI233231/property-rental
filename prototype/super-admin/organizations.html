@@ -26,6 +26,9 @@
         <a href="organizations.html" class="sidebar-link active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
         </a>
+        <a href="invoices.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices
+        </a>
         <div class="sidebar-divider"></div>
         <a href="plans.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
@@ -117,81 +120,73 @@
         <table class="data-table" id="org-table">
           <thead>
             <tr>
-              <th>Organization</th><th>Slug</th><th>Plan</th><th>Active Users</th><th>Status</th><th>Created</th><th></th>
+              <th>Organization</th><th>Plan</th><th>Active Users</th><th>Status</th><th>Created</th><th></th>
             </tr>
           </thead>
           <tbody id="org-tbody">
-            <tr data-status="pending" data-plan="standard" data-name="saffron stays pvt ltd" data-slug="saffron-stays">
+            <tr data-status="pending" data-plan="standard" data-name="saffron stays pvt ltd">
               <td class="font-poppins font-semibold text-charcoal">Saffron Stays Pvt Ltd</td>
-              <td class="font-mono text-xs muted">saffron-stays</td>
               <td>Standard</td>
               <td>0 / 20</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>21/05/2026</td>
-              <td><a href="organization-detail.html?org=saffron-stays" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=1" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="pending" data-plan="basic" data-name="greenleaf housing" data-slug="greenleaf-housing">
+            <tr data-status="pending" data-plan="basic" data-name="greenleaf housing">
               <td class="font-poppins font-semibold text-charcoal">Greenleaf Housing</td>
-              <td class="font-mono text-xs muted">greenleaf-housing</td>
               <td>Basic</td>
               <td>0 / 5</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>23/05/2026</td>
-              <td><a href="organization-detail.html?org=greenleaf-housing" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=2" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="pending" data-plan="basic" data-name="metro nest properties" data-slug="metro-nest">
+            <tr data-status="pending" data-plan="basic" data-name="metro nest properties">
               <td class="font-poppins font-semibold text-charcoal">Metro Nest Properties</td>
-              <td class="font-mono text-xs muted">metro-nest</td>
               <td>Basic</td>
               <td>0 / 5</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>25/05/2026</td>
-              <td><a href="organization-detail.html?org=metro-nest" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=3" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="premium" data-name="delhi dwellings ltd" data-slug="delhi-dwellings">
+            <tr data-status="active" data-plan="premium" data-name="delhi dwellings ltd">
               <td class="font-poppins font-semibold text-charcoal">Delhi Dwellings Ltd</td>
-              <td class="font-mono text-xs muted">delhi-dwellings</td>
               <td>Premium</td>
               <td>42 / ∞</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>15/01/2026</td>
-              <td><a href="organization-detail.html?org=delhi-dwellings" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=4" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="standard" data-name="green valley co-living" data-slug="green-valley">
+            <tr data-status="active" data-plan="standard" data-name="green valley co-living">
               <td class="font-poppins font-semibold text-charcoal">Green Valley Co-living</td>
-              <td class="font-mono text-xs muted">green-valley</td>
               <td>Standard</td>
               <td>12 / 20</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>10/03/2026</td>
-              <td><a href="organization-detail.html?org=green-valley" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=5" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="basic" data-name="urban nest homes" data-slug="urban-nest">
+            <tr data-status="active" data-plan="basic" data-name="urban nest homes">
               <td class="font-poppins font-semibold text-charcoal">Urban Nest Homes</td>
-              <td class="font-mono text-xs muted">urban-nest</td>
               <td>Basic</td>
               <td>4 / 5</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>01/04/2026</td>
-              <td><a href="organization-detail.html?org=urban-nest" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=6" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="standard" data-name="cityscape rentals" data-slug="cityscape">
+            <tr data-status="active" data-plan="standard" data-name="cityscape rentals">
               <td class="font-poppins font-semibold text-charcoal">Cityscape Rentals</td>
-              <td class="font-mono text-xs muted">cityscape</td>
               <td>Standard</td>
               <td>8 / 20</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>05/02/2026</td>
-              <td><a href="organization-detail.html?org=cityscape" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=7" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="deactivated" data-plan="basic" data-name="sunrise rentals" data-slug="sunrise">
+            <tr data-status="deactivated" data-plan="basic" data-name="sunrise rentals">
               <td class="font-poppins font-semibold text-charcoal">Sunrise Rentals</td>
-              <td class="font-mono text-xs muted">sunrise</td>
               <td>Basic</td>
               <td>2 / 5</td>
               <td><span class="badge badge-closed" aria-label="Status: Deactivated">Deactivated</span></td>
               <td>12/11/2025</td>
-              <td><a href="organization-detail.html?org=sunrise" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
+              <td><a href="organization-detail.html?id=8" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
           </tbody>
         </table>
@@ -308,6 +303,7 @@
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
+    <a href="invoices.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
     <a href="master-data/states.html" class="more-sheet-sublink">States</a>

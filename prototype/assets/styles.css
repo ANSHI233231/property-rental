@@ -1135,3 +1135,19 @@ body.impers-active .app-main {
 }
 .gs-cb-opt:hover, .gs-cb-opt.active { background: var(--bg-prepaid); }
 .gs-cb-opt[aria-selected="true"] { font-weight: 600; color: var(--color-royal-blue); }
+
+/* ---- Feature chips — used on org detail "Features available" row and any
+   other surface that needs a compact list of plan-included capabilities. ---- */
+.feature-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(46, 125, 50, 0.10);
+  color: var(--color-status-paid);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}

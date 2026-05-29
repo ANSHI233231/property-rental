@@ -135,15 +135,17 @@
       Array.prototype.forEach.call((root || document).querySelectorAll('select[data-searchable]'), enhance);
     },
     // Re-sync after a native select's options/disabled state changed (e.g. cascades).
+    // After enhance() the native <select> lives INSIDE the wrap, so look up
+    // via sel.parentNode — `sel.previousElementSibling` is the <ul> list, not the wrap.
     refresh: function (idOrEl) {
       var sel = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
       if (!sel) return;
-      var wrap = sel.previousElementSibling;
+      var wrap = sel.parentNode;
       if (!wrap || !wrap.classList.contains('gs-combobox')) { enhance(sel); return; }
       var input = wrap.querySelector('.gs-cb-input');
-      input.disabled = sel.disabled;
+      if (input) input.disabled = sel.disabled;
       var o = sel.options[sel.selectedIndex];
-      input.value = o ? o.textContent.trim() : '';
+      if (input) input.value = o ? o.textContent.trim() : '';
     }
   };
 

@@ -110,6 +110,7 @@ Plus `document-agent` for `.docx` / `.xlsx` work — see [.claude/agents/documen
 16. **Frontend validation (Zod) mirrors backend validation (class-validator)** for every field. The browser's native HTML5 validation (`required`, `pattern`, `min`, `:invalid` tooltips) is not used — errors render below the field per the UI/UX contract.
 17. **Sensitive files never enter git.** `.env`, `.env.*`, log files, runtime files, temp files, Office lock files (`~$*.docx`, `~$*.xlsx`). Use `.env.example` as the template.
 18. **Property and Unit pickers are searchable dropdowns** — any `<select>` that lists **properties** or **units** must be a type-to-filter combobox (shared `assets/searchable-select.js`, `data-searchable`), never a plain `<select>`. Other selects (status, role, plan, master types, etc.) stay native unless asked.
+19. **Every table's primary key is an `id INTEGER` auto-increment, owned by the database.** No string slugs as PKs, no CUIDs/UUIDs, no client-chosen ids. Slugs (plan slug, business-type slug, etc.) are at most a `slug VARCHAR UNIQUE` *secondary* column — never the primary key. URLs use `?id=<n>`. Cross-references in Prisma `@relation` always target the numeric `id`.
 
 ## Scope rules — what the product is
 

@@ -6,6 +6,21 @@
  * All three render the SAME feature catalogue + per-plan flags so they never drift.
  */
 
+/* Core entities — always included in every plan, not toggleable. These are the
+   inventory primitives the platform manages: removing them would orphan org data
+   (rooms created under one plan can't disappear on downgrade). Per-Room Leasing
+   (in the feature catalogue below) gates lease creation scoped to a single room,
+   but the Rooms entity itself is always available so inventory records survive
+   any plan change. Read-only across all surfaces — never rendered as a checkbox. */
+window.GHARSETU_CORE_FEATURES = [
+  { id: 'properties', label: 'Properties' },
+  { id: 'units',      label: 'Units' },
+  { id: 'rooms',      label: 'Rooms' },
+  { id: 'tenants',    label: 'Tenants' },
+  { id: 'leases',     label: 'Leases' },
+  { id: 'users',      label: 'Users' }
+];
+
 /* Platform feature catalogue — what a plan can switch on/off. */
 window.GHARSETU_FEATURE_CATALOG = [
   { id: 'rent',          label: 'Rent Collection' },
@@ -15,19 +30,27 @@ window.GHARSETU_FEATURE_CATALOG = [
   { id: 'delegation',    label: 'Task Delegation' },
   { id: 'impersonation', label: 'Admin Impersonation' },
   { id: 'settings',      label: 'Settings Customization' },
-  { id: 'export',        label: 'Data Export (CSV)' },
-  { id: 'priority',      label: 'Priority Support' }
+  { id: 'export',        label: 'Data Export (CSV)' }
 ];
 
-/* Plans — caps + enabled feature ids. */
+/* Plans — caps + enabled feature ids + monthly price in paise (Tech convention #12).
+ * id: integer PK (DB-owned, autoincrement). slug: stable machine-friendly handle. */
 window.GHARSETU_PLANS = [
-  { id: 'basic',    name: 'Basic',    cap: 5,    propertyCap: 1,    orgs: 4, status: 'active', popular: false,
+  { id: 1, slug: 'basic',    name: 'Basic',    cap: 5,    propertyCap: 1,    orgs: 4, status: 'active', popular: false,
+    priceInr: 99900,
     features: ['rent', 'maintenance', 'visitors'] },
-  { id: 'standard', name: 'Standard', cap: 20,   propertyCap: null, orgs: 5, status: 'active', popular: true,
-    features: ['rent', 'maintenance', 'visitors', 'per-room', 'delegation', 'impersonation', 'settings'] },
-  { id: 'premium',  name: 'Premium',  cap: null, propertyCap: null, orgs: 1, status: 'active', popular: false,
-    features: ['rent', 'maintenance', 'visitors', 'per-room', 'delegation', 'impersonation', 'settings', 'export', 'priority'] }
+  { id: 2, slug: 'standard', name: 'Standard', cap: 20,   propertyCap: null, orgs: 5, status: 'active', popular: true,
+    priceInr: 299900,
+    features: ['rent', 'maintenance', 'visitors', 'per-room', 'impersonation', 'settings'] },
+  { id: 3, slug: 'premium',  name: 'Premium',  cap: null, propertyCap: null, orgs: 1, status: 'active', popular: false,
+    priceInr: 699900,
+    features: ['rent', 'maintenance', 'visitors', 'per-room', 'delegation', 'impersonation', 'settings', 'export'] }
 ];
+
+/* Render price as ₹X,XXX/mo using Indian digit grouping. priceInr is paise. */
+window.gsPriceLabel = function (plan) {
+  return '₹' + (plan.priceInr / 100).toLocaleString('en-IN') + '/mo';
+};
 
 window.GHARSETU_userCapLabel = function (p) {
   return p.cap === null ? 'Unlimited active users' : 'Up to ' + p.cap + ' active users';
@@ -37,17 +60,26 @@ window.GHARSETU_propertyCapLabel = function (p) {
   return p.propertyCap + (p.propertyCap === 1 ? ' property' : ' properties');
 };
 
-/* Build the ✓ / ✗ feature list (full catalogue) for a plan — matches the Super Admin cards. */
-function gsFeatureList(plan, small) {
-  return window.GHARSETU_FEATURE_CATALOG.map(function (fc) {
+/* Build a flat unified feature list for a plan — Core entities (always ✓)
+   followed by the Optional catalogue (✓ if enabled, ✗ if not). One list, no
+   labels, rendered the same on marketing cards, sign-up tiles, and the
+   Super Admin plan cards. */
+function gsCombinedFeatureList(plan, small) {
+  var fs = small ? '12px' : '14px';
+  var coreRows = window.GHARSETU_CORE_FEATURES.map(function (fc) {
+    return '<li style="display:flex;align-items:center;gap:8px;font-size:' + fs + ';color:#212121;">'
+         +   '<span style="color:#2E7D32;font-weight:700;flex-shrink:0;">✓</span> ' + fc.label
+         + '</li>';
+  });
+  var optRows = window.GHARSETU_FEATURE_CATALOG.map(function (fc) {
     var on = plan.features.indexOf(fc.id) !== -1;
     var mark = on
       ? '<span style="color:#2E7D32;font-weight:700;flex-shrink:0;">✓</span>'
       : '<span style="color:#CFD8DC;font-weight:700;flex-shrink:0;">✗</span>';
     var style = on ? 'color:#546E7A;' : 'color:#CFD8DC;text-decoration:line-through;';
-    var fs = small ? '12px' : '14px';
     return '<li style="display:flex;align-items:center;gap:8px;font-size:' + fs + ';' + style + '">' + mark + ' ' + fc.label + '</li>';
-  }).join('');
+  });
+  return coreRows.concat(optRows).join('');
 }
 
 /* ---- Home page (marketing) cards ---- */
@@ -64,33 +96,65 @@ window.renderMarketingPlans = function (containerId) {
       + 'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'' + hover + '\';" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';">'
       + badge
       + '<div class="font-poppins font-semibold text-slate" style="font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">' + p.name + '</div>'
+      + '<div class="font-poppins font-bold text-charcoal" style="font-size:28px;margin-bottom:4px;">' + window.gsPriceLabel(p) + '</div>'
       + '<div class="font-poppins font-bold text-charcoal" style="font-size:22px;margin-bottom:2px;">' + window.GHARSETU_userCapLabel(p) + '</div>'
-      + '<div class="muted" style="font-size:13px;margin-bottom:4px;">' + window.GHARSETU_propertyCapLabel(p) + '</div>'
-      + '<div class="muted" style="font-size:13px;margin-bottom:20px;">Pricing on request</div>'
-      + '<ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px;">' + gsFeatureList(p, false) + '</ul>'
+      + '<div class="muted" style="font-size:13px;margin-bottom:20px;">' + window.GHARSETU_propertyCapLabel(p) + '</div>'
+      + '<ul style="list-style:none;padding:0;margin:0 0 24px;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:6px;">' + gsCombinedFeatureList(p, false) + '</ul>'
       + '<div class="font-poppins font-semibold ' + cta + '" style="font-size:14px;">Get started →</div>'
       + '</a>';
   }).join('');
 };
 
-/* ---- Sign-up radio tiles ---- */
+/* ---- Sign-up radio tiles — modern pricing-card layout ----
+   Visual hierarchy (top → bottom):
+     1. Floating "Most Popular" pill (saffron, only on the popular plan)
+     2. Plan name as a small slate uppercase label
+     3. Big price (₹X,XXX) + "/month" period
+     4. Two cap KPI chips side-by-side (users · properties)
+     5. Flat feature list (Core ✓ + Optional ✓/✗) */
 window.renderSignupPlanTiles = function (containerId) {
   var el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = window.GHARSETU_PLANS.map(function (p) {
-    var popBadge = p.popular ? ' <span style="font-size:10px;background:#FF6F00;color:#fff;padding:2px 6px;border-radius:999px;font-weight:600;letter-spacing:0.4px;vertical-align:middle;margin-left:4px;white-space:nowrap;">Most Popular</span>' : '';
-    var capShort = (p.cap === null ? 'Unlimited users' : 'Up to ' + p.cap + ' users') + ' · ' + window.GHARSETU_propertyCapLabel(p);
+    var userCap = (p.cap === null) ? '∞' : p.cap;
+    var propCap = (p.propertyCap === null) ? '∞' : p.propertyCap;
+    // Strip the "/mo" suffix; we render the period as a separate line below.
+    var priceAmount = window.gsPriceLabel(p).replace('/mo', '');
+    var popBadge = p.popular
+      ? '<div class="signup-plan-badge">★ Most Popular</div>'
+      : '';
     return ''
-      + '<div>'
-      + '<input class="plan-tile-input" type="radio" name="subscription-plan" id="plan-' + p.id + '" value="' + p.id + '" aria-describedby="plan-group-error" />'
-      + '<label class="plan-tile-label" for="plan-' + p.id + '">'
-      + '<div style="margin-bottom:6px;">'
-      + '<div class="font-poppins font-semibold" style="font-size:14px;color:#212121;">' + p.name + popBadge + '</div>'
-      + '<div style="font-size:11px;color:#546E7A;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;">' + capShort + '</div>'
-      + '</div>'
-      + '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px;">' + gsFeatureList(p, true) + '</ul>'
-      + '<div class="muted" style="font-size:11px;margin-top:8px;">Pricing on request</div>'
-      + '</label>'
+      + '<div class="signup-plan-tile' + (p.popular ? ' is-popular' : '') + '">'
+      +   popBadge
+      +   '<input class="plan-tile-input" type="radio" name="subscription-plan" id="plan-' + p.slug + '" value="' + p.id + '" aria-describedby="plan-group-error" />'
+      +   '<label class="plan-tile-label" for="plan-' + p.slug + '">'
+      +     '<div class="signup-plan-name">' + p.name + '</div>'
+      +     '<div class="signup-plan-price">' + priceAmount + '</div>'
+      +     '<div class="signup-plan-period">per month · billed monthly</div>'
+      +     '<div class="signup-plan-caps">'
+      +       '<div class="signup-plan-cap"><strong>' + userCap + '</strong><span>users</span></div>'
+      +       '<div class="signup-plan-cap"><strong>' + propCap + '</strong><span>properties</span></div>'
+      +     '</div>'
+      +     '<div class="signup-plan-divider"></div>'
+      +     '<ul class="signup-plan-features">' + gsCombinedFeatureList(p, true) + '</ul>'
+      +   '</label>'
       + '</div>';
   }).join('');
+
+  /* Auto-select the plan from the URL — set by the homepage / marketing cards
+     (e.g. organization-signup.html?plan=2). Accepts numeric id or slug for
+     backward compatibility with any older links still floating around. */
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var planParam = params.get('plan');
+    if (planParam) {
+      var match = window.GHARSETU_PLANS.filter(function (p) {
+        return String(p.id) === planParam || p.slug === planParam;
+      })[0];
+      if (match) {
+        var radio = document.getElementById('plan-' + match.slug);
+        if (radio) radio.checked = true;
+      }
+    }
+  } catch (e) { /* URLSearchParams unavailable — silently no-op */ }
 };

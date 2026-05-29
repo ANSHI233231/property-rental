@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  <title>Invoice Detail · Super Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+        </a>
+        <a href="organizations.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
+        </a>
+        <a href="invoices.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="plans.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+        </a>
+        <div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/cities.html" class="sidebar-sublink">Cities</a>
+          <a href="master-data/states.html" class="sidebar-sublink">States</a>
+          <a href="master-data/payment-methods.html" class="sidebar-sublink">Payment Methods</a>
+          <a href="master-data/business-types.html" class="sidebar-sublink">Business Types</a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <a href="server-logs.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+        <a href="legal-pages.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+        <a href="contact-inbox.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">AK</div>
+            <div>
+              <div class="account-menu-name">Aayush</div>
+              <div class="account-menu-role">Super Admin</div>
+            </div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            My Profile
+          </a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div style="flex:1;min-width:0">
+          <h1 class="page-title" id="inv-title">Invoice INV-2026-05-0042</h1>
+        </div>
+        <div class="flex gap-2 flex-wrap" id="inv-header-actions">
+          <button class="btn btn-primary !py-2 !text-sm" id="btn-mark-paid" onclick="openModal('markPaidModal')">Mark Paid</button>
+          <button class="btn btn-danger !py-2 !text-sm" id="btn-cancel-inv" onclick="openModal('cancelInvoiceModal')">Cancel Invoice</button>
+        </div>
+      </header>
+
+      <!-- prototype-only: invoice status simulator -->
+      <div class="card mb-6" style="border-style:dashed;background:var(--color-off-white);">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="label" style="margin:0">Preview status</span>
+          <div class="flex gap-2 flex-wrap" role="group" aria-label="Preview invoice status">
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-inv-sim="draft" onclick="setInvoiceSimStatus('draft',this)">Draft</button>
+            <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-inv-sim="issued" onclick="setInvoiceSimStatus('issued',this)">Issued</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-inv-sim="paid" onclick="setInvoiceSimStatus('paid',this)">Paid</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-inv-sim="cancelled" onclick="setInvoiceSimStatus('cancelled',this)">Cancelled</button>
+          </div>
+        </div>
+      </div>
+      <!-- /prototype-only -->
+
+      <!-- Draft banner (hidden unless draft) -->
+      <div id="draft-banner" class="alert mb-6" role="status" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>This invoice is in draft and not yet visible to the organization.</span>
+      </div>
+
+      <!-- Cancelled banner (hidden unless cancelled) -->
+      <div id="cancelled-banner" class="alert alert-emergency mb-6" role="alert" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div>
+          <strong class="font-poppins">Invoice Cancelled</strong>
+          <div id="cancelled-reason-text">Duplicate invoice raised in error — replaced by INV-2026-05-0042.</div>
+        </div>
+      </div>
+
+      <!-- Invoice Header card -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-x-8 gap-y-0">
+          <div class="profile-row"><span class="field">Organization</span><span class="value"><div>Triline Properties</div><div class="muted" style="font-size:12px;font-weight:400;">admin@triline.co.in</div></span></div>
+          <div class="profile-row"><span class="field">Plan</span><span class="value">Standard · ₹2,999/mo</span></div>
+          <div class="profile-row"><span class="field">Period</span><span class="value">21/05/2026 → 20/06/2026</span></div>
+          <div class="profile-row"><span class="field">Total Amount</span><span class="value font-poppins font-bold" style="font-size:18px;">₹2,999</span></div>
+          <div class="profile-row"><span class="field">Issued on</span><span class="value">21/05/2026</span></div>
+          <div class="profile-row"><span class="field">Due on</span><span class="value">28/05/2026</span></div>
+          <!-- Paid on row — shown only when paid -->
+          <div class="profile-row" id="row-paid-on" style="display:none;"><span class="field">Paid on</span><span class="value" id="val-paid-on">05/05/2026</span></div>
+          <div class="profile-row" id="row-payment-method" style="display:none;"><span class="field">Payment Method</span><span class="value" id="val-payment-method">NEFT / Bank Transfer</span></div>
+          <div class="profile-row" id="row-payment-ref" style="display:none;"><span class="field" id="val-payment-ref-label">Payment Reference</span><span class="value" id="val-payment-ref" style="font-family:monospace;font-size:14px;color:var(--color-status-paid);">UTRN12345678</span></div>
+          <!-- Cancelled on row — shown only when cancelled -->
+          <div class="profile-row" id="row-cancelled-on" style="display:none;"><span class="field">Cancelled on</span><span class="value" id="val-cancelled-on">10/05/2026</span></div>
+        </div>
+      </section>
+
+      <!-- Line Items card -->
+      <section class="card mb-6">
+        <h3 style="margin:0 0 16px;">Line Items</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Standard plan — 21/05/2026 to 20/06/2026</td>
+                <td class="font-poppins font-semibold text-charcoal" style="text-align:right;">₹2,999</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal" style="text-align:right;padding-top:8px;border-top:2px solid var(--color-mid-gray);" colspan="2">
+                  <div style="display:flex;justify-content:space-between;padding:0 16px;">
+                    <span>Total</span>
+                    <span>₹2,999</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:8px;">GST line item deferred — see planning note §4 Q2.</p>
+      </section>
+
+      <!-- Status timeline card -->
+      <section class="card mb-6">
+        <h3 style="margin:0 0 16px;">Status Timeline</h3>
+        <ul class="progress-timeline" id="status-timeline">
+          <li class="timeline-event done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Created</div>
+              <div class="timeline-meta">21/05/2026 00:00 IST · System (anchor-day cron)</div>
+            </div>
+          </li>
+          <li class="timeline-event done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Issued</div>
+              <div class="timeline-meta">21/05/2026 00:05 IST · System</div>
+            </div>
+          </li>
+          <li class="timeline-event pending" id="timeline-paid-event" style="display:none;">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Paid</div>
+              <div class="timeline-meta" id="timeline-paid-meta">05/05/2026 14:32 IST · Aayush (Super Admin) · ref UTRN12345678</div>
+            </div>
+          </li>
+          <li class="timeline-event pending" id="timeline-cancelled-event" style="display:none;">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Cancelled</div>
+              <div class="timeline-meta" id="timeline-cancelled-meta">10/05/2026 09:15 IST · Aayush (Super Admin)</div>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mark Paid Modal -->
+  <div class="modal-backdrop" id="markPaidModal" role="dialog" aria-modal="true" aria-labelledby="markPaidTitle">
+    <div class="modal" style="max-width:520px;">
+      <h3 id="markPaidTitle">Mark Invoice Paid</h3>
+      <form novalidate onsubmit="event.preventDefault();confirmMarkPaid()">
+        <!-- Payment method comes from the canonical Payment Methods master
+             (super-admin/master-data/payment-methods.html). The reference
+             field's label + placeholder swap to match the selected method. -->
+        <div class="mt-4">
+          <label class="label" for="payment-method">Payment method <span style="color:var(--color-saffron)">*</span></label>
+          <select id="payment-method" class="input" aria-required="true" onchange="onPaymentMethodChange()"></select>
+          <div class="field-error" id="payment-method-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="payment-ref" id="payment-ref-label">Payment reference <span style="color:var(--color-saffron)">*</span></label>
+          <input id="payment-ref" type="text" class="input" placeholder="Pick a payment method first" aria-required="true" disabled oninput="validateMarkPaid()" />
+          <div class="field-error" id="payment-ref-error"></div>
+        </div>
+        <div class="mt-4">
+          <label class="label" for="paid-on-date">Paid on (DD/MM/YYYY)</label>
+          <input id="paid-on-date" type="text" class="input" placeholder="28/05/2026" value="28/05/2026" />
+        </div>
+        <div class="mt-4">
+          <label class="label" for="payment-note">Note (optional)</label>
+          <textarea id="payment-note" class="input" rows="2" placeholder="e.g. Confirmed via bank statement ref."></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" id="markPaidCancelBtn" onclick="closeModal('markPaidModal')">Cancel</button>
+          <button type="submit" class="btn btn-disabled" id="markPaidSubmitBtn" disabled>Mark Paid</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cancel Invoice Modal -->
+  <div class="modal-backdrop" id="cancelInvoiceModal" role="dialog" aria-modal="true" aria-labelledby="cancelInvTitle">
+    <div class="modal" style="max-width:520px;">
+      <h3 id="cancelInvTitle">Cancel Invoice?</h3>
+      <p class="text-sm muted mt-2 mb-4">Cancellation is terminal. A cancelled invoice cannot be re-opened. Provide a reason below.</p>
+      <form novalidate onsubmit="event.preventDefault();confirmCancelInvoice()">
+        <div class="mt-4">
+          <label class="label" for="cancel-reason">Cancellation reason (min 20 characters) <span style="color:var(--color-saffron)">*</span></label>
+          <textarea id="cancel-reason" class="input" rows="3" placeholder="e.g. Duplicate invoice raised in error — replaced by INV-2026-05-0042." aria-required="true" oninput="updateCancelCounter()"></textarea>
+          <div class="counter error" id="cancel-counter">0/20</div>
+          <div class="field-error" id="cancel-reason-error"></div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" id="cancelInvCancelBtn" onclick="closeModal('cancelInvoiceModal')">Cancel</button>
+          <button type="submit" class="btn btn-disabled" id="cancelInvSubmitBtn" disabled>Cancel Invoice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile tab bar -->
+  <nav class="tabbar" aria-label="Super Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard
+    </a>
+    <a href="organizations.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orgs
+    </a>
+    <a href="plans.html" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Plans
+    </a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/payment-methods.js"></script>
+  <script>
+    // Read query params
+    var urlParams = new URLSearchParams(window.location.search);
+    var invId = urlParams.get('id') || 'INV-2026-05-0042';
+    var isAdminView = urlParams.get('admin') === '1';
+
+    document.getElementById('inv-title').textContent = 'Invoice ' + invId;
+
+    // If admin=1 query param: hide action buttons regardless of status
+    if (isAdminView) {
+      document.getElementById('inv-header-actions').style.display = 'none';
+    }
+
+    function setInvoiceSimStatus(status, btn) {
+      document.querySelectorAll('[data-inv-sim]').forEach(function(b) {
+        b.classList.toggle('btn-primary', b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
+      });
+
+      var actions = document.getElementById('inv-header-actions');
+      var draftBanner = document.getElementById('draft-banner');
+      var cancelledBanner = document.getElementById('cancelled-banner');
+      var rowPaidOn = document.getElementById('row-paid-on');
+      var rowPaymentRef = document.getElementById('row-payment-ref');
+      var rowCancelledOn = document.getElementById('row-cancelled-on');
+      var timelinePaid = document.getElementById('timeline-paid-event');
+      var timelineCancelled = document.getElementById('timeline-cancelled-event');
+
+      // Reset all
+      draftBanner.style.display = 'none';
+      cancelledBanner.style.display = 'none';
+      rowPaidOn.style.display = 'none';
+      rowPaymentRef.style.display = 'none';
+      rowCancelledOn.style.display = 'none';
+      timelinePaid.style.display = 'none';
+      timelinePaid.classList.remove('done');
+      timelineCancelled.style.display = 'none';
+      timelineCancelled.classList.remove('done');
+
+      if (!isAdminView) {
+        if (status === 'issued') {
+          actions.style.display = '';
+        } else {
+          actions.style.display = 'none';
+        }
+      }
+
+      var rowPaymentMethod = document.getElementById('row-payment-method');
+      if (rowPaymentMethod) rowPaymentMethod.style.display = 'none';
+
+      if (status === 'draft') {
+        draftBanner.style.display = 'flex';
+      } else if (status === 'paid') {
+        rowPaidOn.style.display = '';
+        if (rowPaymentMethod) rowPaymentMethod.style.display = '';
+        rowPaymentRef.style.display = '';
+        timelinePaid.style.display = '';
+        timelinePaid.classList.add('done');
+      } else if (status === 'cancelled') {
+        cancelledBanner.style.display = 'flex';
+        rowCancelledOn.style.display = '';
+        timelineCancelled.style.display = '';
+        timelineCancelled.classList.add('done');
+      }
+    }
+
+    // Populate the Payment Method dropdown from the canonical master.
+    if (window.renderPaymentMethodOptions) {
+      window.renderPaymentMethodOptions('payment-method');
+    }
+
+    // When the operator picks a payment method, re-label and re-placeholder the
+    // reference field (e.g. UPI wants a transaction id; Cheque wants a cheque #).
+    function onPaymentMethodChange() {
+      var sel = document.getElementById('payment-method');
+      var ref = document.getElementById('payment-ref');
+      var refLabel = document.getElementById('payment-ref-label');
+      var method = window.gsPaymentMethodById && window.gsPaymentMethodById(sel.value);
+      var methodErr = document.getElementById('payment-method-error');
+      if (methodErr) { methodErr.textContent = ''; methodErr.classList.remove('show'); }
+
+      if (method) {
+        refLabel.innerHTML = method.refLabel + ' <span style="color:var(--color-saffron)">*</span>';
+        ref.placeholder = method.refPlaceholder;
+        ref.disabled = false;
+      } else {
+        refLabel.innerHTML = 'Payment reference <span style="color:var(--color-saffron)">*</span>';
+        ref.placeholder = 'Pick a payment method first';
+        ref.value = '';
+        ref.disabled = true;
+      }
+      validateMarkPaid();
+    }
+
+    // Validation: Mark Paid — needs BOTH a method picked AND a reference.
+    function validateMarkPaid() {
+      var sel = document.getElementById('payment-method');
+      var ref = document.getElementById('payment-ref');
+      var refErr = document.getElementById('payment-ref-error');
+      var btn = document.getElementById('markPaidSubmitBtn');
+      refErr.textContent = ''; refErr.classList.remove('show'); ref.classList.remove('error');
+      var ok = !!sel.value && !!ref.value.trim();
+      if (ok) {
+        btn.classList.remove('btn-disabled'); btn.classList.add('btn-primary'); btn.disabled = false;
+      } else {
+        btn.classList.add('btn-disabled'); btn.classList.remove('btn-primary'); btn.disabled = true;
+      }
+    }
+
+    function confirmMarkPaid() {
+      var sel = document.getElementById('payment-method');
+      var ref = document.getElementById('payment-ref');
+      var methodErr = document.getElementById('payment-method-error');
+      var refErr = document.getElementById('payment-ref-error');
+      if (!sel.value) {
+        methodErr.textContent = 'Please select a payment method.'; methodErr.classList.add('show');
+        sel.focus(); return;
+      }
+      if (!ref.value.trim()) {
+        refErr.textContent = 'Payment reference is required.'; refErr.classList.add('show'); ref.classList.add('error');
+        ref.focus(); return;
+      }
+      var method = window.gsPaymentMethodById(sel.value);
+      var methodName = method ? method.name : '';
+      var refLabelText = method ? method.refLabel : 'Payment Reference';
+
+      // Update header-card "Paid" rows
+      document.getElementById('val-payment-method').textContent = methodName;
+      document.getElementById('val-payment-ref-label').textContent = refLabelText;
+      document.getElementById('val-payment-ref').textContent = ref.value.trim();
+
+      // Update Status Timeline entry
+      document.getElementById('timeline-paid-meta').textContent =
+        '28/05/2026 14:32 IST · Aayush (Super Admin) · ' + methodName + ' · ref ' + ref.value.trim();
+
+      closeModal('markPaidModal');
+      gsToast('Invoice marked paid.');
+      setInvoiceSimStatus('paid', document.querySelector('[data-inv-sim="paid"]'));
+    }
+
+    // Validation: Cancel Invoice
+    function updateCancelCounter() {
+      var ta = document.getElementById('cancel-reason');
+      var counter = document.getElementById('cancel-counter');
+      var btn = document.getElementById('cancelInvSubmitBtn');
+      var len = ta.value.length;
+      counter.textContent = len + '/20';
+      counter.className = len < 20 ? 'counter error' : 'counter';
+      if (len >= 20) {
+        btn.classList.remove('btn-disabled'); btn.classList.add('btn-danger'); btn.disabled = false;
+      } else {
+        btn.classList.add('btn-disabled'); btn.classList.remove('btn-danger'); btn.disabled = true;
+      }
+    }
+
+    function confirmCancelInvoice() {
+      var ta = document.getElementById('cancel-reason');
+      var err = document.getElementById('cancel-reason-error');
+      if (ta.value.length < 20) {
+        err.textContent = 'Reason must be at least 20 characters.'; err.classList.add('show'); ta.classList.add('error');
+        ta.focus(); return;
+      }
+      document.getElementById('cancelled-reason-text').textContent = ta.value.trim();
+      document.getElementById('timeline-cancelled-meta').textContent = '28/05/2026 09:15 IST · Aayush (Super Admin)';
+      closeModal('cancelInvoiceModal');
+      gsToast('Invoice cancelled.');
+      setInvoiceSimStatus('cancelled', document.querySelector('[data-inv-sim="cancelled"]'));
+    }
+
+    function openModal(id) {
+      var m = document.getElementById(id);
+      m.classList.add('open');
+      var cancel = m.querySelector('.btn-secondary');
+      if (cancel) setTimeout(function() { cancel.focus(); }, 50);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+      backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeModal(backdrop.id);
+      });
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(function(m) { closeModal(m.id); });
+      }
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+      backdrop.addEventListener('keydown', function(e) {
+        if (e.key !== 'Tab') return;
+        var focusable = backdrop.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], select, textarea, [tabindex]:not([tabindex="-1"])');
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (!first) return;
+        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+        else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+      });
+    });
+
+    // Initialize to issued state
+    setInvoiceSimStatus('issued', document.querySelector('[data-inv-sim="issued"]'));
+  </script>
+
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <a href="invoices.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices</a>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
+    <a href="master-data/states.html" class="more-sheet-sublink">States</a>
+    <a href="master-data/payment-methods.html" class="more-sheet-sublink">Payment Methods</a>
+    <a href="master-data/business-types.html" class="more-sheet-sublink">Business Types</a>
+    <a href="server-logs.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>Server Logs</a>
+    <a href="legal-pages.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Legal Pages</a>
+    <a href="contact-inbox.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact Inbox</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+  <script src="../assets/toast.js"></script>
+</body>
+</html>

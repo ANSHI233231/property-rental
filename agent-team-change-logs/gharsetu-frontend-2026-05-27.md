@@ -367,4 +367,93 @@ Commit/push pending explicit user authorization (Working rule §1).
 
 **Verify:** 66/66 HTML tag-balanced; all inline JS `node --check` clean.
 
+---
+
+## Task — Lease Feature Rework (Admin-only prototype slice)
+
+**Status:** Completed
+**Started:** 2026-05-28
+**Completed:** 2026-05-28
+**Plan ref:** `docs/planning/features/2026-05-28-lease-feature-plan.md` (Revision 2)
+
+### Changes
+
+**`prototype/admin/leases.html` — listing refactor:**
+- Replaced 4-tile filter (All · Active · Renewed · Terminated) with 5-tile filter: All · Upcoming · Active · Ended · Terminated (exact order).
+- Ended tile uses `data-tile-filter="expired"` mapping to `data-status="expired"` rows only.
+- Removed `data-status="renewed"` row and `badge-renewed` badge from the page.
+- Added 2 upcoming rows (Aditi Joshi + Sunil Kapoor); relabeled expired row (Vikram Mehta); kept 4 active + 1 terminated.
+- Status badges: upcoming=badge-prepaid, active=badge-active, expired=badge-closed ("Ended"), terminated=badge-terminated.
+- Row actions per status: upcoming shows Cancel; active shows Renew + Terminate; expired shows Renew (back-dated); terminated shows View only. All non-View are gsToast info placeholders.
+- Flash toast wired to created=1 query-string param with history.replaceState cleanup.
+
+**`prototype/admin/unit-detail.html` — Rooms section + simulator fix:**
+- Added Rooms section after Leases table; mirrors Units sub-table pattern from property-detail.html.
+- 3 mock rooms: Room A (Available), Room B (Occupied/Rohan Mehta), Room C (Available).
+- Add/Edit/Retire modals with validation. Lock rules per 2.5: Add Room disabled when unit occupied; Room B always locked; Rooms A+C locked when simulator=occupied.
+- Simulator JS fixed: ONLY lease-active-row hides when status is not occupied. Upcoming row (L-2245 Aditi Joshi) and expired/terminated rows always visible regardless of simulator state.
+
+**`prototype/admin/create-lease.html` — full rewrite to 5-step wizard:**
+- Steps: 1 Lease Type (radio cards), 2 Property (card grid + search), 3 Unit+Room, 4 Tenants (autocomplete), 5 Lease Details (conflict validation + context panels).
+- No renewed status anywhere in mock data or status badges.
+- Conflict check: debounced 250ms; cross-scope (unit-wise blocks room-wise); only upcoming+active participate.
+- Context panels: Panel A = unit/room history; Panel B = per-tenant history. No renewed status in any badge.
+- Page-scoped styles only; no new design tokens.
+
+**Verified:** properties.html and property-detail.html: 0 "leasing" matches.
+**Verified:** badge-renewed remains in styles.css (used elsewhere) but 0 appearances on leases.html and create-lease.html.
+
+### Files Changed
+- `/Users/aayushsaini/projects/property-rental/prototype/admin/leases.html`
+- `/Users/aayushsaini/projects/property-rental/prototype/admin/unit-detail.html`
+- `/Users/aayushsaini/projects/property-rental/prototype/admin/create-lease.html`
+
+### Negative-Assertion Checks (all 0)
+- "Renewed" in leases.html: 0; data-status="renewed" in leases.html: 0; badge-renewed in leases.html: 0
+- "renewed" in create-lease.html: 0; "Renewed" in create-lease.html: 0; badge-renewed in create-lease.html: 0
+
+### Verification
+- HTML tag-balance: all 3 files pass HTMLParser check (OK).
+- Inline JS node --check: all 3 files pass (1 inline block each).
+
+`pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).
+
+---
+
+## Task — Lease Feature Rework: Revision 3 delta (admin/leases.html only)
+
+**Status:** Completed
+**Started:** 2026-05-28
+**Completed:** 2026-05-28
+**Plan ref:** `docs/planning/features/2026-05-28-lease-feature-plan.md` (Revision 3, §2.7)
+
+### Changes
+
+**`prototype/admin/leases.html` — table restructure (delta-only edit):**
+
+1. **Column order changed** to: `# · Lease # · Lease Type · Property · Unit (combined) · Tenant(s) · Rent · Status · Action`. Start and End columns removed (not in Revision 3 spec).
+2. **New "Lease #" column** — each row's lease number rendered as a clickable `<a href="lease-detail.html?id=L-XXXX" class="text-royal-blue">` in `font-mono text-xs`; same `href` appears in Action cell.
+3. **New "Lease Type" column** — `badge badge-closed` ("Unit-wise") for 7 unit-wise rows; `badge badge-renewed` ("Room-wise") for Sunil Kapoor's row (only acceptable use of badge-renewed on this page).
+4. **Combined "Property · Unit" cell** — property name on top; `<div class="text-xs muted">Unit XA</div>` beneath; for room-wise row: `<div class="text-xs muted">Unit PG-101 · Room A</div>` (U+00B7 middle dot).
+5. **Sunil Kapoor row converted to room-wise** — Sai Heights, Lajpat Nagar · Unit PG-101 · Room A, #L-2204, ₹7,500.
+6. **All Action cells collapsed to single "View detail" link** — `<a href="lease-detail.html?id=L-XXXX" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a>`. Zero buttons in tbody. No Cancel/Renew/Terminate/gsToast stubs.
+7. **Lease IDs assigned:** L-2100 (Raj+Priya), L-2101 (Gupta), L-2103 (Rohan), L-2105 (Anjali), L-2245 (Aditi), L-2204 (Sunil room-wise), L-2090 (Vikram expired), L-2080 (Pradeep terminated).
+8. **`data-property`/`data-unit`/`data-room` attributes** added to every `<tr>` for cascade filter future-proofing. `data-room` present only on Sunil Kapoor's row.
+9. **HTML comment** added before `<section class="card p-0">`: `<!-- lease-detail.html is a separate planning file + deferred build; links will 404 until that ships -->`.
+
+### Files Changed
+- `/Users/aayushsaini/projects/property-rental/prototype/admin/leases.html`
+
+### Negative-Assertion Checks (all pass)
+- `<button` in tbody: 0 (expected 0)
+- gsToast calls in tbody: 0 (expected 0)
+- `data-status="renewed"` anywhere: 0 (expected 0)
+- `badge-renewed` occurrences: 1 (expected exactly 1 — Sunil Kapoor Lease Type badge)
+- Cancel/Terminate as action buttons/links: 0 (expected 0; "Terminated" in status badge not counted)
+
+### Tag Balance Check
+- table/thead/tbody/tr/td/th all open==close
+- 9 `<tr>` (1 header + 8 data rows); 8 `<th>`; 64 `<td>` (8 cols × 8 rows)
+- 16 lease-detail.html links (8 rows × 2 links each: Lease # cell + Action cell)
+
 `pnpm` gates N/A — prototype + docs only; `apps/*` untouched. Commit/push pending explicit user authorization (Working rule §1).

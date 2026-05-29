@@ -10,6 +10,173 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* Plan cards — every card has identical block sequence + height so
+       the three (or more) cards align edge-to-edge with no visual drift. */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+      align-items: stretch;          /* cards stretch to row height */
+    }
+    @media (max-width: 1023px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px)  { .plan-grid { grid-template-columns: 1fr; } }
+
+    .plan-card {
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .plan-card.is-popular { border-top: 4px solid var(--color-saffron); }
+    .plan-card.is-inactive { opacity: 0.7; }
+
+    /* Block 1 — Header (plan name + status badges) */
+    .plan-card-header {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--color-light-gray);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .plan-card-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 20px;
+      color: var(--color-navy);
+      margin: 0;
+      line-height: 1.2;
+    }
+    .plan-card-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+    /* Block 2 — Price */
+    .plan-card-price {
+      padding: 22px 22px 18px;
+      text-align: center;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .plan-card-price-amount {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--color-charcoal);
+      line-height: 1;
+    }
+    .plan-card-price-period {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--color-slate);
+      margin-top: 6px;
+    }
+
+    /* Block 3 — Caps (2-up KPI tiles) */
+    .plan-card-caps {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--color-light-gray);
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .plan-card-cap {
+      background: #fff;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .plan-card-cap-value {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--color-charcoal);
+      line-height: 1.1;
+    }
+    .plan-card-cap-label {
+      font-size: 11px;
+      color: var(--color-slate);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 4px;
+    }
+
+    /* Block 4 — Features (grows to fill, keeps the footer aligned).
+       Single flat list rendered as a 2-column grid — Core entities and Optional
+       features sit together (Core always ✓, Optional ✓/–). No labels — the
+       Core/Optional distinction only matters in the editor, not on the card. */
+    .plan-card-features-wrap {
+      padding: 16px 22px;
+      flex: 1 1 auto;
+      min-height: 180px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 16px;
+      row-gap: 2px;
+      align-content: start;
+    }
+    @media (max-width: 380px) {
+      .plan-card-features-wrap { grid-template-columns: 1fr; }
+    }
+    .plan-card-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 0;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 0;
+    }
+    .plan-card-feature > span:last-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .plan-card-feature-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .plan-card-feature.is-on  { color: var(--color-charcoal); }
+    .plan-card-feature.is-on  .plan-card-feature-icon { background: rgba(46,125,50,0.12); color: var(--color-status-paid); }
+    .plan-card-feature.is-off { color: var(--color-mid-gray); }
+    .plan-card-feature.is-off .plan-card-feature-icon { background: var(--color-light-gray); color: var(--color-mid-gray); }
+
+    /* Block 5 — Org-usage line */
+    .plan-card-usage {
+      padding: 12px 22px;
+      border-top: 1px solid var(--color-light-gray);
+      font-size: 13px;
+      color: var(--color-slate);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .plan-card-usage strong {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: var(--color-charcoal);
+    }
+
+    /* Block 6 — Action footer (always aligned across cards) */
+    .plan-card-actions {
+      padding: 14px 22px 18px;
+      background: var(--color-off-white);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .plan-card-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .plan-card-actions .plan-action-wide { grid-column: span 2; }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -25,6 +192,9 @@
         </a>
         <a href="organizations.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organizations
+        </a>
+        <a href="invoices.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices
         </a>
         <div class="sidebar-divider"></div>
         <a href="plans.html" class="sidebar-link active">
@@ -86,7 +256,7 @@
 
       <!-- Plan cards (rendered from the PLANS model) -->
       <section class="section">
-        <div class="grid lg:grid-cols-3 gap-6" id="plan-cards"></div>
+        <div class="plan-grid" id="plan-cards"></div>
       </section>
     </main>
   </div>
@@ -100,6 +270,12 @@
           <label class="label" for="pl-name">Plan name</label>
           <input id="pl-name" type="text" class="input" placeholder="e.g. Enterprise" oninput="validatePlanForm()" />
           <div class="field-error" id="pl-name-error"></div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label" for="pl-price">Monthly price (₹) <span style="color:var(--color-saffron)">*</span></label>
+          <input id="pl-price" type="number" class="input" min="1" step="1" placeholder="e.g. 2999" aria-required="true" oninput="validatePlanForm()" />
+          <div class="field-error" id="pl-price-error"></div>
         </div>
 
         <div class="grid sm:grid-cols-2 gap-4 mt-4">
@@ -123,8 +299,16 @@
           </div>
         </div>
 
+        <!-- Core — always-on entities, identical across every plan. Read-only on
+             purpose: removing them would orphan org inventory data (rooms created
+             under Premium can't disappear on downgrade). -->
         <div class="mt-4">
-          <label class="label">Included features</label>
+          <label class="label">Core <span style="color:var(--color-slate);font-weight:400;font-size:12px;">(always included on every plan — not editable)</span></label>
+          <div id="pl-core" class="grid sm:grid-cols-2 gap-2" style="border:1px solid var(--color-mid-gray);border-radius:8px;padding:14px;background:var(--color-off-white);"></div>
+        </div>
+
+        <div class="mt-4">
+          <label class="label">Optional features <span style="color:var(--color-slate);font-weight:400;font-size:12px;">(toggle per plan)</span></label>
           <div id="pl-features" class="grid sm:grid-cols-2 gap-2" style="border:1px solid var(--color-mid-gray);border-radius:8px;padding:14px;"></div>
           <div class="field-error" id="pl-features-error"></div>
         </div>
@@ -171,53 +355,93 @@
     var PLANS = window.GHARSETU_PLANS;
     function featureLabel(id){ var m = FEATURE_CATALOG.filter(function(f){return f.id===id;})[0]; return m ? m.label : id; }
 
-    var editingId = null;       // plan id being edited (null = adding)
+    var editingId = null;       // plan id (numeric) being edited (null = adding)
     var statusTargetId = null;  // plan id for deactivate/reactivate
-
-    function slugify(s){ return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 
     function renderPlans() {
       var wrap = document.getElementById('plan-cards');
+      var activeCount = PLANS.filter(function(x){ return x.status === 'active'; }).length;
       wrap.innerHTML = PLANS.map(function(p){
         var inactive = p.status !== 'active';
         var userCap = (p.cap === null) ? '∞' : p.cap;
         var propCap = (p.propertyCap === null) ? '∞' : p.propertyCap;
-        // Full catalogue with ✓ (included) / ✗ (not included)
-        var feats = FEATURE_CATALOG.map(function(fc){
-          var on = p.features.indexOf(fc.id) !== -1;
-          var icon = on
-            ? '<span style="color:var(--color-status-paid);font-weight:700">✓</span>'
-            : '<span style="color:var(--color-mid-gray);font-weight:700">✗</span>';
-          var style = on ? 'color:var(--color-charcoal)' : 'color:var(--color-mid-gray);text-decoration:line-through';
-          return '<li style="display:flex;gap:8px;align-items:center;'+style+'">'+icon+' '+fc.label+'</li>';
+
+        /* Header badges (right-aligned column so heights match across cards) */
+        var badges = '';
+        if (p.popular)  badges += '<span class="badge" style="background:rgba(255,111,0,0.12);color:var(--color-saffron);white-space:nowrap">★ Most Popular</span>';
+        if (inactive)   badges += '<span class="badge badge-closed">Deactivated</span>';
+
+        /* Price block — always rendered, "—" placeholder if missing so block height matches */
+        var priceLabel = (p.priceInr && window.gsPriceLabel) ? window.gsPriceLabel(p) : '—';
+
+        /* Single flat feature list — Core entities (always ✓) followed by Optional
+           features (✓ if enabled, – if not). Rendered into a 2-column grid; no
+           Core/Optional labels because the card-viewer just wants to know what's in
+           the plan, not how the platform categorises it. */
+        var coreFeatures = (window.GHARSETU_CORE_FEATURES || []).map(function (fc) {
+          return { id: fc.id, label: fc.label, on: true };
+        });
+        var optionalFeatures = FEATURE_CATALOG.map(function (fc) {
+          return { id: fc.id, label: fc.label, on: p.features.indexOf(fc.id) !== -1 };
+        });
+        var allFeatures = coreFeatures.concat(optionalFeatures).map(function (f) {
+          var cls = f.on ? 'is-on' : 'is-off';
+          var icon = f.on ? '✓' : '–';
+          return '<div class="plan-card-feature ' + cls + '">'
+               +   '<span class="plan-card-feature-icon">' + icon + '</span>'
+               +   '<span>' + f.label + '</span>'
+               + '</div>';
         }).join('');
+
+        /* Status button — Reactivate vs Deactivate (the latter guarded by ≥3-active rule) */
+        var canDeactivate = !inactive && activeCount > 3;
+        var deactivateDisabledTitle = 'Cannot deactivate — at least 3 active plans must exist. Add a new plan first, then deactivate this one.';
         var statusBtn = inactive
           ? '<button class="btn btn-primary !py-2 !text-sm" onclick="askPlanStatus(\''+p.id+'\',\'reactivate\')">Reactivate</button>'
-          : '<button class="btn btn-danger !py-2 !text-sm" onclick="askPlanStatus(\''+p.id+'\',\'deactivate\')">Deactivate</button>';
-        // Only one active plan can be the public "Most Popular" highlight.
-        var popularBtn = (!p.popular && !inactive)
-          ? '<button class="btn btn-secondary !py-2 !text-sm" onclick="setPopular(\''+p.id+'\')">Set as Most Popular</button>'
+          : (canDeactivate
+              ? '<button class="btn btn-danger !py-2 !text-sm" onclick="askPlanStatus(\''+p.id+'\',\'deactivate\')">Deactivate</button>'
+              : '<button class="btn btn-disabled !py-2 !text-sm" disabled title="'+deactivateDisabledTitle+'">Deactivate</button>');
+
+        /* "Set as Most Popular" gets a third button on its own row when applicable.
+           When not applicable, the action footer stays a clean 2-button row. */
+        var popularRow = (!p.popular && !inactive)
+          ? '<button class="btn btn-secondary !py-2 !text-sm plan-action-wide" onclick="setPopular(\''+p.id+'\')">Set as Most Popular</button>'
           : '';
+
+        var cardCls = 'card plan-card'
+                    + (p.popular ? ' is-popular' : '')
+                    + (inactive ? ' is-inactive' : '');
+
         return ''
-          + '<div class="card" style="'+(inactive?'opacity:0.6;':'')+(p.popular?'border-top:3px solid var(--color-saffron);':'')+'">'
-          +   '<div class="flex items-start justify-between gap-2">'
-          +     '<h2 style="color:var(--color-navy);font-family:Poppins,sans-serif;font-weight:600;font-size:28px;margin:0 0 4px">'+p.name+'</h2>'
-          +     '<div class="flex flex-col items-end gap-1">'
-          +       (p.popular ? '<span class="badge" style="background:rgba(255,111,0,0.12);color:var(--color-saffron);white-space:nowrap">★ Most Popular</span>' : '')
-          +       (inactive ? '<span class="badge badge-closed">Deactivated</span>' : '')
-          +     '</div>'
+          + '<div class="' + cardCls + '">'
+          +   '<div class="plan-card-header">'
+          +     '<h3 class="plan-card-name">' + p.name + '</h3>'
+          +     (badges ? '<div class="plan-card-badges">' + badges + '</div>' : '')
           +   '</div>'
-          +   '<div class="flex gap-8 mb-4 mt-2">'
-          +     '<div><div class="kpi-value">'+userCap+'</div><div class="kpi-meta">active users</div></div>'
-          +     '<div><div class="kpi-value">'+propCap+'</div><div class="kpi-meta">properties</div></div>'
+
+          +   '<div class="plan-card-price">'
+          +     '<div class="plan-card-price-amount">' + priceLabel + '</div>'
+          +     '<div class="plan-card-price-period">billed monthly · INR</div>'
           +   '</div>'
-          +   '<ul class="text-sm muted mb-4" style="list-style:none;padding:0;margin:0;line-height:2">'+feats+'</ul>'
-          +   '<div class="text-sm mb-4"><span class="muted">'+p.orgs+' organization'+(p.orgs===1?'':'s')+' on this plan.</span> '
-          +     '<a href="organizations.html?plan='+p.id+'" class="font-poppins font-semibold ml-1" style="color:var(--color-royal-blue)">View list</a></div>'
-          +   '<div class="flex gap-2 flex-wrap">'
+
+          +   '<div class="plan-card-caps">'
+          +     '<div class="plan-card-cap"><div class="plan-card-cap-value">' + userCap + '</div><div class="plan-card-cap-label">Active users</div></div>'
+          +     '<div class="plan-card-cap"><div class="plan-card-cap-value">' + propCap + '</div><div class="plan-card-cap-label">Properties</div></div>'
+          +   '</div>'
+
+          +   '<div class="plan-card-features-wrap">'
+          +     allFeatures
+          +   '</div>'
+
+          +   '<div class="plan-card-usage">'
+          +     '<span><strong>' + p.orgs + '</strong> organization' + (p.orgs === 1 ? '' : 's') + ' on this plan</span>'
+          +     '<a href="organizations.html?plan=' + p.id + '" class="font-poppins font-semibold" style="color:var(--color-royal-blue);font-size:13px;text-decoration:none;">View list →</a>'
+          +   '</div>'
+
+          +   '<div class="plan-card-actions">'
           +     '<button class="btn btn-secondary !py-2 !text-sm" onclick="openPlanEditor(\''+p.id+'\')">Edit</button>'
-          +     popularBtn
           +     statusBtn
+          +     popularRow
           +   '</div>'
           + '</div>';
       }).join('');
@@ -225,7 +449,7 @@
 
     /* ---- Add / Edit ---- */
     function openPlanEditor(id) {
-      editingId = id || null;
+      editingId = id ? Number(id) : null;
       var title = document.getElementById('planModalTitle');
       var name = document.getElementById('pl-name');
       var cap = document.getElementById('pl-cap');
@@ -237,8 +461,20 @@
       var propcap = document.getElementById('pl-propcap');
       var propunlimited = document.getElementById('pl-propunlimited');
       document.getElementById('pl-propcap-error').textContent = '';
+      document.getElementById('pl-price-error').textContent = '';
 
-      var enabled = editingId ? (PLANS.filter(function(x){return x.id===editingId;})[0].features) : [];
+      var enabled = editingId != null ? (PLANS.filter(function(x){return x.id===editingId;})[0].features) : [];
+
+      // Render the Core (always-on) list — read-only, identical across every plan.
+      var coreEl = document.getElementById('pl-core');
+      if (coreEl) {
+        coreEl.innerHTML = (window.GHARSETU_CORE_FEATURES || []).map(function(fc){
+          return '<div style="display:flex;align-items:center;gap:8px;font-family:\'Inter\',sans-serif;font-size:14px;color:var(--color-charcoal);padding:2px 0;">'
+               + '<span style="color:var(--color-status-paid);font-weight:700;flex-shrink:0;">✓</span>'
+               + fc.label
+               + '</div>';
+        }).join('');
+      }
 
       // Render feature checkboxes from the catalogue
       features.innerHTML = FEATURE_CATALOG.map(function(fc){
@@ -248,7 +484,8 @@
              + fc.label + '</label>';
       }).join('');
 
-      if (editingId) {
+      var priceInput = document.getElementById('pl-price');
+      if (editingId != null) {
         var p = PLANS.filter(function(x){return x.id===editingId;})[0];
         title.textContent = 'Edit ' + p.name + ' plan';
         name.value = p.name;
@@ -256,10 +493,12 @@
         cap.value = (p.cap === null) ? '' : p.cap;
         propunlimited.checked = (p.propertyCap === null);
         propcap.value = (p.propertyCap === null) ? '' : p.propertyCap;
+        priceInput.value = p.priceInr ? Math.round(p.priceInr / 100) : '';
       } else {
         title.textContent = 'Add plan';
         name.value = ''; cap.value = ''; unlimited.checked = false;
         propcap.value = ''; propunlimited.checked = false;
+        priceInput.value = '';
       }
       toggleUnlimited();
       togglePropUnlimited();
@@ -291,9 +530,11 @@
       var unlimited = document.getElementById('pl-unlimited');
       var propcap = document.getElementById('pl-propcap');
       var propunlimited = document.getElementById('pl-propunlimited');
+      var price = document.getElementById('pl-price');
       var nameErr = document.getElementById('pl-name-error');
       var capErr = document.getElementById('pl-cap-error');
       var propErr = document.getElementById('pl-propcap-error');
+      var priceErr = document.getElementById('pl-price-error');
       var featErr = document.getElementById('pl-features-error');
       var saveBtn = document.getElementById('savePlanBtn');
       var ok = true;
@@ -301,6 +542,7 @@
       nameErr.textContent = ''; nameErr.classList.remove('show'); name.classList.remove('error');
       capErr.textContent = ''; capErr.classList.remove('show'); cap.classList.remove('error');
       propErr.textContent = ''; propErr.classList.remove('show'); propcap.classList.remove('error');
+      priceErr.textContent = ''; priceErr.classList.remove('show'); price.classList.remove('error');
       featErr.textContent = ''; featErr.classList.remove('show');
 
       if (!name.value.trim()) ok = false;
@@ -311,6 +553,15 @@
       if (!propunlimited.checked) {
         var pv = parseInt(propcap.value, 10);
         if (isNaN(pv) || pv < 1) ok = false;
+      }
+      var priceVal = parseInt(price.value, 10);
+      if (isNaN(priceVal) || priceVal < 1) {
+        ok = false;
+        if (price.value !== '') {
+          priceErr.textContent = 'Monthly price must be a whole number greater than 0.';
+          priceErr.classList.add('show');
+          price.classList.add('error');
+        }
       }
       var anyFeat = document.querySelectorAll('.pl-feat:checked').length > 0;
       if (!anyFeat) ok = false;
@@ -326,15 +577,19 @@
       var propunlimited = document.getElementById('pl-propunlimited').checked;
       var propCap = propunlimited ? null : parseInt(document.getElementById('pl-propcap').value, 10);
       var features = Array.prototype.map.call(document.querySelectorAll('.pl-feat:checked'), function(c){ return c.value; });
-      if (!name || (!unlimited && (isNaN(cap) || cap < 1)) || (!propunlimited && (isNaN(propCap) || propCap < 1)) || !features.length) return;
+      var priceRupees = parseInt(document.getElementById('pl-price').value, 10);
+      var priceInr = isNaN(priceRupees) ? 0 : priceRupees * 100;
+      if (!name || (!unlimited && (isNaN(cap) || cap < 1)) || (!propunlimited && (isNaN(propCap) || propCap < 1)) || !features.length || priceInr < 1) return;
 
-      if (editingId) {
+      if (editingId != null) {
+        // On EDIT: id is DB-owned, never changes.
         var p = PLANS.filter(function(x){return x.id===editingId;})[0];
-        p.name = name; p.cap = cap; p.propertyCap = propCap; p.features = features;
+        p.name = name; p.cap = cap; p.propertyCap = propCap; p.features = features; p.priceInr = priceInr;
         gsToast('Plan "' + name + '" updated.');
       } else {
-        var id = slugify(name) || ('plan-' + (PLANS.length+1));
-        PLANS.push({ id:id, name:name, cap:cap, propertyCap:propCap, orgs:0, status:'active', features:features });
+        // On ADD: id is DB-assigned (autoincrement). Prototype uses next integer.
+        var nextId = PLANS.reduce(function(mx,x){ return x.id>mx?x.id:mx; }, 0) + 1;
+        PLANS.push({ id:nextId, slug:'plan-'+nextId, name:name, cap:cap, propertyCap:propCap, orgs:0, status:'active', popular:false, priceInr:priceInr, features:features });
         gsToast('Plan "' + name + '" added.');
       }
       closeModal('planModal');
@@ -346,20 +601,20 @@
        In the live app this is a PATCH; in the prototype it updates the shared
        window.GHARSETU_PLANS so the home + sign-up cards stay in sync. */
     function setPopular(id) {
-      PLANS.forEach(function(p){ p.popular = (p.id === id); });
+      PLANS.forEach(function(p){ p.popular = (p.id === Number(id)); });
       renderPlans();
     }
 
     /* ---- Deactivate / Reactivate ---- */
     function askPlanStatus(id, action) {
-      statusTargetId = id;
-      var p = PLANS.filter(function(x){return x.id===id;})[0];
+      statusTargetId = Number(id);
+      var p = PLANS.filter(function(x){return x.id===Number(id);})[0];
       var title = document.getElementById('planStatusTitle');
       var body = document.getElementById('planStatusBody');
       var btn = document.getElementById('planStatusConfirmBtn');
       if (action === 'deactivate') {
         title.textContent = 'Deactivate ' + p.name + '?';
-        body.textContent = 'Organizations already on this plan keep it. You cannot assign it to new organizations until reactivated.';
+        body.textContent = p.orgs + ' organization(s) are currently on this plan. They keep it; no new organization can be assigned to this plan until reactivated. Continue?';
         btn.textContent = 'Deactivate'; btn.className = 'btn btn-danger';
         btn.dataset.action = 'deactivate';
       } else {
@@ -373,7 +628,7 @@
 
     function confirmPlanStatus() {
       var action = document.getElementById('planStatusConfirmBtn').dataset.action;
-      var p = PLANS.filter(function(x){return x.id===statusTargetId;})[0];
+      var p = PLANS.filter(function(x){return x.id===Number(statusTargetId);})[0];
       p.status = (action === 'deactivate') ? 'inactive' : 'active';
       // A deactivated plan can't be the public "Most Popular" highlight.
       if (action === 'deactivate' && p.popular) p.popular = false;
@@ -425,6 +680,7 @@
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
+    <a href="invoices.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg>Invoices</a>
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/cities.html" class="more-sheet-sublink">Cities</a>
     <a href="master-data/states.html" class="more-sheet-sublink">States</a>

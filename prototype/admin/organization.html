@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>My Profile · Admin · GharSetu</title>
+  <title>Organization · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/plans.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -38,11 +39,11 @@
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
         <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
-        <a href="organization.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+        <a href="organization.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
         <a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
       </nav>
       <div class="sidebar-footer">
-        <button type="button" class="account-trigger active" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
           <span class="account-trigger-label">Account</span>
           <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
@@ -50,20 +51,11 @@
         <div class="account-menu" id="accountMenu" role="menu">
           <div class="account-menu-header">
             <div class="account-menu-avatar">RS</div>
-            <div>
-              <div class="account-menu-name">Raj</div>
-              <div class="account-menu-role">Admin</div>
-            </div>
+            <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
           </div>
           <div class="account-menu-divider"></div>
-          <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            My Profile
-          </a>
-          <a href="../login.html" class="account-menu-link danger" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-            Sign out
-          </a>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
         </div>
       </div>
     </aside>
@@ -72,68 +64,140 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">My Profile</h1>
+          <h1 class="page-title">Organization</h1>
         </div>
+        <!-- Admin view of own org — read-only. Plan-change / deactivate / impersonate
+             live on the Super Admin side (super-admin/organization-detail.html). -->
       </header>
 
-      <div class="profile-grid">
-        <!-- Account card -->
-        <section class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar-lg">RS</div>
-            <div class="profile-name">Raj Singh</div>
-            <span class="profile-role">Admin</span>
+      <!-- Status strip — Plan / Created / Primary Contact at a glance -->
+      <section class="card mb-6">
+        <div class="flex flex-wrap gap-6">
+          <div>
+            <div class="label" style="display:block;margin-bottom:4px">Status</div>
+            <span class="badge badge-active">Active</span>
           </div>
-
-          <h3>Account</h3>
-          <div class="profile-row"><span class="field">Name</span><span class="value">Raj Singh</span></div>
-          <div class="profile-row"><span class="field">Email</span><span class="value">raj@gharsetu.in</span></div>
-          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx12</span></div>
-          <div class="profile-row"><span class="field">Scope</span><span class="value">All 18 properties</span></div>
-          <div class="profile-row"><span class="field">Member since</span><span class="value">15/03/2024</span></div>
-          <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active">Active</span></span></div>
-
-          <div class="mt-6 flex gap-2 flex-wrap">
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditProfile()">Edit details</button>
+          <div>
+            <div class="label" style="display:block;margin-bottom:4px">Plan</div>
+            <span class="font-poppins font-semibold text-charcoal" id="strip-plan-name">Standard</span>
           </div>
-          <p class="text-xs muted mt-3">Email and role changes are audited and require Admin confirmation.</p>
-        </section>
+          <div>
+            <div class="label" style="display:block;margin-bottom:4px">Created</div>
+            <span class="font-poppins font-semibold text-charcoal">21/05/2026</span>
+          </div>
+          <div>
+            <div class="label" style="display:block;margin-bottom:4px">Primary Contact</div>
+            <span class="font-poppins font-semibold text-charcoal">Raj Singh · <a href="mailto:admin@triline.co.in" style="color:var(--color-royal-blue)">admin@triline.co.in</a></span>
+          </div>
+        </div>
+      </section>
 
-        <!-- Security card -->
-        <section class="profile-card">
-          <h3>Security</h3>
+      <!-- Organization Details + Subscription cards (two-column on desktop) -->
+      <section class="section grid lg:grid-cols-2 gap-6">
+        <div class="profile-card">
+          <h3>Organization Details</h3>
+          <div class="profile-row"><span class="field">Name</span><span class="value">Triline Properties Pvt Ltd</span></div>
+          <div class="profile-row"><span class="field">Type of business</span><span class="value">Property Management Firm</span></div>
+          <div class="profile-row"><span class="field">Expected unit count</span><span class="value">120 units</span></div>
+          <div class="profile-row"><span class="field">City + State</span><span class="value">Delhi, Delhi</span></div>
+          <div class="profile-row"><span class="field">Pincode</span><span class="value">110017</span></div>
+          <div class="profile-row"><span class="field">Created on</span><span class="value">21/05/2026</span></div>
+          <div class="mt-4" style="border-top:1px solid var(--color-light-gray);padding-top:12px;">
+            <div class="muted" style="font-size:12px;">To update any of these details, contact your GharSetu account manager.</div>
+          </div>
+        </div>
 
-          <form class="mt-2">
-            <div class="mb-4">
-              <label class="label" for="cur-pw">Current password</label>
-              <input id="cur-pw" type="password" class="input" placeholder="••••••••" required />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              <div>
-                <label class="label" for="new-pw">New password</label>
-                <input id="new-pw" type="password" class="input" placeholder="At least 10 characters" required minlength="10" />
-              </div>
-              <div>
-                <label class="label" for="conf-pw">Confirm new</label>
-                <input id="conf-pw" type="password" class="input" placeholder="Repeat new password" required minlength="10" />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary !py-2 !text-sm">Change password</button>
-          </form>
-        </section>
-      </div>
+        <div class="profile-card">
+          <h3>Subscription</h3>
+          <div class="profile-row"><span class="field">Plan</span><span class="value" id="sub-plan-name">Standard</span></div>
+          <div class="profile-row"><span class="field">Plan price</span><span class="value" id="sub-plan-price">—</span></div>
+          <div class="profile-row"><span class="field">Billing anchor day</span><span class="value">21 <span class="muted" style="font-weight:400;font-size:12px;margin-left:6px;">(next invoice <span id="sub-next-invoice">21/06/2026</span>)</span></span></div>
+          <div class="profile-row"><span class="field">Active-user cap</span><span class="value" id="sub-cap-display">20 users</span></div>
+          <div class="profile-row"><span class="field">Active users</span><span class="value">18 of 20</span></div>
+          <div class="profile-row">
+            <span class="field">Features available</span>
+            <span class="value" id="sub-features-included" style="display:flex;flex-wrap:wrap;gap:6px;"></span>
+          </div>
+        </div>
+      </section>
 
-      <!-- Activity preview -->
-      <section class="section mt-8">
-        <h3 class="section-title">Recent Activity</h3>
+      <!-- Subscription Plan History — read-only -->
+      <section class="section mt-6">
+        <h3 class="section-title">Subscription Plan History</h3>
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
-            <thead><tr><th>When</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
+            <thead><tr><th>Effective</th><th>Plan</th><th>User cap</th><th>Change</th></tr></thead>
             <tbody>
-              <tr><td>09/05/2026 09:14</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
-              <tr><td>08/05/2026 18:03</td><td>Created Property Manager</td><td>Anil Kapoor</td><td>106.51.xx.xx</td></tr>
-              <tr><td>05/05/2026 11:22</td><td>Reviewed maintenance alert</td><td>Unit 4B · Sai Heights</td><td>106.51.xx.xx</td></tr>
-              <tr><td>02/05/2026 15:40</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
+              <tr><td>21/05/2026</td><td><span class="badge badge-active">Standard</span></td><td>20 users</td><td>Activated on approval</td></tr>
+              <tr><td>21/05/2026</td><td>Standard</td><td>20 users</td><td>Selected at sign-up</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Invoices — same data as before, now under the org page -->
+      <section class="section mt-6">
+        <h3 class="section-title">Invoices</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Invoice #</th>
+                <th>Period</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Issued</th>
+                <th>Due</th>
+                <th>Paid on</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="muted" style="font-size:12px;">1</td>
+                <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-05-0042</span></td>
+                <td class="text-xs muted">21/05/2026 → 20/06/2026</td>
+                <td class="font-poppins font-semibold">₹2,999</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td class="muted" style="font-size:13px;">21/05/2026</td>
+                <td class="muted" style="font-size:13px;">28/05/2026</td>
+                <td class="muted" style="font-size:13px;">24/05/2026</td>
+                <td><a href="invoice-detail.html?id=INV-2026-05-0042" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
+              </tr>
+              <tr>
+                <td class="muted" style="font-size:12px;">2</td>
+                <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-04-0031</span></td>
+                <td class="text-xs muted">21/04/2026 → 20/05/2026</td>
+                <td class="font-poppins font-semibold">₹2,999</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td class="muted" style="font-size:13px;">21/04/2026</td>
+                <td class="muted" style="font-size:13px;">28/04/2026</td>
+                <td class="muted" style="font-size:13px;">24/04/2026</td>
+                <td><a href="invoice-detail.html?id=INV-2026-04-0031" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
+              </tr>
+              <tr>
+                <td class="muted" style="font-size:12px;">3</td>
+                <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-03-0019</span></td>
+                <td class="text-xs muted">21/03/2026 → 20/04/2026</td>
+                <td class="font-poppins font-semibold">₹2,999</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td class="muted" style="font-size:13px;">21/03/2026</td>
+                <td class="muted" style="font-size:13px;">28/03/2026</td>
+                <td class="muted" style="font-size:13px;">24/03/2026</td>
+                <td><a href="invoice-detail.html?id=INV-2026-03-0019" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
+              </tr>
+              <tr>
+                <td class="muted" style="font-size:12px;">4</td>
+                <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-02-0008</span></td>
+                <td class="text-xs muted">21/02/2026 → 20/03/2026</td>
+                <td class="font-poppins font-semibold">₹2,999</td>
+                <td><span class="badge badge-paid">Paid</span></td>
+                <td class="muted" style="font-size:13px;">21/02/2026</td>
+                <td class="muted" style="font-size:13px;">28/02/2026</td>
+                <td class="muted" style="font-size:13px;">24/02/2026</td>
+                <td><a href="invoice-detail.html?id=INV-2026-02-0008" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -150,7 +214,7 @@
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
-  <!-- More bottom sheet (Admin overflow nav) -->
+  <!-- More bottom sheet -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
@@ -167,7 +231,7 @@
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
-    <a href="organization.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+    <a href="organization.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
     <a href="delegations.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
@@ -177,82 +241,42 @@
     <div class="account-sheet-handle" aria-hidden="true"></div>
     <div class="account-menu-header">
       <div class="account-menu-avatar">RS</div>
-      <div>
-        <div class="account-menu-name">Raj</div>
-        <div class="account-menu-role">Admin</div>
-      </div>
+      <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
     </div>
     <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
-  <!-- Edit Profile Modal (Name + Mobile only; email/role locked) -->
-  <div class="modal-backdrop" id="editProfileModal" role="dialog" aria-modal="true" aria-labelledby="epTitle">
-    <div class="modal" style="max-width:480px;">
-      <h3 id="epTitle">Edit profile</h3>
-      <form novalidate onsubmit="event.preventDefault(); saveProfile();">
-        <div class="mt-4">
-          <label class="label" for="ep-name">Full name</label>
-          <input id="ep-name" class="input" oninput="document.getElementById('ep-name-error').classList.remove('show'); this.classList.remove('error');" />
-          <div class="field-error" id="ep-name-error"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="ep-phone">Mobile number</label>
-          <input id="ep-phone" class="input" placeholder="98xxxxxxxx" oninput="document.getElementById('ep-phone-error').classList.remove('show'); this.classList.remove('error');" />
-          <div class="field-error" id="ep-phone-error"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="ep-email">Email (locked)</label>
-          <input id="ep-email" class="input" disabled style="background:var(--color-light-gray);cursor:not-allowed;" />
-        </div>
-        <div class="flex justify-end gap-3 mt-6">
-          <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  <script>
-    var _epRows = {};
-    function openEditProfile(){
-      _epRows = {};
-      document.querySelectorAll('.profile-row').forEach(function(r){
-        var f=r.querySelector('.field'), v=r.querySelector('.value'); if(f&&v) _epRows[f.textContent.trim()]=v;
-      });
-      document.getElementById('ep-name').value  = _epRows['Name']  ? _epRows['Name'].textContent.trim()  : '';
-      document.getElementById('ep-phone').value = _epRows['Phone'] ? _epRows['Phone'].textContent.trim() : '';
-      document.getElementById('ep-email').value = _epRows['Email'] ? _epRows['Email'].textContent.trim() : '';
-      document.getElementById('ep-name-error').classList.remove('show');
-      document.getElementById('ep-phone-error').classList.remove('show');
-      document.getElementById('editProfileModal').classList.add('open');
-      document.body.style.overflow='hidden';
-      setTimeout(function(){ document.getElementById('ep-name').focus(); }, 50);
-    }
-    function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('open'); document.body.style.overflow=''; }
-    function epErr(id,msg){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); e.textContent=msg; e.classList.add('show'); i.classList.add('error'); }
-    function saveProfile(){
-      var name=document.getElementById('ep-name').value.trim();
-      var phone=document.getElementById('ep-phone').value.trim();
-      var ok=true;
-      if(!name){ epErr('ep-name','Name is required.'); ok=false; }
-      var hasDigit=/\d/.test(phone);
-      if(!phone || !hasDigit || phone.replace(/\D/g,'').length<10){ epErr('ep-phone','Enter a valid mobile number (at least 10 digits).'); ok=false; }
-      if(!ok) return;
-      if(_epRows['Name'])  _epRows['Name'].textContent  = name;
-      if(_epRows['Phone']) _epRows['Phone'].textContent = phone;
-      var hdr=document.querySelector('.profile-name'); if(hdr) hdr.textContent = name;
-      closeEditProfile();
-      gsToast('Profile updated.');
-    }
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEditProfile(); });
-    (function(){ var m=document.getElementById('editProfileModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) closeEditProfile(); }); })();
-  </script>
   <script src="../assets/toast.js"></script>
+  <script>
+    // Render plan-derived fields from the canonical plans.js catalogue.
+    (function () {
+      var PLAN_SLUG = 'standard';
+      var plan = (window.GHARSETU_PLANS || []).find(function (p) { return p.slug === PLAN_SLUG; });
+      if (!plan) return;
+
+      // Plan name in the status strip + Subscription card
+      document.getElementById('strip-plan-name').textContent = plan.name;
+      document.getElementById('sub-plan-name').textContent   = plan.name;
+
+      // Plan price
+      var priceEl = document.getElementById('sub-plan-price');
+      if (priceEl && window.gsPriceLabel) priceEl.textContent = window.gsPriceLabel(plan);
+
+      // Cap display
+      var capEl = document.getElementById('sub-cap-display');
+      if (capEl) capEl.textContent = (plan.cap === null ? 'Unlimited users' : plan.cap + ' users');
+
+      // Features available — Core entities + the plan's optional features as chips
+      var coreChips = (window.GHARSETU_CORE_FEATURES || []).map(function (f) {
+        return '<span class="feature-chip">' + f.label + '</span>';
+      });
+      var optionalChips = (window.GHARSETU_FEATURE_CATALOG || [])
+        .filter(function (fc) { return plan.features.indexOf(fc.id) !== -1; })
+        .map(function (fc) { return '<span class="feature-chip">' + fc.label + '</span>'; });
+      var container = document.getElementById('sub-features-included');
+      if (container) container.innerHTML = coreChips.concat(optionalChips).join('');
+    })();
+  </script>
 </body>
 </html>

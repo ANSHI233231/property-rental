@@ -10,6 +10,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* Page-scoped styles for Rooms section — no new design tokens */
+    .rooms-empty-state {
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--color-slate);
+    }
+    .rooms-empty-state p {
+      margin: 0 0 16px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -38,6 +50,7 @@
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
         <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+        <a href="organization.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
         <a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
       </nav>
       <div class="sidebar-footer">
@@ -133,11 +146,11 @@
             </div>
           </div>
           <hr class="divider"/>
-          <div class="text-sm muted">On lease <a href="../pm/lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold">#L-2103</a> · since 01/04/2025</div>
+          <div class="text-sm muted">On lease <a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold">#L-2103</a> · since 01/04/2025</div>
         </div>
       </section>
 
-      <!-- Leases (current + past, combined) -->
+      <!-- Leases (active + upcoming + past combined; always visible regardless of unit status) -->
       <section class="section">
         <h3 class="section-title">Leases</h3>
         <div class="card p-0 overflow-x-auto">
@@ -152,7 +165,17 @@
                 <td>31/03/2026</td>
                 <td>₹18,000</td>
                 <td><span class="badge badge-active">Active</span></td>
-                <td><a href="../pm/lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+                <td><a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+              </tr>
+              <tr id="lease-upcoming-row">
+                <td class="font-mono text-xs">#L-2245</td>
+                <td>Aditi Joshi</td>
+                <td>—</td>
+                <td>01/04/2026</td>
+                <td>31/03/2027</td>
+                <td>₹19,500</td>
+                <td><span class="badge badge-prepaid">Upcoming</span></td>
+                <td><a href="lease-detail.html?id=L-2245" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
               </tr>
               <tr>
                 <td class="font-mono text-xs">#L-1842</td>
@@ -162,7 +185,7 @@
                 <td>31/03/2025</td>
                 <td>₹15,000</td>
                 <td><span class="badge badge-closed">Ended</span></td>
-                <td><a href="../pm/lease-detail.html?id=L-1842" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+                <td><a href="lease-detail.html?id=L-1842" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
               </tr>
               <tr>
                 <td class="font-mono text-xs">#L-1521</td>
@@ -172,7 +195,66 @@
                 <td>31/03/2023</td>
                 <td>₹12,500</td>
                 <td><span class="badge badge-terminated">Terminated</span></td>
-                <td><a href="../pm/lease-detail.html?id=L-1521" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+                <td><a href="lease-detail.html?id=L-1521" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Rooms in this unit -->
+      <section class="section" id="rooms-section">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title m-0">Rooms in this unit</h3>
+          <button type="button" id="add-room-btn" class="btn btn-primary !py-2 !text-sm" onclick="openAddRoomModal()">+ Add Room</button>
+        </div>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table" id="rooms-table">
+            <thead>
+              <tr><th>Label</th><th>Monthly Rent</th><th>Status</th><th>Current Tenant</th><th>Notes</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="rooms-tbody">
+              <!-- Room A — Available -->
+              <tr id="room-row-A">
+                <td class="font-poppins font-semibold text-charcoal">Room A</td>
+                <td>₹6,500</td>
+                <td><span class="badge badge-paid">Available</span></td>
+                <td class="muted">—</td>
+                <td class="text-sm muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Sunny side">Sunny side</td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="edit-room-A-btn" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openEditRoomModal('A')">Edit</button>
+                    <button type="button" id="retire-room-A-btn" class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRetireRoomModal('A')">Retire</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Room B — Occupied -->
+              <tr id="room-row-B">
+                <td class="font-poppins font-semibold text-charcoal">Room B</td>
+                <td>₹7,000</td>
+                <td><span class="badge badge-prepaid">Occupied</span></td>
+                <td>Rohan Mehta</td>
+                <td class="text-sm muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Attached bathroom">Attached bathroom</td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="edit-room-B-btn" class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot edit — room has an active or upcoming lease.">Edit</button>
+                    <button type="button" id="retire-room-B-btn" class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot retire — room has an active or upcoming lease.">Retire</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Room C — Available -->
+              <tr id="room-row-C">
+                <td class="font-poppins font-semibold text-charcoal">Room C</td>
+                <td>₹6,500</td>
+                <td><span class="badge badge-paid">Available</span></td>
+                <td class="muted">—</td>
+                <td class="text-sm muted">—</td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="edit-room-C-btn" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openEditRoomModal('C')">Edit</button>
+                    <button type="button" id="retire-room-C-btn" class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRetireRoomModal('C')">Retire</button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -208,6 +290,7 @@
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+    <a href="organization.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
     <a href="delegations.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
@@ -220,9 +303,103 @@
     <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
     <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+
+  <!-- Add Room Modal -->
+  <div class="modal-backdrop" id="addRoomModal" role="dialog" aria-modal="true" aria-labelledby="addRoomTitle">
+    <div class="modal" style="max-width:480px">
+      <h3 id="addRoomTitle" class="m-0">Add Room</h3>
+      <form id="addRoomForm" novalidate onsubmit="event.preventDefault(); saveAddRoom();" style="margin-top:20px;">
+        <div class="mb-4">
+          <label class="label" for="ar-label">Label <span style="color:var(--color-saffron)">*</span></label>
+          <input id="ar-label" class="input" placeholder="e.g. Room D" aria-required="true" oninput="clearRoomErr('ar-label')" />
+          <div class="field-error" id="ar-label-error"></div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="ar-rent">Monthly Rent (₹) <span style="color:var(--color-saffron)">*</span></label>
+          <input id="ar-rent" class="input" type="number" min="0" placeholder="e.g. 6500" aria-required="true" oninput="clearRoomErr('ar-rent')" />
+          <div class="field-error" id="ar-rent-error"></div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="ar-status">Status</label>
+          <select id="ar-status" class="input">
+            <option value="Available" selected>Available</option>
+          </select>
+          <div class="text-xs muted mt-1" style="font-size:12px;">Status is set by the lease once a tenant moves in.</div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="ar-notes">Notes</label>
+          <textarea id="ar-notes" class="input" rows="2" placeholder="e.g. Corner room, attached bathroom"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addRoomModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Room</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Room Modal -->
+  <div class="modal-backdrop" id="editRoomModal" role="dialog" aria-modal="true" aria-labelledby="editRoomTitle">
+    <div class="modal" style="max-width:480px">
+      <h3 id="editRoomTitle" class="m-0">Edit Room</h3>
+      <form id="editRoomForm" novalidate onsubmit="event.preventDefault(); saveEditRoom();" style="margin-top:20px;">
+        <input type="hidden" id="er-room-id" />
+        <div class="mb-4">
+          <label class="label" for="er-label">Label <span style="color:var(--color-saffron)">*</span></label>
+          <input id="er-label" class="input" aria-required="true" oninput="clearRoomErr('er-label')" />
+          <div class="field-error" id="er-label-error"></div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="er-rent">Monthly Rent (₹) <span style="color:var(--color-saffron)">*</span></label>
+          <input id="er-rent" class="input" type="number" min="0" aria-required="true" oninput="clearRoomErr('er-rent')" />
+          <div class="field-error" id="er-rent-error"></div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="er-status">Status</label>
+          <select id="er-status" class="input">
+            <option value="Available">Available</option>
+            <option value="Under Maintenance">Under Maintenance</option>
+          </select>
+          <div class="text-xs muted mt-1" id="er-status-hint" style="font-size:12px;display:none;">Status is controlled by the active lease while the room is Occupied.</div>
+        </div>
+        <div class="mb-4">
+          <label class="label" for="er-notes">Notes</label>
+          <textarea id="er-notes" class="input" rows="2"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('editRoomModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Retire Room Modal -->
+  <div class="modal-backdrop" id="retireRoomModal" role="dialog" aria-modal="true" aria-labelledby="retireRoomTitle">
+    <div class="modal" style="max-width:440px">
+      <h3 id="retireRoomTitle">Retire room?</h3>
+      <p class="muted text-sm mt-2 mb-4">Room <strong id="retireRoomName"></strong> will be marked <strong>Retired</strong> — it stops accepting new leases. Nothing is deleted; existing records stay.</p>
+      <input type="hidden" id="rr-room-id" />
+      <div class="mb-6">
+        <label class="label" for="rr-reason">Reason for retiring <span style="color:var(--color-saffron)">*</span></label>
+        <textarea id="rr-reason" class="input" rows="3" placeholder="e.g. Under major renovation" aria-required="true" oninput="clearRoomErr('rr-reason')"></textarea>
+        <div class="field-error" id="rr-reason-error"></div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('retireRoomModal').classList.remove('open')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="doRetireRoom()">Retire room</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/toast.js"></script>
   <script>
-    /* Prototype status simulator — preview the unit detail page per unit status. */
+    /* ---------------------------------------------------------------
+       Unit status simulator — controls which content is visible.
+       KEY RULE: only the active-lease row (#lease-active-row) is hidden
+       when status is not "occupied". Upcoming/expired/terminated rows
+       must ALWAYS remain visible regardless of simulator state.
+    --------------------------------------------------------------- */
     function setUnitSimStatus(status, btn) {
       document.querySelectorAll('[data-usim]').forEach(function (b) {
         b.classList.toggle('btn-primary', b === btn);
@@ -239,15 +416,200 @@
       var badge = document.getElementById('unit-status-badge');
       badge.textContent = m[0];
       badge.className = m[1];
-      // Occupancy-tied content shows only when occupied: tenant card, lease KPIs,
-      // and the active lease row. Open Maintenance also shows under "Under Maintenance".
-      var occupied = status === 'occupied';
+
+      /* Occupancy-tied content shows only when occupied. */
+      var occupied = (status === 'occupied');
       document.getElementById('tenant-section').style.display = occupied ? '' : 'none';
       document.getElementById('unit-kpis').style.display = occupied ? '' : 'none';
+
+      /* ONLY the active-lease row is gated to occupied status.
+         Upcoming, expired, and terminated rows are always visible. */
       var activeRow = document.getElementById('lease-active-row');
       if (activeRow) activeRow.style.display = occupied ? '' : 'none';
+
+      /* Rooms section lock: any non-available/non-listed status that implies an
+         active/upcoming lease disables Add Room and room-row actions.
+         Simulator "occupied" = active lease present. All others = no active/upcoming. */
+      updateRoomLockState(occupied);
     }
+
+    /* ---------------------------------------------------------------
+       Rooms lock state — mirrors §2.5:
+       Add Room disabled when unit has any active or upcoming lease.
+       Edit/Retire disabled per-row when that room is Occupied.
+    --------------------------------------------------------------- */
+    function updateRoomLockState(unitHasActiveLease) {
+      var addBtn = document.getElementById('add-room-btn');
+      if (unitHasActiveLease) {
+        addBtn.className = 'btn btn-disabled !py-2 !text-sm';
+        addBtn.setAttribute('disabled', '');
+        addBtn.setAttribute('title', 'Cannot add rooms — unit has an active or upcoming lease.');
+        addBtn.removeAttribute('onclick');
+      } else {
+        addBtn.className = 'btn btn-primary !py-2 !text-sm';
+        addBtn.removeAttribute('disabled');
+        addBtn.removeAttribute('title');
+        addBtn.setAttribute('onclick', 'openAddRoomModal()');
+      }
+      /* Available room actions: always enabled when unit has no active lease */
+      var availableRooms = ['A', 'C'];
+      availableRooms.forEach(function (r) {
+        var editBtn = document.getElementById('edit-room-' + r + '-btn');
+        var retireBtn = document.getElementById('retire-room-' + r + '-btn');
+        if (!editBtn || !retireBtn) return;
+        if (unitHasActiveLease) {
+          editBtn.className = 'btn btn-disabled !py-1 !px-3 !text-sm';
+          editBtn.setAttribute('disabled', '');
+          editBtn.setAttribute('title', 'Cannot edit — room has an active or upcoming lease.');
+          editBtn.removeAttribute('onclick');
+          retireBtn.className = 'btn btn-disabled !py-1 !px-3 !text-sm';
+          retireBtn.setAttribute('disabled', '');
+          retireBtn.setAttribute('title', 'Cannot retire — room has an active or upcoming lease.');
+          retireBtn.removeAttribute('onclick');
+        } else {
+          editBtn.className = 'btn btn-secondary !py-1 !px-3 !text-sm';
+          editBtn.removeAttribute('disabled');
+          editBtn.removeAttribute('title');
+          editBtn.setAttribute('onclick', "openEditRoomModal('" + r + "')");
+          retireBtn.className = 'btn btn-danger !py-1 !px-3 !text-sm';
+          retireBtn.removeAttribute('disabled');
+          retireBtn.removeAttribute('title');
+          retireBtn.setAttribute('onclick', "openRetireRoomModal('" + r + "')");
+        }
+      });
+      /* Occupied room (Room B) — always locked regardless of unit status */
+      var editB = document.getElementById('edit-room-B-btn');
+      var retireB = document.getElementById('retire-room-B-btn');
+      if (editB) {
+        editB.className = 'btn btn-disabled !py-1 !px-3 !text-sm';
+        editB.setAttribute('disabled', '');
+        editB.setAttribute('title', 'Cannot edit — room has an active or upcoming lease.');
+        editB.removeAttribute('onclick');
+      }
+      if (retireB) {
+        retireB.className = 'btn btn-disabled !py-1 !px-3 !text-sm';
+        retireB.setAttribute('disabled', '');
+        retireB.setAttribute('title', 'Cannot retire — room has an active or upcoming lease.');
+        retireB.removeAttribute('onclick');
+      }
+    }
+
+    /* Initialise at occupied (the simulator's default state) */
     setUnitSimStatus('occupied', document.querySelector('[data-usim="occupied"]'));
+
+    /* ---------------------------------------------------------------
+       Room CRUD helpers
+    --------------------------------------------------------------- */
+    function clearRoomErr(id) {
+      var e = document.getElementById(id + '-error');
+      var i = document.getElementById(id);
+      if (e) { e.textContent = ''; e.classList.remove('show'); }
+      if (i) i.classList.remove('error');
+    }
+    function showRoomErr(id, msg) {
+      var e = document.getElementById(id + '-error');
+      var i = document.getElementById(id);
+      if (e) { e.textContent = msg; e.classList.add('show'); }
+      if (i) i.classList.add('error');
+    }
+
+    /* Mock room data for the prototype */
+    var roomData = {
+      A: { label: 'Room A', rent: 6500, status: 'Available', occupied: false, notes: 'Sunny side' },
+      B: { label: 'Room B', rent: 7000, status: 'Occupied',  occupied: true,  notes: 'Attached bathroom' },
+      C: { label: 'Room C', rent: 6500, status: 'Available', occupied: false, notes: '' }
+    };
+
+    function openAddRoomModal() {
+      document.getElementById('ar-label').value = '';
+      document.getElementById('ar-rent').value = '';
+      document.getElementById('ar-notes').value = '';
+      clearRoomErr('ar-label');
+      clearRoomErr('ar-rent');
+      document.getElementById('addRoomModal').classList.add('open');
+      document.getElementById('ar-label').focus();
+    }
+
+    function saveAddRoom() {
+      var label = document.getElementById('ar-label').value.trim();
+      var rent  = document.getElementById('ar-rent').value;
+      var ok = true;
+      if (!label) { showRoomErr('ar-label', 'Enter a room label.'); ok = false; }
+      if (!rent || parseInt(rent, 10) <= 0) { showRoomErr('ar-rent', 'Enter the monthly rent.'); ok = false; }
+      if (!ok) return;
+      document.getElementById('addRoomModal').classList.remove('open');
+      gsToast('Room added.');
+    }
+
+    function openEditRoomModal(roomId) {
+      var d = roomData[roomId];
+      if (!d) return;
+      document.getElementById('er-room-id').value = roomId;
+      document.getElementById('er-label').value = d.label;
+      document.getElementById('er-rent').value = d.rent;
+      document.getElementById('er-notes').value = d.notes;
+      var statusSel = document.getElementById('er-status');
+      /* Occupied rooms: status dropdown locked, hint shown */
+      if (d.occupied) {
+        statusSel.innerHTML = '<option value="Occupied" selected>Occupied</option>';
+        statusSel.disabled = true;
+        document.getElementById('er-status-hint').style.display = '';
+      } else {
+        statusSel.innerHTML =
+          '<option value="Available"' + (d.status === 'Available' ? ' selected' : '') + '>Available</option>' +
+          '<option value="Under Maintenance"' + (d.status === 'Under Maintenance' ? ' selected' : '') + '>Under Maintenance</option>';
+        statusSel.disabled = false;
+        document.getElementById('er-status-hint').style.display = 'none';
+      }
+      clearRoomErr('er-label');
+      clearRoomErr('er-rent');
+      document.getElementById('editRoomModal').classList.add('open');
+      document.getElementById('er-label').focus();
+    }
+
+    function saveEditRoom() {
+      var label = document.getElementById('er-label').value.trim();
+      var rent  = document.getElementById('er-rent').value;
+      var ok = true;
+      if (!label) { showRoomErr('er-label', 'Enter a room label.'); ok = false; }
+      if (!rent || parseInt(rent, 10) <= 0) { showRoomErr('er-rent', 'Enter the monthly rent.'); ok = false; }
+      if (!ok) return;
+      document.getElementById('editRoomModal').classList.remove('open');
+      gsToast('Room updated.');
+    }
+
+    function openRetireRoomModal(roomId) {
+      var d = roomData[roomId];
+      if (!d) return;
+      document.getElementById('rr-room-id').value = roomId;
+      document.getElementById('retireRoomName').textContent = d.label;
+      document.getElementById('rr-reason').value = '';
+      clearRoomErr('rr-reason');
+      document.getElementById('retireRoomModal').classList.add('open');
+      document.getElementById('rr-reason').focus();
+    }
+
+    function doRetireRoom() {
+      var reason = document.getElementById('rr-reason').value.trim();
+      if (!reason) { showRoomErr('rr-reason', 'Enter a reason for retiring this room.'); return; }
+      document.getElementById('retireRoomModal').classList.remove('open');
+      gsToast('Room retired.');
+    }
+
+    /* Close modals on backdrop click */
+    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) backdrop.classList.remove('open');
+      });
+    });
+    /* Close modals on Escape */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(function (m) {
+          m.classList.remove('open');
+        });
+      }
+    });
   </script>
 </body>
 </html>

@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>My Profile · Admin · GharSetu</title>
+  <title>Invoice · Billing · Admin · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/plans.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -38,11 +39,11 @@
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
         <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
-        <a href="organization.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+        <a href="organization.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
         <a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
       </nav>
       <div class="sidebar-footer">
-        <button type="button" class="account-trigger active" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
           <span class="account-trigger-label">Account</span>
           <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
@@ -50,20 +51,11 @@
         <div class="account-menu" id="accountMenu" role="menu">
           <div class="account-menu-header">
             <div class="account-menu-avatar">RS</div>
-            <div>
-              <div class="account-menu-name">Raj</div>
-              <div class="account-menu-role">Admin</div>
-            </div>
+            <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
           </div>
           <div class="account-menu-divider"></div>
-          <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            My Profile
-          </a>
-          <a href="../login.html" class="account-menu-link danger" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-            Sign out
-          </a>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
         </div>
       </div>
     </aside>
@@ -71,73 +63,109 @@
     <main class="app-main">
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <div>
-          <h1 class="page-title">My Profile</h1>
+        <div style="flex:1;min-width:0">
+          <h1 class="page-title" id="inv-title">Invoice INV-2026-05-0042</h1>
         </div>
+        <!-- Admin view is read-only — no Mark Paid / Cancel buttons here.
+             Only Super Admin can mutate an invoice. -->
       </header>
 
-      <div class="profile-grid">
-        <!-- Account card -->
-        <section class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar-lg">RS</div>
-            <div class="profile-name">Raj Singh</div>
-            <span class="profile-role">Admin</span>
+      <!-- prototype-only: invoice status simulator (Issued · Paid · Cancelled
+           — Draft is intentionally omitted because the Admin never sees drafts). -->
+      <div class="card mb-6" style="border-style:dashed;background:var(--color-off-white);">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="label" style="margin:0">Preview status</span>
+          <div class="flex gap-2 flex-wrap" role="group" aria-label="Preview invoice status">
+            <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-inv-sim="issued" onclick="setInvoiceSimStatus('issued',this)">Issued</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-inv-sim="paid" onclick="setInvoiceSimStatus('paid',this)">Paid</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-inv-sim="cancelled" onclick="setInvoiceSimStatus('cancelled',this)">Cancelled</button>
           </div>
+        </div>
+      </div>
+      <!-- /prototype-only -->
 
-          <h3>Account</h3>
-          <div class="profile-row"><span class="field">Name</span><span class="value">Raj Singh</span></div>
-          <div class="profile-row"><span class="field">Email</span><span class="value">raj@gharsetu.in</span></div>
-          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx12</span></div>
-          <div class="profile-row"><span class="field">Scope</span><span class="value">All 18 properties</span></div>
-          <div class="profile-row"><span class="field">Member since</span><span class="value">15/03/2024</span></div>
-          <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active">Active</span></span></div>
-
-          <div class="mt-6 flex gap-2 flex-wrap">
-            <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditProfile()">Edit details</button>
-          </div>
-          <p class="text-xs muted mt-3">Email and role changes are audited and require Admin confirmation.</p>
-        </section>
-
-        <!-- Security card -->
-        <section class="profile-card">
-          <h3>Security</h3>
-
-          <form class="mt-2">
-            <div class="mb-4">
-              <label class="label" for="cur-pw">Current password</label>
-              <input id="cur-pw" type="password" class="input" placeholder="••••••••" required />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              <div>
-                <label class="label" for="new-pw">New password</label>
-                <input id="new-pw" type="password" class="input" placeholder="At least 10 characters" required minlength="10" />
-              </div>
-              <div>
-                <label class="label" for="conf-pw">Confirm new</label>
-                <input id="conf-pw" type="password" class="input" placeholder="Repeat new password" required minlength="10" />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary !py-2 !text-sm">Change password</button>
-          </form>
-        </section>
+      <!-- Cancelled banner (hidden unless cancelled) -->
+      <div id="cancelled-banner" class="alert alert-emergency mb-6" role="alert" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div>
+          <strong class="font-poppins">Invoice Cancelled</strong>
+          <div id="cancelled-reason-text">Duplicate invoice raised in error — replaced by INV-2026-05-0042.</div>
+        </div>
       </div>
 
-      <!-- Activity preview -->
-      <section class="section mt-8">
-        <h3 class="section-title">Recent Activity</h3>
+      <!-- Invoice Header card -->
+      <section class="card mb-6">
+        <div class="grid md:grid-cols-2 gap-x-8 gap-y-0">
+          <div class="profile-row"><span class="field">Plan</span><span class="value">Standard · ₹2,999/mo</span></div>
+          <div class="profile-row"><span class="field">Period</span><span class="value">21/05/2026 → 20/06/2026</span></div>
+          <div class="profile-row"><span class="field">Total Amount</span><span class="value font-poppins font-bold" style="font-size:18px;">₹2,999</span></div>
+          <div class="profile-row"><span class="field">Issued on</span><span class="value">21/05/2026</span></div>
+          <div class="profile-row"><span class="field">Due on</span><span class="value">28/05/2026</span></div>
+          <!-- Paid on row — shown only when paid -->
+          <div class="profile-row" id="row-paid-on" style="display:none;"><span class="field">Paid on</span><span class="value" id="val-paid-on">05/05/2026</span></div>
+          <div class="profile-row" id="row-payment-method" style="display:none;"><span class="field">Payment Method</span><span class="value" id="val-payment-method">NEFT / Bank Transfer</span></div>
+          <div class="profile-row" id="row-payment-ref" style="display:none;"><span class="field" id="val-payment-ref-label">Payment Reference</span><span class="value" id="val-payment-ref" style="font-family:monospace;font-size:14px;color:var(--color-status-paid);">UTRN12345678</span></div>
+          <!-- Cancelled on row — shown only when cancelled -->
+          <div class="profile-row" id="row-cancelled-on" style="display:none;"><span class="field">Cancelled on</span><span class="value" id="val-cancelled-on">10/05/2026</span></div>
+        </div>
+      </section>
+
+      <!-- Line Items card -->
+      <section class="card mb-6">
+        <h3 style="margin:0 0 16px;">Line Items</h3>
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
-            <thead><tr><th>When</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
+            <thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead>
             <tbody>
-              <tr><td>09/05/2026 09:14</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
-              <tr><td>08/05/2026 18:03</td><td>Created Property Manager</td><td>Anil Kapoor</td><td>106.51.xx.xx</td></tr>
-              <tr><td>05/05/2026 11:22</td><td>Reviewed maintenance alert</td><td>Unit 4B · Sai Heights</td><td>106.51.xx.xx</td></tr>
-              <tr><td>02/05/2026 15:40</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
+              <tr>
+                <td>Standard plan — 21/05/2026 to 20/06/2026</td>
+                <td class="font-poppins font-semibold text-charcoal" style="text-align:right;">₹2,999</td>
+              </tr>
+              <tr>
+                <td class="font-poppins font-semibold text-charcoal" style="text-align:right;padding-top:8px;border-top:2px solid var(--color-mid-gray);" colspan="2">
+                  <div style="display:flex;justify-content:space-between;padding:0 16px;">
+                    <span>Total</span>
+                    <span>₹2,999</span>
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
+
+      <!-- Status timeline card -->
+      <section class="card mb-6">
+        <h3 style="margin:0 0 16px;">Status Timeline</h3>
+        <ul class="progress-timeline" id="status-timeline">
+          <li class="timeline-event done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Issued</div>
+              <div class="timeline-meta">21/05/2026 00:05 IST · System</div>
+            </div>
+          </li>
+          <li class="timeline-event pending" id="timeline-paid-event" style="display:none;">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Paid</div>
+              <div class="timeline-meta" id="timeline-paid-meta">05/05/2026 14:32 IST · Recorded by GharSetu · NEFT / Bank Transfer · ref UTRN12345678</div>
+            </div>
+          </li>
+          <li class="timeline-event pending" id="timeline-cancelled-event" style="display:none;">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">Cancelled</div>
+              <div class="timeline-meta" id="timeline-cancelled-meta">10/05/2026 09:15 IST · GharSetu</div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Back-to-organization footer link (Admin context — they came from organization.html) -->
+      <div style="padding:8px 0 32px;">
+        <a href="organization.html" class="text-royal-blue font-poppins font-semibold text-sm">← Back to Organization</a>
+      </div>
     </main>
   </div>
 
@@ -167,7 +195,7 @@
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
-    <a href="organization.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+    <a href="organization.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
     <a href="delegations.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
@@ -177,82 +205,59 @@
     <div class="account-sheet-handle" aria-hidden="true"></div>
     <div class="account-menu-header">
       <div class="account-menu-avatar">RS</div>
-      <div>
-        <div class="account-menu-name">Raj</div>
-        <div class="account-menu-role">Admin</div>
-      </div>
+      <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
     </div>
     <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link active" role="menuitem" aria-current="page" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
-  <!-- Edit Profile Modal (Name + Mobile only; email/role locked) -->
-  <div class="modal-backdrop" id="editProfileModal" role="dialog" aria-modal="true" aria-labelledby="epTitle">
-    <div class="modal" style="max-width:480px;">
-      <h3 id="epTitle">Edit profile</h3>
-      <form novalidate onsubmit="event.preventDefault(); saveProfile();">
-        <div class="mt-4">
-          <label class="label" for="ep-name">Full name</label>
-          <input id="ep-name" class="input" oninput="document.getElementById('ep-name-error').classList.remove('show'); this.classList.remove('error');" />
-          <div class="field-error" id="ep-name-error"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="ep-phone">Mobile number</label>
-          <input id="ep-phone" class="input" placeholder="98xxxxxxxx" oninput="document.getElementById('ep-phone-error').classList.remove('show'); this.classList.remove('error');" />
-          <div class="field-error" id="ep-phone-error"></div>
-        </div>
-        <div class="mt-4">
-          <label class="label" for="ep-email">Email (locked)</label>
-          <input id="ep-email" class="input" disabled style="background:var(--color-light-gray);cursor:not-allowed;" />
-        </div>
-        <div class="flex justify-end gap-3 mt-6">
-          <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  <script>
-    var _epRows = {};
-    function openEditProfile(){
-      _epRows = {};
-      document.querySelectorAll('.profile-row').forEach(function(r){
-        var f=r.querySelector('.field'), v=r.querySelector('.value'); if(f&&v) _epRows[f.textContent.trim()]=v;
-      });
-      document.getElementById('ep-name').value  = _epRows['Name']  ? _epRows['Name'].textContent.trim()  : '';
-      document.getElementById('ep-phone').value = _epRows['Phone'] ? _epRows['Phone'].textContent.trim() : '';
-      document.getElementById('ep-email').value = _epRows['Email'] ? _epRows['Email'].textContent.trim() : '';
-      document.getElementById('ep-name-error').classList.remove('show');
-      document.getElementById('ep-phone-error').classList.remove('show');
-      document.getElementById('editProfileModal').classList.add('open');
-      document.body.style.overflow='hidden';
-      setTimeout(function(){ document.getElementById('ep-name').focus(); }, 50);
-    }
-    function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('open'); document.body.style.overflow=''; }
-    function epErr(id,msg){ var e=document.getElementById(id+'-error'); var i=document.getElementById(id); e.textContent=msg; e.classList.add('show'); i.classList.add('error'); }
-    function saveProfile(){
-      var name=document.getElementById('ep-name').value.trim();
-      var phone=document.getElementById('ep-phone').value.trim();
-      var ok=true;
-      if(!name){ epErr('ep-name','Name is required.'); ok=false; }
-      var hasDigit=/\d/.test(phone);
-      if(!phone || !hasDigit || phone.replace(/\D/g,'').length<10){ epErr('ep-phone','Enter a valid mobile number (at least 10 digits).'); ok=false; }
-      if(!ok) return;
-      if(_epRows['Name'])  _epRows['Name'].textContent  = name;
-      if(_epRows['Phone']) _epRows['Phone'].textContent = phone;
-      var hdr=document.querySelector('.profile-name'); if(hdr) hdr.textContent = name;
-      closeEditProfile();
-      gsToast('Profile updated.');
-    }
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEditProfile(); });
-    (function(){ var m=document.getElementById('editProfileModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) closeEditProfile(); }); })();
-  </script>
   <script src="../assets/toast.js"></script>
+  <script>
+    // Read query params (invoice id is informational here — content stays mocked for prototype).
+    var urlParams = new URLSearchParams(window.location.search);
+    var invId = urlParams.get('id') || 'INV-2026-05-0042';
+    document.getElementById('inv-title').textContent = 'Invoice ' + invId;
+
+    // Show/hide the per-status rows + banner + timeline events for the prototype simulator.
+    function setInvoiceSimStatus(status, btn) {
+      document.querySelectorAll('[data-inv-sim]').forEach(function(b) {
+        b.classList.toggle('btn-primary', b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
+      });
+
+      var cancelledBanner = document.getElementById('cancelled-banner');
+      var rowPaidOn = document.getElementById('row-paid-on');
+      var rowPaymentMethod = document.getElementById('row-payment-method');
+      var rowPaymentRef = document.getElementById('row-payment-ref');
+      var rowCancelledOn = document.getElementById('row-cancelled-on');
+      var timelinePaid = document.getElementById('timeline-paid-event');
+      var timelineCancelled = document.getElementById('timeline-cancelled-event');
+
+      // Reset
+      cancelledBanner.style.display = 'none';
+      rowPaidOn.style.display = 'none';
+      rowPaymentMethod.style.display = 'none';
+      rowPaymentRef.style.display = 'none';
+      rowCancelledOn.style.display = 'none';
+      timelinePaid.style.display = 'none';     timelinePaid.classList.remove('done');
+      timelineCancelled.style.display = 'none'; timelineCancelled.classList.remove('done');
+
+      if (status === 'paid') {
+        rowPaidOn.style.display = '';
+        rowPaymentMethod.style.display = '';
+        rowPaymentRef.style.display = '';
+        timelinePaid.style.display = '';
+        timelinePaid.classList.add('done');
+      } else if (status === 'cancelled') {
+        cancelledBanner.style.display = 'flex';
+        rowCancelledOn.style.display = '';
+        timelineCancelled.style.display = '';
+        timelineCancelled.classList.add('done');
+      }
+    }
+
+    // Initial state — issued (Admin's most common viewing context)
+    setInvoiceSimStatus('issued', document.querySelector('[data-inv-sim="issued"]'));
+  </script>
 </body>
 </html>

@@ -10,6 +10,419 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* Page-scoped styles for the 5-step wizard. No new design tokens. */
+
+    /* Step progress indicator */
+    .wizard-progress {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .wizard-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      border: 2px solid var(--color-mid-gray);
+      color: var(--color-slate);
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .wizard-step-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-slate);
+    }
+    .wizard-step.is-active .wizard-step-num {
+      border-color: var(--color-saffron);
+      background: var(--color-saffron);
+      color: #fff;
+    }
+    .wizard-step.is-active .wizard-step-label {
+      color: var(--color-charcoal);
+      font-weight: 600;
+    }
+    .wizard-step.is-complete .wizard-step-num {
+      border-color: var(--color-status-paid);
+      background: var(--color-status-paid);
+      color: #fff;
+    }
+    .wizard-step.is-complete .wizard-step-label {
+      color: var(--color-slate);
+    }
+    .wizard-connector {
+      width: 32px;
+      height: 2px;
+      background: var(--color-mid-gray);
+      flex-shrink: 0;
+    }
+    .wizard-connector.is-complete {
+      background: var(--color-status-paid);
+    }
+
+    /* Lease type radio cards */
+    .lease-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 1023px) {
+      .lease-type-grid { grid-template-columns: 1fr; }
+    }
+    .lease-type-card {
+      border: 2px solid var(--color-mid-gray);
+      border-radius: 8px;
+      padding: 24px 20px;
+      cursor: pointer;
+      transition: border-color 150ms, box-shadow 150ms;
+      background: #fff;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    .lease-type-card:hover { border-color: var(--color-royal-blue); }
+    .lease-type-card.is-selected {
+      border-color: var(--color-saffron);
+      box-shadow: 0 0 0 1px var(--color-saffron);
+    }
+    .lease-type-card input[type="radio"] {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-saffron);
+    }
+    .lease-type-card-icon {
+      width: 36px;
+      height: 36px;
+      color: var(--color-royal-blue);
+    }
+    .lease-type-card.is-selected .lease-type-card-icon { color: var(--color-saffron); }
+    .lease-type-card-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--color-charcoal);
+    }
+    .lease-type-card-desc {
+      font-size: 13px;
+      color: var(--color-slate);
+      line-height: 1.5;
+    }
+
+    /* Property / Unit / Room card grids */
+    .prop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1023px) {
+      .prop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .prop-grid { grid-template-columns: 1fr; }
+    }
+    .sel-card {
+      border: 2px solid var(--color-mid-gray);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 150ms;
+      background: #fff;
+    }
+    .sel-card:hover:not(.is-dimmed) { border-color: var(--color-royal-blue); }
+    .sel-card.is-selected {
+      border-color: var(--color-saffron);
+      box-shadow: 0 0 0 1px var(--color-saffron);
+    }
+    .sel-card.is-dimmed {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .sel-card-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--color-charcoal);
+      margin-bottom: 4px;
+    }
+    .sel-card-sub {
+      font-size: 12px;
+      color: var(--color-slate);
+      margin-bottom: 8px;
+    }
+    .sel-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+    /* Tenant row */
+    .tenant-row {
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .tenant-row-search { position: relative; margin-bottom: 12px; }
+    .tenant-row-search .input { padding-right: 36px; }
+    .tenant-search-chev {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--color-slate);
+      pointer-events: none;
+    }
+    .tenant-autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: #fff;
+      border: 1px solid var(--color-mid-gray);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-height: 280px;
+      overflow-y: auto;
+      display: none;
+    }
+    .tenant-autocomplete-dropdown.open { display: block; }
+    .tenant-ac-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    .tenant-ac-item:last-child { border-bottom: none; }
+    .tenant-ac-item:hover { background: var(--color-off-white); }
+    .tenant-ac-name { font-weight: 500; font-size: 14px; color: var(--color-charcoal); }
+    .tenant-ac-sub  { font-size: 12px; color: var(--color-slate); margin-top: 2px; }
+    .tenant-ac-empty {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--color-slate);
+      font-style: italic;
+    }
+    .tenant-ac-create {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-top: 1px solid var(--color-mid-gray);
+      background: var(--color-off-white);
+      font-size: 13px;
+      color: var(--color-royal-blue);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tenant-ac-create:hover { background: var(--color-light-gray); }
+
+    /* Existing-tenant display card */
+    .tenant-existing-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 8px;
+      background: var(--color-off-white);
+      margin-bottom: 12px;
+    }
+    .tenant-existing-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-royal-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .tenant-existing-info { flex: 1; min-width: 0; }
+    .tenant-existing-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--color-charcoal);
+    }
+    .tenant-existing-email {
+      font-size: 13px;
+      color: var(--color-slate);
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tenant-change-btn {
+      background: transparent;
+      border: none;
+      color: var(--color-royal-blue);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 8px;
+      flex-shrink: 0;
+    }
+    .tenant-change-btn:hover { text-decoration: underline; }
+
+    /* New-tenant form wrapper */
+    .tenant-new-form-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .tenant-new-form-header-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-slate);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .tenant-fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 1023px) {
+      .tenant-fields-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .tenant-fields-row { grid-template-columns: 1fr; }
+    }
+    .tenant-row-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .tenant-badge-info {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-prepaid);
+      color: var(--color-status-prepaid);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+    }
+    .tenant-badge-none {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-closed);
+      color: var(--color-slate);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+    }
+    .tenant-new-pill {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-closed);
+      color: var(--color-slate);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+    }
+
+    /* Step 5 — two-column layout */
+    .step5-layout {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1023px) {
+      .step5-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Wizard bottom bar */
+    .wizard-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 32px;
+      gap: 12px;
+    }
+
+    /* Inline reset notice */
+    .wizard-reset-notice {
+      display: none;
+      background: var(--bg-partial);
+      color: var(--color-status-partial);
+      border: 1px solid var(--color-status-partial);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .wizard-reset-notice.show { display: block; }
+
+    /* Step search */
+    .step-search { margin-bottom: 16px; }
+
+    /* Context panels */
+    .context-panel {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-mid-gray);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .context-panel h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin: 0 0 12px;
+    }
+    .context-lease-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-light-gray);
+      font-size: 13px;
+    }
+    .context-lease-item:last-child { border-bottom: none; }
+    .context-lease-id { font-family: monospace; color: var(--color-slate); }
+    .context-lease-tenant { font-weight: 500; color: var(--color-charcoal); }
+    .context-lease-dates { color: var(--color-slate); font-size: 12px; }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -38,6 +451,7 @@
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
         <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+        <a href="organization.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
         <a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
       </nav>
       <div class="sidebar-footer">
@@ -49,20 +463,11 @@
         <div class="account-menu" id="accountMenu" role="menu">
           <div class="account-menu-header">
             <div class="account-menu-avatar">RS</div>
-            <div>
-              <div class="account-menu-name">Raj</div>
-              <div class="account-menu-role">Admin</div>
-            </div>
+            <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
           </div>
           <div class="account-menu-divider"></div>
-          <a href="profile.html" class="account-menu-link" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            My Profile
-          </a>
-          <a href="../login.html" class="account-menu-link danger" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-            Sign out
-          </a>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
         </div>
       </div>
     </aside>
@@ -70,115 +475,166 @@
     <main class="app-main">
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <div>
-          <h1 class="page-title">Create Lease</h1>
-        </div>
+        <div><h1 class="page-title">Create Lease</h1></div>
       </header>
 
-      <form id="leaseForm" novalidate onsubmit="event.preventDefault(); createLease();" style="max-width:900px;">
+      <!-- Wizard wrapped in a single card so all 5 steps share a consistent surface -->
+      <section class="card" style="padding:32px;margin-bottom:24px;">
 
-        <!-- Unit -->
-        <section class="card mb-6">
-          <h3 class="section-title">Unit</h3>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="label" for="cl-property">Property</label>
-              <select id="cl-property" class="input" oninput="clearErr('cl-property')" data-searchable>
-                <option value="">Select property</option>
-                <option>Green Valley, Dwarka</option>
-                <option>Sai Heights, Lajpat Nagar</option>
-                <option>Mayur Vihar Residency</option>
-                <option>Rohini Greens</option>
-              </select>
-              <div class="field-error" id="cl-property-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-unit">Unit</label>
-              <select id="cl-unit" class="input" oninput="clearErr('cl-unit')" data-searchable>
-                <option value="">Select unit</option>
-                <option>3A — Available · ₹20,000</option>
-                <option>7C — Listed · ₹22,000</option>
-              </select>
-              <p class="text-xs muted mt-1">Only available / listed units appear here.</p>
-              <div class="field-error" id="cl-unit-error"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Lease terms -->
-        <section class="card mb-6">
-          <h3 class="section-title">Lease terms</h3>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="label" for="cl-start">Start date</label>
-              <input id="cl-start" class="input" type="text" placeholder="DD/MM/YYYY" oninput="clearErr('cl-start')" />
-              <div class="field-error" id="cl-start-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-end">End date</label>
-              <input id="cl-end" class="input" type="text" placeholder="DD/MM/YYYY" oninput="clearErr('cl-end')" />
-              <div class="field-error" id="cl-end-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-rent">Monthly rent (₹)</label>
-              <input id="cl-rent" class="input" type="number" min="0" placeholder="18000" oninput="clearErr('cl-rent')" />
-              <div class="field-error" id="cl-rent-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-deposit">Security deposit (₹)</label>
-              <input id="cl-deposit" class="input" type="number" min="0" placeholder="36000" oninput="clearErr('cl-deposit')" />
-              <div class="field-error" id="cl-deposit-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-dueday">Rent due day</label>
-              <select id="cl-dueday" class="input">
-                <option>1st of each month</option>
-                <option selected>5th of each month</option>
-                <option>10th of each month</option>
-                <option>Last day of each month</option>
-              </select>
-            </div>
-          </div>
-          <p class="text-xs muted mt-3">Rent is locked at signing and cannot be changed mid-lease — a change needs 60 days' notice (BL-11).</p>
-        </section>
-
-        <!-- Primary tenant -->
-        <section class="card mb-6">
-          <h3 class="section-title">Primary tenant</h3>
-          <div class="grid md:grid-cols-3 gap-4">
-            <div>
-              <label class="label" for="cl-t-name">Full name</label>
-              <input id="cl-t-name" class="input" oninput="clearErr('cl-t-name')" />
-              <div class="field-error" id="cl-t-name-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-t-phone">Mobile</label>
-              <input id="cl-t-phone" class="input" inputmode="numeric" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/[^0-9]/g,''); clearErr('cl-t-phone')" />
-              <div class="field-error" id="cl-t-phone-error"></div>
-            </div>
-            <div>
-              <label class="label" for="cl-t-email">Email <span class="muted" style="text-transform:none;letter-spacing:0;">(optional)</span></label>
-              <input id="cl-t-email" class="input" type="email" />
-            </div>
-          </div>
-          <p class="text-xs muted mt-3">A tenant login is created automatically at signing.</p>
-        </section>
-
-        <!-- Co-tenants -->
-        <section class="card mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="section-title m-0">Co-tenants <span class="muted" style="font-size:13px;text-transform:none;letter-spacing:0;">(optional)</span></h3>
-            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="addCoTenant()">+ Add co-tenant</button>
-          </div>
-          <div id="coTenants"></div>
-          <p class="text-xs muted mt-1">All co-tenants must consent before a future early termination (BL-08) — there is no automatic timeout.</p>
-        </section>
-
-        <div class="flex justify-end gap-3 mb-10">
-          <a href="leases.html" class="btn btn-secondary">Cancel</a>
-          <button type="submit" class="btn btn-primary">Create Lease</button>
+        <!-- Step progress indicator -->
+        <div class="wizard-progress" aria-label="Wizard progress" id="wizard-progress">
+          <!-- Rendered by JS -->
         </div>
-      </form>
+
+        <!-- Step panels -->
+        <div id="wizard-body">
+
+        <!-- STEP 1 — Lease Type -->
+        <div id="step-1" class="wizard-panel">
+          <div>
+            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">What kind of lease is this?</h2>
+            <div class="lease-type-grid">
+              <label class="lease-type-card is-selected" id="card-unit-wise" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectLeaseType('unit-wise');}">
+                <input type="radio" name="cl-lease-type" value="unit-wise" id="lt-unit-wise" checked onchange="selectLeaseType('unit-wise')" aria-required="true" />
+                <svg class="lease-type-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                <div class="lease-type-card-title">Unit-wise</div>
+                <div class="lease-type-card-desc">The tenant leases the entire unit. Common for whole apartments and family homes.</div>
+              </label>
+              <label class="lease-type-card" id="card-room-wise" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectLeaseType('room-wise');}">
+                <input type="radio" name="cl-lease-type" value="room-wise" id="lt-room-wise" onchange="selectLeaseType('room-wise')" aria-required="true" />
+                <svg class="lease-type-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/><rect x="14" y="16" width="7" height="5" rx="1"/></svg>
+                <div class="lease-type-card-title">Room-wise</div>
+                <div class="lease-type-card-desc">The tenant leases a single room within a unit. Common for PG-style and shared accommodations.</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 — Select Property -->
+        <div id="step-2" class="wizard-panel" style="display:none">
+          <div>
+            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 16px;">Which property?</h2>
+            <div class="wizard-reset-notice" id="step2-reset-notice">Property and unit selections have been reset.</div>
+            <div class="step-search">
+              <input id="prop-search" class="input" placeholder="Search by name or address" oninput="filterPropertyCards(this.value)" aria-label="Search properties" />
+            </div>
+            <div class="prop-grid" id="prop-grid">
+              <!-- Rendered by renderPropertyGrid() -->
+            </div>
+            <div id="prop-empty" style="display:none;padding:24px 0;color:var(--color-slate);font-size:14px;">No properties have rooms yet. Create rooms from a unit's detail page first.</div>
+            <div class="field-error" id="step2-error" style="margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <!-- STEP 3 — Select Unit + Room -->
+        <div id="step-3" class="wizard-panel" style="display:none">
+          <div>
+            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 16px;">Which unit?</h2>
+            <div class="wizard-reset-notice" id="step3-reset-notice">Unit and room selections have been reset.</div>
+            <div class="prop-grid" id="unit-grid">
+              <!-- Rendered by renderUnitGrid() -->
+            </div>
+            <div id="unit-empty" style="display:none;padding:16px 0;color:var(--color-slate);font-size:14px;">No units with rooms available for room-wise leasing.</div>
+            <div class="field-error" id="step3-unit-error" style="margin-top:12px;"></div>
+
+            <!-- Room grid — shows after unit selected in room-wise mode -->
+            <div id="room-grid-section" style="display:none;margin-top:24px;">
+              <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 12px;">Which room?</h2>
+              <div class="prop-grid" id="room-grid">
+                <!-- Rendered by renderRoomGrid() -->
+              </div>
+              <div class="field-error" id="step3-room-error" style="margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 — Tenants & Co-tenants -->
+        <div id="step-4" class="wizard-panel" style="display:none">
+          <div>
+            <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">Who's renting?</h2>
+            <div id="tenant-rows-container">
+              <!-- Rendered by addTenantRow() -->
+            </div>
+            <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="addTenantRow()" style="margin-top:4px;">+ Add another tenant</button>
+            <div class="field-error" id="step4-error" style="margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <!-- STEP 5 — Lease Details -->
+        <div id="step-5" class="wizard-panel" style="display:none">
+          <div class="step5-layout">
+            <!-- Left column: form -->
+            <div>
+              <div>
+                <h2 class="font-poppins" style="font-size:18px;color:var(--color-charcoal);margin:0 0 20px;">Lease terms</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="label" for="cl-start">Start date <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-start" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-start');scheduleConflictCheck()" />
+                    <div class="field-error" id="cl-start-error"></div>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-end">End date <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-end" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearWizErr('cl-end');scheduleConflictCheck()" />
+                    <div class="field-error" id="cl-end-error"></div>
+                    <div class="field-error" id="cl-conflict-error" style="margin-top:6px;"></div>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-rent">Monthly rent (₹) <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-rent" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-rent');autoFillDeposit()" />
+                    <div class="field-error" id="cl-rent-error"></div>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-deposit">Security deposit (₹) <span style="color:var(--color-saffron)">*</span></label>
+                    <input id="cl-deposit" class="input" type="number" min="0" aria-required="true" oninput="clearWizErr('cl-deposit');depositManuallyEdited=true;" />
+                    <div class="field-error" id="cl-deposit-error"></div>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-dueday">Rent due day</label>
+                    <select id="cl-dueday" class="input">
+                      <option>1st of each month</option>
+                      <option selected>5th of each month</option>
+                      <option>10th of each month</option>
+                      <option>Last day of each month</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="label" for="cl-notice">Notice period (days)</label>
+                    <input id="cl-notice" class="input" type="number" min="0" value="30" />
+                  </div>
+                  <div>
+                    <label class="label" for="cl-latefee">Late fee (%)</label>
+                    <input id="cl-latefee" class="input" type="number" min="0" step="0.1" value="2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right column: context panels -->
+            <div id="step5-context">
+              <div class="context-panel" id="panel-unit-history">
+                <h4>Lease history</h4>
+                <div id="panel-unit-history-body"><!-- Rendered by renderContextPanels() --></div>
+              </div>
+              <div class="context-panel" id="panel-tenant-history">
+                <h4>Tenant lease history</h4>
+                <div id="panel-tenant-history-body"><!-- Rendered by renderContextPanels() --></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div><!-- /wizard-body -->
+      </section><!-- /wizard outer card -->
+
+      <!-- Wizard bottom bar -->
+      <div class="wizard-bottom-bar">
+        <a href="leases.html" class="text-royal-blue font-poppins font-semibold text-sm">Cancel</a>
+        <div class="flex gap-3">
+          <button type="button" id="btn-back" class="btn btn-secondary" onclick="wizardBack()" style="display:none;">Back</button>
+          <button type="button" id="btn-next" class="btn btn-primary" onclick="wizardNext()">Next</button>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -209,6 +665,7 @@
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+    <a href="organization.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
     <a href="delegations.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
@@ -218,69 +675,1044 @@
     <div class="account-sheet-handle" aria-hidden="true"></div>
     <div class="account-menu-header">
       <div class="account-menu-avatar">RS</div>
-      <div>
-        <div class="account-menu-name">Raj</div>
-        <div class="account-menu-role">Admin</div>
-      </div>
+      <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
     </div>
     <div class="account-menu-divider"></div>
-    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      My Profile
-    </a>
-    <a href="../login.html" class="account-menu-link danger" role="menuitem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Sign out
-    </a>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
 
   <script>
-    var coCount = 0;
-    function addCoTenant() {
-      coCount++;
-      var wrap = document.getElementById('coTenants');
-      var row = document.createElement('div');
-      row.className = 'grid md:grid-cols-3 gap-4 mb-3';
-      row.innerHTML =
-        '<div><label class="label">Full name</label><input class="input co-name" /></div>' +
-        '<div><label class="label">Mobile</label><input class="input co-phone" inputmode="numeric" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')" /></div>' +
-        '<div class="flex items-end gap-2">' +
-          '<div class="flex-1"><label class="label">Email <span class="muted" style="text-transform:none;letter-spacing:0;">(optional)</span></label><input class="input co-email" type="email" /></div>' +
-          '<button type="button" class="btn btn-secondary !py-2 !px-3 !text-sm" aria-label="Remove co-tenant" onclick="this.closest(\'div.grid\').remove()">✕</button>' +
-        '</div>';
-      wrap.appendChild(row);
-    }
+  /* ==============================================================
+     GharSetu Create Lease — 5-step wizard prototype
+     Status enums: upcoming | active | expired | terminated
+     (Renewal creates a new upcoming lease — no separate status exists)
+  ============================================================== */
 
-    function showErr(id, msg) {
-      var e = document.getElementById(id + '-error'); var i = document.getElementById(id);
-      if (e) { e.textContent = msg; e.classList.add('show'); }
-      if (i) i.classList.add('error');
-    }
-    function clearErr(id) {
-      var e = document.getElementById(id + '-error'); var i = document.getElementById(id);
-      if (e) { e.textContent = ''; e.classList.remove('show'); }
-      if (i) i.classList.remove('error');
-    }
+  /* ---------------------------------------------------------------
+     MOCK DATA
+  --------------------------------------------------------------- */
 
-    function createLease() {
-      var ok = true, first = null;
-      function check(id, cond, msg) {
-        if (!cond) { showErr(id, msg); if (!first) first = document.getElementById(id); ok = false; }
-        else clearErr(id);
+  /* Mock property catalogue */
+  var PROPERTIES = [
+    { id: 'green-valley',   name: 'Green Valley Apartments', addr: 'Sector 12, Dwarka',      units: 12, roomCount: 4, roomUnitCount: 1 },
+    { id: 'sai-heights',    name: 'Sai Heights',             addr: 'Lajpat Nagar',           units: 8,  roomCount: 7, roomUnitCount: 2 },
+    { id: 'mayur-vihar',    name: 'Mayur Vihar Residency',   addr: 'Mayur Vihar Ph 1',       units: 6,  roomCount: 0, roomUnitCount: 0 },
+    { id: 'rohini-greens',  name: 'Rohini Greens',           addr: 'Sector 18, Rohini',      units: 10, roomCount: 0, roomUnitCount: 0 }
+  ];
+
+  /* Mock unit catalogue per property */
+  var UNITS = {
+    'green-valley': [
+      { id: 'gv-1A', label: '1A', floor: 1, type: '2 BHK', area: 820, rent: 18000, status: 'occupied', occupied: true,  occupiedUntil: '31/03/2026', hasRooms: false, rooms: 0 },
+      { id: 'gv-2B', label: '2B', floor: 2, type: '3 BHK', area: 1140, rent: 24000, status: 'occupied', occupied: true, occupiedUntil: '30/06/2026', hasRooms: false, rooms: 0 },
+      { id: 'gv-3A', label: '3A', floor: 3, type: '2 BHK', area: 820, rent: 20000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
+      { id: 'gv-7C', label: '7C', floor: 7, type: '2 BHK', area: 880, rent: 22000, status: 'listed',    occupied: false, hasRooms: false, rooms: 0 },
+      { id: 'gv-5B', label: '5B', floor: 5, type: '3 BHK', area: 1100, rent: 26000, status: 'available', occupied: false, hasRooms: true,  rooms: 4 }
+    ],
+    'sai-heights': [
+      { id: 'sh-PG101', label: 'PG-101', floor: 1, type: 'PG Unit', area: 600, rent: 24500, status: 'available', occupied: false, hasRooms: true, rooms: 4 },
+      { id: 'sh-PG202', label: 'PG-202', floor: 2, type: 'PG Unit', area: 600, rent: 17000, status: 'available', occupied: false, hasRooms: true, rooms: 3 }
+    ],
+    'mayur-vihar': [
+      { id: 'mv-1A', label: '1A', floor: 1, type: '2 BHK', area: 800, rent: 16000, status: 'available', occupied: false, hasRooms: false, rooms: 0 },
+      { id: 'mv-2B', label: '2B', floor: 2, type: '2 BHK', area: 800, rent: 22000, status: 'available', occupied: false, hasRooms: false, rooms: 0 }
+    ],
+    'rohini-greens': [
+      { id: 'rg-2C', label: '2C', floor: 2, type: '2 BHK', area: 900, rent: 19000, status: 'available', occupied: false, hasRooms: false, rooms: 0 }
+    ]
+  };
+
+  /* Mock rooms per unit */
+  var ROOMS = {
+    'gv-5B': [
+      { id: 'gv-5B-A', label: 'Room A', rent: 6500, status: 'occupied', occupied: true,  occupiedUntil: '15/02/2027' },
+      { id: 'gv-5B-B', label: 'Room B', rent: 6500, status: 'available', occupied: false },
+      { id: 'gv-5B-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
+      { id: 'gv-5B-D', label: 'Room D', rent: 6000, status: 'available', occupied: false }
+    ],
+    'sh-PG101': [
+      { id: 'pg101-A', label: 'Room A', rent: 6500, status: 'available', occupied: false },
+      { id: 'pg101-B', label: 'Room B', rent: 7000, status: 'occupied',  occupied: true,  occupiedUntil: '31/12/2026' },
+      { id: 'pg101-C', label: 'Room C', rent: 6500, status: 'available', occupied: false },
+      { id: 'pg101-D', label: 'Room D', rent: 6000, status: 'available', occupied: false }
+    ],
+    'sh-PG202': [
+      { id: 'pg202-A', label: 'Room A', rent: 5500, status: 'available', occupied: false },
+      { id: 'pg202-B', label: 'Room B', rent: 5500, status: 'available', occupied: false },
+      { id: 'pg202-C', label: 'Room C', rent: 6000, status: 'occupied',  occupied: true,  occupiedUntil: '30/09/2026' }
+    ]
+  };
+
+  /* Mock tenant directory (org-scoped) */
+  var TENANTS = [
+    { id: 't1', name: 'Rohan Mehta',  phone: '+91 98765 43290', email: 'rohan.mehta@example.com',  leases: [{ id: 'L-2103', status: 'active',   end: '31/03/2026' }] },
+    { id: 't2', name: 'Priya Mehta',  phone: '+91 98765 43291', email: 'priya.mehta@example.com',  leases: [] },
+    { id: 't3', name: 'Anita Verma',  phone: '+91 98730 11122', email: 'anita.verma@example.com',  leases: [{ id: 'L-2101', status: 'active', end: '31/12/2026' }, { id: 'L-2110', status: 'active', end: '30/06/2026' }] },
+    { id: 't4', name: 'Sunil Kapoor', phone: '+91 98760 99821', email: 'sunil.kapoor@example.com', leases: [{ id: 'L-2204', status: 'upcoming', end: '31/05/2027' }] },
+    { id: 't5', name: 'Aditi Joshi',  phone: '+91 98700 22244', email: 'aditi.joshi@example.com',  leases: [{ id: 'L-2245', status: 'upcoming', end: '31/03/2027' }] }
+  ];
+
+  /* Mock lease history per unit (for conflict check + panel A) */
+  var UNIT_LEASES = {
+    'gv-3A': [
+      { id: 'L-2103', tenant: 'Rohan Mehta',  start: '01/04/2025', end: '31/03/2026', status: 'active' },
+      { id: 'L-2245', tenant: 'Aditi Joshi',   start: '01/04/2026', end: '31/03/2027', status: 'upcoming' },
+      { id: 'L-1842', tenant: 'Anita Verma',   start: '01/04/2023', end: '31/03/2025', status: 'expired' },
+      { id: 'L-1521', tenant: 'Sunil Kapoor',  start: '01/06/2022', end: '31/03/2023', status: 'terminated' }
+    ],
+    'gv-5B': [
+      { id: 'L-2150', tenant: 'Vikram Singh',  start: '01/01/2025', end: '31/12/2025', status: 'expired' }
+    ],
+    'gv-5B-A': [
+      { id: 'L-2180', tenant: 'Ravi Kumar',    start: '01/04/2025', end: '31/03/2026', status: 'active' }
+    ],
+    'sh-PG101': [
+      { id: 'L-2200', tenant: 'Neha Sharma',   start: '15/03/2026', end: '14/03/2027', status: 'upcoming' }
+    ],
+    'pg101-B': [
+      { id: 'L-2201', tenant: 'Arun Yadav',    start: '01/02/2026', end: '31/01/2027', status: 'active' }
+    ]
+  };
+
+  /* ---------------------------------------------------------------
+     WIZARD STATE
+  --------------------------------------------------------------- */
+  var wizardState = {
+    step: 1,
+    leaseType: 'unit-wise',   /* 'unit-wise' | 'room-wise' */
+    selectedPropertyId: null,
+    selectedUnitId: null,
+    selectedRoomId: null,
+    tenantRows: [],           /* array of row objects */
+    conflictError: false,
+    depositManuallyEdited: false
+  };
+  var depositManuallyEdited = false;
+  var conflictTimer = null;
+
+  var STEP_LABELS = ['Lease Type', 'Property', 'Unit', 'Tenants', 'Details'];
+
+  /* ---------------------------------------------------------------
+     PROGRESS INDICATOR
+  --------------------------------------------------------------- */
+  function renderProgress() {
+    var html = '';
+    for (var i = 1; i <= 5; i++) {
+      var cls = '';
+      if (i < wizardState.step) cls = 'is-complete';
+      else if (i === wizardState.step) cls = 'is-active';
+      html += '<div class="wizard-step ' + cls + '">';
+      if (i < wizardState.step) {
+        html += '<div class="wizard-step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>';
+      } else {
+        html += '<div class="wizard-step-num">' + i + '</div>';
       }
-      check('cl-property', document.getElementById('cl-property').value, 'Select a property.');
-      check('cl-unit', document.getElementById('cl-unit').value, 'Select a unit.');
-      check('cl-start', document.getElementById('cl-start').value.trim(), 'Enter a start date.');
-      check('cl-end', document.getElementById('cl-end').value.trim(), 'Enter an end date.');
-      check('cl-rent', parseInt(document.getElementById('cl-rent').value, 10) > 0, 'Enter the monthly rent.');
-      check('cl-deposit', parseInt(document.getElementById('cl-deposit').value, 10) >= 0 && document.getElementById('cl-deposit').value !== '', 'Enter the security deposit.');
-      check('cl-t-name', document.getElementById('cl-t-name').value.trim(), 'Enter the primary tenant name.');
-      check('cl-t-phone', document.getElementById('cl-t-phone').value.replace(/\D/g, '').length === 10, 'Enter a 10-digit mobile number.');
-      if (!ok) { if (first) first.focus(); return; }
-      try { sessionStorage.setItem('gharsetu_flash', 'Lease created. The tenant account will be provisioned at signing.'); } catch (e) {}
-      window.location.assign('leases.html');
+      html += '<div class="wizard-step-label">' + STEP_LABELS[i - 1] + '</div>';
+      html += '</div>';
+      if (i < 5) {
+        html += '<div class="wizard-connector' + (i < wizardState.step ? ' is-complete' : '') + '"></div>';
+      }
     }
+    document.getElementById('wizard-progress').innerHTML = html;
+  }
+
+  /* ---------------------------------------------------------------
+     NAVIGATION
+  --------------------------------------------------------------- */
+  function showStep(n) {
+    for (var i = 1; i <= 5; i++) {
+      var panel = document.getElementById('step-' + i);
+      if (panel) panel.style.display = (i === n) ? '' : 'none';
+    }
+    var backBtn = document.getElementById('btn-back');
+    var nextBtn = document.getElementById('btn-next');
+    backBtn.style.display = n > 1 ? '' : 'none';
+    nextBtn.textContent = n === 5 ? 'Create Lease' : 'Next';
+    nextBtn.className = n === 5 ? 'btn btn-primary' : 'btn btn-primary';
+    wizardState.step = n;
+    renderProgress();
+    window.scrollTo(0, 0);
+  }
+
+  function wizardNext() {
+    if (!validateCurrentStep()) return;
+    var n = wizardState.step;
+    if (n === 5) {
+      submitLease();
+      return;
+    }
+    /* Moving from step 1 — might reset downstream */
+    if (n === 1) {
+      /* Nothing to reset on first advance */
+    }
+    if (n === 2) {
+      renderUnitGrid();
+    }
+    if (n === 3) {
+      if (document.getElementById('tenant-rows-container').children.length === 0) {
+        addTenantRow();
+      }
+    }
+    if (n === 4) {
+      prepareStep5();
+    }
+    showStep(n + 1);
+  }
+
+  function wizardBack() {
+    showStep(wizardState.step - 1);
+  }
+
+  /* ---------------------------------------------------------------
+     VALIDATION PER STEP
+  --------------------------------------------------------------- */
+  function validateCurrentStep() {
+    var step = wizardState.step;
+    if (step === 1) {
+      return !!wizardState.leaseType;
+    }
+    if (step === 2) {
+      if (!wizardState.selectedPropertyId) {
+        showWizErr('step2-error', 'Select a property to continue.');
+        return false;
+      }
+      clearWizErr('step2-error');
+      return true;
+    }
+    if (step === 3) {
+      if (!wizardState.selectedUnitId) {
+        showWizErr('step3-unit-error', 'Select a unit to continue.');
+        return false;
+      }
+      clearWizErr('step3-unit-error');
+      if (wizardState.leaseType === 'room-wise') {
+        if (!wizardState.selectedRoomId) {
+          showWizErr('step3-room-error', 'Select a room to continue.');
+          return false;
+        }
+        clearWizErr('step3-room-error');
+      }
+      return true;
+    }
+    if (step === 4) {
+      var rows = document.querySelectorAll('.tenant-row');
+      var hasPrimary = false;
+      var allValid = true;
+      var hasUnselected = false;
+      rows.forEach(function (row) {
+        var mode = row.dataset.mode || 'search';
+        if (mode === 'search') {
+          /* No tenant chosen yet on this row */
+          hasUnselected = true;
+        } else if (mode === 'existing') {
+          /* Existing tenant selected — valid by construction */
+        } else if (mode === 'new') {
+          /* New tenant — need name + phone + email (email becomes the login credential at lease signing, BL-04) */
+          var nameEl = row.querySelector('.t-name');
+          var phoneEl = row.querySelector('.t-phone');
+          var emailEl = row.querySelector('.t-email');
+          if (!nameEl || !nameEl.value.trim()) allValid = false;
+          if (!phoneEl || phoneEl.value.replace(/\D/g, '').length !== 10) allValid = false;
+          if (!emailEl || !emailEl.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) allValid = false;
+        }
+        var radio = row.querySelector('.t-primary');
+        if (radio && radio.checked) hasPrimary = true;
+      });
+      if (hasUnselected) { showWizErr('step4-error', 'Each tenant row needs a tenant — pick one from the directory or create a new tenant.'); return false; }
+      if (!hasPrimary)   { showWizErr('step4-error', 'Mark one tenant as Primary.'); return false; }
+      if (!allValid)     { showWizErr('step4-error', 'Complete all tenant rows — name, 10-digit mobile, and a valid email are required for new tenants (email is the login credential).'); return false; }
+      clearWizErr('step4-error');
+      return true;
+    }
+    if (step === 5) {
+      var ok = true;
+      var start = document.getElementById('cl-start').value.trim();
+      var end   = document.getElementById('cl-end').value.trim();
+      var rent  = document.getElementById('cl-rent').value;
+      var dep   = document.getElementById('cl-deposit').value;
+      var datePat = /^\d{2}\/\d{2}\/\d{4}$/;
+      if (!datePat.test(start)) { showWizErr('cl-start', 'Enter a date in DD/MM/YYYY format.'); ok = false; }
+      else clearWizErr('cl-start');
+      if (!datePat.test(end))   { showWizErr('cl-end',   'Enter a date in DD/MM/YYYY format.'); ok = false; }
+      else clearWizErr('cl-end');
+      if (datePat.test(start) && datePat.test(end)) {
+        var sd = parseDate(start), ed = parseDate(end);
+        if (sd && ed && ed <= sd) { showWizErr('cl-end', 'End date must be after start date.'); ok = false; }
+      }
+      if (!rent || parseInt(rent, 10) <= 0) { showWizErr('cl-rent', 'Enter the monthly rent.'); ok = false; }
+      else clearWizErr('cl-rent');
+      if (dep === '' || parseInt(dep, 10) < 0) { showWizErr('cl-deposit', 'Enter the security deposit.'); ok = false; }
+      else clearWizErr('cl-deposit');
+      if (wizardState.conflictError) { ok = false; }
+      return ok;
+    }
+    return true;
+  }
+
+  function showWizErr(id, msg) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    var inp = document.getElementById(id.replace('-error', ''));
+    if (inp) inp.classList.add('error');
+  }
+  function clearWizErr(id) {
+    var el = document.getElementById(id + '-error') || document.getElementById(id);
+    if (!el) return;
+    if (el.classList.contains('field-error')) { el.textContent = ''; el.classList.remove('show'); }
+    var inp = document.getElementById(id);
+    if (inp) inp.classList.remove('error');
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 1 — Lease Type
+  --------------------------------------------------------------- */
+  function selectLeaseType(type) {
+    var prevType = wizardState.leaseType;
+    wizardState.leaseType = type;
+    document.getElementById('lt-unit-wise').checked = (type === 'unit-wise');
+    document.getElementById('lt-room-wise').checked = (type === 'room-wise');
+    document.getElementById('card-unit-wise').classList.toggle('is-selected', type === 'unit-wise');
+    document.getElementById('card-room-wise').classList.toggle('is-selected', type === 'room-wise');
+    /* If lease type changes after step 1 was passed, reset downstream */
+    if (prevType !== type && wizardState.step > 1) {
+      wizardState.selectedPropertyId = null;
+      wizardState.selectedUnitId = null;
+      wizardState.selectedRoomId = null;
+      document.getElementById('step2-reset-notice').classList.add('show');
+      renderPropertyGrid('');
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 2 — Property Grid
+  --------------------------------------------------------------- */
+  function renderPropertyGrid(searchVal) {
+    var q = (searchVal || '').toLowerCase();
+    var grid = document.getElementById('prop-grid');
+    var emptyEl = document.getElementById('prop-empty');
+    var isRoomWise = wizardState.leaseType === 'room-wise';
+    var visible = PROPERTIES.filter(function (p) {
+      if (isRoomWise && p.roomCount === 0) return false;
+      if (q && p.name.toLowerCase().indexOf(q) < 0 && p.addr.toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    if (visible.length === 0) {
+      grid.innerHTML = '';
+      emptyEl.style.display = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    grid.innerHTML = visible.map(function (p) {
+      var sel = wizardState.selectedPropertyId === p.id;
+      var badgeHtml = '<span class="badge badge-closed" style="font-size:11px;">' + p.units + ' units</span>';
+      if (isRoomWise && p.roomCount > 0) {
+        badgeHtml += ' <span class="badge badge-prepaid" style="font-size:11px;">' + p.roomCount + ' rooms across ' + p.roomUnitCount + ' unit' + (p.roomUnitCount !== 1 ? 's' : '') + '</span>';
+      }
+      return '<div class="sel-card' + (sel ? ' is-selected' : '') + '" onclick="selectProperty(\'' + p.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectProperty(\'' + p.id + '\')}">' +
+        '<div class="sel-card-name">' + esc(p.name) + '</div>' +
+        '<div class="sel-card-sub">' + esc(p.addr) + '</div>' +
+        '<div class="sel-card-badges">' + badgeHtml + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function filterPropertyCards(val) {
+    renderPropertyGrid(val);
+  }
+
+  function selectProperty(propId) {
+    wizardState.selectedPropertyId = propId;
+    wizardState.selectedUnitId = null;
+    wizardState.selectedRoomId = null;
+    clearWizErr('step2-error');
+    renderPropertyGrid(document.getElementById('prop-search').value);
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 3 — Unit Grid + Room Grid
+  --------------------------------------------------------------- */
+  function renderUnitGrid() {
+    var propId = wizardState.selectedPropertyId;
+    var units = (propId && UNITS[propId]) ? UNITS[propId] : [];
+    var isRoomWise = wizardState.leaseType === 'room-wise';
+    var grid = document.getElementById('unit-grid');
+    var emptyEl = document.getElementById('unit-empty');
+    var visible = units.filter(function (u) {
+      if (isRoomWise && !u.hasRooms) return false;
+      return true;
+    });
+    if (visible.length === 0) {
+      grid.innerHTML = '';
+      emptyEl.style.display = '';
+    } else {
+      emptyEl.style.display = 'none';
+      grid.innerHTML = visible.map(function (u) {
+        /* Occupied units are still SELECTABLE — the new lease's start date just has to be
+           after the current lease ends. The Step 5 conflict check enforces this. */
+        var sel = wizardState.selectedUnitId === u.id;
+        var rentOrRooms = isRoomWise
+          ? u.rooms + ' room' + (u.rooms !== 1 ? 's' : '')
+          : '₹' + formatRupee(u.rent) + '/mo';
+        var statusBadge = unitStatusBadgeHtml(u.status);
+        var occupiedHint = '';
+        if (!isRoomWise && u.occupied && u.occupiedUntil) {
+          occupiedHint = '<div class="text-xs muted mt-1">Currently occupied until ' + esc(u.occupiedUntil) + ' — new lease must start after this date.</div>';
+        }
+        return '<div class="sel-card' + (sel ? ' is-selected' : '') + '"' +
+          ' onclick="selectUnit(\'' + u.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectUnit(\'' + u.id + '\')}">' +
+          '<div class="sel-card-name">Unit ' + esc(u.label) + '</div>' +
+          '<div class="sel-card-sub">Floor ' + u.floor + ' · ' + esc(u.type) + ' · ' + u.area + ' sq ft</div>' +
+          '<div class="sel-card-badges">' + statusBadge + ' <span class="badge badge-closed" style="font-size:11px;">' + rentOrRooms + '</span></div>' +
+          occupiedHint +
+          '</div>';
+      }).join('');
+    }
+    /* Hide room grid until a unit is picked in room-wise */
+    document.getElementById('room-grid-section').style.display = 'none';
+    document.getElementById('room-grid').innerHTML = '';
+  }
+
+  function selectUnit(unitId) {
+    wizardState.selectedUnitId = unitId;
+    wizardState.selectedRoomId = null;
+    clearWizErr('step3-unit-error');
+    clearWizErr('step3-room-error');
+    /* Re-render to show selection */
+    renderUnitGrid();
+    /* For room-wise: show room grid below */
+    if (wizardState.leaseType === 'room-wise') {
+      renderRoomGrid(unitId);
+    }
+  }
+
+  function renderRoomGrid(unitId) {
+    var rooms = ROOMS[unitId] || [];
+    var section = document.getElementById('room-grid-section');
+    var grid = document.getElementById('room-grid');
+    if (rooms.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    grid.innerHTML = rooms.map(function (r) {
+      /* Occupied rooms remain SELECTABLE — Step 5 conflict check ensures the new lease's
+         start date is after the current room lease ends. */
+      var sel = wizardState.selectedRoomId === r.id;
+      var statusBadge = r.occupied
+        ? '<span class="badge badge-prepaid" style="font-size:11px;">Occupied</span>'
+        : '<span class="badge badge-paid" style="font-size:11px;">Available</span>';
+      var occupiedHint = (r.occupied && r.occupiedUntil)
+        ? '<div class="text-xs muted mt-1">Currently occupied until ' + esc(r.occupiedUntil) + ' — new lease must start after this date.</div>'
+        : '';
+      return '<div class="sel-card' + (sel ? ' is-selected' : '') + '"' +
+        ' onclick="selectRoom(\'' + r.id + '\')" tabindex="0" role="button" aria-pressed="' + sel + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectRoom(\'' + r.id + '\')}">' +
+        '<div class="sel-card-name">' + esc(r.label) + '</div>' +
+        '<div class="sel-card-sub">₹' + formatRupee(r.rent) + '/mo</div>' +
+        '<div class="sel-card-badges">' + statusBadge + '</div>' +
+        occupiedHint +
+        '</div>';
+    }).join('');
+  }
+
+  function selectRoom(roomId) {
+    wizardState.selectedRoomId = roomId;
+    clearWizErr('step3-room-error');
+    /* Re-render room grid to show selection */
+    renderRoomGrid(wizardState.selectedUnitId);
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 4 — Tenant Rows
+  --------------------------------------------------------------- */
+  var tenantRowCount = 0;
+
+  function addTenantRow() {
+    tenantRowCount++;
+    var idx = tenantRowCount;
+    var container = document.getElementById('tenant-rows-container');
+    var isFirst = container.children.length === 0;
+    var div = document.createElement('div');
+    div.className = 'tenant-row';
+    div.id = 'tenant-row-' + idx;
+    div.dataset.mode = 'search';   /* 'search' | 'existing' | 'new' */
+
+    /* Search input (always present; hidden when an existing tenant is locked in or new-form is open) */
+    var searchHtml =
+      '<div class="tenant-row-search" id="tenant-search-' + idx + '">' +
+        '<input class="input t-search" placeholder="Search tenants — name, phone, or email" ' +
+          'onfocus="openTenantDropdown(' + idx + ')" ' +
+          'oninput="filterTenantDropdown(this,' + idx + ')" ' +
+          'onblur="closeTenantDropdownLater(' + idx + ')" ' +
+          'autocomplete="off" />' +
+        '<svg class="tenant-search-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>' +
+        '<div class="tenant-autocomplete-dropdown" id="tenant-ac-' + idx + '" onmousedown="event.preventDefault()"></div>' +
+      '</div>';
+
+    /* Existing-tenant display (compact card — shown when mode=existing) */
+    var existingHtml =
+      '<div class="tenant-existing-card" id="t-existing-' + idx + '" style="display:none;">' +
+        '<div class="tenant-existing-avatar" id="t-existing-avatar-' + idx + '"></div>' +
+        '<div class="tenant-existing-info">' +
+          '<div class="tenant-existing-name" id="t-existing-name-' + idx + '"></div>' +
+          '<div class="tenant-existing-email" id="t-existing-email-' + idx + '"></div>' +
+        '</div>' +
+        '<button type="button" class="tenant-change-btn" onclick="clearTenantRow(' + idx + ')">Change</button>' +
+      '</div>';
+
+    /* New-tenant input form (shown when mode=new) */
+    var newHtml =
+      '<div class="tenant-new-form" id="t-new-' + idx + '" style="display:none;">' +
+        '<div class="tenant-new-form-header">' +
+          '<span class="tenant-new-form-header-title">New tenant — login account will be created</span>' +
+          '<button type="button" class="tenant-change-btn" onclick="clearTenantRow(' + idx + ')">Change</button>' +
+        '</div>' +
+        '<div class="tenant-fields-row">' +
+          '<div>' +
+            '<label class="label" for="t-name-' + idx + '">Name <span style="color:var(--color-saffron)">*</span></label>' +
+            '<input id="t-name-' + idx + '" class="input t-name" placeholder="Full name" />' +
+          '</div>' +
+          '<div>' +
+            '<label class="label" for="t-phone-' + idx + '">Mobile <span style="color:var(--color-saffron)">*</span></label>' +
+            '<input id="t-phone-' + idx + '" class="input t-phone" inputmode="numeric" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/[^0-9+]/g,\'\')" />' +
+          '</div>' +
+          '<div>' +
+            '<label class="label" for="t-email-' + idx + '">Email <span style="color:var(--color-saffron)">*</span></label>' +
+            '<input id="t-email-' + idx + '" class="input t-email" type="email" placeholder="name@example.com" />' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    /* Meta row — badge + Primary radio + remove button */
+    var metaHtml =
+      '<div class="tenant-row-meta">' +
+        '<div id="tenant-badge-' + idx + '"></div>' +
+        '<div class="flex items-center gap-3">' +
+          '<label style="display:flex;align-items:center;gap:6px;font-family:\'Poppins\',sans-serif;font-size:13px;font-weight:500;color:var(--color-slate);cursor:pointer;">' +
+            '<input type="radio" name="cl-primary" value="' + idx + '" class="t-primary"' + (isFirst ? ' checked' : '') + ' style="accent-color:var(--color-saffron);width:16px;height:16px;" /> Primary' +
+          '</label>' +
+          (!isFirst ? '<button type="button" class="btn btn-secondary !py-1 !px-2 !text-sm" aria-label="Remove tenant row" onclick="removeTenantRow(' + idx + ')">✕</button>' : '') +
+        '</div>' +
+      '</div>';
+
+    div.innerHTML = searchHtml + existingHtml + newHtml + metaHtml;
+    container.appendChild(div);
+    updateRemoveButtons();
+  }
+
+  function removeTenantRow(idx) {
+    var row = document.getElementById('tenant-row-' + idx);
+    if (row) row.remove();
+    updateRemoveButtons();
+    /* If removed row was Primary, set first row as Primary */
+    var firstRadio = document.querySelector('.t-primary');
+    if (firstRadio && !document.querySelector('.t-primary:checked')) {
+      firstRadio.checked = true;
+    }
+  }
+
+  function updateRemoveButtons() {
+    var rows = document.querySelectorAll('.tenant-row');
+    rows.forEach(function (row, i) {
+      var btn = row.querySelector('button[aria-label="Remove tenant row"]');
+      if (btn) btn.style.display = rows.length > 1 ? '' : 'none';
+    });
+  }
+
+  /* Tenant dropdown — opens on focus, filters as user types, always offers
+     "Create new tenant" as a fallback at the bottom of the list. */
+  function openTenantDropdown(idx) {
+    renderTenantDropdown(idx, '');
+    var dd = document.getElementById('tenant-ac-' + idx);
+    if (dd) dd.classList.add('open');
+  }
+
+  function filterTenantDropdown(input, idx) {
+    renderTenantDropdown(idx, input.value);
+    var dd = document.getElementById('tenant-ac-' + idx);
+    if (dd) dd.classList.add('open');
+  }
+
+  function closeTenantDropdownLater(idx) {
+    /* Delay so click on dropdown items registers before blur closes it. */
+    setTimeout(function () {
+      var dd = document.getElementById('tenant-ac-' + idx);
+      if (dd) dd.classList.remove('open');
+    }, 180);
+  }
+
+  function renderTenantDropdown(idx, filterText) {
+    var q = (filterText || '').trim().toLowerCase();
+    var dd = document.getElementById('tenant-ac-' + idx);
+    if (!dd) return;
+    /* Hide tenants already selected on other rows so a tenant can't be added twice. */
+    var takenIds = [];
+    document.querySelectorAll('.tenant-row').forEach(function (r) {
+      if (r.id !== ('tenant-row-' + idx) && r.dataset.existingTenantId) {
+        takenIds.push(r.dataset.existingTenantId);
+      }
+    });
+    var matches = TENANTS.filter(function (t) {
+      if (takenIds.indexOf(t.id) >= 0) return false;
+      if (!q) return true;
+      return t.name.toLowerCase().indexOf(q) >= 0 ||
+             t.phone.replace(/\s/g, '').toLowerCase().indexOf(q) >= 0 ||
+             t.email.toLowerCase().indexOf(q) >= 0;
+    });
+    var html = '';
+    if (matches.length === 0) {
+      html += '<div class="tenant-ac-empty">No matching tenants in your directory.</div>';
+    } else {
+      html += matches.map(function (t) {
+        var leaseStr = buildLeaseSub(t);
+        return '<div class="tenant-ac-item" onclick="selectExistingTenant(' + idx + ', \'' + t.id + '\')">' +
+          '<div class="tenant-ac-name">' + esc(t.name) + '</div>' +
+          '<div class="tenant-ac-sub">' + esc(t.email) + ' · ' + esc(leaseStr) + '</div>' +
+          '</div>';
+      }).join('');
+    }
+    html += '<div class="tenant-ac-create" onclick="startNewTenant(' + idx + ')">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      'Create new tenant' +
+      '</div>';
+    dd.innerHTML = html;
+  }
+
+  function buildLeaseSub(tenant) {
+    var active = tenant.leases.filter(function (l) { return l.status === 'active'; });
+    var upcoming = tenant.leases.filter(function (l) { return l.status === 'upcoming'; });
+    if (active.length === 0 && upcoming.length === 0) return 'No active leases';
+    var parts = [];
+    if (active.length > 0) parts.push('On ' + active.length + ' active lease' + (active.length > 1 ? 's' : '') + ' · ' + active.map(function (l) { return '#' + l.id; }).join(', '));
+    if (upcoming.length > 0) parts.push(upcoming.length + ' upcoming');
+    return parts.join(', ');
+  }
+
+  function buildLeaseBadge(tenant) {
+    var active = tenant.leases.filter(function (l) { return l.status === 'active'; });
+    var upcoming = tenant.leases.filter(function (l) { return l.status === 'upcoming'; });
+    if (active.length === 0 && upcoming.length === 0) {
+      return '<span class="tenant-badge-none">No active leases</span>';
+    }
+    var parts = [];
+    if (active.length > 0) parts.push('On ' + active.length + ' active lease' + (active.length > 1 ? 's' : '') + ' · ' + active.map(function (l) { return '#' + l.id; }).join(', '));
+    if (upcoming.length > 0) parts.push('On ' + upcoming.length + ' upcoming lease' + (upcoming.length > 1 ? 's' : '') + ' · ' + upcoming.map(function (l) { return '#' + l.id; }).join(', '));
+    return '<span class="tenant-badge-info">' + esc(parts.join(' · ')) + '</span>';
+  }
+
+  function selectExistingTenant(idx, tenantId) {
+    var tenant = TENANTS.filter(function (t) { return t.id === tenantId; })[0];
+    if (!tenant) return;
+    var row = document.getElementById('tenant-row-' + idx);
+    if (!row) return;
+    row.dataset.mode = 'existing';
+    row.dataset.existingTenantId = tenantId;
+
+    /* Hide search + new-form; show existing-tenant card */
+    var searchBlock = document.getElementById('tenant-search-' + idx);
+    var existingBlock = document.getElementById('t-existing-' + idx);
+    var newBlock = document.getElementById('t-new-' + idx);
+    if (searchBlock) searchBlock.style.display = 'none';
+    if (newBlock)    newBlock.style.display    = 'none';
+    if (existingBlock) existingBlock.style.display = 'flex';
+
+    /* Populate the existing-tenant card — name + email only; phone is intentionally
+       hidden because it's PII the lease creator doesn't need to see again. */
+    var avatarEl = document.getElementById('t-existing-avatar-' + idx);
+    var nameEl   = document.getElementById('t-existing-name-' + idx);
+    var emailEl  = document.getElementById('t-existing-email-' + idx);
+    if (avatarEl) avatarEl.textContent = buildAvatarInitials(tenant.name);
+    if (nameEl)   nameEl.textContent   = tenant.name;
+    if (emailEl)  emailEl.textContent  = tenant.email;
+
+    /* Show informational lease badge */
+    var badgeEl = document.getElementById('tenant-badge-' + idx);
+    if (badgeEl) badgeEl.innerHTML = buildLeaseBadge(tenant);
+
+    /* Close the dropdown */
+    var dd = document.getElementById('tenant-ac-' + idx);
+    if (dd) dd.classList.remove('open');
+
+    /* Update Step 5 context panel B if already on step 5 */
+    if (wizardState.step === 5) renderContextPanels();
+  }
+
+  /* Switch a row into "new tenant" mode — show the input form. */
+  function startNewTenant(idx) {
+    var row = document.getElementById('tenant-row-' + idx);
+    if (!row) return;
+    row.dataset.mode = 'new';
+    delete row.dataset.existingTenantId;
+
+    var searchBlock = document.getElementById('tenant-search-' + idx);
+    var existingBlock = document.getElementById('t-existing-' + idx);
+    var newBlock = document.getElementById('t-new-' + idx);
+    if (searchBlock) searchBlock.style.display = 'none';
+    if (existingBlock) existingBlock.style.display = 'none';
+    if (newBlock) newBlock.style.display = 'block';
+
+    /* Clear and focus the Name field */
+    var nameEl = document.getElementById('t-name-' + idx);
+    if (nameEl) { nameEl.value = ''; nameEl.focus(); }
+    var phoneEl = document.getElementById('t-phone-' + idx);
+    if (phoneEl) phoneEl.value = '';
+    var emailEl = document.getElementById('t-email-' + idx);
+    if (emailEl) emailEl.value = '';
+
+    /* Clear lease badge (no history for a new tenant) */
+    var badgeEl = document.getElementById('tenant-badge-' + idx);
+    if (badgeEl) badgeEl.innerHTML = '<span class="tenant-new-pill">New tenant — no prior leases</span>';
+
+    var dd = document.getElementById('tenant-ac-' + idx);
+    if (dd) dd.classList.remove('open');
+
+    if (wizardState.step === 5) renderContextPanels();
+  }
+
+  /* Reset a row back to the search state — used by both "Change" buttons. */
+  function clearTenantRow(idx) {
+    var row = document.getElementById('tenant-row-' + idx);
+    if (!row) return;
+    row.dataset.mode = 'search';
+    delete row.dataset.existingTenantId;
+
+    var searchBlock = document.getElementById('tenant-search-' + idx);
+    var existingBlock = document.getElementById('t-existing-' + idx);
+    var newBlock = document.getElementById('t-new-' + idx);
+    if (existingBlock) existingBlock.style.display = 'none';
+    if (newBlock) newBlock.style.display = 'none';
+    if (searchBlock) {
+      searchBlock.style.display = 'block';
+      var input = searchBlock.querySelector('.t-search');
+      if (input) { input.value = ''; input.focus(); }
+    }
+
+    /* Clear new-tenant inputs */
+    var nameEl = document.getElementById('t-name-' + idx);
+    if (nameEl) nameEl.value = '';
+    var phoneEl = document.getElementById('t-phone-' + idx);
+    if (phoneEl) phoneEl.value = '';
+    var emailEl = document.getElementById('t-email-' + idx);
+    if (emailEl) emailEl.value = '';
+
+    /* Clear badge */
+    var badgeEl = document.getElementById('tenant-badge-' + idx);
+    if (badgeEl) badgeEl.innerHTML = '';
+
+    if (wizardState.step === 5) renderContextPanels();
+  }
+
+  function buildAvatarInitials(name) {
+    var parts = String(name || '').trim().split(/\s+/);
+    var first = parts[0] ? parts[0].charAt(0) : '';
+    var last  = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 5 — Lease Details
+  --------------------------------------------------------------- */
+  function prepareStep5() {
+    /* Auto-fill rent from selected unit/room */
+    var rent = 0;
+    if (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId) {
+      var allRooms = [];
+      Object.keys(ROOMS).forEach(function (k) { allRooms = allRooms.concat(ROOMS[k]); });
+      var room = allRooms.filter(function (r) { return r.id === wizardState.selectedRoomId; })[0];
+      if (room) rent = room.rent;
+    } else if (wizardState.selectedUnitId) {
+      var allUnits = [];
+      Object.keys(UNITS).forEach(function (k) { allUnits = allUnits.concat(UNITS[k]); });
+      var unit = allUnits.filter(function (u) { return u.id === wizardState.selectedUnitId; })[0];
+      if (unit) rent = unit.rent;
+    }
+    var rentEl = document.getElementById('cl-rent');
+    if (rentEl) { rentEl.value = rent; }
+    /* Auto-fill deposit = 2 × rent (unless manually edited) */
+    depositManuallyEdited = false;
+    var depEl = document.getElementById('cl-deposit');
+    if (depEl) depEl.value = rent * 2;
+    /* Clear previous errors */
+    ['cl-start','cl-end','cl-rent','cl-deposit'].forEach(function (id) { clearWizErr(id); });
+    clearConflict();
+    /* Render context panels */
+    renderContextPanels();
+  }
+
+  function autoFillDeposit() {
+    if (depositManuallyEdited) return;
+    var rent = parseInt(document.getElementById('cl-rent').value, 10);
+    if (!isNaN(rent) && rent > 0) {
+      document.getElementById('cl-deposit').value = rent * 2;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     CONFLICT CHECK
+  --------------------------------------------------------------- */
+  function scheduleConflictCheck() {
+    if (conflictTimer) clearTimeout(conflictTimer);
+    conflictTimer = setTimeout(runConflictCheck, 250);
+  }
+
+  function parseDate(str) {
+    /* DD/MM/YYYY → Date */
+    var parts = (str || '').split('/');
+    if (parts.length !== 3) return null;
+    var d = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, y = parseInt(parts[2], 10);
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+    return new Date(y, m, d);
+  }
+
+  function datesOverlap(s1, e1, s2, e2) {
+    /* Closed interval: overlap when s1 <= e2 AND s2 <= e1 */
+    return s1 <= e2 && s2 <= e1;
+  }
+
+  function runConflictCheck() {
+    var start = document.getElementById('cl-start').value.trim();
+    var end   = document.getElementById('cl-end').value.trim();
+    var datePat = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!datePat.test(start) || !datePat.test(end)) {
+      clearConflict(); return;
+    }
+    var sd = parseDate(start), ed = parseDate(end);
+    if (!sd || !ed || ed <= sd) { clearConflict(); return; }
+
+    /* Determine which lease history to check against */
+    var historyKey = null;
+    var scopeLabel = '';
+    if (wizardState.leaseType === 'unit-wise' && wizardState.selectedUnitId) {
+      historyKey = wizardState.selectedUnitId;
+      scopeLabel = 'unit';
+    } else if (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId) {
+      historyKey = wizardState.selectedRoomId;
+      scopeLabel = 'room';
+      /* Also check for unit-wise lease on same unit (cross-scope conflict) */
+    }
+    if (!historyKey) { clearConflict(); return; }
+
+    var leases = UNIT_LEASES[historyKey] || [];
+    /* Only upcoming + active participate in conflict check */
+    var activeLeases = leases.filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
+
+    /* Cross-scope: for room-wise, also check unit-wise leases on the parent unit */
+    if (wizardState.leaseType === 'room-wise' && wizardState.selectedUnitId) {
+      var unitLeases = (UNIT_LEASES[wizardState.selectedUnitId] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
+      activeLeases = activeLeases.concat(unitLeases);
+    }
+    /* Cross-scope: for unit-wise, check room leases on all rooms of the unit */
+    if (wizardState.leaseType === 'unit-wise' && wizardState.selectedUnitId) {
+      var rooms = ROOMS[wizardState.selectedUnitId] || [];
+      rooms.forEach(function (r) {
+        var rLeases = (UNIT_LEASES[r.id] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; });
+        activeLeases = activeLeases.concat(rLeases);
+      });
+    }
+
+    var conflict = null;
+    for (var i = 0; i < activeLeases.length; i++) {
+      var l = activeLeases[i];
+      var ls = parseDate(l.start), le = parseDate(l.end);
+      if (ls && le && datesOverlap(sd, ed, ls, le)) {
+        conflict = l;
+        break;
+      }
+    }
+
+    if (conflict) {
+      var msg;
+      if (wizardState.leaseType === 'unit-wise') {
+        msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies this unit from ' + conflict.start + ' to ' + conflict.end + '. Choose dates outside this range or terminate the existing lease first.';
+      } else {
+        /* Determine if it's the room or the unit-wise that conflicts */
+        var unitLeaseIds = ((UNIT_LEASES[wizardState.selectedUnitId] || []).filter(function (l) { return l.status === 'active' || l.status === 'upcoming'; })).map(function (l) { return l.id; });
+        if (unitLeaseIds.indexOf(conflict.id) >= 0) {
+          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies this unit unit-wise from ' + conflict.start + ' to ' + conflict.end + '. Choose a different room, choose dates outside this range, or terminate the existing lease first.';
+        } else {
+          var roomLabel = 'this room';
+          var allR = [];
+          Object.keys(ROOMS).forEach(function (k) { allR = allR.concat(ROOMS[k]); });
+          var rObj = allR.filter(function (r) { return r.id === wizardState.selectedRoomId; })[0];
+          if (rObj) roomLabel = rObj.label;
+          msg = 'Conflict: Lease #' + conflict.id + ' (' + conflict.tenant + ') occupies ' + roomLabel + ' from ' + conflict.start + ' to ' + conflict.end + '. Choose a different room, choose dates outside this range, or terminate the existing lease first.';
+        }
+      }
+      showConflict(msg);
+    } else {
+      clearConflict();
+    }
+  }
+
+  function showConflict(msg) {
+    wizardState.conflictError = true;
+    var el = document.getElementById('cl-conflict-error');
+    if (el) { el.textContent = msg; el.classList.add('show'); }
+    /* Disable create button */
+    var btn = document.getElementById('btn-next');
+    if (btn) { btn.classList.add('btn-disabled'); btn.classList.remove('btn-primary'); btn.setAttribute('disabled', ''); }
+  }
+
+  function clearConflict() {
+    wizardState.conflictError = false;
+    var el = document.getElementById('cl-conflict-error');
+    if (el) { el.textContent = ''; el.classList.remove('show'); }
+    var btn = document.getElementById('btn-next');
+    if (btn && wizardState.step === 5) {
+      btn.classList.remove('btn-disabled');
+      btn.classList.add('btn-primary');
+      btn.removeAttribute('disabled');
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     STEP 5 — Context Panels
+  --------------------------------------------------------------- */
+  function renderContextPanels() {
+    /* Panel A — unit/room lease history */
+    var histKey = (wizardState.leaseType === 'room-wise' && wizardState.selectedRoomId)
+      ? wizardState.selectedRoomId
+      : wizardState.selectedUnitId;
+    var leases = histKey ? (UNIT_LEASES[histKey] || []) : [];
+    var panelA = document.getElementById('panel-unit-history-body');
+    if (leases.length === 0) {
+      panelA.innerHTML = '<div style="font-size:13px;color:var(--color-slate);">No lease history for this ' + (wizardState.leaseType === 'room-wise' ? 'room' : 'unit') + '.</div>';
+    } else {
+      /* Sort descending by start date */
+      var sorted = leases.slice().sort(function (a, b) {
+        var da = parseDate(a.start), db = parseDate(b.start);
+        if (!da || !db) return 0;
+        return db - da;
+      });
+      panelA.innerHTML = sorted.map(function (l) {
+        return '<div class="context-lease-item">' +
+          '<div><span class="context-lease-id">#' + esc(l.id) + '</span> <span class="context-lease-tenant">' + esc(l.tenant) + '</span></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="context-lease-dates">' + esc(l.start) + ' – ' + esc(l.end) + '</span>' +
+            statusBadgeHtml(l.status) +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    /* Panel B — tenant lease history */
+    var panelB = document.getElementById('panel-tenant-history-body');
+    var rows = document.querySelectorAll('.tenant-row');
+    var panelHtml = '';
+    if (rows.length === 0) {
+      panelHtml = '<div style="font-size:13px;color:var(--color-slate);">No tenants selected yet.</div>';
+    } else {
+      rows.forEach(function (row) {
+        var tenantId = row.dataset.existingTenantId;
+        var nameEl = row.querySelector('.t-name');
+        var rowLabel = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : 'Tenant';
+        if (tenantId) {
+          var tenant = TENANTS.filter(function (t) { return t.id === tenantId; })[0];
+          if (tenant) {
+            panelHtml += '<div style="margin-bottom:12px;">';
+            panelHtml += '<div style="font-size:12px;font-weight:600;color:var(--color-slate);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">' + esc(tenant.name) + '</div>';
+            if (tenant.leases.length === 0) {
+              panelHtml += '<div style="font-size:13px;color:var(--color-slate);">No prior leases.</div>';
+            } else {
+              tenant.leases.forEach(function (l) {
+                panelHtml += '<div class="context-lease-item">' +
+                  '<span class="context-lease-id">#' + esc(l.id) + '</span>' +
+                  '<div style="display:flex;align-items:center;gap:6px;">' +
+                    '<span class="context-lease-dates">ends ' + esc(l.end) + '</span>' +
+                    statusBadgeHtml(l.status) +
+                  '</div>' +
+                  '</div>';
+              });
+            }
+            panelHtml += '</div>';
+          }
+        } else {
+          panelHtml += '<div style="margin-bottom:12px;">';
+          panelHtml += '<div style="font-size:12px;font-weight:600;color:var(--color-slate);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">' + esc(rowLabel) + '</div>';
+          panelHtml += '<span class="tenant-new-pill">New tenant — no prior leases</span>';
+          panelHtml += '</div>';
+        }
+      });
+    }
+    panelB.innerHTML = panelHtml;
+  }
+
+  /* ---------------------------------------------------------------
+     SUBMIT
+  --------------------------------------------------------------- */
+  function submitLease() {
+    window.location.href = 'leases.html?created=1';
+  }
+
+  /* ---------------------------------------------------------------
+     HELPERS
+  --------------------------------------------------------------- */
+  function statusBadgeHtml(status) {
+    var map = {
+      active:     'badge-active',
+      upcoming:   'badge-prepaid',
+      expired:    'badge-closed',
+      terminated: 'badge-terminated'
+    };
+    var labelMap = { active: 'Active', upcoming: 'Upcoming', expired: 'Ended', terminated: 'Terminated' };
+    var cls = map[status] || 'badge-closed';
+    var label = labelMap[status] || status;
+    return '<span class="badge ' + cls + '" style="font-size:11px;">' + esc(label) + '</span>';
+  }
+
+  /* Unit-status badge — distinct from lease-status. Used in Step 3 unit cards. */
+  function unitStatusBadgeHtml(status) {
+    var map = {
+      available:   { cls: 'badge-paid',     label: 'Available'   },
+      occupied:    { cls: 'badge-prepaid',  label: 'Occupied'    },
+      listed:      { cls: 'badge-renewed',  label: 'Listed'      },
+      maintenance: { cls: 'badge-partial',  label: 'Maintenance' },
+      retired:     { cls: 'badge-closed',   label: 'Retired'     }
+    };
+    var entry = map[status] || { cls: 'badge-closed', label: status };
+    return '<span class="badge ' + entry.cls + '" style="font-size:11px;">' + esc(entry.label) + '</span>';
+  }
+
+  function formatRupee(n) {
+    /* Indian grouping: 12,00,000 */
+    n = parseInt(n, 10);
+    if (isNaN(n)) return '0';
+    var s = n.toString();
+    if (s.length <= 3) return s;
+    var last3 = s.slice(-3);
+    var rest = s.slice(0, s.length - 3);
+    rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    return rest + ',' + last3;
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ---------------------------------------------------------------
+     INIT
+  --------------------------------------------------------------- */
+  /* Mark deposit as manually edited when changed */
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'cl-deposit') {
+      depositManuallyEdited = true;
+    }
+  });
+
+  /* Close autocomplete on outside click */
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.tenant-row-search')) {
+      document.querySelectorAll('.tenant-autocomplete-dropdown').forEach(function (d) {
+        d.classList.remove('open');
+      });
+    }
+  });
+
+  /* Initial render */
+  renderProgress();
+  renderPropertyGrid('');
+
   </script>
-  <script src="../assets/searchable-select.js"></script>
 </body>
 </html>
