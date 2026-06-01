@@ -33,7 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -83,18 +83,18 @@
       <!-- Portfolio summary tiles (read-only) -->
       <section class="section">
         <div class="filter-tiles">
-          <div class="filter-tile is-static">
+          <a class="filter-tile" href="create-lease.html" title="Start a lease on an available unit">
             <span class="filter-tile-count">7</span>
             <span class="filter-tile-label">Available Units</span>
-          </div>
-          <div class="filter-tile is-static">
+          </a>
+          <a class="filter-tile" href="leases.html?filter=active" title="View active leases">
             <span class="filter-tile-count">113</span>
             <span class="filter-tile-label">Total Active Leases</span>
-          </div>
-          <div class="filter-tile is-static">
+          </a>
+          <a class="filter-tile" href="leases.html?filter=upcoming" title="View upcoming leases">
             <span class="filter-tile-count">4</span>
             <span class="filter-tile-label">Upcoming Leases</span>
-          </div>
+          </a>
         </div>
       </section>
 
@@ -106,15 +106,25 @@
             <input id="search" class="input" placeholder="Property name, area" data-pg-search="tbl-properties" />
           </div>
           <div>
-            <label class="label" for="manager">Manager</label>
-            <select id="manager" class="input">
-              <option>Any manager</option><option>Sunita Arora</option><option>Manoj Verma</option><option>Pooja Khanna</option><option>Anil Kapoor</option>
+            <label class="label" for="propertyTypeFilter">Property type</label>
+            <select id="propertyTypeFilter" class="input" onchange="Paginator.setAttrFilter('tbl-properties','data-category',this.value)">
+              <option value="">All types</option>
+              <option value="apartment-complex">Apartment Complex</option>
+              <option value="independent-building">Independent Building</option>
             </select>
           </div>
           <div>
-            <label class="label" for="status">Occupancy</label>
-            <select id="status" class="input">
-              <option>Any</option><option>Below 80%</option><option>80–95%</option><option>Above 95%</option>
+            <label class="label" for="roomStatusFilter">Room status</label>
+            <select id="roomStatusFilter" class="input" onchange="Paginator.setAttrFilter('tbl-properties','data-has-rooms',this.value)">
+              <option value="">All</option>
+              <option value="yes">Has rooms</option>
+              <option value="no">No rooms</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="manager">Manager</label>
+            <select id="manager" class="input" onchange="Paginator.setAttrFilter('tbl-properties','data-manager',this.value)">
+              <option value="">Any manager</option><option value="sunita-arora">Sunita Arora</option><option value="manoj-verma">Manoj Verma</option><option value="pooja-khanna">Pooja Khanna</option><option value="anil-kapoor">Anil Kapoor</option>
             </select>
           </div>
         </div>
@@ -125,132 +135,146 @@
         <table class="data-table" id="tbl-properties">
           <thead>
             <tr><th class="w-12">#</th>
-              <th>Property</th><th>Address</th><th>Type</th><th>Units</th><th>Manager</th><th>Occupancy</th><th></th>
+              <th>Property</th><th>Address</th><th>Type</th><th>Units</th><th>Rooms</th><th>Manager</th><th>Occupancy</th><th></th>
             </tr>
           </thead>
           <tbody>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="sunita-arora" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Green Valley Apartments</td>
               <td>Sector 12, Dwarka</td>
               <td>Apartment Complex</td>
               <td>40</td>
+              <td>0</td>
               <td>Sunita Arora</td>
               <td>36/40 · 90%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="manoj-verma" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Sai Heights</td>
               <td>Block C, Lajpat Nagar</td>
               <td>Apartment Complex</td>
               <td>24</td>
+              <td>0</td>
               <td>Manoj Verma</td>
               <td>23/24 · 96%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="pooja-khanna" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Mayur Vihar Residency</td>
               <td>Phase 1, Mayur Vihar</td>
               <td>Apartment Complex</td>
               <td>32</td>
+              <td>0</td>
               <td>Pooja Khanna</td>
               <td>31/32 · 97%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="independent-building"><td data-pg-serial class="muted"></td>
+            <tr data-category="independent-building" data-manager="anil-kapoor" data-rooms="6" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rohini Greens</td>
               <td>Sector 7, Rohini</td>
               <td>Independent Building</td>
               <td>24</td>
+              <td>6</td>
               <td>Anil Kapoor</td>
               <td>23/24 · 96%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="sunita-arora" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Janakpuri Enclave</td>
               <td>Block B-7, Janakpuri</td>
               <td>Apartment Complex</td>
               <td>18</td>
+              <td>0</td>
               <td>Sunita Arora</td>
               <td>16/18 · 89%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="independent-building"><td data-pg-serial class="muted"></td>
+            <tr data-category="independent-building" data-manager="manoj-verma" data-rooms="6" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Pitampura Towers</td>
               <td>Plot 9, Pitampura</td>
               <td>Independent Building</td>
               <td>12</td>
+              <td>6</td>
               <td>Manoj Verma</td>
               <td>10/12 · 83%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="pooja-khanna" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Saket Heights</td>
               <td>Block A, Saket</td>
               <td>Apartment Complex</td>
               <td>36</td>
+              <td>0</td>
               <td>Pooja Khanna</td>
               <td>34/36 · 94%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="anil-kapoor" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Vasant Kunj Residency</td>
               <td>Pocket C, Vasant Kunj</td>
               <td>Apartment Complex</td>
               <td>28</td>
+              <td>0</td>
               <td>Anil Kapoor</td>
               <td>25/28 · 89%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="independent-building"><td data-pg-serial class="muted"></td>
+            <tr data-category="independent-building" data-manager="sunita-arora" data-rooms="6" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Laxmi Nagar Complex</td>
               <td>C-12, Laxmi Nagar</td>
               <td>Independent Building</td>
               <td>16</td>
+              <td>6</td>
               <td>Sunita Arora</td>
               <td>14/16 · 88%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="manoj-verma" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Paschim Vihar Plaza</td>
               <td>Sector 8, Paschim Vihar</td>
               <td>Apartment Complex</td>
               <td>22</td>
+              <td>0</td>
               <td>Manoj Verma</td>
               <td>20/22 · 91%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="independent-building"><td data-pg-serial class="muted"></td>
+            <tr data-category="independent-building" data-manager="pooja-khanna" data-rooms="6" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Uttam Nagar Flats</td>
               <td>Block D, Uttam Nagar</td>
               <td>Independent Building</td>
               <td>10</td>
+              <td>6</td>
               <td>Pooja Khanna</td>
               <td>9/10 · 90%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="anil-kapoor" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Kalkaji Mansion</td>
               <td>Plot 44, Kalkaji</td>
               <td>Apartment Complex</td>
               <td>20</td>
+              <td>0</td>
               <td>Anil Kapoor</td>
               <td>17/20 · 85%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="apartment-complex"><td data-pg-serial class="muted"></td>
+            <tr data-category="apartment-complex" data-manager="sunita-arora" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Noida Extension Towers</td>
               <td>Sector 1, Noida Ext.</td>
               <td>Apartment Complex</td>
               <td>30</td>
+              <td>0</td>
               <td>Sunita Arora</td>
               <td>28/30 · 93%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
             </tr>
-            <tr data-category="independent-building"><td data-pg-serial class="muted"></td>
+            <tr data-category="independent-building" data-manager="manoj-verma" data-rooms="6" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rajouri Garden Residency</td>
               <td>J-Block, Rajouri Garden</td>
               <td>Independent Building</td>
               <td>14</td>
+              <td>6</td>
               <td>Manoj Verma</td>
               <td>12/14 · 86%</td>
               <td><div class="flex items-center gap-3"><a href="property-detail.html" class="text-royal-blue font-poppins font-semibold">View</a><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); editPropertyRow(this)">Edit</a></div></td>
@@ -454,7 +478,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

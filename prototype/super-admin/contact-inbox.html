@@ -68,35 +68,47 @@
       </div>
 
       <section class="card mb-6">
-        <label class="label" for="inboxSearch">Search</label>
-        <input id="inboxSearch" class="input" data-pg-search="tbl-inbox" placeholder="Search by name, email or subject…" />
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="inboxSearch">Search</label>
+            <input id="inboxSearch" class="input" data-pg-search="tbl-inbox" placeholder="Search by name, email or subject…" />
+          </div>
+          <div>
+            <label class="label" for="inbox-from">Received from</label>
+            <input id="inbox-from" data-datepicker data-pair-max="inbox-to" class="input" placeholder="DD/MM/YYYY" onchange="applyInboxDate()" />
+          </div>
+          <div>
+            <label class="label" for="inbox-to">Received to</label>
+            <input id="inbox-to" data-datepicker data-pair-min="inbox-from" class="input" placeholder="DD/MM/YYYY" onchange="applyInboxDate()" />
+          </div>
+        </div>
       </section>
 
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-inbox">
           <thead><tr><th class="w-12">#</th><th>When</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
-            <tr data-status="new"><td data-pg-serial class="muted"></td>
+            <tr data-date="2026-05-27" data-status="new"><td data-pg-serial class="muted"></td>
               <td class="text-xs">27/05/2026 10:12</td><td class="font-poppins font-semibold text-charcoal">Anjali Rao</td><td>anjali@example.com</td><td>Demo request for 60-unit PG</td>
               <td><span class="badge badge-partial">New</span></td>
               <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(0)">View</button></td>
             </tr>
-            <tr data-status="new"><td data-pg-serial class="muted"></td>
+            <tr data-date="2026-05-27" data-status="new"><td data-pg-serial class="muted"></td>
               <td class="text-xs">27/05/2026 08:40</td><td class="font-poppins font-semibold text-charcoal">Mohit Sethi</td><td>mohit@sethirentals.in</td><td>Can we import existing tenants?</td>
               <td><span class="badge badge-partial">New</span></td>
               <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(1)">View</button></td>
             </tr>
-            <tr data-status="read"><td data-pg-serial class="muted"></td>
+            <tr data-date="2026-05-26" data-status="read"><td data-pg-serial class="muted"></td>
               <td class="text-xs">26/05/2026 17:22</td><td class="font-poppins font-semibold text-charcoal">Farida Khan</td><td>farida@example.com</td><td>Pricing for unlimited users</td>
               <td><span class="badge badge-prepaid">Read</span></td>
               <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(2)">View</button></td>
             </tr>
-            <tr data-status="read"><td data-pg-serial class="muted"></td>
+            <tr data-date="2026-05-25" data-status="read"><td data-pg-serial class="muted"></td>
               <td class="text-xs">25/05/2026 11:05</td><td class="font-poppins font-semibold text-charcoal">Deepak Nair</td><td>deepak@nairhomes.in</td><td>Does it support per-room leasing?</td>
               <td><span class="badge badge-prepaid">Read</span></td>
               <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(3)">View</button></td>
             </tr>
-            <tr data-status="replied"><td data-pg-serial class="muted"></td>
+            <tr data-date="2026-05-24" data-status="replied"><td data-pg-serial class="muted"></td>
               <td class="text-xs">24/05/2026 09:30</td><td class="font-poppins font-semibold text-charcoal">Sunita Verma</td><td>sunita@example.com</td><td>Onboarding help</td>
               <td><span class="badge badge-paid">Replied</span></td>
               <td><button class="text-royal-blue font-poppins font-semibold text-sm" style="background:none;border:none;cursor:pointer;padding:0" onclick="openMsg(4)">View</button></td>
@@ -147,7 +159,19 @@
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script>
+    /* Received-date range filter — layered onto Paginator via setPredicate. */
+    function applyInboxDate() {
+      function iso(v){ var m=(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m? m[3]+'-'+m[2]+'-'+m[1] : ''; }
+      var from = iso(document.getElementById('inbox-from').value);
+      var to   = iso(document.getElementById('inbox-to').value);
+      if (!from && !to) { Paginator.setPredicate('tbl-inbox', null); return; }
+      Paginator.setPredicate('tbl-inbox', function (tr) {
+        var d = tr.getAttribute('data-date') || '';
+        return (!from || d >= from) && (!to || d <= to);
+      });
+    }
     var MESSAGES = [
       { name:'Anjali Rao', email:'anjali@example.com', when:'27/05/2026 10:12', subject:'Demo request for 60-unit PG', body:'Hi, we run a 60-bed PG in Dwarka and want to move off spreadsheets. Can we get a walkthrough this week?' },
       { name:'Mohit Sethi', email:'mohit@sethirentals.in', when:'27/05/2026 08:40', subject:'Can we import existing tenants?', body:'We have ~40 active tenants. Is there a way to import them, or do we add manually?' },

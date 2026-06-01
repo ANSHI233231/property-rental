@@ -408,8 +408,9 @@ const DELEGATION_TASKS = [
 // 3.4 — Visitor Management (bullets)
 const VISITOR_BULLETS = [
   [r('A new '), bn('Visitor Management'), r(' page is added.')],
-  [r('Tenants can '), bn('register expected visitors'), r('.')],
-  [r('The Property Manager or Admin can '), bn('approve, deny and mark check-in / check-out'), r(' for each visit.')],
+  [r('Tenants can '), bn('register expected visitors'), r(' and '), bn('approve gate visitor requests'), r(' for their own unit or room.')],
+  [r('The Property Manager, Admin or Security Guard can '), bn('approve, deny and mark check-in / check-out'), r(' for each visit.')],
+  [bn('New Security Guard role '), r('— a gate-level role that manages visitors for assigned properties and can log walk-in visitors at the gate for the tenant to approve.')],
 ];
 
 // 3.5 — Organization Management (SAAS layer) — bullets with bold-lead first phrase

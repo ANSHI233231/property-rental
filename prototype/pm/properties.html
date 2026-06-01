@@ -87,6 +87,14 @@
             <label class="label" for="propSearch">Search</label>
             <input id="propSearch" class="input" placeholder="Property name or city" data-pg-search="tbl-pm-properties" />
           </div>
+          <div>
+            <label class="label" for="pmRoomStatus">Room status</label>
+            <select id="pmRoomStatus" class="input" onchange="Paginator.setAttrFilter('tbl-pm-properties','data-has-rooms',this.value)">
+              <option value="">All</option>
+              <option value="yes">Has rooms</option>
+              <option value="no">No rooms</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -98,6 +106,7 @@
               <th>Property</th>
               <th>City</th>
               <th>Units</th>
+              <th>Rooms</th>
               <th>Occupancy</th>
               <th>Tenure</th>
               <th>Status</th>
@@ -106,38 +115,38 @@
           </thead>
           <tbody>
             <!-- Active properties -->
-            <tr data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-status="active" data-rooms="4" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Green Valley Apartments</td>
               <td>Dwarka, Delhi</td>
-              <td>24</td>
+              <td>24</td><td>4</td>
               <td>88%</td>
               <td>01/06/2024 – Present</td>
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="property-detail.html?id=green-valley" class="action-link">View</a></td>
             </tr>
-            <tr data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-status="active" data-rooms="7" data-has-rooms="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Sai Heights</td>
               <td>Lajpat Nagar, Delhi</td>
-              <td>18</td>
+              <td>18</td><td>7</td>
               <td>94%</td>
               <td>01/09/2024 – Present</td>
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="property-detail.html?id=sai-heights" class="action-link">View</a></td>
             </tr>
-            <tr data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-status="active" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Mayur Vihar Residency</td>
               <td>Mayur Vihar, Delhi</td>
-              <td>30</td>
+              <td>30</td><td>0</td>
               <td>80%</td>
               <td>01/01/2025 – Present</td>
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="property-detail.html?id=mayur-vihar" class="action-link">View</a></td>
             </tr>
             <!-- Past properties -->
-            <tr data-status="past"><td data-pg-serial class="muted"></td>
+            <tr data-status="past" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rohini Greens</td>
               <td>Rohini, Delhi</td>
-              <td>20</td>
+              <td>20</td><td>0</td>
               <td class="muted">—</td>
               <td>
                 <span class="badge badge-closed" style="font-size:11px;">Past · 09/2024–03/2025</span>
@@ -145,10 +154,10 @@
               <td><span class="badge badge-closed">Past</span></td>
               <td><a href="property-detail.html?id=rohini-greens&tenure=2024-09-01..2025-03-31" class="action-link">View</a></td>
             </tr>
-            <tr data-status="past"><td data-pg-serial class="muted"></td>
+            <tr data-status="past" data-rooms="0" data-has-rooms="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Dwarka West Tower</td>
               <td>Dwarka, Delhi</td>
-              <td>16</td>
+              <td>16</td><td>0</td>
               <td class="muted">—</td>
               <td>
                 <span class="badge badge-closed" style="font-size:11px;">Past · 03/2024–08/2024</span>

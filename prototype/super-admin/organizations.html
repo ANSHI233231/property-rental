@@ -89,28 +89,36 @@
       <!-- Status filter pills -->
       <section class="section">
         <div class="filter-tiles" id="filter-pills">
-          <button type="button" class="filter-tile active" id="pill-all" onclick="setFilter('all')"><span class="filter-tile-count">12</span><span class="filter-tile-label">All</span></button>
-          <button type="button" class="filter-tile" id="pill-pending" onclick="setFilter('pending')"><span class="filter-tile-count">3</span><span class="filter-tile-label">Pending</span></button>
-          <button type="button" class="filter-tile" id="pill-active" onclick="setFilter('active')"><span class="filter-tile-count">8</span><span class="filter-tile-label">Active</span></button>
-          <button type="button" class="filter-tile" id="pill-deactivated" onclick="setFilter('deactivated')"><span class="filter-tile-count">1</span><span class="filter-tile-label">Deactivated</span></button>
+          <button type="button" class="filter-tile active" data-tile-for="org-table" data-tile-filter="all" onclick="Paginator.setFilter('org-table','all',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">All</span></button>
+          <button type="button" class="filter-tile" data-tile-for="org-table" data-tile-filter="pending" onclick="Paginator.setFilter('org-table','pending',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Pending</span></button>
+          <button type="button" class="filter-tile" data-tile-for="org-table" data-tile-filter="active" onclick="Paginator.setFilter('org-table','active',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Active</span></button>
+          <button type="button" class="filter-tile" data-tile-for="org-table" data-tile-filter="deactivated" onclick="Paginator.setFilter('org-table','deactivated',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Deactivated</span></button>
         </div>
       </section>
 
       <!-- Search + Plan filter -->
       <section class="card mb-6">
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-4 gap-4">
           <div>
             <label class="label" for="search-org">Search</label>
-            <input id="search-org" class="input" placeholder="Organization name, contact" oninput="debounceSearch(this.value)" />
+            <input id="search-org" class="input" placeholder="Organization name, contact" data-pg-search="org-table" />
           </div>
           <div>
             <label class="label" for="plan-filter">Plan</label>
-            <select id="plan-filter" class="input" onchange="filterByPlan(this.value)">
-              <option value="all">All plans</option>
+            <select id="plan-filter" class="input" onchange="Paginator.setAttrFilter('org-table','data-plan',this.value)">
+              <option value="">All plans</option>
               <option value="basic">Basic</option>
               <option value="standard">Standard</option>
               <option value="premium">Premium</option>
             </select>
+          </div>
+          <div>
+            <label class="label" for="created-from">Created from</label>
+            <input id="created-from" data-datepicker data-pair-max="created-to" class="input" placeholder="DD/MM/YYYY" onchange="applyOrgDate()" />
+          </div>
+          <div>
+            <label class="label" for="created-to">Created to</label>
+            <input id="created-to" data-datepicker data-pair-min="created-from" class="input" placeholder="DD/MM/YYYY" onchange="applyOrgDate()" />
           </div>
         </div>
       </section>
@@ -120,68 +128,76 @@
         <table class="data-table" id="org-table">
           <thead>
             <tr>
-              <th>Organization</th><th>Plan</th><th>Active Users</th><th>Status</th><th>Created</th><th></th>
+              <th>Organization</th><th>Contact</th><th>Plan</th><th>Active Users</th><th>Status</th><th>Created</th><th></th>
             </tr>
           </thead>
           <tbody id="org-tbody">
-            <tr data-status="pending" data-plan="standard" data-name="saffron stays pvt ltd">
+            <tr data-status="pending" data-plan="standard" data-name="saffron stays pvt ltd" data-contact="priya mehta contact@saffronstays.in" data-created="2026-05-21">
               <td class="font-poppins font-semibold text-charcoal">Saffron Stays Pvt Ltd</td>
+              <td>Priya Mehta<div class="text-xs muted">contact@saffronstays.in</div></td>
               <td>Standard</td>
               <td>0 / 20</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>21/05/2026</td>
               <td><a href="organization-detail.html?id=1" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="pending" data-plan="basic" data-name="greenleaf housing">
+            <tr data-status="pending" data-plan="basic" data-name="greenleaf housing" data-contact="arjun nair arjun@greenleaf.in" data-created="2026-05-23">
               <td class="font-poppins font-semibold text-charcoal">Greenleaf Housing</td>
+              <td>Arjun Nair<div class="text-xs muted">arjun@greenleaf.in</div></td>
               <td>Basic</td>
               <td>0 / 5</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>23/05/2026</td>
               <td><a href="organization-detail.html?id=2" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="pending" data-plan="basic" data-name="metro nest properties">
+            <tr data-status="pending" data-plan="basic" data-name="metro nest properties" data-contact="kavya rao kavya@metronest.in" data-created="2026-05-25">
               <td class="font-poppins font-semibold text-charcoal">Metro Nest Properties</td>
+              <td>Kavya Rao<div class="text-xs muted">kavya@metronest.in</div></td>
               <td>Basic</td>
               <td>0 / 5</td>
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td>25/05/2026</td>
               <td><a href="organization-detail.html?id=3" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="premium" data-name="delhi dwellings ltd">
+            <tr data-status="active" data-plan="premium" data-name="delhi dwellings ltd" data-contact="raj malhotra raj@delhidwellings.in" data-created="2026-01-15">
               <td class="font-poppins font-semibold text-charcoal">Delhi Dwellings Ltd</td>
+              <td>Raj Malhotra<div class="text-xs muted">raj@delhidwellings.in</div></td>
               <td>Premium</td>
               <td>42 / ∞</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>15/01/2026</td>
               <td><a href="organization-detail.html?id=4" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="standard" data-name="green valley co-living">
+            <tr data-status="active" data-plan="standard" data-name="green valley co-living" data-contact="sneha gupta sneha@greenvalley.co" data-created="2026-03-10">
               <td class="font-poppins font-semibold text-charcoal">Green Valley Co-living</td>
+              <td>Sneha Gupta<div class="text-xs muted">sneha@greenvalley.co</div></td>
               <td>Standard</td>
               <td>12 / 20</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>10/03/2026</td>
               <td><a href="organization-detail.html?id=5" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="basic" data-name="urban nest homes">
+            <tr data-status="active" data-plan="basic" data-name="urban nest homes" data-contact="vikram shah vikram@urbannest.in" data-created="2026-04-01">
               <td class="font-poppins font-semibold text-charcoal">Urban Nest Homes</td>
+              <td>Vikram Shah<div class="text-xs muted">vikram@urbannest.in</div></td>
               <td>Basic</td>
               <td>4 / 5</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>01/04/2026</td>
               <td><a href="organization-detail.html?id=6" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="active" data-plan="standard" data-name="cityscape rentals">
+            <tr data-status="active" data-plan="standard" data-name="cityscape rentals" data-contact="meera iyer meera@cityscape.in" data-created="2026-02-05">
               <td class="font-poppins font-semibold text-charcoal">Cityscape Rentals</td>
+              <td>Meera Iyer<div class="text-xs muted">meera@cityscape.in</div></td>
               <td>Standard</td>
               <td>8 / 20</td>
               <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               <td>05/02/2026</td>
               <td><a href="organization-detail.html?id=7" class="font-poppins font-semibold" style="color:var(--color-royal-blue)">View</a></td>
             </tr>
-            <tr data-status="deactivated" data-plan="basic" data-name="sunrise rentals">
+            <tr data-status="deactivated" data-plan="basic" data-name="sunrise rentals" data-contact="rohit verma rohit@sunriserentals.in" data-created="2025-11-12">
               <td class="font-poppins font-semibold text-charcoal">Sunrise Rentals</td>
+              <td>Rohit Verma<div class="text-xs muted">rohit@sunriserentals.in</div></td>
               <td>Basic</td>
               <td>2 / 5</td>
               <td><span class="badge badge-closed" aria-label="Status: Deactivated">Deactivated</span></td>
@@ -191,19 +207,16 @@
           </tbody>
         </table>
 
-        <!-- Empty state (hidden by default) -->
-        <div class="p-8 text-center" id="empty-state" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;color:var(--color-mid-gray);margin:0 auto 12px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          <div class="font-poppins font-semibold text-charcoal mb-1">No organizations match</div>
-          <div class="text-sm muted mb-4">Try a different filter or clear the search.</div>
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="clearFilters()">Show all</button>
-        </div>
-
-        <div class="flex items-center justify-between p-4 border-t" style="border-color:var(--color-light-gray)" id="pagination-footer">
-          <div class="text-sm muted" id="pagination-label">Showing 1–8 of 12</div>
-          <div class="flex gap-1">
-            <button class="btn btn-secondary !py-1 !px-3 !text-sm" aria-label="Previous page">‹</button>
-            <button class="btn btn-secondary !py-1 !px-3 !text-sm" aria-label="Next page">›</button>
+        <div class="pagination" data-paginate-for="org-table" data-per-page="10" aria-label="Pagination">
+          <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
+          <div class="pagination-controls">
+            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-pg-pages></div>
+            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
+          </div>
+          <div>
+            <label for="per-page-org-table" class="sr-only">Rows per page</label>
+            <select id="per-page-org-table" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
           </div>
         </div>
       </section>
@@ -225,78 +238,35 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
+  <script src="../assets/paginate.js"></script>
   <script>
-    var currentStatus = 'all';
-    var currentPlan = 'all';
-    var currentSearch = '';
-    var searchTimer;
+    /* Created-date range filter, layered onto Paginator. */
+    function applyOrgDate() {
+      function iso(v){ var m=(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m? m[3]+'-'+m[2]+'-'+m[1] : ''; }
+      var from = iso((document.getElementById('created-from')||{}).value);
+      var to   = iso((document.getElementById('created-to')||{}).value);
+      if (!from && !to) { Paginator.setPredicate('org-table', null); return; }
+      Paginator.setPredicate('org-table', function (tr) {
+        var d = tr.getAttribute('data-created') || '';
+        return (!from || d >= from) && (!to || d <= to);
+      });
+    }
 
-    // On load: read URL params
+    /* Honor dashboard deep-links: ?filter=<status> and ?plan=<plan>. */
     (function () {
       var params = new URLSearchParams(window.location.search);
       var f = params.get('filter');
+      if (f && ['pending','active','deactivated','all'].indexOf(f) >= 0) {
+        var tile = document.querySelector('[data-tile-for="org-table"][data-tile-filter="' + f + '"]');
+        if (tile) Paginator.setFilter('org-table', f, tile);
+      }
       var p = params.get('plan');
-      if (f && ['pending','active','deactivated','all'].includes(f)) setFilter(f, true);
-      if (p && ['basic','standard','premium'].includes(p)) {
-        document.getElementById('plan-filter').value = p;
-        filterByPlan(p, true);
+      if (p && ['basic','standard','premium'].indexOf(p) >= 0) {
+        var sel = document.getElementById('plan-filter');
+        if (sel) { sel.value = p; Paginator.setAttrFilter('org-table', 'data-plan', p); }
       }
     })();
-
-    function setFilter(status, noHistory) {
-      currentStatus = status;
-      ['all','pending','active','deactivated'].forEach(function(s) {
-        var btn = document.getElementById('pill-' + s);
-        if (!btn) return;
-        if (s === status) btn.classList.add('active');
-        else btn.classList.remove('active');
-      });
-      if (!noHistory) history.replaceState(null, '', 'organizations.html?filter=' + status);
-      applyFilters();
-    }
-
-    function filterByPlan(plan, noHistory) {
-      currentPlan = plan;
-      if (!noHistory) history.replaceState(null, '', 'organizations.html?filter=' + currentStatus + '&plan=' + plan);
-      applyFilters();
-    }
-
-    function debounceSearch(val) {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(function () { currentSearch = val.toLowerCase(); applyFilters(); }, 300);
-    }
-
-    function applyFilters() {
-      var rows = document.querySelectorAll('#org-tbody tr');
-      var visible = 0;
-      rows.forEach(function (row) {
-        var statusMatch = currentStatus === 'all' || row.dataset.status === currentStatus;
-        var planMatch   = currentPlan === 'all'   || row.dataset.plan === currentPlan;
-        var nameMatch   = !currentSearch || row.dataset.name.includes(currentSearch);
-        var show = statusMatch && planMatch && nameMatch;
-        row.style.display = show ? '' : 'none';
-        if (show) visible++;
-      });
-      var empty = document.getElementById('empty-state');
-      var footer = document.getElementById('pagination-footer');
-      var label = document.getElementById('pagination-label');
-      if (visible === 0) {
-        empty.style.display = '';
-        footer.style.display = 'none';
-      } else {
-        empty.style.display = 'none';
-        footer.style.display = '';
-        label.textContent = 'Showing 1–' + Math.min(visible, 8) + ' of ' + visible;
-      }
-    }
-
-    function clearFilters() {
-      document.getElementById('search-org').value = '';
-      document.getElementById('plan-filter').value = 'all';
-      currentSearch = '';
-      currentPlan = 'all';
-      setFilter('all');
-    }
   </script>
   
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>

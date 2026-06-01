@@ -33,7 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -84,6 +84,7 @@
       <section class="section">
         <div class="filter-tiles">
           <button type="button" class="filter-tile active" data-tile-for="tbl-admin-visitors" data-tile-filter="all" onclick="Paginator.setFilter('tbl-admin-visitors','all',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">All</span></button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-admin-visitors" data-tile-filter="awaiting" onclick="Paginator.setFilter('tbl-admin-visitors','awaiting',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Awaiting tenant</span></button>
           <button type="button" class="filter-tile" data-tile-for="tbl-admin-visitors" data-tile-filter="pending" onclick="Paginator.setFilter('tbl-admin-visitors','pending',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Pending</span></button>
           <button type="button" class="filter-tile" data-tile-for="tbl-admin-visitors" data-tile-filter="approved" onclick="Paginator.setFilter('tbl-admin-visitors','approved',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Approved</span></button>
           <button type="button" class="filter-tile" data-tile-for="tbl-admin-visitors" data-tile-filter="checked-in" onclick="Paginator.setFilter('tbl-admin-visitors','checked-in',this)"><span class="filter-tile-count" data-pg-count></span><span class="filter-tile-label">Checked-in</span></button>
@@ -93,7 +94,7 @@
       </section>
 
       <section class="card mb-6">
-        <div class="grid md:grid-cols-3 gap-4">
+        <div class="grid md:grid-cols-4 gap-4">
           <div>
             <label class="label" for="flt-prop">Property</label>
             <select id="flt-prop" class="input" data-searchable onchange="onVisitorPropChange(this)">
@@ -111,8 +112,16 @@
             </select>
           </div>
           <div>
+            <label class="label" for="flt-type">Visitor type</label>
+            <select id="flt-type" class="input" onchange="Paginator.setAttrFilter('tbl-admin-visitors','data-type',this.value)">
+              <option value="">All types</option>
+              <option value="preapproved">Pre-approved</option>
+              <option value="gate">Gate</option>
+            </select>
+          </div>
+          <div>
             <label class="label" for="visitorSearch">Search</label>
-            <input id="visitorSearch" class="input" data-pg-search="tbl-admin-visitors" placeholder="Visitor name, phone or purpose" />
+            <input id="visitorSearch" class="input" data-pg-search="tbl-admin-visitors" placeholder="Name, phone, purpose or visitor code" />
           </div>
         </div>
       </section>
@@ -120,11 +129,19 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-admin-visitors">
           <thead>
-            <tr><th class="w-12">#</th><th>Visitor</th><th>Phone</th><th>Purpose</th><th>Property &middot; Unit</th><th>When</th><th>Status</th><th>Actions</th></tr>
+            <tr><th class="w-12">#</th><th>Visitor</th><th>Type</th><th>Phone</th><th>Purpose</th><th>Property &middot; Unit</th><th>When</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr id="visitor-row-1" data-status="pending" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-B3M9"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+            <tr data-type="gate" id="visitor-row-G1" data-status="awaiting" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Imran Sheikh</td><td><span class="badge badge-renewed">Gate</span></td>
+              <td>98220 11334</td><td>Delivery — Amazon</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A &middot; routed to Raj Sharma</div></td>
+              <td>Now · at gate</td>
+              <td><span class="badge badge-partial">Awaiting tenant</span></td>
+              <td><span class="text-xs muted">Logged by guard · awaiting tenant</span></td>
+            </tr>
+            <tr data-type="preapproved" data-search="VIS-B3M9" id="visitor-row-1" data-status="pending" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-B3M9"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>98765 43210</td><td>Personal visit</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A &middot; Raj Sharma</div></td>
               <td>Expected 27/05/2026 14:00</td><td><span class="badge badge-partial">Pending</span></td>
@@ -132,8 +149,8 @@
                 <button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('approve','1','Rohan Mehta')">Approve</button>
                 <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openConfirm('deny','1','Rohan Mehta')">Deny</button>
               </div></td></tr>
-            <tr id="visitor-row-2" data-status="pending" data-property="green-valley" data-unit="2A" data-visitor-code="VIS-C5N1"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Priya Kapoor</td>
+            <tr data-type="preapproved" data-search="VIS-C5N1" id="visitor-row-2" data-status="pending" data-property="green-valley" data-unit="2A" data-visitor-code="VIS-C5N1"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Priya Kapoor</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>91234 56789</td><td>Delivery</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 2A &middot; Priya Patel</div></td>
               <td>Expected 26/05/2026 11:00</td><td><span class="badge badge-partial">Pending</span></td>
@@ -141,8 +158,8 @@
                 <button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('approve','2','Priya Kapoor')">Approve</button>
                 <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openConfirm('deny','2','Priya Kapoor')">Deny</button>
               </div></td></tr>
-            <tr id="visitor-row-3" data-status="pending" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-D8P4"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Arjun Verma</td>
+            <tr data-type="preapproved" data-search="VIS-D8P4" id="visitor-row-3" data-status="pending" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-D8P4"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Arjun Verma</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>87654 32109</td><td>Maintenance vendor</td>
               <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5B &middot; Vikram Singh</div></td>
               <td>Expected 26/05/2026 15:00</td><td><span class="badge badge-partial">Pending</span></td>
@@ -150,8 +167,8 @@
                 <button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('approve','3','Arjun Verma')">Approve</button>
                 <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openConfirm('deny','3','Arjun Verma')">Deny</button>
               </div></td></tr>
-            <tr id="visitor-row-4" data-status="pending" data-property="sai-heights" data-unit="4B" data-visitor-code="VIS-L5V3"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Sundar Raj</td>
+            <tr data-type="preapproved" data-search="VIS-L5V3" id="visitor-row-4" data-status="pending" data-property="sai-heights" data-unit="4B" data-visitor-code="VIS-L5V3"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Sundar Raj</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>91111 55555</td><td>Personal visit</td>
               <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 4B &middot; Anjali Verma</div></td>
               <td>Expected 27/05/2026 12:00</td><td><span class="badge badge-partial">Pending</span></td>
@@ -159,44 +176,44 @@
                 <button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('approve','4','Sundar Raj')">Approve</button>
                 <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openConfirm('deny','4','Sundar Raj')">Deny</button>
               </div></td></tr>
-            <tr id="visitor-row-A" data-status="approved" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-A7K2"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Kavya Sharma</td>
+            <tr data-type="preapproved" data-search="VIS-A7K2" id="visitor-row-A" data-status="approved" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-A7K2"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Kavya Sharma</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>96543 21098</td><td>Personal visit</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A &middot; Raj Sharma</div></td>
               <td>Expected 26/05/2026 16:00</td><td><span class="badge badge-prepaid">Approved</span></td>
               <td><button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('checkin','A','Kavya Sharma')">Check-in</button></td></tr>
-            <tr id="visitor-row-B" data-status="approved" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-E2Q6"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Deepak Joshi</td>
+            <tr data-type="preapproved" data-search="VIS-E2Q6" id="visitor-row-B" data-status="approved" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-E2Q6"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Deepak Joshi</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>93210 98765</td><td>Service / Utility</td>
               <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5B &middot; Vikram Singh</div></td>
               <td>Expected 27/05/2026 10:00</td><td><span class="badge badge-prepaid">Approved</span></td>
               <td><button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="openConfirm('checkin','B','Deepak Joshi')">Check-in</button></td></tr>
-            <tr id="visitor-row-X" data-status="checked-in" data-property="green-valley" data-unit="2A" data-visitor-code="VIS-F1X8"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Meena Rao</td>
+            <tr data-type="preapproved" data-search="VIS-F1X8" id="visitor-row-X" data-status="checked-in" data-property="green-valley" data-unit="2A" data-visitor-code="VIS-F1X8"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Meena Rao</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>91111 22222</td><td>Personal visit</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 2A &middot; Priya Patel</div></td>
               <td>Arrived 26/05/2026 09:42</td><td><span class="badge badge-progress">Checked-in</span></td>
               <td><button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="openConfirm('checkout','X','Meena Rao')">Check-out</button></td></tr>
-            <tr data-status="checked-out" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-G2Y9"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Suresh Nair</td>
+            <tr data-type="preapproved" data-search="VIS-G2Y9" data-status="checked-out" data-property="green-valley" data-unit="3A" data-visitor-code="VIS-G2Y9"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Suresh Nair</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>90000 11111</td><td>Personal visit</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A &middot; Raj Sharma</div></td>
               <td>Departed 24/05/2026 16:30 &middot; 2h 30m</td><td><span class="badge badge-resolved">Checked-out</span></td>
               <td><span class="muted">&mdash;</span></td></tr>
-            <tr data-status="checked-out" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-H3Z1"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Ananya Gupta</td>
+            <tr data-type="preapproved" data-search="VIS-H3Z1" data-status="checked-out" data-property="mayur-vihar" data-unit="5B" data-visitor-code="VIS-H3Z1"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Ananya Gupta</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>92222 33333</td><td>Cab / Ride pickup</td>
               <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5B &middot; Vikram Singh</div></td>
               <td>Departed 23/05/2026 13:00 &middot; 1h 45m</td><td><span class="badge badge-resolved">Checked-out</span></td>
               <td><span class="muted">&mdash;</span></td></tr>
-            <tr data-status="checked-out" data-property="sai-heights" data-unit="8A" data-visitor-code="VIS-M6U4"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Ramesh Jain</td>
+            <tr data-type="preapproved" data-search="VIS-M6U4" data-status="checked-out" data-property="sai-heights" data-unit="8A" data-visitor-code="VIS-M6U4"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Ramesh Jain</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>95555 66666</td><td>Maintenance vendor</td>
               <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 8A &middot; Suresh Kumar</div></td>
               <td>Departed 19/05/2026 14:30 &middot; 3h</td><td><span class="badge badge-resolved">Checked-out</span></td>
               <td><span class="muted">&mdash;</span></td></tr>
-            <tr data-status="denied" data-property="rohini-greens" data-unit="4A" data-visitor-code="VIS-N7T5"><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Unknown Vendor</td>
+            <tr data-type="preapproved" data-search="VIS-N7T5" data-status="denied" data-property="rohini-greens" data-unit="4A" data-visitor-code="VIS-N7T5"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Unknown Vendor</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td>88888 77777</td><td>Maintenance vendor</td>
               <td>Rohini Greens<div class="text-xs muted">Unit 4A &middot; Aman Khan</div></td>
               <td>Expected 20/05/2026 10:00</td><td><span class="badge badge-terminated">Denied</span></td>
@@ -428,7 +445,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

@@ -829,6 +829,12 @@ a.sidebar-brand:hover { opacity: 0.85; }
   background: #fff; border: 1px solid var(--color-mid-gray); border-radius: 8px;
   padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+/* Clickable KPI / metric cards — used on dashboards to deep-link into the
+   matching filtered listing. Applied when .kpi is an <a> (has href). */
+a.kpi { display: block; text-decoration: none; color: inherit; transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease; }
+a.kpi:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: var(--color-royal-blue); }
+a.kpi:focus-visible { outline: 2px solid var(--color-royal-blue); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { a.kpi { transition: none; } a.kpi:hover { transform: none; } }
 .kpi-label { font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 12px; color: var(--color-slate); text-transform: uppercase; letter-spacing: 0.5px; }
 .kpi-value { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 32px; color: var(--color-navy); margin-top: 4px; }
 .kpi-meta  { font-size: 12px; color: var(--color-slate); margin-top: 4px; }

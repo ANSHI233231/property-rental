@@ -68,7 +68,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -212,25 +212,46 @@
       <!-- Recent changes -->
       <section class="section mt-8">
         <h2 class="section-title">Recent changes</h2>
+        <div class="card mb-4">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label class="label" for="sc-field">Field</label>
+              <select id="sc-field" class="input" onchange="filterSettingsChanges()">
+                <option value="">All fields</option>
+                <option value="late-fee-rate">Late-fee rate</option>
+                <option value="grace-period">Grace period</option>
+                <option value="notice-window">Rent-change notice window</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="sc-from">From</label>
+              <input id="sc-from" data-datepicker data-pair-max="sc-to" class="input" placeholder="DD/MM/YYYY" onchange="filterSettingsChanges()" />
+            </div>
+            <div>
+              <label class="label" for="sc-to">To</label>
+              <input id="sc-to" data-datepicker data-pair-min="sc-from" class="input" placeholder="DD/MM/YYYY" onchange="filterSettingsChanges()" />
+            </div>
+          </div>
+        </div>
         <div class="card p-0 overflow-x-auto">
           <table class="data-table" id="recentChangesTable">
             <thead>
               <tr><th>When (IST)</th><th>Changed by</th><th>Field</th><th>Change</th></tr>
             </thead>
             <tbody>
-              <tr>
+              <tr data-date="2026-04-12" data-field="grace-period">
                 <td class="text-xs whitespace-nowrap">12/04/2026 11:23</td>
                 <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
                 <td>Grace period</td>
                 <td class="text-xs">4 days → 5 days</td>
               </tr>
-              <tr>
+              <tr data-date="2026-03-01" data-field="late-fee-rate">
                 <td class="text-xs whitespace-nowrap">01/03/2026 09:14</td>
                 <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
                 <td>Late-fee rate</td>
                 <td class="text-xs">1.5% → 2%</td>
               </tr>
-              <tr>
+              <tr data-date="2026-01-15" data-field="notice-window">
                 <td class="text-xs whitespace-nowrap">15/01/2026 17:40</td>
                 <td class="font-poppins font-semibold text-charcoal">Raj Singh</td>
                 <td>Rent-change notice window</td>
@@ -238,6 +259,7 @@
               </tr>
             </tbody>
           </table>
+          <div class="p-3 text-sm muted" id="sc-empty" style="display:none;">No changes match the selected filters.</div>
         </div>
         <p class="text-xs muted mt-3">Full history in the <a href="audit-log.html" class="text-royal-blue font-poppins font-semibold">Audit Log</a>.</p>
       </section>
@@ -252,7 +274,28 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
+  <script>
+    /* Recent-changes filter — Field + date range. */
+    function filterSettingsChanges() {
+      function iso(v){ var m=(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m? m[3]+'-'+m[2]+'-'+m[1] : ''; }
+      var field = document.getElementById('sc-field').value;
+      var from = iso(document.getElementById('sc-from').value);
+      var to   = iso(document.getElementById('sc-to').value);
+      var rows = document.querySelectorAll('#recentChangesTable tbody tr');
+      var shown = 0;
+      rows.forEach(function (r) {
+        var f = r.getAttribute('data-field') || '';
+        var d = r.getAttribute('data-date') || '';
+        var ok = (!field || f === field) && (!from || d >= from) && (!to || d <= to);
+        r.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+      });
+      var empty = document.getElementById('sc-empty');
+      if (empty) empty.style.display = shown === 0 ? '' : 'none';
+    }
+  </script>
   <!-- More bottom sheet -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -266,7 +309,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

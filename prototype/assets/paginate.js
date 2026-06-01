@@ -95,8 +95,11 @@
 
   function trMatchesSearch(tr, q) {
     if (!q) return true;
+    // Visible text + an optional hidden data-search attr (for tokens that aren't
+    // rendered, e.g. a visitor code that must stay hidden but remain searchable).
     var text = (tr.textContent || '').toLowerCase();
-    return text.indexOf(q.toLowerCase()) !== -1;
+    var hidden = (tr.getAttribute('data-search') || '').toLowerCase();
+    return (text + ' ' + hidden).indexOf(q.toLowerCase()) !== -1;
   }
 
   // Secondary attribute filters (e.g. a Status <select> alongside the tile filter).
@@ -115,7 +118,7 @@
 
   // -------------------- Tile-count recompute --------------------
 
-  function refreshTileCounts(tableId, allRows, currentSearch, attrFilters) {
+  function refreshTileCounts(tableId, allRows, currentSearch, attrFilters, predicate) {
     // Counts are computed against the search + secondary-attr set (but NOT the filter-tile set),
     // so tile counts represent "if I picked this filter, how many would I see".
     var tiles = $$('[data-tile-for="' + tableId + '"]');
@@ -126,6 +129,7 @@
         var tr = allRows[i];
         if (!trMatchesSearch(tr, currentSearch)) continue;
         if (!trMatchesAttrs(tr, attrFilters)) continue;
+        if (predicate && !predicate(tr)) continue;
         if (trMatchesFilter(tr, key)) count++;
       }
       var slot = tile.querySelector('[data-pg-count]');
@@ -185,12 +189,13 @@
     // 1) Apply search → matched rows
     var searched = allRows.filter(function (tr) { return trMatchesSearch(tr, state.q); });
 
-    // 2) Tile counts use the searched + secondary-attr set, INDEPENDENT of the active tile.
-    refreshTileCounts(tableId, allRows, state.q, state.attr);
+    // 2) Tile counts use the searched + secondary-attr + custom-predicate set, INDEPENDENT of the active tile.
+    refreshTileCounts(tableId, allRows, state.q, state.attr, state.predicate);
 
-    // 3) Apply tile filter + secondary attribute filters on top of searched set → filtered rows
+    // 3) Apply tile filter + secondary attribute filters (+ optional custom predicate) → filtered rows
     var filtered = searched.filter(function (tr) {
-      return trMatchesFilter(tr, state.filter) && trMatchesAttrs(tr, state.attr);
+      return trMatchesFilter(tr, state.filter) && trMatchesAttrs(tr, state.attr) &&
+             (!state.predicate || state.predicate(tr));
     });
 
     // 4) Pagination math
@@ -308,6 +313,14 @@
       if (!state.attr) state.attr = {};
       if (value === null || value === undefined || value === '') delete state.attr[attr];
       else state.attr[attr] = value;
+      state.page = 1;
+      paginate(tableId);
+    },
+    // Custom row predicate, AND-combined with search/tile/attr filters. Pass a
+    // function(tr)->bool, or null to clear. Used for ranges (e.g. date from/to).
+    setPredicate: function (tableId, fn) {
+      var state = getState(tableId);
+      state.predicate = (typeof fn === 'function') ? fn : null;
       state.page = 1;
       paginate(tableId);
     },

@@ -34,7 +34,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -141,8 +141,38 @@
       <!-- Invoices — same data as before, now under the org page -->
       <section class="section mt-6">
         <h3 class="section-title">Invoices</h3>
+        <div class="card mb-4">
+          <div class="grid md:grid-cols-4 gap-4">
+            <div>
+              <label class="label" for="inv-status">Status</label>
+              <select id="inv-status" class="input" onchange="filterOrgInvoices()">
+                <option value="">All statuses</option>
+                <option value="paid">Paid</option>
+                <option value="issued">Issued</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="inv-plan">Plan</label>
+              <select id="inv-plan" class="input" onchange="filterOrgInvoices()">
+                <option value="">All plans</option>
+                <option value="basic">Basic</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="inv-from">Issued from</label>
+              <input id="inv-from" data-datepicker data-pair-max="inv-to" class="input" placeholder="DD/MM/YYYY" onchange="filterOrgInvoices()" />
+            </div>
+            <div>
+              <label class="label" for="inv-to">Issued to</label>
+              <input id="inv-to" data-datepicker data-pair-min="inv-from" class="input" placeholder="DD/MM/YYYY" onchange="filterOrgInvoices()" />
+            </div>
+          </div>
+        </div>
         <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
+          <table class="data-table" id="orgInvoices">
             <thead>
               <tr>
                 <th>#</th>
@@ -157,18 +187,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr data-status="issued" data-plan="standard" data-date="2026-05-21">
                 <td class="muted" style="font-size:12px;">1</td>
                 <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-05-0042</span></td>
                 <td class="text-xs muted">21/05/2026 → 20/06/2026</td>
                 <td class="font-poppins font-semibold">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
+                <td><span class="badge badge-prepaid">Issued</span></td>
                 <td class="muted" style="font-size:13px;">21/05/2026</td>
                 <td class="muted" style="font-size:13px;">28/05/2026</td>
-                <td class="muted" style="font-size:13px;">24/05/2026</td>
+                <td class="muted" style="font-size:13px;">—</td>
                 <td><a href="invoice-detail.html?id=INV-2026-05-0042" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
               </tr>
-              <tr>
+              <tr data-status="paid" data-plan="standard" data-date="2026-04-21">
                 <td class="muted" style="font-size:12px;">2</td>
                 <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-04-0031</span></td>
                 <td class="text-xs muted">21/04/2026 → 20/05/2026</td>
@@ -179,7 +209,7 @@
                 <td class="muted" style="font-size:13px;">24/04/2026</td>
                 <td><a href="invoice-detail.html?id=INV-2026-04-0031" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
               </tr>
-              <tr>
+              <tr data-status="paid" data-plan="standard" data-date="2026-03-21">
                 <td class="muted" style="font-size:12px;">3</td>
                 <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-03-0019</span></td>
                 <td class="text-xs muted">21/03/2026 → 20/04/2026</td>
@@ -190,7 +220,7 @@
                 <td class="muted" style="font-size:13px;">24/03/2026</td>
                 <td><a href="invoice-detail.html?id=INV-2026-03-0019" class="btn btn-secondary !py-1 !px-3 !text-sm">View</a></td>
               </tr>
-              <tr>
+              <tr data-status="paid" data-plan="standard" data-date="2026-02-21">
                 <td class="muted" style="font-size:12px;">4</td>
                 <td><span class="font-poppins font-semibold" style="font-size:13px;font-family:monospace;">INV-2026-02-0008</span></td>
                 <td class="text-xs muted">21/02/2026 → 20/03/2026</td>
@@ -203,6 +233,7 @@
               </tr>
             </tbody>
           </table>
+          <div class="p-3 text-sm muted" id="inv-empty" style="display:none;">No invoices match the selected filters.</div>
         </div>
       </section>
     </main>
@@ -216,7 +247,30 @@
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
+  <script>
+    /* Invoices filter — Status + Plan + Issued-date range. */
+    function filterOrgInvoices() {
+      function iso(v){ var m=(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m? m[3]+'-'+m[2]+'-'+m[1] : ''; }
+      var st = document.getElementById('inv-status').value;
+      var pl = document.getElementById('inv-plan').value;
+      var from = iso(document.getElementById('inv-from').value);
+      var to   = iso(document.getElementById('inv-to').value);
+      var rows = document.querySelectorAll('#orgInvoices tbody tr');
+      var shown = 0;
+      rows.forEach(function (r) {
+        var ok = (!st || r.getAttribute('data-status') === st) &&
+                 (!pl || r.getAttribute('data-plan') === pl) &&
+                 (!from || (r.getAttribute('data-date') || '') >= from) &&
+                 (!to || (r.getAttribute('data-date') || '') <= to);
+        r.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+      });
+      var empty = document.getElementById('inv-empty');
+      if (empty) empty.style.display = shown === 0 ? '' : 'none';
+    }
+  </script>
   <!-- More bottom sheet -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
@@ -230,7 +284,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-06-01 · Admin lease/unit feature pass (renew wizard, Early Termination consent, unit-detail Type column + status-gated create-lease) + auth email-only + Super Admin contact-inbox fix + **PM property/lease clone** (assigned-scoped, incl. NEW pm/create-lease.html) + lease-status label standardization · Solution Overview + Timeline regenerated · maintained by orchestrator
+**Last updated:** 2026-06-01 (cont.) · Prototype listing enhancements (filters / clickable cards / pagination across all roles) + Organizations pagination unified + **NEW Security Guard role (role 6)** with gate-initiated visitor approvals + visitor Type column / filter / code-search · Solution Overview updated for the new role · maintained by orchestrator + `gharsetu-lead`
 
 ---
 
@@ -34,7 +34,16 @@
 
 **Docs:** change-logs `gharsetu-frontend-2026-06-01.md` + `document-agent-2026-05-29.md`; many rows in `docs/planning/prototype-changes.md`; SRS updated (login, business-type, priority); CLAUDE.md Timeline row updated.
 
-**Carry-over:** App port to `apps/web` / `apps/api` for all v8 features still pending. No blockers.
+**Continuation (same day, uncommitted at time of writing):**
+11. **Prototype listing enhancements** — shared infra `Paginator.setPredicate` (range/predicate filter) + `data-search` hidden-token search + `a.kpi` clickable cards. Across roles: clickable dashboard cards → filtered pages; Admin Properties (Total Rooms + Property-Type/Room-Status/Manager filters + clickable tiles), Leases (Lease-Type + wired Property filter), Maintenance (room cascade + raise-form room), Rent (Room column + 5 filters + record-payment room), Settings (Field+Date), Organization (invoice Status/Plan/Date), Delegations All-tab + **new `admin/delegation-activity.html`**; "Specializations" → "Maintenance Specializations" (25 files); PM dashboard/properties/leases filters. Plan: `2026-06-01-prototype-listing-enhancements.md`.
+12. **Organizations pagination unified** — the one bespoke right-aligned footer migrated to the shared centered `.pagination` component (one constant design everywhere).
+13. **NEW Security Guard role (`SECURITY_GUARD=5`)** — gate-level, assigned-properties, Visitor-Management-only. New `prototype/security/` (dashboard + gate console + profile); tenant "Pending approvals"; admin Users role + property assignment; login shortcut (5→6); admin/PM visitors "Awaiting tenant" tile + gate rows. **Gate-initiated flow**: guard logs a walk-in → routes approval to the tenant by lease type (any one co-tenant approves; common area = staff approves; no code). SRS synced (6 roles, matrix, enum, Module 8). Plan: `2026-06-01-security-guard-role.md`.
+14. **Visitor tables (all roles)** — Type column (Pre-approved / Gate), Visitor-type filter, search-by-visitor-code (hidden `data-search`), Property/Unit filters.
+15. **Solution Overview** updated for the new role (Security Guard bullet + tenant approve + guard check-in/out), via `gharsetu-lead`.
+
+**Docs (cont.):** `gharsetu-frontend-2026-06-01.md` Tasks 5–6 + `gharsetu-lead-2026-06-01.md`; ~16 rows in `prototype-changes.md`; SRS roles 5→6 + Module 8; two new feature plans.
+
+**Carry-over:** App port to `apps/web` / `apps/api` for all v8 features still pending (incl. the Security Guard backend: `security_guard_properties` join, `visitor_requests` columns, RBAC, new enums). No blockers.
 
 ---
 

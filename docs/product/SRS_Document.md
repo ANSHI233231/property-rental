@@ -23,7 +23,7 @@ GharSetu replaces paper folders, spreadsheets, and WhatsApp groups. It centraliz
 
 ## 2. Stakeholders & Roles
 
-The platform has **five roles** — four operational roles inside each organization plus one platform-level role. **Public Organization sign-up is in scope** (Super Admin approval gate). Tenant self-signup is not in scope (tenant accounts auto-create at lease signing). Admin / PM / Maintenance accounts are created internally by Admin within an organization.
+The platform has **six roles** — five operational roles inside each organization plus one platform-level role. **Public Organization sign-up is in scope** (Super Admin approval gate). Tenant self-signup is not in scope (tenant accounts auto-create at lease signing). Admin / PM / Maintenance / Security Guard accounts are created internally by Admin within an organization.
 
 | Role | Scope | Can Do | Cannot Do |
 |---|---|---|---|
@@ -31,7 +31,8 @@ The platform has **five roles** — four operational roles inside each organizat
 | **Admin** | All properties + users within own organization | Manage properties, users, settings, Master Data; view all alerts and reports; impersonate PM / Maintenance / Tenant within own organization; delegate tasks within a window | Cross-organization reads or writes · impersonate Super Admin or another Admin |
 | **Property Manager (PM)** | Assigned properties within an organization | Create tenants & leases, record rent payments, raise and assign maintenance, manage visitors, manage day-to-day ops | View other PMs' properties · record payments outside their assigned scope · cross-organization access |
 | **Maintenance Staff** | Their assigned requests only | Read + update existing maintenance requests; move to In-Progress; mark Resolved | Create new requests · see rent / lease / financial data · cross-property reads |
-| **Tenant** | Their own lease + unit | View own lease, view payment history, raise maintenance requests, close own resolved requests, pre-approve visitors | Record payments · see other tenants/units · reopen closed requests |
+| **Tenant** | Their own lease + unit | View own lease, view payment history, raise maintenance requests, close own resolved requests, pre-approve visitors, **approve/deny gate visitor requests for their own unit/room** | Record payments · see other tenants/units · reopen closed requests |
+| **Security Guard** | Assigned properties (gate level) | All Visitor Management actions — register, approve/deny (common-area), check-in / check-out, and **raise a gate approval request routed to the tenant** of the visited unit/room | Anything outside Visitor Management · other properties · cross-organization · leases / rent / maintenance / users |
 
 ---
 
@@ -97,6 +98,13 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 | All Requests | `maintenance/all-requests.html` | Read-only view of open requests (no rent/lease data) |
 | Request detail | `maintenance/maintenance-detail.html` | Request detail + resolve (≥20-char notes) |
 | My Profile | `maintenance/profile.html` | Account |
+
+### Security Guard (assigned properties — Visitor Management only)
+| Page | File | Purpose |
+|---|---|---|
+| Dashboard | `security/dashboard.html` | Gate KPIs (Today's visits · Awaiting tenant · Checked-in now · Denied today) — clickable to the filtered log |
+| Gate console | `security/visitors.html` | Log gate arrivals (route approval to tenant by lease type) · approve/deny common-area · check-in / check-out · filters + pagination |
+| My Profile | `security/profile.html` | Account |
 
 ### Tenant (own lease only)
 | Page | File | Purpose |
@@ -176,8 +184,9 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 ### Module 8 — Visitor Management
 - **Lifecycle:** Tenant pre-approves (name · phone · unit · purpose · expected date/time) → system generates a **Visitor Code** (`VIS-XXXX`, 4-char alphanumeric) shared with the tenant → PM/Admin **Approves** or **Denies** → on arrival the visitor presents their code → PM/Admin **enters the code** in the check-in modal (validated against the stored code; mismatch is blocked) → **Checked-in** → on departure **Checked-out**. Statuses: `pending → approved → checked-in → checked-out` (or `denied`).
 - **Visitor Code** is a gate-validation token — shown to the **tenant** (who shares it with their visitor) but **never displayed to PM/Admin**. PM/Admin enter it at check-in to confirm identity without any integration with physical gate hardware.
-- **Roles:** Tenant = pre-approve only. PM = Approve/Deny/Check-in(validate)/Check-out for their assigned properties. Admin = same as PM but org-wide (all properties, with Property → Unit filter).
-- Purpose sourced from **Visit Purposes Master Data** (NR-3). Unit picker shows property + unit label. No SMS / gate-hardware integration.
+- **Gate-initiated flow (Security Guard):** an unannounced visitor at the gate is logged by the **Security Guard** (name · phone · purpose · Property → Unit (→ Room)). The system routes an **approval request** to the tenant(s) of the lease covering that unit (unit-wise) or room (room-wise); the request shows in the tenant portal (`awaiting_tenant_approval`). **Any one co-tenant** approves or denies — there is **no Visitor Code** (tenant approval is the gate) and **no auto-approval** (a request stays pending until acted on, is cancellable by the guard, and may only become `expired` if the org enables an expiry Setting). On approval the guard checks the visitor in; on deny the visitor is turned away. **Common/shared-area** visits are approved by the Guard/PM/Admin directly (no tenant routing).
+- **Roles:** Tenant = pre-approve + **approve/deny gate requests for their own unit/room**. Security Guard = full Visitor Management for **assigned properties** (register, approve/deny common-area, check-in/check-out, raise gate requests). PM = Approve/Deny/Check-in(validate)/Check-out for assigned properties. Admin = same org-wide. The Visitor Code applies only to the **tenant-pre-approved** flow.
+- Purpose sourced from **Visit Purposes Master Data** (NR-3). Unit/room picker shows property + unit (+ room) label. No SMS / email / WhatsApp / gate-hardware integration (in-app only). Statuses add `awaiting_tenant_approval` (and optional `expired`) at the next free wire-stable smallints.
 
 ### Module 9 — Admin Impersonation & Task Delegation
 - **Impersonation:** an Admin may impersonate a PM / Maintenance / Tenant **within their own organization**. Every action is recorded against the **Admin** in the audit log; the Admin cannot impersonate the Super Admin or anyone outside their org (NR-7).
@@ -511,7 +520,7 @@ The server still issues short-lived access tokens + revocable refresh tokens for
 - **Error codes:** use the named codes from API spec §5 verbatim (`LEASE_UNIT_OCCUPIED`, `DUPLICATE_ACTIVE_LEASE`, etc.).
 - **Pagination:** cursor-based, default 20 rows, `?cursor=` + `meta: { next_cursor, has_more }`.
 - **Rate limit:** 100 requests / minute per authenticated user → `429 RATE_LIMIT_EXCEEDED`.
-- **Role enum (uppercase):** `ADMIN | MANAGER | MAINTENANCE | TENANT` (v1 spec). **v8 uses five wire-stable smallint roles:** `ADMIN=0 · PROPERTY_MANAGER=1 · MAINTENANCE=2 · TENANT=3 · SUPER_ADMIN=4` (`MANAGER` → `PROPERTY_MANAGER`). Never renumber; new states take the next free integer.
+- **Role enum (uppercase):** `ADMIN | MANAGER | MAINTENANCE | TENANT` (v1 spec). **v8 uses six wire-stable smallint roles:** `ADMIN=0 · PROPERTY_MANAGER=1 · MAINTENANCE=2 · TENANT=3 · SUPER_ADMIN=4 · SECURITY_GUARD=5` (`MANAGER` → `PROPERTY_MANAGER`). Never renumber; new states take the next free integer.
 - **Voided payments:** `is_voided = true` flag with `voided_by` + `void_reason`. Original record never deleted (append-only).
 - **Prepaid credits:** stored in a separate `prepaid_credits` table, not inline on `rent_periods`.
 - **Property timezone:** stored per-property (default `Asia/Kolkata`). Allows future expansion to other Indian cities.

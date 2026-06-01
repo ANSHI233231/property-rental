@@ -33,7 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -677,9 +677,10 @@
 
       <form id="addUserForm" novalidate onsubmit="return saveAddUser()">
         <label class="label" for="role">Role</label>
-        <select id="role" name="role" class="input" onchange="document.getElementById('specRow').style.display = this.value === 'MAINTENANCE' ? 'block' : 'none'">
+        <select id="role" name="role" class="input" onchange="document.getElementById('specRow').style.display = this.value === 'MAINTENANCE' ? 'block' : 'none'; document.getElementById('propRow').style.display = this.value === 'SECURITY_GUARD' ? 'block' : 'none';">
           <option value="PROPERTY_MANAGER" selected>Property Manager</option>
           <option value="MAINTENANCE">Maintenance Staff</option>
+          <option value="SECURITY_GUARD">Security Guard</option>
         </select>
 
         <div class="grid grid-cols-2 gap-3 mt-4">
@@ -724,6 +725,16 @@
         <div class="mt-4" id="specRow" style="display:none">
           <label class="label">Specializations <span class="muted font-normal">(select one or more)</span></label>
           <div id="specCheckboxes" class="grid grid-cols-2 gap-2 mt-1"></div>
+          <div class="field-error"></div>
+        </div>
+
+        <div class="mt-4" id="propRow" style="display:none">
+          <label class="label">Assigned properties <span class="muted font-normal">(the gates this guard covers)</span></label>
+          <div class="grid grid-cols-2 gap-2 mt-1">
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="guard-prop" value="green-valley" style="accent-color:var(--color-saffron);"> Green Valley, Dwarka</label>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="guard-prop" value="sai-heights" style="accent-color:var(--color-saffron);"> Sai Heights, Lajpat Nagar</label>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="guard-prop" value="mayur-vihar" style="accent-color:var(--color-saffron);"> Mayur Vihar Residency</label>
+          </div>
           <div class="field-error"></div>
         </div>
 
@@ -1077,7 +1088,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

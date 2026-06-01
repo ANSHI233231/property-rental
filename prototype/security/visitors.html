@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>Visitors · PM · GharSetu</title>
+  <title>Visitors · Security · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -18,11 +18,6 @@
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <nav class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
-        <a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-        <a href="leases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
-        <a href="tenants.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
-        <a href="rent-collection.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent Collection</a>
-        <a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
         <a href="visitors.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
       </nav>
       <div class="sidebar-footer">
@@ -33,10 +28,10 @@
         </button>
         <div class="account-menu" id="accountMenu" role="menu">
           <div class="account-menu-header">
-            <div class="account-menu-avatar">SA</div>
+            <div class="account-menu-avatar">RG</div>
             <div>
-              <div class="account-menu-name">Sunita</div>
-              <div class="account-menu-role">PM</div>
+              <div class="account-menu-name">Ramesh</div>
+              <div class="account-menu-role">Security Guard</div>
             </div>
           </div>
           <div class="account-menu-divider"></div>
@@ -56,8 +51,9 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">Visitors</h1>
+          <h1 class="page-title">Gate · Visitors</h1>
         </div>
+        <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('gateModal').classList.add('open')">+ Log Gate Arrival</button>
       </header>
 
       <!-- Filter tiles -->
@@ -154,7 +150,18 @@
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A &middot; routed to Raj Sharma</div></td>
               <td>Now · at gate</td>
               <td><span class="badge badge-partial">Awaiting tenant</span></td>
-              <td><span class="text-xs muted">Logged by guard · awaiting tenant</span></td>
+              <td><div class="flex gap-2 flex-wrap">
+                <span class="text-xs muted">Waiting for tenant approval</span>
+                <button class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="gsToast('Gate request cancelled.')">Cancel</button>
+              </div></td>
+            </tr>
+            <tr data-type="gate" data-property="green-valley" data-unit="1B" id="visitor-row-G2" data-status="approved"><td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Sana Khan</td><td><span class="badge badge-renewed">Gate</span></td>
+              <td>98300 55221</td><td>Guest</td>
+              <td>Green Valley, Dwarka<div class="text-xs muted">Unit 1B &middot; approved by tenant</div></td>
+              <td>Now · at gate</td>
+              <td><span class="badge badge-prepaid">Approved</span></td>
+              <td><button class="btn btn-primary !py-1 !px-3 !text-sm" onclick="gsToast('Visitor checked in.')">Check-in</button></td>
             </tr>
             <tr data-type="preapproved" data-search="VIS-B3M9" data-property="green-valley" data-unit="3A" id="visitor-row-1" data-status="pending" data-visitor-code="VIS-B3M9"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
@@ -270,6 +277,60 @@
   </div>
 
 
+  <!-- Log Gate Arrival — unannounced visitor; routes an approval request to the tenant by lease type -->
+  <div class="modal-backdrop" id="gateModal" role="dialog" aria-modal="true" aria-labelledby="gateModalTitle">
+    <form class="modal" style="max-width:540px;" onsubmit="event.preventDefault(); submitGateArrival();">
+      <h3 id="gateModalTitle" class="m-0">Log Gate Arrival</h3>
+      <p class="text-sm muted mt-1 mb-4">Log an unannounced visitor. For a unit or room, an approval request is sent to the tenant; the visitor enters once any one tenant approves. Common-area visitors you approve here directly.</p>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="label" for="gate-name">Visitor name <span style="color:var(--color-saffron)">*</span></label>
+          <input id="gate-name" class="input" placeholder="Full name" required />
+        </div>
+        <div>
+          <label class="label" for="gate-phone">Mobile <span style="color:var(--color-saffron)">*</span></label>
+          <input id="gate-phone" class="input" inputmode="numeric" placeholder="10-digit mobile" required oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="label" for="gate-purpose">Purpose <span style="color:var(--color-saffron)">*</span></label>
+        <input id="gate-purpose" class="input" placeholder="e.g. Delivery, Guest, Service" required />
+      </div>
+      <label class="flex items-center gap-2 text-sm mb-4" style="cursor:pointer;">
+        <input type="checkbox" id="gate-common" onchange="toggleGateCommon(this)" style="accent-color:var(--color-saffron);width:16px;height:16px;"> Common / shared area (no specific tenant — you approve directly)
+      </label>
+      <div id="gate-target" class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="label" for="gate-prop">Property <span style="color:var(--color-saffron)">*</span></label>
+          <select id="gate-prop" class="input" data-searchable>
+            <option value="">Select</option>
+            <option>Green Valley, Dwarka</option>
+            <option>Sai Heights, Lajpat Nagar</option>
+            <option>Mayur Vihar Residency</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="gate-unit">Unit <span style="color:var(--color-saffron)">*</span></label>
+          <select id="gate-unit" class="input" data-searchable>
+            <option value="">Select</option>
+            <option>1A</option><option>1B</option><option>2A</option><option>3A</option><option>4B</option><option>5B</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="gate-room">Room <span class="muted" style="font-weight:400;font-size:11px;">(if room-wise)</span></label>
+          <select id="gate-room" class="input">
+            <option value="">Whole unit</option>
+            <option>Room A</option><option>Room B</option><option>Room C</option><option>Room D</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('gateModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="gate-submit-btn">Send request to tenant</button>
+      </div>
+    </form>
+  </div>
+
   <div class="modal-backdrop" id="modal-approve" role="dialog" aria-modal="true" aria-labelledby="modal-approve-title">
     <div class="modal" style="max-width:480px;">
       <h3 id="modal-approve-title">Approve visitor?</h3>
@@ -318,22 +379,15 @@
     </div>
   </div>
 
-  <nav class="tabbar" aria-label="PM navigation (mobile)">
+  <nav class="tabbar" aria-label="Security navigation (mobile)">
     <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
-    <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
-    <a href="tenants.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Tenants</a>
-    <a href="rent-collection.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
-    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+    <a href="visitors.html" class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Visitors</a>
+    <a href="profile.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>Profile</a>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
 
   <!-- More bottom sheet (PM overflow nav) -->
-  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
-  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
-    <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
-    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
-    <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
     <a href="visitors.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
@@ -342,6 +396,27 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
+  <script src="../assets/searchable-select.js"></script>
+  <script>
+    /* Common-area toggle hides the unit/room target (no tenant routing). */
+    function toggleGateCommon(cb) {
+      var target = document.getElementById('gate-target');
+      target.style.display = cb.checked ? 'none' : '';
+      document.getElementById('gate-submit-btn').textContent = cb.checked ? 'Approve & log' : 'Send request to tenant';
+      ['gate-prop','gate-unit'].forEach(function (id) { document.getElementById(id).required = !cb.checked; });
+    }
+    function submitGateArrival() {
+      var common = document.getElementById('gate-common').checked;
+      document.getElementById('gateModal').classList.remove('open');
+      if (common) {
+        gsToast('Common-area visitor approved and logged.');
+      } else {
+        var unit = document.getElementById('gate-unit').value || 'the unit';
+        var room = document.getElementById('gate-room').value;
+        gsToast('Approval request sent to the tenant of ' + unit + (room ? ' · ' + room : '') + '.');
+      }
+    }
+  </script>
   <script>
     var TABLE_ID = 'tbl-visitors';
 
@@ -461,10 +536,10 @@
   <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
     <div class="account-sheet-handle" aria-hidden="true"></div>
     <div class="account-menu-header">
-      <div class="account-menu-avatar">SA</div>
+      <div class="account-menu-avatar">RG</div>
       <div>
-        <div class="account-menu-name">Sunita</div>
-        <div class="account-menu-role">PM</div>
+        <div class="account-menu-name">Ramesh</div>
+        <div class="account-menu-role">Security Guard</div>
       </div>
     </div>
     <div class="account-menu-divider"></div>

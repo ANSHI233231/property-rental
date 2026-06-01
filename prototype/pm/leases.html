@@ -91,11 +91,19 @@
           </div>
           <div>
             <label class="label" for="propertyFilter">Property</label>
-            <select id="propertyFilter" class="input" data-searchable>
-              <option>All properties</option>
-              <option>Green Valley, Dwarka</option>
-              <option>Sai Heights, Lajpat Nagar</option>
-              <option>Mayur Vihar Residency</option>
+            <select id="propertyFilter" class="input" data-searchable onchange="Paginator.setAttrFilter('tbl-leases','data-property',this.value)">
+              <option value="">All properties</option>
+              <option value="green-valley">Green Valley, Dwarka</option>
+              <option value="sai-heights">Sai Heights, Lajpat Nagar</option>
+              <option value="mayur-vihar">Mayur Vihar Residency</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="leaseTypeFilter">Lease type</label>
+            <select id="leaseTypeFilter" class="input" onchange="Paginator.setAttrFilter('tbl-leases','data-lease-type',this.value)">
+              <option value="">All types</option>
+              <option value="unit">Unit-wise</option>
+              <option value="room">Room-wise</option>
             </select>
           </div>
         </div>
@@ -108,7 +116,7 @@
           </thead>
           <tbody>
             <!-- 4 active rows -->
-            <tr data-status="active" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="active" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2100" class="text-royal-blue">#L-2100</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
@@ -117,7 +125,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="lease-detail.html?id=L-2100" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="active" data-property="green-valley" data-unit="1B"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="active" data-property="green-valley" data-unit="1B"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2101" class="text-royal-blue">#L-2101</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 1B</div></td>
@@ -126,7 +134,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="lease-detail.html?id=L-2101" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="active" data-property="green-valley" data-unit="1A"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="active" data-property="green-valley" data-unit="1A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2103" class="text-royal-blue">#L-2103</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 1A</div></td>
@@ -135,7 +143,7 @@
               <td><span class="badge badge-active">Active</span></td>
               <td><a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="active" data-property="sai-heights" data-unit="4B"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="active" data-property="sai-heights" data-unit="4B"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2105" class="text-royal-blue">#L-2105</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit 4B</div></td>
@@ -145,7 +153,7 @@
               <td><a href="lease-detail.html?id=L-2105" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
             <!-- 2 upcoming rows -->
-            <tr data-status="upcoming" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="upcoming" data-property="green-valley" data-unit="3A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2245" class="text-royal-blue">#L-2245</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
@@ -154,7 +162,7 @@
               <td><span class="badge badge-prepaid">Upcoming</span></td>
               <td><a href="lease-detail.html?id=L-2245" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
-            <tr data-status="upcoming" data-property="sai-heights" data-unit="PG-101" data-room="Room-A"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="room" data-status="upcoming" data-property="sai-heights" data-unit="PG-101" data-room="Room-A"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2204" class="text-royal-blue">#L-2204</a></td>
               <td><span class="badge badge-renewed">Room-wise</span></td>
               <td>Sai Heights, Lajpat Nagar<div class="text-xs muted">Unit PG-101 · Room A</div></td>
@@ -164,7 +172,7 @@
               <td><a href="lease-detail.html?id=L-2204" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
             <!-- 1 expired row (Ended) -->
-            <tr data-status="expired" data-property="mayur-vihar" data-unit="2B"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="expired" data-property="mayur-vihar" data-unit="2B"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2090" class="text-royal-blue">#L-2090</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Mayur Vihar Residency<div class="text-xs muted">Unit 2B</div></td>
@@ -174,7 +182,7 @@
               <td><a href="lease-detail.html?id=L-2090" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
             </tr>
             <!-- 1 terminated row -->
-            <tr data-status="terminated" data-property="mayur-vihar" data-unit="5C"><td data-pg-serial class="muted"></td>
+            <tr data-lease-type="unit" data-status="terminated" data-property="mayur-vihar" data-unit="5C"><td data-pg-serial class="muted"></td>
               <td class="font-mono text-xs"><a href="lease-detail.html?id=L-2080" class="text-royal-blue">#L-2080</a></td>
               <td><span class="badge badge-closed">Unit-wise</span></td>
               <td>Mayur Vihar Residency<div class="text-xs muted">Unit 5C</div></td>

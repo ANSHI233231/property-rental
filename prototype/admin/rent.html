@@ -33,7 +33,7 @@
           </div>
           <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
           <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
-          <a href="master-data/specializations.html" class="sidebar-sublink">Specializations</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
           <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
           <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
         </div>
@@ -98,7 +98,7 @@
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>Tenant</th><th>Unit</th><th>Property</th><th>Due Date</th><th>Outstanding</th><th>Late Fee</th><th>Days Late</th></tr>
+              <tr><th>Tenant</th><th>Unit</th><th>Room</th><th>Property</th><th>Due Date</th><th>Outstanding</th><th>Late Fee</th><th>Days Late</th></tr>
             </thead>
             <tbody>
               <tr>
@@ -166,109 +166,152 @@
           </button>
         </div>
 
+        <section class="card mb-4">
+          <div class="grid md:grid-cols-5 gap-4">
+            <div>
+              <label class="label" for="rent-search">Tenant</label>
+              <input id="rent-search" class="input" placeholder="Tenant name" data-pg-search="tbl-rent" />
+            </div>
+            <div>
+              <label class="label" for="rent-prop">Property</label>
+              <select id="rent-prop" class="input" data-searchable onchange="Paginator.setAttrFilter('tbl-rent','data-property',this.value)">
+                <option value="">All properties</option>
+                <option value="green-valley">Green Valley</option>
+                <option value="sai-heights">Sai Heights</option>
+                <option value="mayur-vihar">Mayur Vihar</option>
+                <option value="rohini-greens">Rohini Greens</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="rent-unit">Unit</label>
+              <select id="rent-unit" class="input" data-searchable onchange="Paginator.setAttrFilter('tbl-rent','data-unit',this.value)">
+                <option value="">All units</option>
+                <option value="1A">1A</option><option value="1C">1C</option><option value="2A">2A</option><option value="2B">2B</option><option value="2D">2D</option><option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="4A">4A</option><option value="4B">4B</option><option value="5B">5B</option><option value="5C">5C</option><option value="6A">6A</option><option value="6C">6C</option><option value="6D">6D</option><option value="7C">7C</option><option value="8B">8B</option><option value="9A">9A</option><option value="10B">10B</option><option value="11C">11C</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="rent-room">Room</label>
+              <select id="rent-room" class="input" onchange="Paginator.setAttrFilter('tbl-rent','data-room',this.value)">
+                <option value="">All rooms</option>
+                <option value="a">Room A</option><option value="b">Room B</option><option value="c">Room C</option><option value="d">Room D</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="rent-pm">Property Manager</label>
+              <select id="rent-pm" class="input" onchange="Paginator.setAttrFilter('tbl-rent','data-pm',this.value)">
+                <option value="">All PMs</option>
+                <option value="sunita-arora">Sunita Arora</option>
+                <option value="manoj-verma">Manoj Verma</option>
+                <option value="pooja-khanna">Pooja Khanna</option>
+                <option value="anil-kapoor">Anil Kapoor</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
         <div class="card p-0 overflow-x-auto">
           <table class="data-table" id="tbl-rent">
             <thead>
               <tr><th class="w-12">#</th><th>Tenant</th><th>Unit</th><th>Property</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td>7C</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹22,000</td>
+              <tr data-status="paid" data-tenant="rohan-mehta" data-property="green-valley" data-unit="7C" data-room="a" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td>7C</td><td>Room A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹22,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Anjali Verma</td><td>4B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹32,000</td><td>₹32,000</td>
+              <tr data-status="paid" data-tenant="anjali-verma" data-property="sai-heights" data-unit="4B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Anjali Verma</td><td>4B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹32,000</td><td>₹32,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>1A</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹26,000</td><td>₹26,000</td>
+              <tr data-status="paid" data-tenant="suresh-kumar" data-property="sai-heights" data-unit="1A" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>1A</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹26,000</td><td>₹26,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Priya Patel</td><td>2A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹19,500</td><td>₹19,500</td>
+              <tr data-status="paid" data-tenant="priya-patel" data-property="green-valley" data-unit="2A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Priya Patel</td><td>2A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹19,500</td><td>₹19,500</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Akash Joshi</td><td>4A</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹33,000</td><td>₹33,000</td>
+              <tr data-status="paid" data-tenant="akash-joshi" data-property="mayur-vihar" data-unit="4A" data-room="b" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Akash Joshi</td><td>4A</td><td>Room B</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹33,000</td><td>₹33,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Kavita Singh</td><td>5C</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹28,000</td><td>₹28,000</td>
+              <tr data-status="paid" data-tenant="kavita-singh" data-property="mayur-vihar" data-unit="5C" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Kavita Singh</td><td>5C</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹28,000</td><td>₹28,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>2D</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹21,000</td><td>₹21,000</td>
+              <tr data-status="paid" data-tenant="divya-nair" data-property="rohini-greens" data-unit="2D" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>2D</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹21,000</td><td>₹21,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Sanjay Rawat</td><td>6A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹20,500</td><td>₹20,500</td>
+              <tr data-status="paid" data-tenant="sanjay-rawat" data-property="green-valley" data-unit="6A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Sanjay Rawat</td><td>6A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹20,500</td><td>₹20,500</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Meena Gupta</td><td>3B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹27,000</td><td>₹27,000</td>
+              <tr data-status="paid" data-tenant="meena-gupta" data-property="sai-heights" data-unit="3B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Meena Gupta</td><td>3B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹27,000</td><td>₹27,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="paid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Neha Jain</td><td>8B</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹29,000</td>
+              <tr data-status="paid" data-tenant="neha-jain" data-property="sai-heights" data-unit="8B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Neha Jain</td><td>8B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹29,000</td>
                 <td><span class="badge badge-paid">Paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td><td>2B</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹10,000</td>
+              <tr data-status="partial" data-tenant="vikram-mehta" data-property="green-valley" data-unit="2B" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td><td>2B</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹10,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Rahul Tiwari</td><td>9A</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹35,000</td><td>₹20,000</td>
+              <tr data-status="partial" data-tenant="rahul-tiwari" data-property="mayur-vihar" data-unit="9A" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Rahul Tiwari</td><td>9A</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹35,000</td><td>₹20,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="partial"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Mohan Das</td><td>10B</td><td>Green Valley</td><td>Sunita Arora</td><td>₹25,000</td><td>₹15,000</td>
+              <tr data-status="partial" data-tenant="mohan-das" data-property="green-valley" data-unit="10B" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Mohan Das</td><td>10B</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹25,000</td><td>₹15,000</td>
                 <td><span class="badge badge-partial">Partial</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Raj Sharma + Priya</td><td>3A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹18,000</td><td>₹0</td>
+              <tr data-status="overdue" data-tenant="raj-sharma-priya" data-property="green-valley" data-unit="3A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Raj Sharma + Priya</td><td>3A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹18,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Aman Khan</td><td>1C</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹15,500</td><td>₹0</td>
+              <tr data-status="overdue" data-tenant="aman-khan" data-property="rohini-greens" data-unit="1C" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Aman Khan</td><td>1C</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹15,500</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Sunita Chauhan</td><td>3C</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹18,000</td><td>₹0</td>
+              <tr data-status="overdue" data-tenant="sunita-chauhan" data-property="rohini-greens" data-unit="3C" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Sunita Chauhan</td><td>3C</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹18,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="overdue"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Pooja Bhatia</td><td>11C</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹31,000</td><td>₹0</td>
+              <tr data-status="overdue" data-tenant="pooja-bhatia" data-property="sai-heights" data-unit="11C" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Pooja Bhatia</td><td>11C</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹31,000</td><td>₹0</td>
                 <td><span class="badge badge-overdue">Overdue</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td><td>5B</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹34,000</td><td>₹40,000</td>
+              <tr data-status="prepaid" data-tenant="vikram-singh" data-property="mayur-vihar" data-unit="5B" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td><td>5B</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹34,000</td><td>₹40,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>6D</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹23,000</td><td>₹28,000</td>
+              <tr data-status="prepaid" data-tenant="divya-nair" data-property="rohini-greens" data-unit="6D" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>6D</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹23,000</td><td>₹28,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
-              <tr data-status="prepaid"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>6C</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹35,000</td>
+              <tr data-status="prepaid" data-tenant="suresh-kumar" data-property="sai-heights" data-unit="6C" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
+                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>6C</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹35,000</td>
                 <td><span class="badge badge-prepaid">Pre-paid</span></td>
                 <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
               </tr>
@@ -309,6 +352,17 @@
           <option>Anjali Verma · Unit 4B · Sai Heights (PM: Manoj Verma)</option>
           <option>Aman Khan · Unit 1C · Rohini Greens (PM: Anil Kapoor)</option>
           <option>Akash Joshi · Unit 4A · Mayur Vihar (PM: Pooja Khanna)</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="label" for="ap-room">Room <span class="muted" style="font-weight:400;font-size:12px;">(room-based leases only)</span></label>
+        <select id="ap-room" class="input">
+          <option value="">Whole unit / not room-based</option>
+          <option value="a">Room A</option>
+          <option value="b">Room B</option>
+          <option value="c">Room C</option>
+          <option value="d">Room D</option>
         </select>
       </div>
 
@@ -379,7 +433,7 @@
     <div class="more-sheet-section-header">Master Data</div>
     <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
     <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
-    <a href="master-data/specializations.html" class="more-sheet-sublink">Specializations</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
     <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
     <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
     <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>

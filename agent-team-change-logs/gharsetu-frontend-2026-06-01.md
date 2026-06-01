@@ -46,3 +46,31 @@ Date: 2026-06-01
 - App port to `apps/web` / `apps/api` for all v8 features remains pending (prototype is the design contract).
 
 ---
+
+## Task 5 — Prototype listing enhancements (filters · clickable cards · pagination)
+- **Status:** ✅ Completed · Plan: `docs/planning/features/2026-06-01-prototype-listing-enhancements.md`
+- **Shared infra:** `assets/paginate.js` gained **`Paginator.setPredicate(tableId, fn)`** (custom/range row predicate, AND-combined with search/tile/attr; powers all date-range filters) and later **`data-search`** support in `trMatchesSearch` (scan a hidden attr so the visitor code stays hidden but searchable). `assets/styles.css` gained **`a.kpi`** clickable-card styling (hover/focus, reduced-motion).
+- **Super Admin:** dashboard cards clickable → filtered pages; Organizations **Contact column + Created-date range filter** + contact search **and migrated to the shared Paginator** (fixing a bespoke right-aligned footer → one constant pagination design); Contact Inbox **received-date range filter**.
+- **Admin:** dashboard cards clickable; **Properties** Total-Rooms column + Property-Type/Room-Status filters + Manager filter wired + clickable tiles; **Leases** Lease-Type filter + wired the dead Property filter; **Delegations** All-status tab + **new `delegation-activity.html`**; **Maintenance** room cascade filter + room field in raise form; **Rent** Room column + 5 filters (Tenant/Property/Unit/Room/PM) + room in Record Payment; **Settings** Field+Date filter; **Organization** invoice Status/Plan/Date filters; **Master Data** "Specializations" → "Maintenance Specializations" (25 files).
+- **PM:** dashboard cards clickable; Properties Rooms column + Room-status filter; Leases Property + Lease-Type filters wired.
+
+## Task 6 — NEW ROLE: Security Guard + gate-initiated visitor approvals
+- **Status:** ✅ Completed (prototype) · Plan: `docs/planning/features/2026-06-01-security-guard-role.md`
+- **`SECURITY_GUARD=5`** — org-scoped, assigned properties, Visitor-Management-only, email login.
+- **New `prototype/security/`**: `dashboard.html` (gate KPIs, clickable), `visitors.html` (gate console — "Log Gate Arrival" routes an approval request to the tenant by lease type; common-area = guard approves directly, no code; approve/deny/check-in/out), `profile.html`; guard-only nav.
+- **`tenant/visitors.html`**: "Pending approvals" section (any one co-tenant approves/denies; section hides when none).
+- **`admin/users.html`**: Security Guard role option + assigned-properties checkboxes. **`login.html`**: guard preview shortcut (grid 5→6). **`admin/visitors.html` + `pm/visitors.html`**: "Awaiting tenant" tile + gate rows.
+- **All visitor tables (admin/pm/security/tenant):** added a **Type** column (Pre-approved / Gate), a **Visitor-type filter**, **search-by-visitor-code** (hidden `data-search`), and **Property/Unit filters** (admin cascade; pm/security selects; tenant single-unit → type+code only).
+- **SRS synced:** roles 5→6, matrix (Guard row + amended Tenant), enum `SECURITY_GUARD=5`, Module 8 gate flow + `awaiting_tenant_approval`, page map.
+- **Solution Overview** (with `gharsetu-lead`): added the Security Guard role bullet to Visitor Management; tenant bullet now "register + approve gate visitor requests"; check-in/out bullet now includes Security Guard. (See `gharsetu-lead-2026-06-01.md`.)
+
+### Bug fixes this session
+- Super Admin Organizations pagination was a bespoke right-aligned footer → migrated to the shared centered `.pagination` component (one constant design).
+- Broken HTML comments `<\!--` → `<!--` on `security/dashboard.html` + `admin/delegation-activity.html` (zsh mangled `!` in a heredoc; they were rendering as visible text).
+
+### Verification
+- `node --check` on all changed inline JS + `assets/paginate.js` — all pass.
+- Scope: PM/Security pages assigned-scoped; Guard pages carry no other-module links.
+- python-docx round-trip on `Solution_Overview.docx` after each bullet edit.
+
+---

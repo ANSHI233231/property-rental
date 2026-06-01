@@ -59,6 +59,29 @@
         <button class="btn btn-primary !py-2 !text-sm" onclick="openPreapproveModal()" aria-label="Pre-approve a new visitor">+ Pre-approve Visitor</button>
       </header>
 
+      <!-- Pending gate approvals — only shown when a security guard has a visitor awaiting this tenant's approval -->
+      <section class="section" id="pending-approvals">
+        <h3 class="section-title">Pending approvals <span class="badge badge-partial" id="pa-count" style="vertical-align:middle;">1</span></h3>
+        <p class="text-sm muted mb-3">A security guard has logged a visitor at the gate for your home. Approve to let them in, or deny to turn them away.</p>
+        <div id="pa-list">
+          <div class="card" id="gate-req-1" data-gate-req>
+            <div class="flex items-center justify-between flex-wrap gap-3">
+              <div class="flex items-center gap-3">
+                <div class="avatar" style="width:44px;height:44px;font-size:16px;">IS</div>
+                <div>
+                  <div class="font-poppins font-semibold text-charcoal">Imran Sheikh</div>
+                  <div class="text-sm muted">Delivery — Amazon · 98220 11334 · for Unit 3A · raised just now</div>
+                </div>
+              </div>
+              <div class="flex gap-2 flex-shrink-0">
+                <button class="btn btn-primary !py-2 !text-sm" onclick="resolveGateReq('gate-req-1','approved')">Approve</button>
+                <button class="btn btn-danger !py-2 !text-sm" onclick="resolveGateReq('gate-req-1','denied')">Deny</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Filter tiles -->
       <div class="filter-tiles mb-6" role="group" aria-label="Filter visitors by status">
         <button type="button" class="filter-tile active" data-tile-for="tbl-my-visitors" data-tile-filter="all"
@@ -98,7 +121,15 @@
         <div class="grid md:grid-cols-2 gap-4">
           <div>
             <label class="label" for="myVisitorSearch">Search</label>
-            <input id="myVisitorSearch" class="input" data-pg-search="tbl-my-visitors" placeholder="Search visitor name · phone · purpose…" />
+            <input id="myVisitorSearch" class="input" data-pg-search="tbl-my-visitors" placeholder="Name, phone, purpose or visitor code" />
+          </div>
+          <div>
+            <label class="label" for="flt-type">Visitor type</label>
+            <select id="flt-type" class="input" onchange="Paginator.setAttrFilter('tbl-my-visitors','data-type',this.value)">
+              <option value="">All types</option>
+              <option value="preapproved">Pre-approved</option>
+              <option value="gate">Gate</option>
+            </select>
           </div>
         </div>
       </section>
@@ -109,7 +140,7 @@
           <thead>
             <tr><th class="w-12">#</th>
               <th>Visitor Code</th>
-              <th>Visitor</th>
+              <th>Visitor</th><th>Type</th>
               <th>Property · Unit</th>
               <th>Phone</th>
               <th>Purpose</th>
@@ -119,8 +150,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr data-status="pending"><td data-pg-serial class="muted"></td>
-              <td class="font-mono text-xs font-semibold text-charcoal">VIS-A7K2</td>
+            <tr data-type="preapproved" data-status="pending"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-A7K2</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>98765 43210</td>
@@ -129,8 +160,8 @@
               <td><span class="badge badge-partial" aria-label="Status: Pending">Pending</span></td>
               <td class="text-sm muted">Awaiting Property Manager approval</td>
             </tr>
-            <tr data-status="approved"><td data-pg-serial class="muted"></td>
-              <td class="font-mono text-xs font-semibold text-charcoal">VIS-B3M9</td>
+            <tr data-type="preapproved" data-status="approved"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-B3M9</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td class="font-poppins font-semibold text-charcoal">Kavya Sharma</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>96543 21098</td>
@@ -139,8 +170,8 @@
               <td><span class="badge badge-prepaid" aria-label="Status: Approved">Approved</span></td>
               <td class="text-sm muted">Approved 25/05/2026 by Sunita Arora</td>
             </tr>
-            <tr data-status="checked-in"><td data-pg-serial class="muted"></td>
-              <td class="font-mono text-xs font-semibold text-charcoal">VIS-C5N1</td>
+            <tr data-type="preapproved" data-status="checked-in"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-C5N1</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td class="font-poppins font-semibold text-charcoal">Meena Rao</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>91111 22222</td>
@@ -149,8 +180,8 @@
               <td><span class="badge badge-progress" aria-label="Status: Checked-in">Checked-in</span></td>
               <td class="text-sm muted">Currently inside</td>
             </tr>
-            <tr data-status="checked-out"><td data-pg-serial class="muted"></td>
-              <td class="font-mono text-xs font-semibold text-charcoal">VIS-D8P4</td>
+            <tr data-type="preapproved" data-status="checked-out"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-D8P4</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td class="font-poppins font-semibold text-charcoal">Suresh Nair</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A</div></td>
               <td>90000 11111</td>
@@ -159,8 +190,8 @@
               <td><span class="badge badge-resolved" aria-label="Status: Checked-out">Checked-out</span></td>
               <td class="text-sm muted">Arrived 24/05/2026 14:00</td>
             </tr>
-            <tr data-status="denied"><td data-pg-serial class="muted"></td>
-              <td class="font-mono text-xs font-semibold text-charcoal">VIS-E2Q6</td>
+            <tr data-type="preapproved" data-status="denied"><td data-pg-serial class="muted"></td>
+              <td class="font-mono text-xs font-semibold text-charcoal">VIS-E2Q6</td><td><span class="badge badge-prepaid">Pre-approved</span></td>
               <td class="font-poppins font-semibold text-charcoal">Unknown Vendor</td>
               <td>Green Valley, Dwarka<div class="text-xs muted">Unit 7B</div></td>
               <td>88888 77777</td>
@@ -333,6 +364,26 @@
   <script src="../assets/impersonation.js"></script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/searchable-select.js"></script>
+  <script>
+    /* Resolve a gate-initiated approval request (any one co-tenant suffices).
+       The whole Pending-approvals section only shows while at least one request
+       is awaiting — once the last one is handled, the section is hidden. */
+    function refreshPendingApprovals() {
+      var section = document.getElementById('pending-approvals');
+      if (!section) return;
+      var open = section.querySelectorAll('[data-gate-req]:not([data-resolved])').length;
+      var count = document.getElementById('pa-count');
+      if (count) count.textContent = open;
+      section.style.display = open > 0 ? '' : 'none';
+    }
+    function resolveGateReq(id, decision) {
+      var card = document.getElementById(id);
+      if (card) { card.setAttribute('data-resolved', '1'); card.style.display = 'none'; }
+      refreshPendingApprovals();
+      if (window.gsToast) gsToast(decision === 'approved' ? 'Visitor approved — the guard can let them in.' : 'Visitor denied.');
+    }
+    refreshPendingApprovals();
+  </script>
   <script>
     /* -----------------------------------------------------------------------
      * Pre-approve modal open / close
