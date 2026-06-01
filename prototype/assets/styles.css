@@ -32,6 +32,16 @@
   --space-lg: 32px;
   --space-xl: 48px;
   --space-2xl: 64px;
+
+  /* Cool-blue surface scale (public-pages v2 — glass / light-forward redesign,
+     2026-06-01). Tonal layering for marketing + auth + legal pages. These are
+     near-white surfaces, not brand hues — brand stays navy/royal-blue/saffron. */
+  --surface:            #F8F9FF;  /* page background */
+  --surface-low:        #EFF4FF;  /* low container / subtle panels */
+  --surface-container:  #E5EEFF;  /* hero / tinted card wash */
+  --surface-high:       #DCE9FF;  /* elevated container */
+  --surface-dim:        #CBDBF5;  /* dim / borders on tint */
+  --surface-deep:       #131B2E;  /* near-black navy for footer / dark bands */
 }
 
 html { font-family: 'Inter', system-ui, sans-serif; }
@@ -903,14 +913,114 @@ a.kpi:focus-visible { outline: 2px solid var(--color-royal-blue); outline-offset
 
 .divider { height: 1px; background: var(--color-mid-gray); margin: 16px 0; border: 0; }
 
-/* Login card */
-.auth-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(135deg, #1A237E 0%, #1565C0 100%); }
-.auth-card { background: #fff; border-radius: 12px; padding: 40px 44px; max-width: 480px; width: 100%; box-shadow: 0 16px 48px rgba(0,0,0,0.18); }
+/* Auth shell — v2 light glass treatment (cool-blue surface + soft orange/navy
+   ambient washes). Shared by login / forgot-password / reset-password / signup. */
+.auth-shell {
+  position: relative; overflow: hidden;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(255,111,0,0.06) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(19,27,46,0.06) 0px, transparent 50%);
+}
+/* Decorative ambient blobs — purely cosmetic, behind the card. */
+.auth-shell::before,
+.auth-shell::after {
+  content: ''; position: absolute; border-radius: 999px; pointer-events: none; z-index: 0; filter: blur(90px);
+}
+.auth-shell::before { width: 420px; height: 420px; top: -140px; right: -120px; background: rgba(255,111,0,0.10); }
+.auth-shell::after  { width: 480px; height: 480px; bottom: -180px; left: -140px; background: rgba(21,101,192,0.10); }
+.auth-shell > * { position: relative; z-index: 1; }
+/* Glass card — translucent white, soft ambient shadow, pronounced rounding. */
+.auth-card {
+  background: rgba(255,255,255,0.80); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6); border-radius: 16px; padding: 40px 44px; max-width: 480px; width: 100%;
+  box-shadow: 0 20px 40px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.04);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-shell::before { animation: gs-blob-a 16s ease-in-out infinite; }
+  .auth-shell::after  { animation: gs-blob-b 20s ease-in-out infinite; }
+}
+@keyframes gs-blob-a { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-24px,28px); } }
+@keyframes gs-blob-b { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-22px); } }
 .auth-brand { display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; color: var(--color-navy); text-align: center; margin-bottom: 4px; text-decoration: none; transition: opacity 150ms; }
 a.auth-brand:hover { opacity: 0.8; }
 .auth-brand span { color: var(--color-saffron); }
 .auth-tagline { text-align: center; color: var(--color-slate); margin-bottom: 32px; font-size: 14px; }
 .auth-role-btn { padding: 10px 8px !important; font-size: 13px !important; white-space: nowrap; }
+
+/* Public content pages (contact / privacy / terms) — v2 light-forward chrome.
+   .public-band = centered light page header; .glass-panel = frosted white card. */
+.public-band { text-align: center; padding: 56px 0 40px; }
+.public-band h1 { color: var(--color-charcoal); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 40px; line-height: 1.15; }
+.public-band .public-band-sub { color: var(--color-slate); font-size: 16px; line-height: 1.6; margin: 12px auto 0; max-width: 580px; }
+.public-band-eyebrow {
+  display: inline-block; background: rgba(255,111,0,0.10); color: var(--color-saffron); font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; padding: 5px 14px; border-radius: 999px; margin-bottom: 16px;
+}
+.glass-panel {
+  background: rgba(255,255,255,0.80); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6); border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(15,23,42,0.05), 0 2px 8px rgba(15,23,42,0.04);
+  padding: 36px 40px;
+}
+@media (max-width: 767px) { .glass-panel { padding: 24px 20px; border-radius: 16px; } .public-band { padding: 40px 0 32px; } .public-band h1 { font-size: 30px; } }
+
+/* Legal document bento (privacy / terms — rendered by legal.js renderLegalDoc). */
+.legal-bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; align-items: start; }
+.legal-col-8 { grid-column: span 8; }
+.legal-col-6 { grid-column: span 6; }
+.legal-col-12 { grid-column: span 12; }
+.legal-right { grid-column: span 4; display: flex; flex-direction: column; gap: 20px; }
+@media (max-width: 1023px) {
+  .legal-bento { grid-template-columns: 1fr; }
+  .legal-col-8, .legal-col-6, .legal-col-12, .legal-right { grid-column: auto; }
+}
+.legal-card {
+  background: rgba(255,255,255,0.80); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6); border-left: 4px solid var(--color-saffron); border-radius: 20px; padding: 28px;
+  box-shadow: 0 20px 40px rgba(15,23,42,0.05), 0 2px 8px rgba(15,23,42,0.04); height: 100%;
+}
+.legal-card.feat { padding: 36px; }
+.legal-card.accent-blue  { border-left-color: var(--color-royal-blue); }
+.legal-card.accent-slate { border-left-color: var(--color-slate); }
+.legal-card h2 { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 18px; color: var(--color-charcoal); margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+.legal-card.feat h2 { font-size: 24px; }
+.legal-card .legal-ic { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,111,0,0.10); color: var(--color-saffron); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.legal-card.accent-blue .legal-ic { background: rgba(21,101,192,0.10); color: var(--color-royal-blue); }
+.legal-card.accent-slate .legal-ic { background: rgba(84,110,122,0.12); color: var(--color-slate); }
+.legal-card .legal-body, .legal-card .legal-body p, .legal-card .legal-body li { font-size: 14px; line-height: 1.6; color: var(--color-slate); }
+.legal-card .legal-body p { margin: 0 0 10px; }
+.legal-card .legal-body p:last-child { margin-bottom: 0; }
+.legal-card .legal-body ul { margin: 0; padding-left: 18px; }
+.legal-feat-panel { margin-top: 24px; height: 160px; border-radius: 14px;
+  background: radial-gradient(ellipse 60% 80% at 80% 30%, rgba(255,111,0,0.18) 0%, transparent 60%), linear-gradient(135deg, #1A237E 0%, #0D1757 100%); }
+
+/* Trust strip beneath the legal bento. */
+.legal-strip { margin-top: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 32px 36px; border-radius: 24px; color: #fff;
+  background: radial-gradient(ellipse 50% 90% at 90% 20%, rgba(255,111,0,0.16) 0%, transparent 60%), linear-gradient(135deg, #1A237E 0%, #001A42 100%); }
+.legal-strip-l { display: flex; align-items: center; gap: 18px; }
+.legal-strip-ic { width: 56px; height: 56px; border-radius: 999px; background: rgba(255,255,255,0.10); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+.legal-strip h3 { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 20px; color: #fff; margin: 0 0 4px; }
+.legal-strip p { font-size: 14px; color: rgba(255,255,255,0.72); margin: 0; max-width: 520px; line-height: 1.55; }
+.legal-strip-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.legal-strip-ghost, .legal-strip-cta { padding: 12px 22px; border-radius: 12px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; transition: background 150ms ease, transform 150ms ease; }
+.legal-strip-ghost { border: 1px solid rgba(255,255,255,0.25); color: #fff; }
+.legal-strip-ghost:hover { background: rgba(255,255,255,0.10); }
+.legal-strip-cta { background: var(--color-saffron); color: #fff; box-shadow: 0 6px 16px rgba(255,111,0,0.25); }
+.legal-strip-cta:hover { transform: scale(1.02); }
+@media (max-width: 767px) { .legal-strip { padding: 24px; } }
+
+/* Sparkles "magic text" heading effect (driven by assets/sparkles.js). */
+.sparkle-host { position: relative; display: inline-block; }
+.sparkle { position: absolute; pointer-events: none; z-index: 2; transform-origin: center; }
+@keyframes gs-sparkle {
+  0%   { opacity: 0; transform: scale(0) rotate(75deg); }
+  50%  { opacity: 1; transform: scale(var(--s,1)) rotate(120deg); }
+  100% { opacity: 0; transform: scale(0) rotate(150deg); }
+}
+@media (prefers-reduced-motion: reduce) { .sparkle { display: none; } }
 
 /* Role chip on landing */
 .role-card { transition: transform 200ms, box-shadow 200ms; cursor: pointer; }
@@ -1281,3 +1391,29 @@ body.impers-active .app-main {
     padding: 18px;
   }
 }
+
+/* View tabs — segmented control (e.g. Rent: Lease-wise / Property-wise). */
+.view-tabs {
+  display: inline-flex;
+  background: var(--color-off-white);
+  border: 1px solid var(--color-mid-gray);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+.view-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-royal-blue);
+  padding: 8px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.view-tab:hover { background: var(--color-light-gray); }
+.view-tab[aria-selected="true"] { background: var(--color-navy); color: #fff; }
+.view-tab[aria-selected="true"]:hover { background: var(--color-navy); }

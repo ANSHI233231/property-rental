@@ -82,25 +82,65 @@ function gsCombinedFeatureList(plan, small) {
   return coreRows.concat(optRows).join('');
 }
 
-/* ---- Home page (marketing) cards ---- */
+/* ---- Home page (marketing) cards — v2 glass / navy-popular layout ----
+   Self-contained inline styles (this renderer is used only on index.html).
+   The "popular" plan renders as an elevated navy card; others as light glass. */
+function gsMarketingFeatureList(plan, onDark) {
+  var txt   = onDark ? 'rgba(255,255,255,0.86)' : '#546E7A';
+  var off   = onDark ? 'rgba(255,255,255,0.40)' : '#9FB0BC';
+  var rows = [];
+  window.GHARSETU_CORE_FEATURES.forEach(function (fc) {
+    rows.push('<li style="display:flex;align-items:flex-start;gap:7px;font-size:12px;line-height:1.35;color:' + txt + ';">'
+      + '<span style="color:#FF6F00;font-weight:700;flex-shrink:0;">✓</span>' + fc.label + '</li>');
+  });
+  window.GHARSETU_FEATURE_CATALOG.forEach(function (fc) {
+    var on = plan.features.indexOf(fc.id) !== -1;
+    rows.push('<li style="display:flex;align-items:flex-start;gap:7px;font-size:12px;line-height:1.35;color:' + (on ? txt : off) + ';' + (on ? '' : 'text-decoration:line-through;') + '">'
+      + '<span style="color:' + (on ? '#FF6F00' : off) + ';font-weight:700;flex-shrink:0;">' + (on ? '✓' : '✗') + '</span>' + fc.label + '</li>');
+  });
+  return rows.join('');
+}
+
 window.renderMarketingPlans = function (containerId) {
   var el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = window.GHARSETU_PLANS.map(function (p) {
-    var border = p.popular ? 'border:2px solid #FF6F00;' : '';
-    var hover = p.popular ? '0 8px 24px rgba(255,111,0,0.2)' : '0 8px 24px rgba(0,0,0,0.1)';
-    var cta = p.popular ? 'text-saffron' : 'text-royal-blue';
-    var badge = p.popular ? '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#FF6F00;color:#fff;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:11px;padding:3px 12px;border-radius:999px;white-space:nowrap;letter-spacing:0.5px;text-transform:uppercase;">Most Popular</div>' : '';
+    var dark = !!p.popular;
+    var priceAmount = window.gsPriceLabel(p).replace('/mo', '');
+
+    var cardStyle = dark
+      ? 'background:linear-gradient(150deg,#1A237E 0%,#0D1757 100%);color:#fff;box-shadow:0 28px 64px rgba(13,23,87,0.30);'
+      : 'background:rgba(255,255,255,0.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.6);box-shadow:0 20px 44px rgba(13,23,87,0.08),0 2px 6px rgba(0,0,0,0.04);';
+
+    var nameColor    = dark ? 'rgba(255,255,255,0.70)' : '#546E7A';
+    var priceColor   = dark ? '#fff' : '#212121';
+    var periodColor  = dark ? 'rgba(255,255,255,0.70)' : '#546E7A';
+    var capColor     = dark ? '#fff' : '#212121';
+    var subCapColor  = dark ? 'rgba(255,255,255,0.70)' : '#546E7A';
+    var divider      = dark ? 'rgba(255,255,255,0.15)' : '#ECEFF1';
+
+    var badge = p.popular
+      ? '<div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:#FF6F00;color:#fff;font-family:\'Poppins\',sans-serif;font-weight:700;font-size:11px;padding:5px 14px;border-radius:999px;white-space:nowrap;letter-spacing:0.6px;text-transform:uppercase;box-shadow:0 6px 16px rgba(255,111,0,0.35);">Most Popular</div>'
+      : '';
+
+    var btn = dark
+      ? '<span style="display:block;width:100%;text-align:center;background:#FF6F00;color:#fff;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:14px;padding:14px;border-radius:12px;">Get started →</span>'
+      : '<span class="mkt-btn-light" style="display:block;width:100%;text-align:center;background:transparent;color:#1A237E;border:2px solid #1A237E;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:14px;padding:12px;border-radius:12px;transition:background 150ms,color 150ms;" onmouseover="this.style.background=\'#1A237E\';this.style.color=\'#fff\';" onmouseout="this.style.background=\'transparent\';this.style.color=\'#1A237E\';">Get started →</span>';
+
     return ''
-      + '<a href="organization-signup.html?plan=' + p.id + '" class="card" style="display:block;text-decoration:none;cursor:pointer;' + border + 'transition:transform 200ms,box-shadow 200ms;padding:32px 24px;position:relative;" '
-      + 'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'' + hover + '\';" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';">'
+      + '<a href="organization-signup.html?plan=' + p.id + '" class="mkt-plan' + (dark ? ' mkt-pop' : '') + '" '
+      + 'style="display:flex;flex-direction:column;text-decoration:none;cursor:pointer;border-radius:28px;padding:36px 28px;position:relative;' + cardStyle + '">'
       + badge
-      + '<div class="font-poppins font-semibold text-slate" style="font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">' + p.name + '</div>'
-      + '<div class="font-poppins font-bold text-charcoal" style="font-size:28px;margin-bottom:4px;">' + window.gsPriceLabel(p) + '</div>'
-      + '<div class="font-poppins font-bold text-charcoal" style="font-size:22px;margin-bottom:2px;">' + window.GHARSETU_userCapLabel(p) + '</div>'
-      + '<div class="muted" style="font-size:13px;margin-bottom:20px;">' + window.GHARSETU_propertyCapLabel(p) + '</div>'
-      + '<ul style="list-style:none;padding:0;margin:0 0 24px;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:6px;">' + gsCombinedFeatureList(p, false) + '</ul>'
-      + '<div class="font-poppins font-semibold ' + cta + '" style="font-size:14px;">Get started →</div>'
+      + '<div class="font-poppins font-semibold" style="font-size:12px;text-transform:uppercase;letter-spacing:0.6px;color:' + nameColor + ';margin-bottom:14px;">' + p.name + '</div>'
+      + '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:14px;">'
+      +   '<span class="font-poppins" style="font-weight:800;font-size:40px;line-height:1;color:' + priceColor + ';">' + priceAmount + '</span>'
+      +   '<span style="font-size:14px;color:' + periodColor + ';">/mo</span>'
+      + '</div>'
+      + '<div class="font-poppins font-semibold" style="font-size:15px;color:' + capColor + ';">' + window.GHARSETU_userCapLabel(p) + '</div>'
+      + '<div style="font-size:13px;color:' + subCapColor + ';margin-bottom:18px;">' + window.GHARSETU_propertyCapLabel(p) + '</div>'
+      + '<div style="height:1px;background:' + divider + ';margin:0 0 18px;"></div>'
+      + '<ul style="list-style:none;padding:0;margin:0 0 24px;display:grid;grid-template-columns:1fr 1fr;column-gap:18px;row-gap:9px;align-content:start;flex:1;">' + gsMarketingFeatureList(p, dark) + '</ul>'
+      + btn
       + '</a>';
   }).join('');
 };

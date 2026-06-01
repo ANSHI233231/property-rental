@@ -59,10 +59,48 @@ window.renderLegalDoc = function (key, containerId) {
   var doc = window.GHARSETU_LEGAL[key];
   var el = document.getElementById(containerId);
   if (!doc || !el) return;
-  var html = '<p class="muted" style="font-size:13px;margin:0 0 28px;">Last updated ' + doc.updated + '</p>';
-  doc.sections.forEach(function (s) {
-    html += '<h2 style="font-size:22px;color:var(--color-royal-blue);margin:28px 0 10px;">' + s.heading + '</h2>'
-          + window.GHARSETU_mdToHtml(s.body);
-  });
-  el.innerHTML = html;
+  var s = doc.sections;
+  var ICON = '<span class="legal-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg></span>';
+  function body(sec) { return '<div class="legal-body">' + window.GHARSETU_mdToHtml(sec.body) + '</div>'; }
+  function card(sec, cls, feat) {
+    return '<section class="legal-card ' + (cls || '') + '">'
+      +   '<h2>' + ICON + '<span>' + sec.heading + '</span></h2>'
+      +   body(sec)
+      +   (feat ? '<div class="legal-feat-panel" aria-hidden="true"></div>' : '')
+      + '</section>';
+  }
+
+  /* Bento: featured Overview (col-8) · two stacked on the right (col-4) ·
+     two on the bottom row (col-6 each) · any extras full-width. */
+  var bento = '<div class="legal-bento">';
+  if (s[0]) bento += card(s[0], 'feat legal-col-8', true);
+  if (s[1] || s[2]) {
+    bento += '<div class="legal-right">';
+    if (s[1]) bento += card(s[1], 'accent-blue');
+    if (s[2]) bento += card(s[2], 'accent-slate');
+    bento += '</div>';
+  }
+  if (s[3]) bento += card(s[3], 'legal-col-6');
+  if (s[4]) bento += card(s[4], 'accent-blue legal-col-6');
+  for (var i = 5; i < s.length; i++) {
+    bento += card(s[i], (i % 2 ? 'accent-blue' : '') + ' legal-col-12');
+  }
+  bento += '</div>';
+
+  /* Trust strip — cross-links to the sibling legal doc + Contact. */
+  var sibling = key === 'privacy' ? 'terms.html' : 'privacy.html';
+  var siblingLabel = key === 'privacy' ? 'Read our Terms' : 'Read our Privacy Policy';
+  var strip = '<div class="legal-strip">'
+    + '<div class="legal-strip-l">'
+    +   '<span class="legal-strip-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>'
+    +   '<div><h3>Bank-Grade Security</h3><p>Your data is scoped per organization, encrypted in transit, and every change is written to an append-only audit log.</p></div>'
+    + '</div>'
+    + '<div class="legal-strip-actions">'
+    +   '<a class="legal-strip-ghost" href="' + sibling + '">' + siblingLabel + '</a>'
+    +   '<a class="legal-strip-cta" href="contact.html">Contact support</a>'
+    + '</div>'
+    + '</div>';
+
+  el.innerHTML = '<p class="muted" style="font-size:13px;text-align:center;margin:0 0 28px;">Last updated ' + doc.updated + '</p>'
+    + bento + strip;
 };

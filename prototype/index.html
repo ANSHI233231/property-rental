@@ -7,7 +7,7 @@
   <title>GharSetu — Property Rental Management Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,206 +24,470 @@
   <link rel="stylesheet" href="assets/styles.css" />
 
   <!-- ========================================================
-       Landing-page-only styles. All colors compose existing
-       tokens from assets/styles.css — nothing invented.
+       Landing-page-only styles (v2 — glass / bento).
+       All colours compose existing tokens from assets/styles.css —
+       navy / royal-blue / saffron / charcoal / slate. Nothing invented.
        ======================================================== -->
   <style>
-    /* ---- Skip link (a11y bypass-blocks) ---- */
+    /* ---- Skip link ---- */
     .skip-link { position:absolute; left:-9999px; top:8px; z-index:100; background:#fff; color:var(--color-navy);
       padding:8px 16px; border-radius:8px; font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; text-decoration:none; }
     .skip-link:focus { left:8px; }
 
-    /* ---- Hero gradient + saffron mesh overlay ---- */
-    .hero-gradient {
+    /* ---- Shared glass card ---- */
+    .glass-card { background:rgba(255,255,255,0.72); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.6); border-radius:28px; box-shadow:0 20px 44px rgba(13,23,87,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      transition:transform 280ms cubic-bezier(.4,0,.2,1), box-shadow 280ms cubic-bezier(.4,0,.2,1); }
+    .glass-card.lift:hover { transform:translateY(-6px); box-shadow:0 28px 64px rgba(13,23,87,0.16); }
+
+    /* ---- Hero (light-forward) ---- */
+    .hero-gradient { position:relative; overflow:hidden;
       background:
-        radial-gradient(ellipse 80% 60% at 72% 45%, rgba(255,111,0,0.10) 0%, transparent 65%),
-        linear-gradient(135deg, #1A237E 0%, #0D1757 58%, #1565C0 100%);
-    }
-    .hero-inner { padding-top:72px; padding-bottom:0; }
-    .hero-grid { display:grid; grid-template-columns:1.12fr 1fr; gap:56px; align-items:center; padding-bottom:48px; }
+        radial-gradient(ellipse 70% 60% at 76% 30%, rgba(255,111,0,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 70% at 10% 90%, rgba(21,101,192,0.10) 0%, transparent 60%),
+        var(--surface-container); }
+    .hero-inner { position:relative; z-index:1; padding-top:72px; }
+    .hero-grid { display:grid; grid-template-columns:1.12fr 1fr; gap:56px; align-items:center; padding-bottom:40px; }
     .hero-eyebrow { display:inline-block; color:var(--color-saffron); font-family:'Poppins',sans-serif; font-weight:600;
       font-size:13px; text-transform:uppercase; letter-spacing:0.12em; border-bottom:2px solid var(--color-saffron);
       padding-bottom:5px; margin-bottom:22px; }
-    .hero-h1 { color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:60px; line-height:1.08;
+    .hero-h1 { color:var(--color-charcoal); font-family:'Poppins',sans-serif; font-weight:800; font-size:58px; line-height:1.08;
       letter-spacing:-0.5px; max-width:620px; margin:0; }
-    .hero-sub { color:rgba(255,255,255,0.82); font-size:18px; line-height:1.6; max-width:520px; margin:20px 0 0; }
+    .hero-h1 .accent { color:var(--color-saffron); }
+    .hero-sub { color:var(--color-slate); font-size:18px; line-height:1.6; max-width:520px; margin:20px 0 0; }
     .hero-ctas { display:flex; gap:16px; margin-top:32px; flex-wrap:wrap; }
-    .hero-btn-ghost { background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.55); padding:11px 26px; }
-    .hero-btn-ghost:hover { border-color:#fff; background:rgba(255,255,255,0.06); }
+    .hero-btn-ghost { background:transparent; color:var(--color-navy); border:2px solid var(--color-navy); padding:11px 26px; }
+    .hero-btn-ghost:hover { background:rgba(26,35,126,0.06); }
+    /* Saffron glow + scale on hover (clone of kit btn-glow) */
+    .btn-glow { transition:box-shadow 200ms ease, transform 120ms ease, background 200ms ease; }
+    .btn-glow:hover { box-shadow:0 0 22px rgba(255,111,0,0.40); transform:scale(1.02); }
+    .btn-glow:active { transform:scale(0.97); }
+    @media (prefers-reduced-motion: reduce) { .btn-glow:hover, .btn-glow:active { transform:none; } }
 
-    /* ---- Hero product mock (browser-framed dashboard) ---- */
+    /* ---- Hero product mock (navy-framed dashboard) ---- */
     .hero-visual { position:relative; }
-    .mock-window { background:#fff; border-radius:14px; box-shadow:0 24px 64px rgba(0,0,0,0.40);
-      overflow:hidden; border:1px solid rgba(255,255,255,0.12); }
-    .mock-titlebar { background:var(--color-light-gray); padding:10px 14px; display:flex; align-items:center; gap:7px;
-      border-bottom:1px solid var(--color-mid-gray); }
+    .hero-glass-frame { background:linear-gradient(150deg, #1A237E 0%, #0D1757 100%);
+      border:1px solid rgba(255,255,255,0.10); border-radius:26px; padding:14px; box-shadow:0 32px 72px rgba(15,23,42,0.22); }
+    .hero-glow { position:absolute; inset:-12% -12% -12% -12%; z-index:-1; background:rgba(255,111,0,0.18); border-radius:999px; filter:blur(120px); opacity:0.55; }
+    .mock-window { background:#fff; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); }
+    .mock-titlebar { background:var(--color-light-gray); padding:10px 14px; display:flex; align-items:center; gap:7px; border-bottom:1px solid var(--color-mid-gray); }
     .mock-dot { width:10px; height:10px; border-radius:999px; background:var(--color-mid-gray); flex-shrink:0; }
-    .mock-url { margin-left:10px; background:#fff; border:1px solid var(--color-mid-gray); border-radius:6px;
-      padding:3px 12px; font-size:11px; color:var(--color-slate); font-family:'Inter',sans-serif; }
+    .mock-url { margin-left:10px; background:#fff; border:1px solid var(--color-mid-gray); border-radius:6px; padding:3px 12px; font-size:11px; color:var(--color-slate); font-family:'Inter',sans-serif; }
     .mock-body { padding:18px; }
     .mock-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
     .mock-kpi { background:var(--color-off-white); border:1px solid var(--color-light-gray); border-radius:10px; padding:10px 12px; }
     .mock-kpi-label { font-family:'Poppins',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-slate); }
     .mock-kpi-value { font-family:'Poppins',sans-serif; font-weight:700; font-size:20px; color:var(--color-navy); margin-top:2px; }
     .mock-table { width:100%; border-collapse:collapse; }
-    .mock-table th { text-align:left; font-family:'Poppins',sans-serif; font-size:10px; text-transform:uppercase;
-      letter-spacing:0.5px; color:var(--color-slate); padding:6px 8px; border-bottom:1px solid var(--color-mid-gray); }
+    .mock-table th { text-align:left; font-family:'Poppins',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-slate); padding:6px 8px; border-bottom:1px solid var(--color-mid-gray); }
     .mock-table td { padding:9px 8px; font-size:12px; color:var(--color-charcoal); border-bottom:1px solid var(--color-light-gray); }
     .mock-table tr:last-child td { border-bottom:0; }
     .mock-table .badge { font-size:10px; padding:2px 8px; }
+    @keyframes gs-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+    @media (prefers-reduced-motion: no-preference) { .gs-float { animation:gs-float 6s ease-in-out infinite; } }
 
-    /* ---- Hero trust / stats strip ---- */
-    .hero-stats-strip { display:flex; align-items:center; flex-wrap:wrap; padding:22px 0 36px;
-      border-top:1px solid rgba(255,255,255,0.12); }
-    .hero-stat { padding:6px 32px 6px 0; border-right:1px solid rgba(255,255,255,0.15); margin-right:32px; font-family:'Poppins',sans-serif; }
+    /* ---- Hero stats strip ---- */
+    .hero-stats-strip { display:flex; align-items:center; flex-wrap:wrap; padding:22px 0 36px; border-top:1px solid var(--surface-dim); }
+    .hero-stat { padding:6px 32px 6px 0; border-right:1px solid var(--surface-dim); margin-right:32px; font-family:'Poppins',sans-serif; }
     .hero-stat:last-child { border-right:none; margin-right:0; }
-    .hero-stat-value { font-weight:700; font-size:26px; color:#fff; line-height:1.15; }
-    .hero-stat-label { font-size:13px; color:rgba(255,255,255,0.65); font-weight:400; font-family:'Inter',sans-serif; margin-top:2px; }
+    .hero-stat-value { font-weight:700; font-size:26px; color:var(--color-navy); line-height:1.15; }
+    .hero-stat-label { font-size:13px; color:var(--color-slate); font-weight:400; font-family:'Inter',sans-serif; margin-top:2px; }
 
     /* ---- Section scaffolding ---- */
-    .section-pad { padding:80px 0; }
+    .section-pad { padding:96px 0; }
     .section-head { text-align:center; max-width:640px; margin:0 auto 56px; }
-    .section-head h2 { font-size:36px; color:var(--color-royal-blue); line-height:1.2; }
+    .section-head h2 { font-size:38px; color:var(--color-charcoal); line-height:1.2; font-family:'Poppins',sans-serif; font-weight:700; }
+    .section-head.on-dark h2 { color:#fff; }
+    /* Sparkle "magic text" styles now live in assets/styles.css (shared). */
     .eyebrow-center { display:flex; justify-content:center; margin-bottom:14px; }
     .eyebrow-pill { display:inline-block; background:rgba(255,111,0,0.10); color:var(--color-saffron);
-      font-family:'Poppins',sans-serif; font-weight:600; font-size:12px; text-transform:uppercase;
-      letter-spacing:0.6px; padding:5px 14px; border-radius:999px; }
+      font-family:'Poppins',sans-serif; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.6px; padding:5px 14px; border-radius:999px; }
+    .eyebrow-pill.on-dark { background:rgba(255,255,255,0.12); color:#fff; }
 
-    /* ---- Capabilities — alternating feature rows ---- */
-    .feature-rows { display:flex; flex-direction:column; gap:64px; }
-    .feature-row { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
-    .feature-row.reversed { direction:rtl; }
-    .feature-row.reversed > * { direction:ltr; }
-    .feature-mock { background:#fff; border:1px solid var(--color-mid-gray); border-radius:16px;
-      box-shadow:0 4px 18px rgba(0,0,0,0.06); padding:20px; transition:transform 250ms ease, box-shadow 250ms ease; }
-    .feature-row:hover .feature-mock { transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,0.12); }
-    .feature-h { font-family:'Poppins',sans-serif; font-weight:600; font-size:28px; color:var(--color-charcoal); margin:16px 0 16px; }
-    .feature-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:13px; }
-    .feature-list li { display:flex; gap:10px; font-size:16px; line-height:1.55; color:var(--color-slate); }
+    /* ---- Capabilities bento ---- */
+    .bento { display:grid; grid-template-columns:repeat(12,1fr); gap:24px; }
+    .bento .cell { padding:36px; }
+    .bento .span-7 { grid-column:span 7; }
+    .bento .span-5 { grid-column:span 5; }
+    .cap-split { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center; }
+    .feature-h { font-family:'Poppins',sans-serif; font-weight:700; font-size:26px; color:var(--color-charcoal); margin:14px 0 16px; }
+    .feature-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+    .feature-list li { display:flex; gap:10px; font-size:15px; line-height:1.55; color:var(--color-slate); }
     .feature-list li::before { content:'✓'; color:var(--color-saffron); font-weight:700; flex-shrink:0; }
-
-    /* mock atoms reused inside feature panels */
-    .mock-kv { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--color-light-gray); }
+    .cap-copy p { font-size:15px; line-height:1.6; color:var(--color-slate); margin:0 0 18px; }
+    .cap-link { display:inline-flex; align-items:center; gap:6px; color:var(--color-saffron); font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; text-decoration:none; transition:gap 200ms; }
+    .cap-link:hover { gap:10px; }
+    .mini-mock { background:#fff; border:1px solid var(--color-light-gray); border-radius:16px; padding:18px; box-shadow:0 6px 20px rgba(13,23,87,0.06); }
+    .req-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .req-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; color:var(--color-charcoal); }
+    .progress-track { height:8px; width:100%; background:var(--color-light-gray); border-radius:999px; overflow:hidden; }
+    .progress-fill { height:100%; width:72%; background:var(--color-saffron); border-radius:999px; }
+    .assignee { display:flex; align-items:center; gap:8px; margin-top:14px; }
+    .assignee .av { width:30px; height:30px; border-radius:999px; background:var(--color-navy); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; }
+    .assignee .nm { font-size:12px; color:var(--color-slate); }
+    .mock-kv { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--color-light-gray); }
     .mock-kv:last-child { border-bottom:0; }
-    .mock-kv .k { font-size:12px; color:var(--color-slate); font-family:'Poppins',sans-serif; text-transform:uppercase; letter-spacing:0.4px; }
-    .mock-kv .v { font-size:14px; color:var(--color-charcoal); font-weight:500; }
-    .mock-req-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-    .mock-req-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; color:var(--color-charcoal); }
-    .mock-timeline { list-style:none; padding:0; margin:14px 0 0; }
-    .mock-timeline li { position:relative; padding:0 0 14px 22px; font-size:12px; color:var(--color-slate); }
-    .mock-timeline li::before { content:''; position:absolute; left:3px; top:3px; width:9px; height:9px; border-radius:999px;
-      background:var(--color-royal-blue); }
-    .mock-timeline li:not(:last-child)::after { content:''; position:absolute; left:7px; top:12px; bottom:0; width:1px; background:var(--color-mid-gray); }
+    .mock-kv .k { font-size:11px; color:var(--color-slate); font-family:'Poppins',sans-serif; text-transform:uppercase; letter-spacing:0.4px; }
+    .mock-kv .v { font-size:13px; color:var(--color-charcoal); font-weight:500; }
+    .visitor-row { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:12px; background:var(--color-off-white); border:1px solid var(--color-light-gray); margin-bottom:10px; }
+    .visitor-row:last-child { margin-bottom:0; }
+    .visitor-left { display:flex; align-items:center; gap:10px; }
+    .visitor-ic { width:34px; height:34px; border-radius:9px; background:rgba(255,111,0,0.10); color:var(--color-saffron); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .visitor-name { font-family:'Poppins',sans-serif; font-weight:600; font-size:12px; color:var(--color-charcoal); }
+    .visitor-flat { font-size:11px; color:var(--color-slate); }
+    .visitor-time { font-size:11px; font-weight:600; color:var(--color-slate); font-family:'Poppins',sans-serif; }
 
-    /* ---- How-it-works ---- */
+    /* ---- How it works (navy band) ---- */
+    .how-band { position:relative; overflow:hidden;
+      background: radial-gradient(ellipse 50% 60% at 80% 20%, rgba(255,111,0,0.12) 0%, transparent 60%), linear-gradient(135deg, #1A237E 0%, #0D1757 100%); }
     .how-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; position:relative; }
-    .how-grid::before { content:''; position:absolute; top:20px; left:17%; right:17%; border-top:1px dashed var(--color-mid-gray); z-index:0; }
+    .how-grid::before { content:''; position:absolute; top:36px; left:17%; right:17%; border-top:1px dashed rgba(255,255,255,0.18); z-index:0; }
     .how-step { position:relative; z-index:1; text-align:center; }
-    .how-num-wrap { display:inline-block; background:var(--color-off-white); padding:0 14px; margin-bottom:18px; }
-    .step-number { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:999px;
-      background:rgba(255,111,0,0.10); color:var(--color-saffron); font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; }
-    .how-step h3 { font-size:18px; margin-bottom:8px; }
-    .how-step p { font-size:15px; color:var(--color-slate); line-height:1.6; max-width:280px; margin:0 auto; }
+    .how-num { display:inline-flex; align-items:center; justify-content:center; width:72px; height:72px; border-radius:999px;
+      background:var(--color-saffron); color:#fff; font-family:'Poppins',sans-serif; font-weight:800; font-size:24px; margin:0 auto 22px;
+      box-shadow:0 12px 30px rgba(255,111,0,0.40); transition:transform 250ms; }
+    .how-step:hover .how-num { transform:scale(1.08); }
+    .how-step h3 { font-family:'Poppins',sans-serif; font-weight:600; font-size:19px; color:#fff; margin-bottom:8px; }
+    .how-step p { font-size:15px; color:rgba(255,255,255,0.72); line-height:1.6; max-width:280px; margin:0 auto; }
 
-    /* ---- Roles (bento, Admin emphasized) ---- */
-    .roles-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:920px; margin:0 auto; }
-    .role-admin { border-left:4px solid var(--color-saffron); }
-    .role-label { display:inline-block; background:rgba(255,111,0,0.10); color:var(--color-saffron); font-family:'Poppins',sans-serif;
-      font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; padding:3px 10px; border-radius:999px; margin-bottom:10px; }
+    /* ---- Personas ---- */
+    /* ---- Personas (translucent cards over animated background paths) ---- */
+    .personas-wrap { position:relative; overflow:hidden; }
+    .personas-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:24px; }
+    .persona { display:flex; flex-direction:column; padding:32px 24px; border-radius:24px; height:100%;
+      background:rgba(255,255,255,0.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+      border:1px solid rgba(198,198,205,0.45); transition:border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease; }
+    .persona:hover { border-color:var(--color-saffron); transform:translateY(-6px); box-shadow:0 24px 48px rgba(13,23,87,0.12); }
+    .persona.lead { border-left:4px solid var(--color-saffron); }
+    .persona-ic { width:56px; height:56px; border-radius:16px; display:inline-flex; align-items:center; justify-content:center; color:#fff; margin-bottom:22px; transition:transform 250ms ease; }
+    .persona:hover .persona-ic { transform:scale(1.1); }
+    .persona-label { font-family:'Poppins',sans-serif; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-saffron); margin-bottom:6px; }
+    .persona h4 { font-family:'Poppins',sans-serif; font-weight:600; font-size:20px; color:var(--color-charcoal); margin-bottom:12px; }
+    .persona p { font-size:14px; line-height:1.55; color:var(--color-slate); flex:1; }
 
-    /* ---- Plans — popular card glow ---- */
-    #plansGrid a.card[style*="2px solid #FF6F00"] { box-shadow:0 12px 40px rgba(255,111,0,0.18); }
+    /* Animated SVG background paths — clone of the Stitch persona-section effect */
+    .path-container { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+    .animated-paths { width:100%; height:100%; opacity:0.32; }
+    .animated-path { fill:none; stroke-linecap:round; stroke-dasharray:1000; stroke-dashoffset:1000; animation:path-flow 15s linear infinite; }
+    @keyframes path-flow { to { stroke-dashoffset:-1000; } }
+    /* Char-by-char title reveal */
+    .char-reveal { display:inline-block; opacity:0; transform:translateY(20px); transition:opacity 0.5s cubic-bezier(.34,1.56,.64,1), transform 0.5s cubic-bezier(.34,1.56,.64,1); }
+    .char-reveal.show { opacity:1; transform:translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .animated-path { animation:none; stroke-dashoffset:0; }
+      .char-reveal { transition:opacity 0.3s ease; transform:none; }
+    }
 
-    /* ---- Final CTA + footer merged navy band ---- */
-    .final-cta { background:#1A237E; padding:80px 0 56px; text-align:center; }
-    .final-cta h2 { color:#fff; font-size:36px; margin-bottom:16px; line-height:1.2; }
+    /* ---- Marketing plan cards (rendered by plans.js → renderMarketingPlans) ---- */
+    .mkt-plan { transition:transform 250ms ease, box-shadow 250ms ease; }
+    .mkt-plan:hover { transform:translateY(-6px); }
+    /* The popular plan is emphasised by its navy fill + badge (no scale) so all
+       three cards stay equal height and aligned. */
+
+    /* ---- Final CTA ---- */
+    .final-cta-wrap { padding:80px 0; }
+    .final-cta { position:relative; overflow:hidden; border-radius:40px; padding:72px 48px; text-align:center;
+      background: linear-gradient(135deg, #1A237E 0%, #0D1757 100%); }
+    .final-cta::before { content:''; position:absolute; width:380px; height:380px; border-radius:999px; top:-160px; right:-120px; background:rgba(255,255,255,0.06); filter:blur(40px); }
+    .final-cta::after { content:''; position:absolute; width:380px; height:380px; border-radius:999px; bottom:-180px; left:-120px; background:rgba(255,111,0,0.10); filter:blur(60px); }
+    .final-cta > * { position:relative; z-index:1; }
+    .final-cta h2 { color:#fff; font-family:'Poppins',sans-serif; font-weight:800; font-size:40px; margin-bottom:16px; line-height:1.15; }
 
     /* ---- Scroll reveal ---- */
-    .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.5s ease, transform 0.5s ease; }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.6s ease, transform 0.6s ease; }
     .reveal.visible { opacity:1; transform:translateY(0); }
 
     /* ---- Responsive — single primary breakpoint at 1023px ---- */
-    @media (max-width: 1023px) {
+    @media (max-width:1023px) {
       .hero-inner { padding-top:48px; }
-      .hero-grid { grid-template-columns:1fr; gap:0; padding-bottom:40px; }
+      .hero-grid { grid-template-columns:1fr; gap:0; padding-bottom:36px; }
       .hero-visual { display:none; }
-      .hero-gradient { background:linear-gradient(160deg, #1A237E 0%, #0D1757 100%); }
+      .hero-gradient::before { display:none; }
       .hero-h1 { font-size:38px; }
       .hero-sub { max-width:100%; }
-      .section-pad { padding:56px 0; }
+      .section-pad { padding:60px 0; }
       .section-head { margin-bottom:40px; }
       .section-head h2 { font-size:28px; }
-      .feature-rows { gap:44px; }
-      .feature-row, .feature-row.reversed { grid-template-columns:1fr; direction:ltr; gap:24px; }
-      .feature-h { font-size:24px; }
-      .how-grid { grid-template-columns:1fr; gap:28px; }
+      .bento { grid-template-columns:1fr; gap:20px; }
+      .bento .span-7, .bento .span-5 { grid-column:auto; }
+      .bento .cell { padding:28px; }
+      .cap-split { grid-template-columns:1fr; gap:24px; }
+      .how-grid { grid-template-columns:1fr; gap:32px; }
       .how-grid::before { display:none; }
-      .how-num-wrap { padding:0; }
-      .roles-grid { grid-template-columns:repeat(2,1fr); }
-      .role-admin { border-left:1px solid var(--color-mid-gray); }
+      .personas-grid { grid-template-columns:repeat(2,1fr); }
+      .persona.lead { border-left:1px solid rgba(255,255,255,0.6); }
+      .final-cta h2 { font-size:30px; }
     }
-    @media (max-width: 767px) {
+    @media (max-width:767px) {
       .hero-h1 { font-size:34px; }
       .hero-ctas { flex-direction:column; }
       .hero-ctas .btn { width:100%; justify-content:center; }
-      .roles-grid { grid-template-columns:1fr; }
+      .personas-grid { grid-template-columns:1fr; }
       #plansGrid { grid-template-columns:1fr !important; max-width:480px; }
+      .final-cta { padding:48px 24px; border-radius:28px; }
       .final-cta h2 { font-size:26px; }
     }
-    @media (max-width: 480px) { .hero-stats-strip { display:none; } }
-    @media (max-width: 359px) { .max-w-6xl { padding-left:16px !important; padding-right:16px !important; } }
+    @media (max-width:480px) { .hero-stats-strip { display:none; } }
+    @media (max-width:359px) { .max-w-6xl { padding-left:16px !important; padding-right:16px !important; } }
 
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity:0; transform:none; transition:opacity 0.3s ease; }
       .reveal.visible { transform:none; }
-      .feature-row:hover .feature-mock { transform:none; }
+      .glass-card.lift:hover { transform:none; }
+    }
+
+    /* ============================================================
+       Full-page "deck" mode — homepage only, DESKTOP only (>=1024px),
+       motion-allowed only. Each section IS one screen with centred content; a
+       wheel/key navigator flips one whole section per gesture (JS below). Tall
+       sections scroll INTERNALLY (overflow-y) before the deck advances, so
+       nothing is clipped. Header is NOT sticky here (scrolls away). Below
+       1024px / reduced motion: normal flowing homepage.
+       ============================================================ */
+    @media (min-width:1024px) and (prefers-reduced-motion: no-preference) {
+      html.deck-on { overflow-x: hidden; scroll-behavior: smooth; }
+      /* slim fixed header on the deck — stays visible but barely intrudes */
+      html.deck-on #siteNav { position: fixed !important; top: 0; left: 0; right: 0; }
+      html.deck-on #siteNav > div { height: 56px !important; }
+      /* NOTE: no `perspective`/`transform` on <body> here — it would make the
+         fixed header position relative to <body> (so it'd scroll away after the
+         first screen). The depth effect uses scale/blur/opacity only. */
+      html.deck-on .screen {
+        height: 100vh; box-sizing: border-box;
+        /* vp-relative top pad: clears 56px header + a small rhythmic gap.
+           clamp(64px, 7vh, 88px) = 64px @ 914px vh, 88px @ 1257px vh — keeps
+           the 56px header safely cleared at every target height (768→1440). */
+        padding-top: clamp(64px, 7vh, 88px);
+        overflow-y: auto; overflow-x: hidden;          /* tall sections scroll inside */
+        scrollbar-width: none;                          /* hide the inner scrollbar */
+        display: flex; flex-direction: column; justify-content: center;
+        transform-origin: center center;
+        transform: scale(var(--sx, 1));
+        opacity: var(--so, 1);
+        filter: blur(var(--bl, 0px));
+        /* transition easing: ease-out entering (content sharpens), ease-in leaving */
+        transition: opacity 180ms ease-out, filter 180ms ease-out, transform 180ms ease-out;
+        will-change: transform, opacity, filter;
+      }
+      /* sections taller than the screen top-align + scroll internally (JS-tagged),
+         so their top content never hides above the viewport / under the header. */
+      html.deck-on .screen.is-tall { justify-content: flex-start; }
+      html.deck-on .screen::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+      /* ---- #closing: CTA fills/centres upper area; footer pinned to screen bottom ---- */
+      html.deck-on #closing { justify-content: flex-start; gap: 0; background: #fff; }
+      html.deck-on #closing .final-cta-wrap {
+        flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;
+        padding: clamp(16px, 3vh, 40px) 0;
+      }
+      /* Enlarged CTA card — more presence at every height:
+         - padding scales from 40px (768px screen) up to 72px (1440px screen)
+         - heading scales from 30px up to 42px
+         Uses vmin so it responds to both width & height simultaneously */
+      html.deck-on #closing .final-cta {
+        padding: clamp(40px, 5.5vmin, 72px) clamp(40px, 6vmin, 80px);
+        border-radius: clamp(24px, 3.5vmin, 40px);
+      }
+      html.deck-on #closing .final-cta h2 {
+        font-size: clamp(30px, 3.5vmin, 44px);
+        margin-bottom: clamp(12px, 1.5vmin, 20px);
+        line-height: 1.12;
+      }
+      html.deck-on #closing .final-cta p {
+        font-size: clamp(14px, 1.6vmin, 18px);
+        margin-bottom: clamp(20px, 2.8vmin, 36px);
+      }
+      html.deck-on #closing .final-cta .btn {
+        padding: clamp(12px, 1.6vmin, 16px) clamp(28px, 3.5vmin, 44px) !important;
+        font-size: clamp(14px, 1.6vmin, 17px) !important;
+      }
+      html.deck-on #closing .gs-footer { flex: 0 0 auto; padding: 28px 0 22px; }
+
+      /* ---- Capabilities bento: viewport-relative compaction ----
+         All overrides use clamp() so they gracefully scale from 768 (short laptop)
+         to 1440 (tall monitor). At 768px vmin=7.68, so vmin-based values bottom
+         out at small but readable sizes. The `is-tall` internal-scroll is the
+         safety net for any edge case where content still overflows. */
+      html.deck-on #capabilities {
+        padding-bottom: clamp(8px, 1.5vh, 28px);
+      }
+      html.deck-on #capabilities .eyebrow-center {
+        margin-bottom: clamp(3px, 0.6vh, 10px);
+      }
+      html.deck-on #capabilities .section-head {
+        margin-bottom: clamp(10px, 1.8vh, 28px);
+      }
+      html.deck-on #capabilities .section-head h2 {
+        font-size: clamp(20px, 2.8vmin, 32px);
+      }
+      html.deck-on #capabilities .bento {
+        gap: clamp(8px, 1.3vmin, 20px);
+      }
+      html.deck-on #capabilities .bento .cell {
+        padding: clamp(12px, 1.8vmin, 26px) clamp(14px, 2.2vmin, 28px);
+      }
+      html.deck-on #capabilities .cap-split {
+        gap: clamp(12px, 1.8vmin, 28px);
+      }
+      html.deck-on #capabilities .feature-h {
+        font-size: clamp(14px, 1.9vmin, 22px);
+        margin: clamp(3px, 0.5vh, 8px) 0 clamp(5px, 0.8vh, 12px);
+      }
+      html.deck-on #capabilities .feature-list {
+        gap: clamp(3px, 0.6vh, 10px);
+      }
+      html.deck-on #capabilities .feature-list li {
+        font-size: clamp(11px, 1.3vmin, 15px);
+        line-height: 1.4;
+      }
+      html.deck-on #capabilities .cap-copy p {
+        font-size: clamp(11px, 1.3vmin, 15px);
+        margin: 0 0 clamp(6px, 0.9vh, 14px);
+      }
+      html.deck-on #capabilities .mini-mock {
+        padding: clamp(7px, 1vmin, 16px);
+      }
+      html.deck-on #capabilities .mock-table td {
+        padding: clamp(2px, 0.4vh, 7px) 8px;
+        font-size: clamp(10px, 1.1vmin, 12px);
+      }
+      html.deck-on #capabilities .mock-table th {
+        padding: clamp(2px, 0.4vh, 6px) 8px;
+      }
+      html.deck-on #capabilities .req-head {
+        margin-bottom: clamp(5px, 0.8vh, 12px);
+      }
+      html.deck-on #capabilities .assignee {
+        margin-top: clamp(5px, 0.8vh, 12px);
+      }
+      html.deck-on #capabilities .visitor-row {
+        padding: clamp(4px, 0.6vh, 9px) clamp(7px, 0.9vmin, 12px);
+        margin-bottom: clamp(4px, 0.6vh, 9px);
+      }
+
+      /* ---- Other sections: vp-relative vertical rhythm ----
+         Hero / how / roles / plans keep natural design; only tighten section-pad
+         so they don't feel too airy on tall monitors or too cramped on short ones. */
+      html.deck-on #hero .hero-inner {
+        /* override the static padding-top:72px set on .hero-inner for flowing mode */
+        padding-top: 0;
+      }
+      html.deck-on #hero .hero-grid {
+        gap: clamp(28px, 4vmin, 56px);
+        padding-bottom: clamp(16px, 2vh, 36px);
+      }
+      html.deck-on #hero .hero-h1 {
+        font-size: clamp(36px, 5.5vmin, 60px);
+      }
+      html.deck-on #hero .hero-sub {
+        font-size: clamp(15px, 1.8vmin, 19px);
+        margin-top: clamp(12px, 1.5vh, 20px);
+      }
+      html.deck-on #hero .hero-ctas {
+        margin-top: clamp(18px, 2.5vh, 32px);
+      }
+      html.deck-on #hero .hero-stats-strip {
+        padding: clamp(12px, 1.8vh, 24px) 0 clamp(18px, 2.5vh, 36px);
+      }
+      html.deck-on #hero .hero-stat-value {
+        font-size: clamp(18px, 2.5vmin, 28px);
+      }
+
+      html.deck-on #how .section-head { margin-bottom: clamp(20px, 3vh, 48px); }
+      html.deck-on #how .section-head h2 { font-size: clamp(26px, 3.8vmin, 40px); }
+      html.deck-on #how .how-grid { gap: clamp(20px, 3vmin, 44px); }
+      html.deck-on #how .how-num {
+        width: clamp(56px, 7vmin, 76px); height: clamp(56px, 7vmin, 76px);
+        font-size: clamp(18px, 2.4vmin, 26px);
+        margin-bottom: clamp(12px, 1.8vh, 24px);
+      }
+      html.deck-on #how .how-step h3 { font-size: clamp(15px, 1.9vmin, 20px); }
+      html.deck-on #how .how-step p  { font-size: clamp(13px, 1.5vmin, 16px); }
+
+      html.deck-on #roles .section-head { margin-bottom: clamp(18px, 2.5vh, 48px); }
+      html.deck-on #roles .section-head h2 { font-size: clamp(24px, 3.4vmin, 40px); }
+      html.deck-on #roles .personas-grid { gap: clamp(12px, 1.8vmin, 24px); }
+      html.deck-on #roles .persona { padding: clamp(18px, 2.5vmin, 32px) clamp(14px, 2vmin, 24px); }
+      html.deck-on #roles .persona-ic {
+        width: clamp(40px, 5vmin, 58px); height: clamp(40px, 5vmin, 58px);
+        margin-bottom: clamp(10px, 1.6vh, 22px);
+      }
+      html.deck-on #roles .persona h4 { font-size: clamp(15px, 1.9vmin, 21px); margin-bottom: clamp(6px, 0.8vh, 12px); }
+      html.deck-on #roles .persona p  { font-size: clamp(12px, 1.4vmin, 15px); }
+
+      html.deck-on #plans .section-head { margin-bottom: clamp(14px, 2.2vh, 48px); }
+      html.deck-on #plans .section-head h2 { font-size: clamp(24px, 3.5vmin, 40px); }
+      /* plans grid gap scales; card padding tightens at short heights */
+      html.deck-on #plans #plansGrid { gap: clamp(12px, 1.6vmin, 24px) !important; }
+      /* At short viewports (768px): reduce plan card internal spacing so all 3 fit.
+         Cards rendered by plans.js carry inline padding:36px 28px — override with
+         !important at the clamp minimum. At 768px vmin=7.68 → 2.8vmin≈21px.
+         2-col feature grid + feature font size also tightens slightly. */
+      html.deck-on #plans .mkt-plan {
+        padding: clamp(18px, 2.8vmin, 36px) clamp(16px, 2.5vmin, 28px) !important;
+        border-radius: clamp(18px, 2.5vmin, 28px) !important;
+      }
+      html.deck-on #plans .mkt-plan ul {
+        row-gap: clamp(5px, 0.7vh, 9px) !important;
+        margin-bottom: clamp(14px, 2vh, 24px) !important;
+      }
+      html.deck-on #plans .mkt-plan ul li {
+        font-size: clamp(11px, 1.3vmin, 13px) !important;
+      }
+      html.deck-on #plans .mkt-plan > div:first-child + div,
+      html.deck-on #plans .mkt-plan [style*="font-size:12px"] { margin-bottom: clamp(6px, 0.9vh, 14px) !important; }
+      html.deck-on #plans .mkt-plan [style*="font-size:40px"] { font-size: clamp(26px, 3.5vmin, 40px) !important; }
+      html.deck-on #plans .mkt-plan [style*="margin-bottom:14px"] { margin-bottom: clamp(6px, 0.9vh, 14px) !important; }
+      html.deck-on #plans .mkt-plan [style*="margin-bottom:18px"] { margin-bottom: clamp(8px, 1.2vh, 18px) !important; }
+      html.deck-on #plans .mkt-plan [style*="margin:0 0 18px"] { margin: 0 0 clamp(8px, 1.2vh, 18px) !important; }
+      html.deck-on #plans .mkt-plan [style*="margin:0 0 24px"] { margin: 0 0 clamp(12px, 1.8vh, 24px) !important; }
     }
   </style>
 </head>
 <body>
   <a href="#hero" class="skip-link">Skip to main content</a>
 
-  <!-- ========================================================
-       SECTION A — Top navigation (shared chrome — assets/public-chrome.js)
-       ======================================================== -->
+  <!-- SECTION A — Top navigation (shared chrome — assets/public-chrome.js) -->
   <div id="gs-public-nav"></div>
 
   <!-- ========================================================
        SECTION B — Hero
-       Navy gradient + saffron mesh · copy left · product mock right · stats strip
        ======================================================== -->
-  <section id="hero" class="hero-gradient" aria-labelledby="hero-heading">
+  <section id="hero" class="hero-gradient screen" aria-labelledby="hero-heading">
     <div class="max-w-6xl mx-auto px-6 hero-inner">
       <div class="hero-grid">
         <div class="hero-copy">
           <span class="hero-eyebrow">Property Rental Management</span>
-          <h1 id="hero-heading" class="hero-h1">Run your entire rental business from one place.</h1>
+          <h1 id="hero-heading" class="hero-h1">Run your entire <span class="accent">rental business</span> from one place.</h1>
           <p class="hero-sub">Leases, rent, maintenance and visitors — every record role-scoped and auditable. Get your organization live in minutes.</p>
           <div class="hero-ctas">
-            <a href="organization-signup.html" class="btn btn-primary" style="font-size:15px; padding:13px 30px;">Register Your Organization</a>
-            <a href="login.html" class="btn btn-secondary hero-btn-ghost">Login</a>
+            <a href="organization-signup.html" class="btn btn-primary btn-glow" style="font-size:15px; padding:13px 30px;">Register Your Organization</a>
+            <a href="login.html" class="btn btn-secondary hero-btn-ghost btn-glow">Login</a>
           </div>
         </div>
         <div class="hero-visual" aria-hidden="true">
-          <div class="mock-window">
-            <div class="mock-titlebar">
-              <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
-              <span class="mock-url">anshika.tlitech.net</span>
-            </div>
-            <div class="mock-body">
-              <div class="mock-kpis">
-                <div class="mock-kpi"><div class="mock-kpi-label">Collected</div><div class="mock-kpi-value">₹4.2L</div></div>
-                <div class="mock-kpi"><div class="mock-kpi-label">Occupancy</div><div class="mock-kpi-value">94%</div></div>
-                <div class="mock-kpi"><div class="mock-kpi-label">Open req.</div><div class="mock-kpi-value">7</div></div>
+          <div class="hero-glow"></div>
+          <div class="hero-glass-frame gs-float">
+            <div class="mock-window">
+              <div class="mock-titlebar">
+                <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+                <span class="mock-url">anshika.tlitech.net</span>
               </div>
-              <table class="mock-table">
-                <thead><tr><th>Unit</th><th>Tenant</th><th>Rent</th><th>Status</th></tr></thead>
-                <tbody>
-                  <tr><td>Flat 101</td><td>Priya Sharma</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
-                  <tr><td>Flat 204</td><td>Rahul Verma</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
-                  <tr><td>Flat 305</td><td>Anjali Mehta</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
-                </tbody>
-              </table>
+              <div class="mock-body">
+                <div class="mock-kpis">
+                  <div class="mock-kpi"><div class="mock-kpi-label">Collected</div><div class="mock-kpi-value">₹4.2L</div></div>
+                  <div class="mock-kpi"><div class="mock-kpi-label">Occupancy</div><div class="mock-kpi-value">94%</div></div>
+                  <div class="mock-kpi"><div class="mock-kpi-label">Open req.</div><div class="mock-kpi-value">7</div></div>
+                </div>
+                <table class="mock-table">
+                  <thead><tr><th>Unit</th><th>Tenant</th><th>Rent</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Flat 101</td><td>Priya Sharma</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                    <tr><td>Flat 204</td><td>Rahul Verma</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
+                    <tr><td>Flat 305</td><td>Anjali Mehta</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -237,110 +501,107 @@
   </section>
 
   <!-- ========================================================
-       SECTION C — Capabilities (alternating feature rows)
+       SECTION C — Capabilities (bento)
        ======================================================== -->
-  <section id="capabilities" aria-labelledby="capabilities-heading" class="section-pad" style="background:#fff;">
+  <section id="capabilities" aria-labelledby="capabilities-heading" class="section-pad screen" style="background:var(--surface);">
     <div class="max-w-6xl mx-auto px-6">
       <div class="section-head">
         <div class="eyebrow-center"><span class="eyebrow-pill">Platform capabilities</span></div>
-        <h2 id="capabilities-heading">Everything your rental business needs</h2>
+        <h2 id="capabilities-heading" class="sparkle-text" data-sparkle="#FF6F00,#1565C0">Everything your rental business needs</h2>
       </div>
-      <div class="feature-rows">
+      <div class="bento">
 
-        <!-- Row 1 — Rent Collection (mock left · text right) -->
-        <div class="feature-row reveal">
-          <div class="feature-mock">
-            <table class="mock-table">
-              <thead><tr><th>Unit</th><th>Rent</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr><td>Flat 101</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
-                <tr><td>Flat 204</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
-                <tr><td>Flat 305</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
-                <tr><td>Flat 402</td><td>₹20,000</td><td><span class="badge badge-prepaid">Prepaid</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="feature-text">
-            <span class="eyebrow-pill">Rent</span>
-            <h3 class="feature-h">Rent Collection</h3>
-            <ul class="feature-list">
-              <li>Record payments — full, partial or prepaid — in a click.</li>
-              <li>Overdue rent surfaces automatically; no manual chasing.</li>
-              <li>Every rupee captured with a permanent audit trail.</li>
-            </ul>
+        <!-- Rent (span 7) -->
+        <div class="glass-card lift cell span-7 reveal">
+          <div class="cap-split">
+            <div class="cap-copy">
+              <span class="eyebrow-pill">Rent</span>
+              <h3 class="feature-h">Rent Collection</h3>
+              <ul class="feature-list">
+                <li>Record payments — full, partial or prepaid — in a click.</li>
+                <li>Overdue rent surfaces automatically; no manual chasing.</li>
+                <li>Every rupee captured with a permanent audit trail.</li>
+              </ul>
+            </div>
+            <div class="mini-mock">
+              <table class="mock-table">
+                <thead><tr><th>Unit</th><th>Rent</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Flat 101</td><td>₹18,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                  <tr><td>Flat 204</td><td>₹22,500</td><td><span class="badge badge-partial">Partial</span></td></tr>
+                  <tr><td>Flat 305</td><td>₹15,000</td><td><span class="badge badge-overdue">Overdue</span></td></tr>
+                  <tr><td>Flat 402</td><td>₹20,000</td><td><span class="badge badge-prepaid">Prepaid</span></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Row 2 — Maintenance (text left · mock right) -->
-        <div class="feature-row reversed reveal">
-          <div class="feature-mock">
-            <div class="mock-req-head">
-              <span class="mock-req-title">Leaking tap — Flat 204</span>
+        <!-- Maintenance (span 5) -->
+        <div class="glass-card lift cell span-5 reveal">
+          <span class="eyebrow-pill">Maintenance</span>
+          <h3 class="feature-h">Maintenance Requests</h3>
+          <p class="cap-copy" style="margin-bottom:18px;">Structured requests replace scattered WhatsApp threads. Assign staff and track status to a close.</p>
+          <div class="mini-mock">
+            <div class="req-head">
+              <span class="req-title">Leaking tap — Flat 204</span>
               <span class="badge badge-emergency">Emergency</span>
             </div>
-            <div class="mock-kv"><span class="k">Assigned</span><span class="v">Suresh K.</span></div>
-            <div class="mock-kv"><span class="k">Status</span><span class="badge badge-progress">In Progress</span></div>
-            <ul class="mock-timeline">
-              <li>Raised by tenant · 24/05/2026</li>
-              <li>Assigned to Suresh K. · 24/05/2026</li>
-              <li>Work started · 25/05/2026</li>
-            </ul>
-          </div>
-          <div class="feature-text">
-            <span class="eyebrow-pill">Maintenance</span>
-            <h3 class="feature-h">Maintenance Requests</h3>
-            <ul class="feature-list">
-              <li>Structured requests replace scattered WhatsApp threads.</li>
-              <li>Assign staff, track status and close with accountability.</li>
-              <li>Emergency requests are flagged and surfaced first.</li>
-            </ul>
+            <div class="progress-track"><div class="progress-fill"></div></div>
+            <div class="assignee"><span class="av">SK</span><span class="nm">Assigned to Suresh K.</span></div>
           </div>
         </div>
 
-        <!-- Row 3 — Leases (mock left · text right) -->
-        <div class="feature-row reveal">
-          <div class="feature-mock">
-            <div class="mock-req-head">
-              <span class="mock-req-title">Lease · Flat 101</span>
-              <span class="badge badge-active">Active</span>
-            </div>
+        <!-- Leases (span 5) -->
+        <div class="glass-card lift cell span-5 reveal">
+          <span class="eyebrow-pill">Leases</span>
+          <h3 class="feature-h">Lease Management</h3>
+          <ul class="feature-list" style="margin-bottom:18px;">
+            <li>Create, renew and terminate leases with rent-lock logic.</li>
+            <li>Co-tenant support with per-tenant consent on changes.</li>
+          </ul>
+          <div class="mini-mock">
+            <div class="req-head"><span class="req-title">Lease · Flat 101</span><span class="badge badge-active">Active</span></div>
             <div class="mock-kv"><span class="k">Tenant</span><span class="v">Priya Sharma</span></div>
-            <div class="mock-kv"><span class="k">Start</span><span class="v">01/06/2025</span></div>
-            <div class="mock-kv"><span class="k">End</span><span class="v">31/05/2026</span></div>
+            <div class="mock-kv"><span class="k">Term</span><span class="v">01/06/2025 – 31/05/2026</span></div>
             <div class="mock-kv"><span class="k">Monthly rent</span><span class="v">₹18,000</span></div>
           </div>
-          <div class="feature-text">
-            <span class="eyebrow-pill">Leases</span>
-            <h3 class="feature-h">Lease Management</h3>
-            <ul class="feature-list">
-              <li>Create, renew and terminate leases with rent-lock logic.</li>
-              <li>Co-tenant support with per-tenant consent on changes.</li>
-              <li>Schedule future rent changes ahead of renewal.</li>
-            </ul>
-          </div>
         </div>
 
-        <!-- Row 4 — Visitors & Tenants (text left · mock right) -->
-        <div class="feature-row reversed reveal">
-          <div class="feature-mock">
-            <table class="mock-table">
-              <thead><tr><th>Visitor</th><th>Flat</th><th>Check-in</th></tr></thead>
-              <tbody>
-                <tr><td>Amit Rao</td><td>101</td><td>10:24</td></tr>
-                <tr><td>Delivery — BlueDart</td><td>204</td><td>11:05</td></tr>
-                <tr><td>Neha Gupta</td><td>305</td><td>13:40</td></tr>
-                <tr><td>Plumber</td><td>402</td><td>15:12</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="feature-text">
-            <span class="eyebrow-pill">Visitors &amp; Tenants</span>
-            <h3 class="feature-h">Visitors &amp; Tenant Portal</h3>
-            <ul class="feature-list">
-              <li>Log every visitor with flat, purpose and check-in time.</li>
-              <li>Tenants self-serve their lease, rent status and requests.</li>
-              <li>One record for every person in your building.</li>
-            </ul>
+        <!-- Visitors & Tenants (span 7) -->
+        <div class="glass-card lift cell span-7 reveal">
+          <div class="cap-split">
+            <div class="mini-mock">
+              <div class="visitor-row">
+                <div class="visitor-left">
+                  <span class="visitor-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                  <div><div class="visitor-name">Amit Rao</div><div class="visitor-flat">Flat 101</div></div>
+                </div>
+                <span class="visitor-time">10:24</span>
+              </div>
+              <div class="visitor-row">
+                <div class="visitor-left">
+                  <span class="visitor-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+                  <div><div class="visitor-name">Delivery — BlueDart</div><div class="visitor-flat">Flat 204</div></div>
+                </div>
+                <span class="visitor-time">11:05</span>
+              </div>
+              <div class="visitor-row">
+                <div class="visitor-left">
+                  <span class="visitor-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                  <div><div class="visitor-name">Neha Gupta</div><div class="visitor-flat">Flat 305</div></div>
+                </div>
+                <span class="visitor-time">13:40</span>
+              </div>
+            </div>
+            <div class="cap-copy">
+              <span class="eyebrow-pill">Visitors &amp; Tenants</span>
+              <h3 class="feature-h">Visitors &amp; Tenant Portal</h3>
+              <p>One record for every person in your building. Log visitors with purpose and check-in time, while tenants self-serve their lease, rent status and requests.</p>
+              <a href="organization-signup.html" class="cap-link">Explore the portal
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -349,28 +610,28 @@
   </section>
 
   <!-- ========================================================
-       SECTION D — How it works (three steps)
+       SECTION D — How it works (navy band, three steps)
        ======================================================== -->
-  <section id="how" aria-labelledby="how-heading" class="section-pad reveal" style="background:#F8F9FA;">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="section-head">
-        <div class="eyebrow-center"><span class="eyebrow-pill">Get started</span></div>
-        <h2 id="how-heading">Live in three steps</h2>
+  <section id="how" aria-labelledby="how-heading" class="section-pad how-band screen">
+    <div class="max-w-6xl mx-auto px-6" style="position:relative; z-index:1;">
+      <div class="section-head on-dark">
+        <div class="eyebrow-center"><span class="eyebrow-pill on-dark">Get started</span></div>
+        <h2 id="how-heading" class="sparkle-text" data-sparkle="#FF6F00,#FFFFFF">Live in three steps</h2>
       </div>
       <div class="how-grid">
-        <div class="how-step">
-          <div class="how-num-wrap"><div class="step-number">01</div></div>
-          <h3 class="font-poppins">Register your organization</h3>
+        <div class="how-step reveal">
+          <div class="how-num">01</div>
+          <h3>Register your organization</h3>
           <p>Sign up and choose a plan — your workspace is ready once approved.</p>
         </div>
-        <div class="how-step">
-          <div class="how-num-wrap"><div class="step-number">02</div></div>
-          <h3 class="font-poppins">Invite your team</h3>
+        <div class="how-step reveal">
+          <div class="how-num">02</div>
+          <h3>Invite your team</h3>
           <p>Add property managers and maintenance staff, each scoped to their role.</p>
         </div>
-        <div class="how-step">
-          <div class="how-num-wrap"><div class="step-number">03</div></div>
-          <h3 class="font-poppins">Manage from day one</h3>
+        <div class="how-step reveal">
+          <div class="how-num">03</div>
+          <h3>Manage from day one</h3>
           <p>Add properties and leases — rent, requests and visitors track themselves.</p>
         </div>
       </div>
@@ -378,45 +639,70 @@
   </section>
 
   <!-- ========================================================
-       SECTION E — Roles (bento, Admin emphasized)
+       SECTION E — Personas (5 operational roles, Admin emphasized)
        ======================================================== -->
-  <section id="roles" aria-labelledby="roles-heading" class="section-pad" style="background:#fff;">
-    <div class="max-w-6xl mx-auto px-6">
+  <section id="roles" aria-labelledby="roles-heading" class="section-pad personas-wrap screen" style="background:#fff;">
+    <!-- Animated background paths (decorative) -->
+    <div class="path-container" aria-hidden="true">
+      <svg class="animated-paths" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+        <path class="animated-path" style="stroke:rgba(26,35,126,0.45);" d="M -100 200 Q 250 400 500 200 T 1100 300" stroke-width="40"></path>
+        <path class="animated-path" style="stroke:rgba(255,111,0,0.55); animation-delay:-5s; animation-duration:20s;" d="M -100 600 Q 300 400 600 700 T 1100 500" stroke-width="60"></path>
+        <path class="animated-path" style="stroke:rgba(21,101,192,0.40); animation-delay:-10s; animation-duration:18s;" d="M -100 800 Q 400 900 700 600 T 1100 800" stroke-width="30"></path>
+        <path class="animated-path" style="stroke:rgba(255,111,0,0.30); animation-delay:-2s; animation-duration:25s;" d="M -100 100 Q 200 300 500 100 T 1100 200" stroke-width="80"></path>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-6" style="position:relative; z-index:1;">
       <div class="section-head">
         <div class="eyebrow-center"><span class="eyebrow-pill">Who it's for</span></div>
-        <h2 id="roles-heading">Built for every person in your building</h2>
+        <h2 id="roles-heading" class="sparkle-text" data-sparkle="#FF6F00,#1565C0">Built for every person in your building</h2>
       </div>
-      <div class="roles-grid">
-        <div class="card role-card role-admin reveal">
-          <div class="role-icon" style="background:#1A237E; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
+      <div class="personas-grid">
+
+        <div class="persona lead reveal">
+          <div class="persona-ic" style="background:#1A237E;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg>
           </div>
-          <span class="role-label">Owner / Operator</span>
-          <h3 class="font-poppins font-semibold" style="font-size:20px; color:#212121; margin-bottom:8px;">Admin</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Full control across every property, user and alert. Highest privilege, complete visibility, and the buyer who sets up the workspace.</p>
+          <span class="persona-label">Owner / Operator</span>
+          <h4>Admin</h4>
+          <p>Full control across every property, user and alert. Highest privilege and complete visibility.</p>
         </div>
-        <div class="card role-card reveal">
-          <div class="role-icon" style="background:#1565C0; margin-bottom:16px;">
+
+        <div class="persona reveal">
+          <div class="persona-ic" style="background:#1565C0;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Property Manager</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Manages assigned properties — leases, rent collection, tenants and maintenance coordination.</p>
+          <span class="persona-label">Operations</span>
+          <h4>Property Manager</h4>
+          <p>Manages assigned properties — leases, rent collection, tenants and maintenance coordination.</p>
         </div>
-        <div class="card role-card reveal">
-          <div class="role-icon" style="background:#FF6F00; margin-bottom:16px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2h-1.6L12 2 7.6 6H6a2 2 0 0 0-2 2v4"/><path d="M2 13h20l-2 9H4z"/></svg>
+
+        <div class="persona reveal">
+          <div class="persona-ic" style="background:#FF6F00;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
-          <span class="role-label">Self-service portal</span>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Tenant</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Views their lease, tracks rent status and raises maintenance requests from their own portal.</p>
+          <span class="persona-label">Self-service portal</span>
+          <h4>Tenant</h4>
+          <p>Views their lease, tracks rent status and raises maintenance requests from their own portal.</p>
         </div>
-        <div class="card role-card reveal">
-          <div class="role-icon" style="background:#546E7A; margin-bottom:16px;">
+
+        <div class="persona reveal">
+          <div class="persona-ic" style="background:#546E7A;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
           </div>
-          <h3 class="font-poppins font-semibold" style="font-size:16px; color:#212121; margin-bottom:8px;">Maintenance Staff</h3>
-          <p class="muted" style="font-size:14px; line-height:1.6;">Sees only the requests assigned to them. No access to rent or lease data — scoped by design.</p>
+          <span class="persona-label">Field staff</span>
+          <h4>Maintenance Staff</h4>
+          <p>Sees only the requests assigned to them. No access to rent or lease data — scoped by design.</p>
         </div>
+
+        <div class="persona reveal">
+          <div class="persona-ic" style="background:#0D1757;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <span class="persona-label">Field operations</span>
+          <h4>Security Guard</h4>
+          <p>Logs visitors and manages building access at the gate. No access to rent or lease data.</p>
+        </div>
+
       </div>
     </div>
   </section>
@@ -424,43 +710,68 @@
   <!-- ========================================================
        SECTION F — Subscription plans (rendered from plans.js)
        ======================================================== -->
-  <section id="plans" aria-labelledby="plans-heading" class="section-pad" style="background:#ECEFF1;">
+  <section id="plans" aria-labelledby="plans-heading" class="section-pad screen" style="background:var(--surface-low);">
     <div class="max-w-6xl mx-auto px-6">
       <div class="section-head">
         <div class="eyebrow-center"><span class="eyebrow-pill">Pricing</span></div>
-        <h2 id="plans-heading">Plans for every size</h2>
+        <h2 id="plans-heading" class="sparkle-text" data-sparkle="#FF6F00,#1565C0">Plans for every size</h2>
       </div>
-      <div id="plansGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:900px; margin:0 auto;" class="plans-grid"></div>
+      <div id="plansGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:1180px; margin:0 auto; align-items:stretch;" class="plans-grid"></div>
     </div>
   </section>
 
   <!-- ========================================================
-       SECTION G — Final CTA (navy, merges into footer)
+       SECTION G — Closing screen: Final CTA + Footer together
        ======================================================== -->
-  <section id="final-cta" aria-labelledby="final-cta-heading" class="final-cta">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 id="final-cta-heading">Ready to organize your rental business?</h2>
-      <p style="color:rgba(255,255,255,0.78); font-size:17px; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto;">Join organizations that have replaced paper chaos with GharSetu. Sign up takes minutes.</p>
-      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
-        <a href="organization-signup.html" class="btn btn-primary" style="font-size:16px; padding:14px 36px; min-width:260px;">
-          Register Your Organization
-        </a>
-        <a href="login.html" class="font-poppins font-semibold" style="color:rgba(255,255,255,0.78); font-size:14px; text-decoration:none;">
-          Already have an account? <span style="color:#fff; text-decoration:underline;">Login</span>
-        </a>
+  <div class="screen" id="closing">
+    <section id="final-cta" aria-labelledby="final-cta-heading" class="final-cta-wrap" style="background:#fff;">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="final-cta reveal">
+          <h2 id="final-cta-heading" class="sparkle-text" data-sparkle="#FF6F00,#FFFFFF">Ready to organize your rental business?</h2>
+          <p style="color:rgba(255,255,255,0.80); font-size:17px; margin-bottom:32px; max-width:560px; margin-left:auto; margin-right:auto;">Join organizations that have replaced paper chaos with GharSetu. Sign up takes minutes.</p>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+            <a href="organization-signup.html" class="btn btn-primary btn-glow" style="font-size:16px; padding:14px 36px; min-width:260px;">Register Your Organization</a>
+            <a href="login.html" class="font-poppins font-semibold" style="color:rgba(255,255,255,0.80); font-size:14px; text-decoration:none;">
+              Already have an account? <span style="color:#fff; text-decoration:underline;">Login</span>
+            </a>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========================================================
-       SECTION H — Footer (shared chrome — assets/public-chrome.js)
-       ======================================================== -->
-  <div id="gs-public-footer"></div>
+    <!-- Footer (shared chrome — assets/public-chrome.js) -->
+    <div id="gs-public-footer"></div>
+  </div>
 
   <script src="assets/public-chrome.js"></script>
   <script src="assets/plans.js"></script>
   <script>
     renderMarketingPlans("plansGrid");
+
+    /* Personas heading — char-by-char reveal (clone of Stitch effect) */
+    (function () {
+      var t = document.getElementById('roles-heading');
+      if (!t) return;
+      var txt = t.textContent;
+      t.textContent = '';
+      txt.split('').forEach(function (ch, i) {
+        var s = document.createElement('span');
+        s.className = 'char-reveal';
+        s.textContent = ch === ' ' ? ' ' : ch;
+        s.style.transitionDelay = (i * 22) + 'ms';
+        t.appendChild(s);
+      });
+      function showAll() { t.querySelectorAll('.char-reveal').forEach(function (s) { s.classList.add('show'); }); }
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) { showAll(); return; }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { showAll(); io.disconnect(); } });
+      }, { threshold: 0.4 });
+      io.observe(t);
+    })();
+
+    /* Sparkles "magic text" headings are decorated by assets/sparkles.js
+       (loaded after this block, so the personas char-reveal runs first). */
 
     /* Scroll reveal — IntersectionObserver, reduced-motion aware */
     (function () {
@@ -477,7 +788,132 @@
       }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
       els.forEach(function (e) { io.observe(e); });
     })();
+
+    /* Full-page "deck" — desktop + motion-allowed only.
+       (1) A wheel/key navigator flips exactly one section per gesture; tall
+           sections scroll internally first (so nothing is clipped).
+       (2) A scroll-driven zoom/blur supplies the depth: the section covering the
+           viewport centre is sharp/full; neighbours recede + blur. Both scale
+           directions stay <=1 so nothing overflows horizontally.
+       Disabled + cleaned up below 1024px or with reduced motion. */
+    (function () {
+      var mq = window.matchMedia('(min-width:1024px)');
+      var rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+      var html = document.documentElement;
+      var ticking = false, active = false, animating = false, cooldown = false;
+      if (!screens.length) return;
+      function vh() { return window.innerHeight; }
+
+      /* ---- depth: zoom/blur focus ---- */
+      /* Intensity scales gently with available viewport height so tall monitors
+         get a more dramatic depth (more room to "stack") while short laptops stay
+         readable. vhFactor: 1.0 @ 900px, 0.82 @ 768px, 1.20 @ 1080px, 1.60 @ 1440px —
+         capped 0.75..1.6 to prevent extremes. */
+      function depthFactor() {
+        var f = vh() / 900;
+        return f < 0.75 ? 0.75 : f > 1.6 ? 1.6 : f;
+      }
+      function apply() {
+        var v = vh(), center = v / 2;
+        var sy = window.pageYOffset || document.documentElement.scrollTop || 0;
+        var df = depthFactor();
+        for (var i = 0; i < screens.length; i++) {
+          var el = screens[i];
+          var topRel = el.offsetTop - sy, bottomRel = topRel + el.offsetHeight, off;
+          if (bottomRel <= center) off = (center - bottomRel) / v;       /* leaving (above) */
+          else if (topRel >= center) off = (topRel - center) / v;        /* arriving (below) */
+          else off = 0;                                                  /* covers centre → sharp */
+          /* e: 0 = at centre (sharp), 1 = fully off-screen.
+             Ramp starts only after 0.1 of offset so there's a "flat sharp" zone around the snap
+             point — matches the ui-ux-pro-max "dominant section should stay fully sharp" rule. */
+          var raw = (off - 0.10) / 0.55; if (raw < 0) raw = 0; if (raw > 1) raw = 1;
+          var e = raw;
+          /* Scale: recede (<=1 — no horizontal overflow). Gentle at short, more dramatic at tall. */
+          el.style.setProperty('--sx', (1 - e * 0.06 * df).toFixed(4));
+          /* Opacity: ui-ux-pro-max says fading elements should not linger below 0.2.
+             Neighbour fades to ~0.6 (was 0.5). Only neighbours fully off-screen go dim. */
+          el.style.setProperty('--so', (1 - e * 0.42).toFixed(3));
+          /* Blur: 0→5px at 900, 0→4px at 768, 0→8px at 1440. Crisp dominant section, subtle neighbours. */
+          el.style.setProperty('--bl', (e * 5 * df).toFixed(2) + 'px');
+        }
+        ticking = false;
+      }
+      function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(apply); } }
+      function clearVars() { screens.forEach(function (el) { el.style.removeProperty('--sx'); el.style.removeProperty('--so'); el.style.removeProperty('--bl'); el.classList.remove('is-tall'); }); }
+      /* Tag sections whose content is taller than the screen → they top-align +
+         scroll internally (instead of centring, which would hide their top). */
+      function tagTall() {
+        screens.forEach(function (el) {
+          if (el.scrollHeight > el.clientHeight + 2) el.classList.add('is-tall');
+          else el.classList.remove('is-tall');
+        });
+      }
+
+      /* ---- flip navigator (one section per gesture) ---- */
+      var maxIndex = screens.length - 1;             /* last screen = #closing (CTA + footer) */
+      function curIndex() {
+        var v = vh(), sy = window.pageYOffset || 0;
+        if (sy >= (document.body.scrollHeight - v - 4)) return maxIndex;
+        var i = Math.round(sy / v);
+        return i < 0 ? 0 : (i > maxIndex ? maxIndex : i);
+      }
+      function targetTop(i) { return screens[i].offsetTop; }
+      function go(i) {
+        i = Math.max(0, Math.min(maxIndex, i));
+        animating = true;
+        window.scrollTo({ top: targetTop(i), behavior: 'smooth' });
+        setTimeout(function () { animating = false; }, 820);
+      }
+      function canInner(el, dir) {
+        if (!el) return false;
+        return dir > 0 ? (el.scrollTop + el.clientHeight < el.scrollHeight - 2) : (el.scrollTop > 2);
+      }
+      function onWheel(e) {
+        if (animating || cooldown) { e.preventDefault(); return; }
+        var dir = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+        if (!dir) return;
+        var i = curIndex();
+        if (canInner(screens[i], dir)) return;       /* let a tall section scroll inside first */
+        e.preventDefault();
+        cooldown = true; setTimeout(function () { cooldown = false; }, 880);
+        go(i + dir);
+      }
+      function onKey(e) {
+        if (animating) return;
+        var i = curIndex(), dir = 0;
+        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') dir = 1;
+        else if (e.key === 'ArrowUp' || e.key === 'PageUp') dir = -1;
+        else if (e.key === 'Home') { e.preventDefault(); go(0); return; }
+        else if (e.key === 'End') { e.preventDefault(); go(maxIndex); return; }
+        else return;
+        if (canInner(screens[i], dir)) return;
+        e.preventDefault(); go(i + dir);
+      }
+
+      function update() {
+        var on = mq.matches && !rm.matches;
+        if (on && !active) {
+          active = true; html.classList.add('deck-on');
+          window.addEventListener('scroll', onScroll, { passive: true });
+          window.addEventListener('wheel', onWheel, { passive: false });
+          window.addEventListener('keydown', onKey);
+          requestAnimationFrame(function () { tagTall(); apply(); });
+        } else if (!on && active) {
+          active = false; html.classList.remove('deck-on');
+          window.removeEventListener('scroll', onScroll);
+          window.removeEventListener('wheel', onWheel);
+          window.removeEventListener('keydown', onKey);
+          clearVars();
+        }
+      }
+      if (mq.addEventListener) { mq.addEventListener('change', update); rm.addEventListener('change', update); }
+      else if (mq.addListener) { mq.addListener(update); rm.addListener(update); }
+      window.addEventListener('resize', function () { if (active) { tagTall(); onScroll(); } }, { passive: true });
+      update();
+    })();
   </script>
+  <script src="assets/sparkles.js"></script>
   <script src="assets/toast.js"></script>
 </body>
 </html>

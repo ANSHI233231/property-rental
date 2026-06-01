@@ -9,101 +9,142 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { navy:'#1A237E','royal-blue':'#1565C0',saffron:'#FF6F00',charcoal:'#212121',slate:'#546E7A','off-white':'#F8F9FA','light-gray':'#ECEFF1','mid-gray':'#CFD8DC' },
+      fontFamily: { poppins:['Poppins','sans-serif'], inter:['Inter','sans-serif'] }
+    }}}
+  </script>
   <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    /* Icon-in-field helpers (login / auth) */
+    .icon-field { position: relative; }
+    .icon-field .fi { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--color-slate); pointer-events: none; display: inline-flex; }
+    .icon-field .input { padding-left: 42px; }
+    .icon-field .pw-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: var(--color-slate); padding: 6px; border-radius: 8px; line-height: 0; }
+    .icon-field .pw-toggle:hover { color: var(--color-charcoal); }
+    .icon-field input[type="password"], .icon-field input.has-toggle { padding-right: 44px; }
+    .auth-icon-badge { width: 64px; height: 64px; border-radius: 999px; background: rgba(255,111,0,0.12); display: inline-flex; align-items: center; justify-content: center; color: var(--color-saffron); }
+    /* Preview-as-role modal */
+    .role-modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px;
+      background: rgba(11,28,48,0.40); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+    .role-modal.open { display: flex; }
+    .role-modal-card { background: #fff; border-radius: 16px; box-shadow: 0 24px 64px rgba(15,23,42,0.28); width: 100%; max-width: 680px; overflow: hidden; }
+    .role-modal-head { padding: 20px 28px; border-bottom: 1px solid var(--color-light-gray); display: flex; align-items: center; justify-content: space-between; background: var(--surface-low); }
+    .role-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 24px 28px; }
+    @media (min-width: 560px) { .role-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 860px) { .role-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .role-opt { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 12px; border: 1px solid var(--color-mid-gray); border-radius: 14px; text-decoration: none; transition: border-color 150ms, background 150ms, transform 150ms; }
+    .role-opt:hover { border-color: var(--color-saffron); background: rgba(255,111,0,0.04); transform: translateY(-2px); }
+    .role-opt .ric { width: 46px; height: 46px; border-radius: 999px; background: var(--surface-high); color: var(--color-navy); display: flex; align-items: center; justify-content: center; }
+    .role-opt:hover .ric { background: rgba(255,111,0,0.14); color: var(--color-saffron); }
+    .role-opt .rlbl { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; color: var(--color-charcoal); text-align: center; }
+  </style>
 </head>
 <body>
-  <h1 class="sr-only">Sign in to GharSetu</h1>
+  <div id="gs-public-nav"></div>
   <main class="auth-shell" style="flex-direction:column; align-items:center; justify-content:center; gap:0;">
 
     <!-- Auth card -->
-    <form id="login-step" class="auth-card" onsubmit="event.preventDefault();">
-      <a href="index.html" class="auth-brand">Ghar<span>Setu</span></a>
-      <div class="auth-tagline">Property Rental Management</div>
+    <form id="login-step" class="auth-card" novalidate onsubmit="return handleLogin(event);">
+      <div class="text-center" style="margin-bottom:28px;">
+        <div class="auth-icon-badge" style="margin-bottom:16px;" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M12 3 4 9v12h6v-6h4v6h6V9l-8-6Z"/></svg>
+        </div>
+        <h1 class="font-poppins sparkle-text" data-sparkle="#FF6F00,#1565C0" style="font-size:30px; font-weight:700; color:var(--color-charcoal); margin:0 0 6px;">Welcome Back</h1>
+        <p class="muted" style="font-size:14px;">Enter your credentials to manage your properties</p>
+      </div>
 
       <label class="label" for="email">Email</label>
-      <input id="email" class="input" type="text" placeholder="raj@gharsetu.in" autocomplete="username" />
+      <div class="icon-field">
+        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+        <input id="email" class="input" type="text" placeholder="manager@anshika.tlitech.net" autocomplete="username" oninput="clearErr('email')" />
+      </div>
+      <div class="field-error" id="email-error"></div>
 
       <div class="mt-4">
-        <label class="label" for="password">Password</label>
-        <div class="relative">
-          <input id="password" class="input pr-12" type="password" placeholder="••••••••" autocomplete="current-password" />
-          <button
-            type="button"
-            id="pw-toggle"
-            aria-label="Show password"
-            onclick="togglePassword()"
-            class="absolute top-1/2 right-3 -translate-y-1/2 text-slate hover:text-charcoal focus:outline-none focus:ring-2 focus:ring-saffron focus:ring-offset-1 rounded p-1"
-          >
-            <svg id="pw-eye" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg id="pw-eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
-              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 4.22-5.22"/>
-              <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.16 4.19"/>
-              <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
+        <div class="flex items-center justify-between">
+          <label class="label" for="password" style="margin-bottom:0;">Password</label>
+          <a href="forgot-password.html" class="text-saffron font-poppins font-semibold" style="font-size:13px;">Forgot password?</a>
+        </div>
+        <div class="icon-field" style="margin-top:8px;">
+          <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input id="password" class="input has-toggle" type="password" placeholder="••••••••" autocomplete="current-password" oninput="clearErr('password')" />
+          <button type="button" id="pw-toggle" aria-label="Show password" onclick="togglePassword()" class="pw-toggle focus:outline-none focus:ring-2 focus:ring-saffron">
+            <svg id="pw-eye" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="pw-eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 4.22-5.22"/><path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.16 4.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
           </button>
         </div>
       </div>
+      <div class="field-error" id="password-error"></div>
 
-      <div class="mt-3 flex items-center justify-between text-sm">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" /> <span class="muted">Remember me</span>
-        </label>
-        <a href="forgot-password.html" class="text-royal-blue font-poppins font-semibold">Forgot password?</a>
+      <div class="mt-3 flex items-center gap-2">
+        <input id="remember" type="checkbox" class="w-5 h-5 rounded cursor-pointer" style="accent-color:var(--color-saffron);" />
+        <label for="remember" class="muted cursor-pointer select-none" style="font-size:14px;">Remember this device</label>
       </div>
 
-      <button type="submit" class="btn btn-primary w-full mt-6">Login</button>
+      <button type="submit" class="btn btn-primary w-full mt-6" style="gap:8px;">
+        Login
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
 
-      <div class="mt-6 text-center text-sm muted">
-        Don't have an account?
-        <a href="organization-signup.html" class="text-royal-blue font-poppins font-semibold">Register your organization <span aria-hidden="true">→</span></a>
+      <div class="mt-8 pt-6 text-center" style="border-top:1px solid var(--color-light-gray);">
+        <p class="muted" style="font-size:14px;">Don't have an account?</p>
+        <a href="organization-signup.html" class="text-saffron font-poppins font-semibold" style="font-size:14px; display:inline-block; margin-top:4px;">Register your organization <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="mt-5 text-center">
+        <button type="button" onclick="document.getElementById('roleModal').classList.add('open')"
+          class="font-poppins font-semibold inline-flex items-center gap-2"
+          style="font-size:13px; color:var(--color-slate); border:1px solid var(--color-mid-gray); padding:9px 16px; border-radius:999px; background:transparent;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview as Role
+        </button>
       </div>
     </form>
 
-    <!-- Prototype shortcuts strip — below the auth-card, outside the form -->
-    <div style="width:100%; max-width:480px; margin:32px auto 0; padding:0 24px; box-sizing:border-box;">
-      <div style="text-align:center; color:rgba(255,255,255,0.65); font-family:'Poppins',sans-serif; font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
-        Prototype Shortcuts — Preview as Role
-      </div>
+  </main>
+  <div id="gs-public-footer"></div>
 
-      <!-- 1-col on mobile; 2-col at 768px; 4-col at 1024px -->
-      <div class="shortcuts-grid">
-        <a href="super-admin/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Super Admin</a>
-        <a href="admin/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Admin</a>
-        <a href="pm/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Property Manager</a>
-        <a href="maintenance/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Maintenance</a>
-        <a href="security/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Security Guard</a>
-        <a href="tenant/dashboard.html" class="btn btn-secondary" style="color:#fff; border-color:rgba(255,255,255,0.6); background:transparent; text-align:center; display:block;">Tenant</a>
+  <!-- Preview-as-Role modal — prototype shortcut to each role's dashboard -->
+  <div id="roleModal" class="role-modal" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle"
+       onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="role-modal-card">
+      <div class="role-modal-head">
+        <h2 id="roleModalTitle" class="font-poppins" style="font-size:18px; font-weight:600; color:var(--color-charcoal); margin:0;">Select a preview role</h2>
+        <button type="button" aria-label="Close" onclick="document.getElementById('roleModal').classList.remove('open')"
+          style="color:var(--color-slate); padding:6px; line-height:0; border-radius:8px;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
-
-      <div style="text-align:center; color:rgba(255,255,255,0.5); font-family:'Inter',sans-serif; font-size:13px; margin-top:12px;">
-        Prototype only. Real login uses the form above — your role is detected from your account.
+      <div class="role-grid">
+        <a href="super-admin/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/><circle cx="12" cy="11" r="2"/></svg></span>
+          <span class="rlbl">Super Admin</span>
+        </a>
+        <a href="admin/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg></span>
+          <span class="rlbl">Admin</span>
+        </a>
+        <a href="pm/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg></span>
+          <span class="rlbl">Property Manager</span>
+        </a>
+        <a href="maintenance/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg></span>
+          <span class="rlbl">Maintenance</span>
+        </a>
+        <a href="security/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span class="rlbl">Security Guard</span>
+        </a>
+        <a href="tenant/dashboard.html" class="role-opt">
+          <span class="ric"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="rlbl">Tenant</span>
+        </a>
       </div>
     </div>
-
-  </main>
-
-  <style>
-    /* Shortcuts grid: 1-col mobile → 2-col 768px → 5-col 1024px (one per role) */
-    .shortcuts-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    @media (min-width: 768px) {
-      .shortcuts-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    @media (min-width: 1024px) {
-      .shortcuts-grid {
-        grid-template-columns: repeat(6, 1fr);
-      }
-    }
-  </style>
+  </div>
 
   <script>
     function togglePassword() {
@@ -112,18 +153,44 @@
       var eyeOff = document.getElementById('pw-eye-off');
       var btn = document.getElementById('pw-toggle');
       if (input.type === 'password') {
-        input.type = 'text';
-        eye.style.display = 'none';
-        eyeOff.style.display = 'block';
-        btn.setAttribute('aria-label', 'Hide password');
+        input.type = 'text'; eye.style.display = 'none'; eyeOff.style.display = 'block'; btn.setAttribute('aria-label', 'Hide password');
       } else {
-        input.type = 'password';
-        eye.style.display = 'block';
-        eyeOff.style.display = 'none';
-        btn.setAttribute('aria-label', 'Show password');
+        input.type = 'password'; eye.style.display = 'block'; eyeOff.style.display = 'none'; btn.setAttribute('aria-label', 'Show password');
       }
     }
+
+    /* Custom validation — errors below the field, no native browser tooltips (Working rule §16). */
+    function showErr(id, msg) {
+      var i = document.getElementById(id), e = document.getElementById(id + '-error');
+      i.classList.add('error'); i.setAttribute('aria-invalid', 'true');
+      e.textContent = msg; e.classList.add('show');
+    }
+    function clearErr(id) {
+      var i = document.getElementById(id), e = document.getElementById(id + '-error');
+      i.classList.remove('error'); i.removeAttribute('aria-invalid');
+      if (e) { e.textContent = ''; e.classList.remove('show'); }
+    }
+    function handleLogin(ev) {
+      ev.preventDefault();
+      var email = document.getElementById('email').value.trim();
+      var pw = document.getElementById('password').value;
+      var ok = true, first = null;
+      var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      if (!emailRe.test(email)) { showErr('email', 'Enter a valid email address.'); ok = false; first = first || 'email'; } else clearErr('email');
+      if (!pw) { showErr('password', 'Password is required.'); ok = false; first = first || 'password'; } else clearErr('password');
+      if (!ok) { document.getElementById(first).focus(); return false; }
+      if (window.gsToast) gsToast('Prototype: use “Preview as Role” to explore a dashboard.');
+      return false;
+    }
+
+    /* Esc closes the role modal */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.getElementById('roleModal').classList.remove('open');
+    });
   </script>
+  <script src="assets/public-chrome.js"></script>
+  <script src="assets/auth-bg.js"></script>
+  <script src="assets/sparkles.js"></script>
   <script src="assets/validation.js"></script>
   <script src="assets/toast.js"></script>
 </body>

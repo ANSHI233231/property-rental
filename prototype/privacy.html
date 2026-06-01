@@ -15,21 +15,29 @@
       fontFamily: { poppins:['Poppins','sans-serif'], inter:['Inter','sans-serif'] }
     }}}
   </script>
-
   <link rel="stylesheet" href="assets/styles.css" />
   <script src="assets/legal.js"></script>
+  <style>
+    body { background-color: var(--surface);
+      background-image: radial-gradient(at 0% 0%, rgba(255,111,0,0.05) 0px, transparent 45%), radial-gradient(at 100% 100%, rgba(19,27,46,0.05) 0px, transparent 45%); }
+  </style>
 </head>
 <body>
   <div id="gs-public-nav"></div>
 
-  <main class="max-w-6xl mx-auto px-6" style="padding:48px 0 64px; max-width:760px;">
-    <h1 style="font-size:36px;">Privacy Policy</h1>
-    <div id="legal-content" style="margin-top:8px;"></div>
+  <main class="max-w-6xl mx-auto px-6" style="padding-bottom:72px; max-width:1080px;">
+    <div class="public-band">
+      <span class="public-band-eyebrow">Legal Document</span>
+      <h1 class="sparkle-text" data-sparkle="#FF6F00,#1565C0">Privacy Policy</h1>
+      <p class="public-band-sub">How GharSetu collects, uses and safeguards your organization's data — with the high-trust standards of enterprise software.</p>
+    </div>
+    <div id="legal-content"></div>
   </main>
 
   <div id="gs-public-footer"></div>
 
   <script src="assets/public-chrome.js"></script>
+  <script src="assets/sparkles.js"></script>
   <script>renderLegalDoc('privacy', 'legal-content');</script>
   <script src="assets/toast.js"></script>
 </body>
