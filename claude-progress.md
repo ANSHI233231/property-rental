@@ -2,7 +2,7 @@
 
 > **Rolling cross-session memory.** Updated at session exit. Pair this human-readable file with the machine-readable [feature_list.json](feature_list.json) — when they disagree, the JSON wins. See [.claude/skills/harness-engineering/SKILL.md](.claude/skills/harness-engineering/SKILL.md) for the contract.
 
-**Last updated:** 2026-05-30 · Create Lease wizard end-to-end overhaul (modernization + Step 5 restructure + trim + history-card relocate + step strip + numeric-id mock-data refactor + quick-create deep-link) + NEW `assets/date-picker.js` + bulk rollout to 12 pages / 20 inputs + 5 range pairs wired + CLAUDE.md rule #19 strengthened · maintained by `gharsetu-lead`
+**Last updated:** 2026-06-01 · Admin lease/unit feature pass (renew wizard, Early Termination consent, unit-detail Type column + status-gated create-lease) + auth email-only + Super Admin contact-inbox fix + **PM property/lease clone** (assigned-scoped, incl. NEW pm/create-lease.html) + lease-status label standardization · Solution Overview + Timeline regenerated · maintained by orchestrator
 
 ---
 
@@ -16,7 +16,29 @@
 
 ---
 
-## 2. Last session summary (2026-05-30 — Create Lease wizard overhaul + date-picker rollout)
+## 2. Last session summary (2026-06-01 — admin lease/unit feature pass + auth email-only + PM property/lease clone)
+
+**Scope.** Opus orchestrator-direct session. All work in `prototype/` + `docs/`. No app code.
+
+**Shipped (prototype + docs):**
+1. **Solution Overview** client-review refinements + **Timeline** full rebuild (parallel multi-AI-agent, **8 working days**, relative days "Day 1…N", no prototype phase, mirrors SO order). Committed separately (`39125f1`, `3a2c53e`).
+2. Admin **dashboard** — removed the Emergency (Unit 7C) water-leak alert banner.
+3. **Maintenance priority labels** standardized system-wide to **Low · Medium · High · Emergency** ("Normal" → "Medium").
+4. **Org detail** (admin + super-admin) — **Type of business** multi-value comma-separated; **Primary Contact** (name·email·mobile) added to the details card. SRS §4 updated.
+5. **Auth = email only** — `login.html` + `forgot-password.html` de-phoned; validator email-only; SRS §3 updated. Login "Prototype Shortcuts" strip centered.
+6. **Super Admin Contact Inbox** bug fix — mark read/replied wrote to the Subject cell instead of the Status cell (nth-child 5 → 6).
+7. Admin **unit-detail** — create-lease buttons gated hidden on Retired/Under-Maintenance; Leases **Type** column added + section moved after Rooms.
+8. Admin **lease-detail** — **Renew** → Create Lease wizard renew mode; top terminate button replaced with end-of-page **Early Termination** per-co-tenant-consent section (+ Terminated read-only view); tenant "View profile" removed.
+9. **PM property + lease clone (assigned-scoped)** — NEW `pm/create-lease.html` (scoped to Green Valley / Sai Heights / Mayur Vihar, renew mode); `pm/leases.html` re-cloned to admin filter-tile layout; `pm/unit-detail` + `pm/lease-detail` at admin parity. Plan: `docs/planning/features/2026-05-29-pm-property-lease-clone.md`.
+10. **Lease status labels** standardized to **Active / Upcoming / Ended / Terminated** across admin + PM (no Closed/Expired/Renewed).
+
+**Docs:** change-logs `gharsetu-frontend-2026-06-01.md` + `document-agent-2026-05-29.md`; many rows in `docs/planning/prototype-changes.md`; SRS updated (login, business-type, priority); CLAUDE.md Timeline row updated.
+
+**Carry-over:** App port to `apps/web` / `apps/api` for all v8 features still pending. No blockers.
+
+---
+
+## 2a. Last session summary (2026-05-30 — Create Lease wizard overhaul + date-picker rollout)
 
 **Scope.** Single Opus session (with one `gharsetu-frontend` dispatch for the modernization pass). All work in `prototype/` + `CLAUDE.md` + docs. No app code.
 
@@ -38,7 +60,7 @@
 
 ---
 
-## 2a. Earlier session summary (2026-05-29 — anchor-day billing + Admin Organization page + plans polish)
+## 2b. Earlier session summary (2026-05-29 — anchor-day billing + Admin Organization page + plans polish)
 
 **Scope.** Single Opus session, orchestrator-direct (no specialist agents). All work in `prototype/` + `docs/`. No app code.
 
@@ -59,7 +81,7 @@
 
 ---
 
-## 2b. Earlier session summary (2026-05-27 PM — Admin role build-out + Property Types master + global success toast)
+## 2c. Earlier session summary (2026-05-27 PM — Admin role build-out + Property Types master + global success toast)
 
 **Scope.** Continued the screen-by-screen review, focused on the **Admin role** plus two cross-cutting features (Property Types master, global toast). Prototype-only — no app code, no business-rule changes. (The morning's homepage redesign + public-chrome work is committed in `994bfa4`; see §7.)
 
@@ -88,7 +110,7 @@
 
 ---
 
-## 2c. Earlier session summary (2026-05-26 / 27 — v8 prototype build-out)
+## 2d. Earlier session summary (2026-05-26 / 27 — v8 prototype build-out)
 
 **Scope.** Implement v8 across the static prototype: ship the 7 new features (with Per-Room Leasing as planning-only this pass) and the 6 module gap closures from Solution Overview v8. Public auth pages refreshed; sidebar pattern updated to a compact account menu.
 
@@ -124,7 +146,7 @@
 
 ---
 
-## 2d. Earlier session summary (2026-05-26 — CLAUDE.md overhaul + Feature Planning template)
+## 2e. Earlier session summary (2026-05-26 — CLAUDE.md overhaul + Feature Planning template)
 
 **CLAUDE.md rewrite.** Fixed: stale 2026-05-25 header; the Rule #2 vs Rule #12 contradiction on public sign-up (the v1 "No public sign-up" framing never updated for v8 SAAS scope); UIUX_Design_Document.docx missing from source-of-truth table; prototype page count (19 → actual 29). Restructured into clear bands: **Working rules** (11 process rules — never-commit-without-instruction, plan-first, lead-orchestrates, worker≠checker, per-task change log, submodule discipline, relative paths, CONTEXT.md mirror, prototype sync, JS-source-of-truth for binaries, line caps) + **Technical conventions** (6 code conventions — snake_case DB, no FK constraints with relations declared in Prisma, Prisma migrations append-only, audit_log on every mutation, FE/BE validation parity with no HTML5 native, sensitive files never in git) + renamed **Hard rules → Scope rules** (11 business/scope rules A–K). Added a Conflict-resolution section (JSON wins over markdown, CONTEXT.md wins over CLAUDE.md, ask user when working vs scope rules conflict). All internal links converted to relative `./` paths. Final size: 134 lines (under the 200 cap).
 
@@ -134,7 +156,7 @@
 
 ---
 
-## 2e. Earlier session summary (2026-05-26 — UIUX Design Document delivered)
+## 2f. Earlier session summary (2026-05-26 — UIUX Design Document delivered)
 
 This session continued past the earlier "final close" with a substantial new artifact and several scope refinements.
 

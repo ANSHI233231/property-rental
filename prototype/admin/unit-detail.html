@@ -79,7 +79,7 @@
              (Tenants). Lease type is unit-wise. unitId=105 matches the gv-5B mock
              in create-lease.html that has rooms; see also the per-room buttons in
              the Rooms table below. -->
-        <a href="create-lease.html?unitId=105" class="btn btn-primary !py-2 !text-sm">+ Create Lease for this Unit</a>
+        <a href="create-lease.html?unitId=105" id="create-lease-unit-btn" class="btn btn-primary !py-2 !text-sm">+ Create Lease for this Unit</a>
       </header>
 
       <!-- Prototype status simulator -->
@@ -156,58 +156,6 @@
         </div>
       </section>
 
-      <!-- Leases (active + upcoming + past combined; always visible regardless of unit status) -->
-      <section class="section">
-        <h3 class="section-title">Leases</h3>
-        <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
-            <thead><tr><th>Lease</th><th>Tenant</th><th>Co-tenant</th><th>Start</th><th>End</th><th>Rent</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr id="lease-active-row">
-                <td class="font-mono text-xs">#L-2103</td>
-                <td>Rohan Mehta</td>
-                <td>Priya Mehta</td>
-                <td>01/04/2025</td>
-                <td>31/03/2026</td>
-                <td>₹18,000</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td><a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
-              </tr>
-              <tr id="lease-upcoming-row">
-                <td class="font-mono text-xs">#L-2245</td>
-                <td>Aditi Joshi</td>
-                <td>—</td>
-                <td>01/04/2026</td>
-                <td>31/03/2027</td>
-                <td>₹19,500</td>
-                <td><span class="badge badge-prepaid">Upcoming</span></td>
-                <td><a href="lease-detail.html?id=L-2245" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
-              </tr>
-              <tr>
-                <td class="font-mono text-xs">#L-1842</td>
-                <td>Anita Verma</td>
-                <td>—</td>
-                <td>01/04/2023</td>
-                <td>31/03/2025</td>
-                <td>₹15,000</td>
-                <td><span class="badge badge-closed">Ended</span></td>
-                <td><a href="lease-detail.html?id=L-1842" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
-              </tr>
-              <tr>
-                <td class="font-mono text-xs">#L-1521</td>
-                <td>Sunil Kapoor</td>
-                <td>—</td>
-                <td>01/06/2022</td>
-                <td>31/03/2023</td>
-                <td>₹12,500</td>
-                <td><span class="badge badge-terminated">Terminated</span></td>
-                <td><a href="lease-detail.html?id=L-1521" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       <!-- Rooms in this unit -->
       <section class="section" id="rooms-section">
         <div class="flex items-center justify-between mb-4">
@@ -267,6 +215,62 @@
                     <button type="button" id="retire-room-C-btn" class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openRetireRoomModal('C')">Retire</button>
                   </div>
                 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Leases (active + upcoming + past combined; always visible regardless of unit status) -->
+      <section class="section">
+        <h3 class="section-title">Leases</h3>
+        <div class="card p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead><tr><th>Lease</th><th>Type</th><th>Tenant</th><th>Co-tenant</th><th>Start</th><th>End</th><th>Rent</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr id="lease-active-row">
+                <td class="font-mono text-xs">#L-2103</td>
+                <td>Unit-wise</td>
+                <td>Rohan Mehta</td>
+                <td>Priya Mehta</td>
+                <td>01/04/2025</td>
+                <td>31/03/2026</td>
+                <td>₹18,000</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td><a href="lease-detail.html?id=L-2103" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+              </tr>
+              <tr id="lease-upcoming-row">
+                <td class="font-mono text-xs">#L-2245</td>
+                <td>Unit-wise</td>
+                <td>Aditi Joshi</td>
+                <td>—</td>
+                <td>01/04/2026</td>
+                <td>31/03/2027</td>
+                <td>₹19,500</td>
+                <td><span class="badge badge-prepaid">Upcoming</span></td>
+                <td><a href="lease-detail.html?id=L-2245" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono text-xs">#L-1842</td>
+                <td>Room-wise · Room A</td>
+                <td>Anita Verma</td>
+                <td>—</td>
+                <td>01/04/2023</td>
+                <td>31/03/2025</td>
+                <td>₹15,000</td>
+                <td><span class="badge badge-closed">Ended</span></td>
+                <td><a href="lease-detail.html?id=L-1842" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono text-xs">#L-1521</td>
+                <td>Room-wise · Room C</td>
+                <td>Sunil Kapoor</td>
+                <td>—</td>
+                <td>01/06/2022</td>
+                <td>31/03/2023</td>
+                <td>₹12,500</td>
+                <td><span class="badge badge-terminated">Terminated</span></td>
+                <td><a href="lease-detail.html?id=L-1521" class="text-royal-blue font-poppins font-semibold text-sm">View detail</a></td>
               </tr>
             </tbody>
           </table>
@@ -433,6 +437,16 @@
       var occupied = (status === 'occupied');
       document.getElementById('tenant-section').style.display = occupied ? '' : 'none';
       document.getElementById('unit-kpis').style.display = occupied ? '' : 'none';
+
+      /* A retired or under-maintenance unit accepts no new leases — hide the
+         unit-level "Create Lease for this Unit" button and every per-room
+         "Create Lease" button. They reappear in Available / Listed / Occupied. */
+      var noNewLease = (status === 'retired' || status === 'maintenance');
+      var unitLeaseBtn = document.getElementById('create-lease-unit-btn');
+      if (unitLeaseBtn) unitLeaseBtn.style.display = noNewLease ? 'none' : '';
+      document.querySelectorAll('a[href*="create-lease.html"][href*="roomId"]').forEach(function (a) {
+        a.style.display = noNewLease ? 'none' : '';
+      });
 
       /* ONLY the active-lease row is gated to occupied status.
          Upcoming, expired, and terminated rows are always visible. */

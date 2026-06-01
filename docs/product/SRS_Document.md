@@ -44,7 +44,7 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 |---|---|---|
 | Landing | `index.html` | Marketing homepage (hero, capabilities, plans, CTA) |
 | Organization sign-up | `organization-signup.html` | Public registration → queues for Super Admin approval (business type, expected units, State→City, pincode, plan) |
-| Login | `login.html` | Email/phone + password sign-in |
+| Login | `login.html` | Email + password sign-in (email only — mobile is not a login identifier) |
 | Forgot / Reset password | `forgot-password.html`, `reset-password.html` | Self-service password reset |
 | Contact | `contact.html` | Contact form (record-only; surfaced to Super Admin) |
 | Privacy / Terms | `privacy.html`, `terms.html` | Legal pages (Super-Admin-managed content) |
@@ -84,7 +84,7 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 | Dashboard | `pm/dashboard.html` | Stats + maintenance queue + recent payments |
 | Properties · detail · unit | `pm/properties.html`, `property-detail.html`, `unit-detail.html` | Assigned properties (**multi-property** + read-only tenure history) |
 | Tenants | `pm/tenants.html` | People directory (one row per person) — name · property · unit · phone · status; no detail page (contracts live under Leases) |
-| Leases · detail | `pm/leases.html`, `lease-detail.html` | Leases + renew / terminate |
+| Leases · detail · Create Lease | `pm/leases.html`, `lease-detail.html`, `create-lease.html` | Assigned-property leases; full-page lease creation (scoped to assigned properties); renew (wizard renew mode); early termination via per-co-tenant consent |
 | Rent Collection | `pm/rent-collection.html` | Per-period record-payment |
 | Maintenance | `pm/maintenance.html` + `maintenance-detail.html` | Property maintenance |
 | Visitors | `pm/visitors.html` | Visitor log — Approve / Deny / Check-in (code validation) / Check-out; Property · Unit combined view |
@@ -161,7 +161,7 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 - **Only PROPERTY_MANAGER and ADMIN record payments** (BL-10); Tenant / Maintenance are view-only.
 
 ### Module 6 — Organizations & Subscriptions (SAAS)
-- **Organization record** (captured at public sign-up): name, **business type** (from Business Types Master Data), expected unit count, **address (State → City from Master Data + pincode)**, contact person + email, chosen plan.
+- **Organization record** (captured at public sign-up): name, **one or more business types** (multi-select from Business Types Master Data; stored as a many-to-many, displayed comma-separated), expected unit count, **address (State → City from Master Data + pincode)**, primary contact person + email + mobile, chosen plan.
 - **Public Organization sign-up** → status `Pending` → Super Admin **Approve** (provisions the workspace + emails Admin credentials) or **Reject** (with reason; no workspace). Active orgs can be Deactivated / Reactivated. Org lifecycle: `Pending → Active → Deactivated` (and `Pending → Rejected`).
 - **Subscription Plans** — Basic / Standard / Premium (Super-Admin-managed CRUD: add / edit / deactivate). Each plan carries a **monthly price (₹)** (BIGINT paise), an **active-user cap**, a **property cap** (either may be unlimited), and **toggles a feature catalogue**. Exactly one plan per organization (NR-6), changeable any time (see NR-14 for the billing implication). Exactly one active plan is flagged **"Most Popular"** for the public site (shown identically on home, sign-up and the Super Admin screen from one source). **"Never below the 3 defaults" is operationalized as: at least 3 active plans must exist at all times** — deactivating a plan that would drop active_count < 3 is blocked at the UI and API. The plan `id` is assigned once at creation (slugified from name) and is **wire-stable thereafter**: renames do not re-derive the id; deactivations do not delete the id; existing invoice / audit references survive.
 - **Plan feature catalogue** (toggled per plan): Rent Collection · Maintenance Requests · Visitor Management · Per-Room Leasing · Task Delegation · Admin Impersonation · Settings Customization · Data Export (CSV) · Priority Support. A plan's enabled features gate which modules an organization can use. **Audit log and Master Data are always-on for every plan** (the platform depends on them) and are not catalogue items.

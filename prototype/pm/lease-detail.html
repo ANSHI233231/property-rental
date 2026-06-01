@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>Lease · #L-2103 · GharSetu</title>
+  <title>Lease #L-2103 · Property Manager · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -13,6 +13,8 @@
 </head>
 <body>
   <div class="app-shell">
+
+    <!-- ====================== SIDEBAR ====================== -->
     <aside class="sidebar">
       <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
       <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -52,502 +54,266 @@
       </div>
     </aside>
 
+    <!-- ====================== MAIN ====================== -->
     <main class="app-main">
+
+      <!-- ---- BLOCK 1 — Page header ---- -->
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <div>
-          <div class="text-xs muted"><a href="leases.html" class="hover:underline text-royal-blue">Leases</a> / #L-2103</div>
-          <h1 class="page-title">Lease #L-2103 — Rohan Mehta</h1>
+        <div class="flex items-center justify-between flex-wrap gap-3 flex-1 min-w-0">
+          <h1 class="page-title">Lease #L-2103</h1>
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Renew opens the Create Lease wizard in renew mode: title "Renew Lease",
+                 starts at the Tenants step, property/unit/room locked (no Back), tenants +
+                 rent + deposit pre-filled from this lease (renew=<leaseId>). -->
+            <a id="ld-btn-renew" href="create-lease.html?renew=2103" class="btn btn-primary !py-2 !text-sm" data-status-show="active,expired">Renew Lease</a>
+          </div>
         </div>
       </header>
 
-      <!-- Lease summary -->
+      <!-- ---- PROTOTYPE STATUS SIMULATOR (prototype-only — strip when porting to apps/web) ---- -->
+      <div class="card mb-6" style="border-style:dashed;background:var(--color-off-white);">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="label" style="margin:0">Preview status</span>
+          <div class="flex gap-2 flex-wrap" role="group" aria-label="Preview lease status">
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="upcoming" onclick="setLeaseSimStatus('upcoming',this)">Upcoming</button>
+            <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-lsim="active" onclick="setLeaseSimStatus('active',this)">Active</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="expired" onclick="setLeaseSimStatus('expired',this)">Ended</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="terminated" onclick="setLeaseSimStatus('terminated',this)">Terminated</button>
+          </div>
+        </div>
+      </div>
+      <!-- prototype-only -->
+
+      <!-- ---- BLOCK 2 — Lease Summary ---- -->
       <section class="card mb-6">
         <h3 class="section-title">Lease Summary</h3>
         <div class="grid md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+          <div class="flex justify-between"><span class="muted">Lease type</span><strong class="text-charcoal">Unit-wise</strong></div>
+          <!-- Property · Unit: full-width combined-cell row (property-unit-combined-cell.md) -->
+          <div class="md:col-span-2 flex justify-between items-start">
+            <span class="muted">Property · Unit</span>
+            <div class="text-right">
+              <div class="font-poppins font-semibold text-charcoal">Green Valley, Dwarka</div>
+              <div class="text-xs muted">Unit 3A</div>
+              <!-- Room-wise variant would read: Unit PG-101 · Room A (TC-LD-SUMMARY-003 — one mock path only; room-wise requires extra data wiring) -->
+            </div>
+          </div>
           <div class="flex justify-between"><span class="muted">Start date</span><strong class="text-charcoal">15/04/2026</strong></div>
-          <div class="flex justify-between"><span class="muted">End date</span><strong class="text-charcoal">14/03/2027</strong></div>
+          <div class="flex justify-between"><span class="muted">End date</span><strong class="text-charcoal">14/04/2027</strong></div>
+          <div class="flex justify-between items-center"><span class="muted">Status</span><span class="badge badge-active" id="ld-status-badge">Active</span></div>
           <div class="flex justify-between"><span class="muted">Monthly rent</span><strong class="text-charcoal">₹18,000</strong></div>
           <div class="flex justify-between"><span class="muted">Security deposit</span><strong class="text-charcoal">₹36,000</strong></div>
-          <div class="flex justify-between"><span class="muted">Frequency</span><strong class="text-charcoal">Monthly · 15th</strong></div>
-          <div class="flex justify-between"><span class="muted">Status</span><strong class="text-charcoal">Active</strong></div>
-          <div class="flex justify-between"><span class="muted">Bank reference</span><strong class="text-charcoal font-mono text-xs">BR-2103-GVD</strong></div>
-          <div class="flex justify-between"><span class="muted">Signed on</span><strong class="text-charcoal">14/04/2026</strong></div>
+          <div class="flex justify-between"><span class="muted">Rent due day</span><strong class="text-charcoal">5th of each month</strong></div>
+          <div class="flex justify-between"><span class="muted">Notice period</span><strong class="text-charcoal">30 days</strong></div>
+          <div class="flex justify-between"><span class="muted">Late fee</span><strong class="text-charcoal">2%</strong></div>
+          <div class="flex justify-between"><span class="muted">Created on</span><strong class="text-charcoal">14/04/2026</strong></div>
+          <div class="flex justify-between"><span class="muted">Created by</span><strong class="text-charcoal">Raj Sharma · Admin</strong></div>
         </div>
-        <p class="text-xs muted mt-3">Bank reference is visible to PM and Admin only — never shown to the tenant.</p>
       </section>
 
-      <!-- Co-tenants -->
+      <!-- ---- BLOCK 3 — Tenants ---- -->
       <section class="card mb-6">
-        <h3 class="section-title">Co-tenants</h3>
-        <p class="text-sm muted mb-3">No co-tenants on this lease. Add a co-tenant only with primary tenant consent — they will receive their own login.</p>
-        <button class="btn btn-secondary !py-2 !text-sm" onclick="alert('Add co-tenant form opened. They will receive their own login.')">+ Add Co-tenant</button>
+        <h3 class="section-title">Tenants</h3>
+        <!-- Primary tenant -->
+        <div class="flex items-center gap-3 py-3 border-b border-mid-gray">
+          <div class="avatar" style="width:44px;height:44px;font-size:16px;">RM</div>
+          <div class="flex-1">
+            <div class="font-poppins font-semibold text-charcoal">
+              Rohan Mehta
+              <span class="badge badge-active" style="vertical-align:middle;">Primary</span>
+            </div>
+            <div class="text-sm muted">+91 98765 43290 · rohan.mehta@example.com</div>
+          </div>
+        </div>
+        <!-- Co-tenant -->
+        <div class="flex items-center gap-3 py-3 last:border-b-0">
+          <div class="avatar" style="width:44px;height:44px;font-size:16px;">PM</div>
+          <div class="flex-1">
+            <div class="font-poppins font-semibold text-charcoal">
+              Priya Mehta
+              <span class="badge badge-prepaid" style="vertical-align:middle;">Co-tenant</span>
+            </div>
+            <div class="text-sm muted">+91 98765 43291 · priya.mehta@example.com</div>
+          </div>
+        </div>
       </section>
 
-      <!-- ============================================================ -->
-      <!-- RENT CHANGE SCHEDULE — PENDING state                          -->
-      <!-- ============================================================ -->
+      <!-- ---- BLOCK 4 — Rent Change Schedule ---- -->
       <section class="card mb-6">
-        <h3 class="section-title">Rent Change Schedule</h3>
-
-        <!-- PENDING — scheduled change card -->
-        <div class="rounded-card border border-mid-gray bg-bg-prepaid p-4">
-          <div class="font-poppins font-semibold text-charcoal">Scheduled Rent Change</div>
-          <div class="grid sm:grid-cols-3 gap-x-8 gap-y-2 mt-3 text-sm">
-            <div>
-              <div class="muted">New Amount</div>
-              <strong class="text-charcoal">₹19,500</strong>
-            </div>
-            <div>
-              <div class="muted">Effective Date</div>
-              <strong class="text-charcoal">15/07/2026</strong>
-            </div>
-            <div>
-              <div class="muted">Scheduled On</div>
-              <strong class="text-charcoal">14/05/2026</strong>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-3 mt-4 flex-wrap">
-          <button class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('modifyScheduleModal').classList.add('open')">Modify</button>
-          <button class="btn btn-danger !py-2 !text-sm" onclick="document.getElementById('cancelScheduleModal').classList.add('open')">Cancel Schedule</button>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title m-0">Rent Change Schedule</h3>
+          <button id="ld-rcs-add" class="btn btn-primary !py-2 !text-sm" onclick="openScheduleModal('add')">+ Schedule Rent Change</button>
         </div>
 
-        <!-- Alternate empty-state form, shown when no schedule exists.
-             Hidden here because a schedule already exists; uncomment to demo. -->
-        <details class="mt-6">
-          <summary class="text-xs muted cursor-pointer">Show empty-state form (when no schedule exists)</summary>
-          <div class="mt-4 border-t border-mid-gray pt-4">
-            <p class="text-sm muted mb-4">
-              No rent change scheduled. Schedule a future rent change for this unit — the new rent applies on the effective date.
-            </p>
-            <form class="grid md:grid-cols-2 gap-4" onsubmit="event.preventDefault()">
-              <div>
-                <label class="label" for="rent-schedule-amount">New Rent Amount (₹)</label>
-                <input id="rent-schedule-amount" class="input" type="number" min="1" placeholder="e.g. 22000" />
-                <div class="field-error"></div>
-              </div>
-              <div>
-                <label class="label" for="rent-schedule-effective-date">Effective Date</label>
-                <input data-min-date="today" data-datepicker placeholder="DD/MM/YYYY" id="rent-schedule-effective-date" class="input" type="text" />
-                <div class="field-error"></div>
-                <p class="text-xs muted mt-1">Effective date must be at least 60 days from today. Tenant will be notified.</p>
-              </div>
-              <div class="md:col-span-2 flex justify-end">
-                <button type="submit" class="btn btn-primary !py-2 !text-sm">Schedule Rent Change</button>
-              </div>
-            </form>
-          </div>
-        </details>
-
-        <p class="text-xs muted mt-4">Rent changes require a minimum 60-day notice. The tenant receives an email when the change is scheduled, modified, or cancelled.</p>
-      </section>
-
-      <!-- Documents -->
-      <section class="card mb-6">
-        <h3 class="section-title">Documents</h3>
-        <table class="data-table">
-          <tbody>
-            <tr><td class="muted">Lease agreement</td><td class="text-right"><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">Download</a></td></tr>
-            <tr><td class="muted">Move-in checklist</td><td class="text-right"><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">Download</a></td></tr>
-            <tr><td class="muted">KYC documents</td><td class="text-right"><a href="#" class="text-royal-blue font-poppins font-semibold text-sm">View</a></td></tr>
-          </tbody>
-        </table>
-        <p class="text-xs muted mt-3">Document storage is not part of v1 — links are placeholders.</p>
-      </section>
-
-      <!-- Renewal section -->
-      <section class="card mb-6">
-        <div class="flex items-center justify-between flex-wrap gap-3">
-          <h3 class="section-title m-0">Renew Lease</h3>
-          <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('renewLeaseDrawer').classList.add('open')">Renew Lease</button>
-        </div>
-        <p class="text-sm muted mt-3">Start a renewal to carry tenants forward. You can add or remove tenants on the renewed lease before creating it.</p>
-      </section>
-
-      <!-- Termination -->
-      <section class="card mb-6 border-l-4" style="border-left-color: var(--color-status-overdue)" id="terminateSection">
-        <h3 class="section-title">Terminate Lease</h3>
-        <p class="text-sm muted mb-4">Early termination requires all co-tenants' explicit consent. Deposit refund is a separate step.</p>
-
-        <!-- Step 1: Terminate Early button -->
-        <div id="termStep1">
-          <button class="btn btn-danger !py-2 !text-sm" onclick="showTermStep1Form()">Terminate Early</button>
+        <!-- Empty state — hidden by default (table has mock entries) -->
+        <div id="ld-rcs-empty" class="text-sm muted text-center py-6" style="display:none">
+          No rent changes scheduled yet. Use &quot;+ Schedule Rent Change&quot; to add one.
         </div>
 
-        <!-- Step 1 form (hidden initially) -->
-        <div id="termStep1Form" style="display:none">
-          <form novalidate onsubmit="event.preventDefault(); submitTermStep1();">
-            <div class="mb-4">
-              <label class="label" for="termReason">Reason for termination (min 20 characters)</label>
-              <textarea id="termReason" class="input" rows="4" placeholder="e.g. Tenant vacating city for employment. Request for early termination submitted in writing." oninput="updateTermCounter()"></textarea>
-              <div class="counter error" id="termCounter">0/20</div>
-              <div class="field-error" id="termReasonError"></div>
-            </div>
-            <div class="mb-4">
-              <label class="label" for="termDate">Proposed effective date (DD/MM/YYYY)</label>
-              <input id="termDate" class="input" type="text" placeholder="e.g. 08/06/2026" value="08/06/2026" />
-              <p class="text-xs muted mt-1">Must be today or later (at least 30 days recommended).</p>
-              <div class="field-error" id="termDateError"></div>
-            </div>
-            <div class="flex gap-3 flex-wrap">
-              <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="cancelTermination()">Cancel</button>
-              <button type="submit" class="btn btn-danger !py-2 !text-sm" id="termStep1Submit" disabled>Submit termination request</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Step 2: Per-co-tenant consent panel (hidden initially) -->
-        <div id="termStep2" style="display:none">
-          <div class="alert mb-4" role="status" aria-live="polite">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span>Termination request submitted. Record each co-tenant's consent below before finalizing.</span>
-          </div>
-          <h4 class="font-poppins font-semibold text-charcoal mb-3">Co-tenant consent</h4>
-          <div class="card p-0 overflow-x-auto mb-4">
-            <table class="data-table" id="consentTable">
-              <thead>
-                <tr><th>Tenant</th><th>Role</th><th>Consent</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
-                  <td>Primary</td>
-                  <td>
-                    <select class="input" style="min-height:36px;padding:6px 10px" data-consent="0" onchange="updateFinalizeBtn()">
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="declined">Declined</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="font-poppins font-semibold text-charcoal">Priya Sharma <span class="muted text-xs">(co-tenant)</span></td>
-                  <td>Co-tenant</td>
-                  <td>
-                    <select class="input" style="min-height:36px;padding:6px 10px" data-consent="1" onchange="updateFinalizeBtn()">
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="declined">Declined</option>
-                    </select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- Emergency alert shown when any decline -->
-          <div id="declineAlert" class="alert alert-emergency mb-4" style="display:none" role="alert">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>One or more co-tenants declined termination. The lease remains active. Open a new request after addressing concerns. (BL-08 / BL-09)</span>
-          </div>
-          <div class="flex gap-3 flex-wrap">
-            <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="cancelTermination()">Cancel</button>
-            <button type="button" class="btn btn-danger !py-2 !text-sm" id="finalizeTermBtn" disabled onclick="openFinalizeModal()">Finalize termination</button>
-          </div>
-        </div>
-
-        <!-- Step 3: Success state (hidden initially) -->
-        <div id="termStep3" style="display:none">
-          <div class="alert" style="background:var(--bg-paid);border-left-color:var(--color-status-paid);color:#1b5e20" role="status">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Lease terminated. Status updated. Deposit refund is processed as a separate step.</span>
-          </div>
+        <!-- Table -->
+        <div id="ld-rcs-table-wrap" class="p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Effective date</th>
+                <th>From &#8594; To</th>
+                <th>Scheduled on</th>
+                <th>Scheduled by</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ld-rcs-tbody">
+              <!-- Row 1: PAST / APPLIED — locked -->
+              <tr id="rcs-row-0" data-rcs-past="true">
+                <td>01/05/2026</td>
+                <td>&#8377;17,000 &#8594; &#8377;18,000</td>
+                <td>14/03/2026</td>
+                <td>Raj Sharma · Admin</td>
+                <td><span class="badge badge-paid">Applied</span></td>
+                <td><span class="muted text-xs">Locked — applied</span></td>
+              </tr>
+              <!-- Row 2: FUTURE / SCHEDULED — editable -->
+              <tr id="rcs-row-1" data-rcs-past="false" data-rcs-date="01/04/2027" data-rcs-rent="19500" data-rcs-from="18000">
+                <td>01/04/2027</td>
+                <td>&#8377;18,000 &#8594; &#8377;19,500</td>
+                <td>14/05/2026</td>
+                <td>Raj Sharma · Admin</td>
+                <td><span class="badge badge-prepaid">Scheduled</span></td>
+                <td class="rcs-action-cell">
+                  <button class="text-royal-blue font-poppins font-semibold text-sm" onclick="openScheduleModal('edit', this.closest('tr'))">Edit</button>
+                  <span class="muted" aria-hidden="true"> · </span>
+                  <button class="text-deep-red font-poppins font-semibold text-sm" style="color:var(--color-status-overdue)" onclick="openRemoveModal(this.closest('tr'))">Remove</button>
+                </td>
+              </tr>
+              <!-- Row 3: FUTURE / SCHEDULED — editable -->
+              <tr id="rcs-row-2" data-rcs-past="false" data-rcs-date="01/10/2027" data-rcs-rent="21000" data-rcs-from="19500">
+                <td>01/10/2027</td>
+                <td>&#8377;19,500 &#8594; &#8377;21,000</td>
+                <td>14/05/2026</td>
+                <td>Raj Sharma · Admin</td>
+                <td><span class="badge badge-prepaid">Scheduled</span></td>
+                <td class="rcs-action-cell">
+                  <button class="text-royal-blue font-poppins font-semibold text-sm" onclick="openScheduleModal('edit', this.closest('tr'))">Edit</button>
+                  <span class="muted" aria-hidden="true"> · </span>
+                  <button class="text-deep-red font-poppins font-semibold text-sm" style="color:var(--color-status-overdue)" onclick="openRemoveModal(this.closest('tr'))">Remove</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
+
+      <!-- ---- BLOCK 5 — Early Termination (per-tenant consent → Admin terminates) ---- -->
+      <!-- Visible for upcoming/active (the consent flow) and terminated (read-only record). -->
+      <section class="card mb-6" data-status-show="upcoming,active,terminated">
+        <h3 class="section-title">Early Termination</h3>
+        <p class="text-sm muted mb-4">Every tenant on this lease must raise a termination request before the lease can be ended early. Tenants raise the request from their own portal; once <strong>all</strong> tenants have requested, an Admin can terminate the lease by entering a reason. There is no automatic approval.</p>
+
+        <div class="p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Tenant</th><th>Role</th><th>Request status</th><th>Requested on</th><th>Action</th></tr>
+            </thead>
+            <tbody id="ld-term-tbody">
+              <tr data-term-row data-requested="false">
+                <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+                <td>Primary</td>
+                <td><span class="badge badge-partial" data-term-status>Pending</span></td>
+                <td class="muted" data-term-date>—</td>
+                <td><button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-term-btn onclick="raiseTermRequest(this.closest('tr'))">Raise request</button></td>
+              </tr>
+              <tr data-term-row data-requested="false">
+                <td class="font-poppins font-semibold text-charcoal">Priya Mehta</td>
+                <td>Co-tenant</td>
+                <td><span class="badge badge-partial" data-term-status>Pending</span></td>
+                <td class="muted" data-term-date>—</td>
+                <td><button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-term-btn onclick="raiseTermRequest(this.closest('tr'))">Raise request</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between flex-wrap gap-3 mt-4" id="ld-term-footer" style="border-top:1px solid var(--color-light-gray);padding-top:16px;">
+          <div class="text-sm muted" id="ld-term-progress">0 of 2 tenants have requested termination.</div>
+          <button id="ld-term-btn" class="btn btn-disabled !py-2 !text-sm" disabled title="All tenants must raise a termination request first.">Early Terminate</button>
+        </div>
+        <!-- Shown instead of the action footer when the lease is already terminated. -->
+        <div class="text-sm muted mt-4" id="ld-term-done" style="display:none;border-top:1px solid var(--color-light-gray);padding-top:16px;">This lease was terminated early after all tenants requested termination.</div>
+      </section>
+
     </main>
+  </div><!-- /.app-shell -->
 
-    <!-- Modify Schedule Modal -->
-    <div class="modal-backdrop" id="modifyScheduleModal">
-      <div class="modal">
-        <h3>Modify Rent Schedule</h3>
-        <p class="muted text-sm mt-1 mb-4">Effective date must be at least 60 days from today. Tenant will be notified.</p>
-        <form onsubmit="event.preventDefault(); document.getElementById('modifyScheduleModal').classList.remove('open')">
-          <label class="label" for="modify-amount">New Rent Amount (₹)</label>
-          <input id="modify-amount" class="input" type="number" value="19500" required />
-          <div class="field-error"></div>
+  <!-- ====================== MODALS ====================== -->
 
-          <div class="mt-4">
-            <label class="label" for="modify-date">Effective Date</label>
-            <input data-datepicker placeholder="DD/MM/YYYY" id="modify-date" class="input" type="text" value="2026-07-15" required />
-            <div class="field-error"></div>
-          </div>
+  <!-- Schedule / Edit Modal -->
+  <div class="modal-backdrop" id="scheduleModal" role="dialog" aria-modal="true" aria-labelledby="scheduleModalTitle">
+    <div class="modal" style="max-width:480px">
+      <h3 id="scheduleModalTitle" class="m-0">Schedule Rent Change</h3>
+      <form id="scheduleForm" novalidate onsubmit="event.preventDefault(); saveSchedule();" style="margin-top:20px;">
+        <input type="hidden" id="sm-mode" value="add" />
+        <input type="hidden" id="sm-row-id" value="" />
 
-          <div class="flex justify-end gap-3 mt-6">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('modifyScheduleModal').classList.remove('open')">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Cancel Schedule Modal -->
-    <div class="modal-backdrop" id="cancelScheduleModal">
-      <div class="modal">
-        <h3>Cancel Rent Schedule</h3>
-        <p class="text-sm mt-1 text-charcoal">Cancel the scheduled rent change of <strong>₹19,500</strong> on <strong>15/07/2026</strong>?</p>
-        <p class="text-sm muted mt-2">The current rent will continue unchanged. You can schedule a new change later.</p>
-        <div class="flex justify-end gap-3 mt-6">
-          <button class="btn btn-secondary" onclick="document.getElementById('cancelScheduleModal').classList.remove('open')">Keep Schedule</button>
-          <button class="btn btn-danger !py-2 !text-sm" onclick="document.getElementById('cancelScheduleModal').classList.remove('open')">Cancel Schedule</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Renew Lease Drawer -->
-  <div class="modal-backdrop" id="renewLeaseDrawer" role="dialog" aria-modal="true" aria-labelledby="renewLeaseTitle">
-    <div class="modal" style="max-width:600px;max-height:90vh;overflow-y:auto">
-      <div class="flex items-center justify-between mb-4">
-        <h3 id="renewLeaseTitle" class="m-0">Renew Lease — #L-2103</h3>
-        <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="document.getElementById('renewLeaseDrawer').classList.remove('open')">Cancel</button>
-      </div>
-
-      <form id="renewLeaseForm" novalidate onsubmit="event.preventDefault(); submitRenewal();">
-        <!-- New term -->
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="label" for="rl-start">New Start Date</label>
-            <input data-min-date="today" data-pair-max="rl-end" data-datepicker id="rl-start" class="input" type="text" placeholder="DD/MM/YYYY" value="15/03/2027" />
-          </div>
-          <div>
-            <label class="label" for="rl-end">New End Date</label>
-            <input data-min-date="today" data-pair-min="rl-start" data-datepicker id="rl-end" class="input" type="text" placeholder="DD/MM/YYYY" value="14/03/2028" />
-          </div>
-        </div>
-
-        <!-- Rent -->
         <div class="mb-4">
-          <label class="label" for="rl-rent">Monthly Rent (₹) <span class="muted text-xs font-normal">(current: ₹18,000)</span></label>
-          <input id="rl-rent" class="input" type="number" min="1" value="18000" oninput="checkRenewalRent()" />
-          <div class="field-error" id="rl-rent-error"></div>
+          <label class="label" for="sm-rent">New rent amount (&#8377;) <span style="color:var(--color-saffron)" aria-hidden="true">*</span></label>
+          <input id="sm-rent" class="input" type="number" min="1" placeholder="e.g. 20000" aria-required="true" oninput="clearScheduleErr('sm-rent')" />
+          <div class="field-error" id="sm-rent-error"></div>
         </div>
 
-        <!-- BL-11 banner -->
-        <div id="renewalRentBanner" class="alert mb-4" role="status" aria-live="polite" style="display:none">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span id="renewalRentBannerText">Tenants must be notified at least 60 days before this rent takes effect.</span>
-        </div>
-
-        <!-- Tenants on the new lease -->
         <div class="mb-4">
-          <label class="label">Tenants on the new lease</label>
-          <div id="renewTenantList" class="space-y-2 mb-3">
-            <div class="flex items-center justify-between card p-3" data-primary="true" id="rt-0">
-              <div>
-                <span class="font-poppins font-semibold text-charcoal">Rohan Mehta</span>
-                <span class="badge badge-prepaid text-xs ml-2">Primary</span>
-              </div>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" onclick="removeTenant(0)" disabled title="Cannot remove last primary tenant">Remove</button>
-            </div>
-          </div>
-          <p id="minPrimaryNote" class="text-xs muted mb-3" style="display:none">At least one primary tenant is required. Remove is disabled for the last primary tenant.</p>
+          <label class="label" for="sm-date">Effective date (DD/MM/YYYY) <span style="color:var(--color-saffron)" aria-hidden="true">*</span></label>
+          <input data-max-date="today" data-datepicker id="sm-date" class="input" type="text" placeholder="DD/MM/YYYY" aria-required="true" oninput="clearScheduleErr('sm-date')" />
+          <div class="field-error" id="sm-date-error"></div>
+        </div>
 
-          <!-- Add Tenant inline form -->
-          <div id="addTenantForm" style="display:none" class="card p-4 mb-3">
-            <h4 class="font-poppins font-semibold text-charcoal mb-3">Add Tenant</h4>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="label" for="nt-name">Full Name</label>
-                <input id="nt-name" class="input" placeholder="Full name" />
-              </div>
-              <div>
-                <label class="label" for="nt-phone">Phone</label>
-                <input id="nt-phone" class="input" placeholder="10-digit mobile" />
-              </div>
-            </div>
-            <div class="mt-3">
-              <label class="label" for="nt-email">Email (optional)</label>
-              <input id="nt-email" class="input" placeholder="Email" />
-            </div>
-            <div class="mt-3">
-              <label class="label" for="nt-type">Type</label>
-              <select id="nt-type" class="input">
-                <option value="primary">Primary</option>
-                <option value="co" selected>Co-tenant</option>
-              </select>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('addTenantForm').style.display='none'">Cancel</button>
-              <button type="button" class="btn btn-primary !py-2 !text-sm" onclick="addTenantToRenewal()">Add Tenant</button>
-            </div>
-          </div>
-
-          <button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="document.getElementById('addTenantForm').style.display='block'">+ Add Tenant</button>
+        <div class="mb-4">
+          <label class="label" for="sm-note">Reason / note <span class="muted text-xs font-normal">(optional)</span></label>
+          <textarea id="sm-note" class="input" rows="3" placeholder="e.g. Annual revision per agreement"></textarea>
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('renewLeaseDrawer').classList.remove('open')">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="createRenewalBtn">Create Renewal</button>
+          <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Cancel</button>
+          <button type="submit" id="sm-submit" class="btn btn-primary">Schedule Rent Change</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Finalize Termination Confirm Modal -->
-  <div class="modal-backdrop" id="finalizeTermModal" role="dialog" aria-modal="true" aria-labelledby="finalizeTermTitle">
+  <!-- Remove Confirmation Modal -->
+  <div class="modal-backdrop" id="removeModal" role="dialog" aria-modal="true" aria-labelledby="removeModalTitle">
     <div class="modal" style="max-width:440px">
-      <h3 id="finalizeTermTitle">Confirm termination</h3>
-      <div id="finalizeTermSummary" class="text-sm text-charcoal mt-3 mb-5">
-        <!-- populated by JS -->
-      </div>
+      <h3 id="removeModalTitle" class="m-0">Remove scheduled rent change</h3>
+      <p id="removeModalBody" class="text-sm text-charcoal mt-3 mb-5"></p>
+      <input type="hidden" id="rm-row-id" value="" />
       <div class="flex justify-end gap-3">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('finalizeTermModal').classList.remove('open')">Cancel</button>
-        <button type="button" class="btn btn-danger" onclick="confirmFinalizeTermination()">Finalize termination</button>
+        <button type="button" class="btn btn-secondary" onclick="closeRemoveModal()">Keep schedule</button>
+        <button type="button" class="btn btn-danger" onclick="confirmRemove()">Remove</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // ---- Termination flow ----
-    function showTermStep1Form() {
-      document.getElementById('termStep1').style.display = 'none';
-      document.getElementById('termStep1Form').style.display = 'block';
-    }
-    function cancelTermination() {
-      document.getElementById('termStep1').style.display = 'block';
-      document.getElementById('termStep1Form').style.display = 'none';
-      document.getElementById('termStep2').style.display = 'none';
-      document.getElementById('termStep3').style.display = 'none';
-      document.getElementById('declineAlert').style.display = 'none';
-    }
-    function updateTermCounter() {
-      var v = document.getElementById('termReason').value.length;
-      var c = document.getElementById('termCounter');
-      c.textContent = v + '/20';
-      c.classList.toggle('error', v < 20);
-      document.getElementById('termStep1Submit').disabled = v < 20;
-    }
-    function submitTermStep1() {
-      var reason = document.getElementById('termReason').value.trim();
-      var errEl = document.getElementById('termReasonError');
-      if (reason.length < 20) {
-        errEl.textContent = 'Reason must be at least 20 characters.';
-        errEl.classList.add('show');
-        return;
-      }
-      errEl.classList.remove('show');
-      document.getElementById('termStep1Form').style.display = 'none';
-      document.getElementById('termStep2').style.display = 'block';
-    }
-    function updateFinalizeBtn() {
-      var selects = document.querySelectorAll('#consentTable select');
-      var anyPending = false;
-      var anyDeclined = false;
-      selects.forEach(function(s) {
-        if (s.value === 'pending') anyPending = true;
-        if (s.value === 'declined') anyDeclined = true;
-      });
-      var btn = document.getElementById('finalizeTermBtn');
-      var declineAlert = document.getElementById('declineAlert');
-      if (anyDeclined) {
-        declineAlert.style.display = 'flex';
-        btn.disabled = true;
-      } else if (anyPending) {
-        declineAlert.style.display = 'none';
-        btn.disabled = true;
-      } else {
-        declineAlert.style.display = 'none';
-        btn.disabled = false;
-      }
-    }
-    function openFinalizeModal() {
-      var selects = document.querySelectorAll('#consentTable select');
-      var approved = 0, declined = 0;
-      selects.forEach(function(s) {
-        if (s.value === 'approved') approved++;
-        if (s.value === 'declined') declined++;
-      });
-      document.getElementById('finalizeTermSummary').innerHTML =
-        '<p>Approvals: <strong>' + approved + '</strong> &nbsp; Declines: <strong>' + declined + '</strong></p>' +
-        '<p class="mt-2">Effective date: <strong>' + document.getElementById('termDate').value + '</strong></p>' +
-        '<p class="muted text-xs mt-3">This action cannot be undone. Deposit refund is a separate step.</p>';
-      document.getElementById('finalizeTermModal').classList.add('open');
-    }
-    function confirmFinalizeTermination() {
-      document.getElementById('finalizeTermModal').classList.remove('open');
-      document.getElementById('termStep2').style.display = 'none';
-      document.getElementById('termStep3').style.display = 'block';
-      // Update badge to terminated
-      var badges = document.querySelectorAll('.badge-active');
-      badges.forEach(function(b) {
-        b.className = b.className.replace('badge-active','badge-terminated');
-        b.textContent = 'Terminated';
-      });
-    }
+  <!-- Early Termination reason modal -->
+  <div class="modal-backdrop" id="terminateModal" role="dialog" aria-modal="true" aria-labelledby="terminateModalTitle">
+    <div class="modal" style="max-width:480px">
+      <h3 id="terminateModalTitle" class="m-0">Early Terminate Lease</h3>
+      <p class="text-sm muted mt-2 mb-4">All tenants have requested termination. Enter a reason to terminate this lease early. This cannot be undone.</p>
+      <form id="terminateForm" novalidate onsubmit="event.preventDefault(); confirmTerminate();">
+        <div class="mb-4">
+          <label class="label" for="tm-reason">Reason for termination <span style="color:var(--color-saffron)" aria-hidden="true">*</span></label>
+          <textarea id="tm-reason" class="input" rows="3" placeholder="e.g. Mutual agreement — tenants relocating" aria-required="true" oninput="clearTermErr()"></textarea>
+          <div class="field-error" id="tm-reason-error"></div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" onclick="closeTerminateModal()">Cancel</button>
+          <button type="submit" class="btn btn-danger">Terminate Lease</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-    // ---- Renewal flow ----
-    var renewalTenants = [{ name: 'Rohan Mehta', primary: true }];
-
-    function checkRenewalRent() {
-      var v = parseInt(document.getElementById('rl-rent').value, 10);
-      var prev = 18000;
-      var banner = document.getElementById('renewalRentBanner');
-      if (v && v !== prev) {
-        var d = new Date(); d.setDate(d.getDate() + 60);
-        var dd = ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
-        document.getElementById('renewalRentBannerText').textContent =
-          'Tenants must be notified by ' + dd + ' before this rent takes effect. Effective date: ' + dd + ' (60 days from today). (BL-11)';
-        banner.style.display = 'flex';
-      } else {
-        banner.style.display = 'none';
-      }
-    }
-
-    function addTenantToRenewal() {
-      var name = document.getElementById('nt-name').value.trim();
-      var phone = document.getElementById('nt-phone').value.trim();
-      var isPrimary = document.getElementById('nt-type').value === 'primary';
-      if (!name) return;
-      var idx = renewalTenants.length;
-      renewalTenants.push({ name: name, primary: isPrimary });
-      var list = document.getElementById('renewTenantList');
-      var div = document.createElement('div');
-      div.className = 'flex items-center justify-between card p-3';
-      div.id = 'rt-' + idx;
-      div.dataset.primary = isPrimary ? 'true' : 'false';
-      div.innerHTML = '<div><span class="font-poppins font-semibold text-charcoal">' + name + '</span>' +
-        (isPrimary ? '<span class="badge badge-prepaid text-xs ml-2">Primary</span>' : '<span class="badge badge-closed text-xs ml-2">Co-tenant</span>') +
-        '</div><button type="button" class="btn btn-secondary !py-1 !px-2 !text-xs" onclick="removeTenant(' + idx + ')">Remove</button>';
-      list.appendChild(div);
-      document.getElementById('nt-name').value = '';
-      document.getElementById('nt-phone').value = '';
-      document.getElementById('nt-email').value = '';
-      document.getElementById('addTenantForm').style.display = 'none';
-      updateRemoveButtons();
-    }
-
-    function removeTenant(idx) {
-      var el = document.getElementById('rt-' + idx);
-      if (el) el.remove();
-      renewalTenants[idx] = null;
-      updateRemoveButtons();
-    }
-
-    function updateRemoveButtons() {
-      var primaryRows = document.querySelectorAll('#renewTenantList [data-primary="true"]');
-      if (primaryRows.length === 1) {
-        primaryRows[0].querySelector('button').disabled = true;
-        document.getElementById('minPrimaryNote').style.display = 'block';
-      } else {
-        primaryRows.forEach(function(r){ r.querySelector('button').disabled = false; });
-        document.getElementById('minPrimaryNote').style.display = 'none';
-      }
-    }
-
-    function submitRenewal() {
-      document.getElementById('renewLeaseDrawer').classList.remove('open');
-      gsToast('Renewal lease created successfully. The renewed lease appears in the Leases list.');
-    }
-
-    // Backdrop close
-    document.getElementById('renewLeaseDrawer').addEventListener('click', function(e) {
-      if (e.target === this) this.classList.remove('open');
-    });
-    document.getElementById('finalizeTermModal').addEventListener('click', function(e) {
-      if (e.target === this) this.classList.remove('open');
-    });
-  </script>
-
+  <!-- ====================== MOBILE NAV ====================== -->
   <nav class="tabbar" aria-label="PM navigation (mobile)">
     <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
     <a href="properties.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
@@ -559,12 +325,13 @@
   <script src="../assets/validation.js"></script>
   <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
+
   <!-- More bottom sheet (PM overflow nav) -->
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
     <div class="more-sheet-title">More options</div>
-    <a href="leases.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="leases.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
     <a href="maintenance.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
     <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
@@ -591,5 +358,484 @@
     </a>
   </div>
   <script src="../assets/toast.js"></script>
+  <script>
+    /* ---------------------------------------------------------------
+       gsToast convenience methods (thin wrappers).
+       gsToast itself only supports gsToast(msg, opts).
+    --------------------------------------------------------------- */
+    gsToast.success = function (msg) { gsToast(msg); };
+    gsToast.info    = function (msg) { gsToast(msg, { type: 'info' }); };
+    gsToast.error   = function (msg) { gsToast(msg, 'error'); };
+
+    /* ---------------------------------------------------------------
+       Lease mock data (prototype)
+    --------------------------------------------------------------- */
+    var LEASE_END_DATE = '14/04/2027'; // DD/MM/YYYY — used in validation messages
+    var CURRENT_RENT   = 18000;        // the rent currently in force
+
+    // RCS entries in memory (future rows only — past row is static in the DOM)
+    var rcsData = [
+      { id: 'rcs-row-1', date: '01/04/2027', from: 18000, to: 19500, scheduledOn: '14/05/2026', scheduledBy: 'Raj Sharma · Admin' },
+      { id: 'rcs-row-2', date: '01/10/2027', from: 19500, to: 21000, scheduledOn: '14/05/2026', scheduledBy: 'Raj Sharma · Admin' }
+    ];
+    var rcsNextId = 3; // counter for newly added rows
+
+    /* ---------------------------------------------------------------
+       Helpers
+    --------------------------------------------------------------- */
+    function fmtRupee(n) {
+      return '₹' + n.toLocaleString('en-IN');
+    }
+
+    // Parse DD/MM/YYYY to a Date object (midnight local)
+    function parseDDMMYYYY(s) {
+      if (!s) return null;
+      var parts = s.trim().split('/');
+      if (parts.length !== 3) return null;
+      var d = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10) - 1;
+      var y = parseInt(parts[2], 10);
+      if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+      var dt = new Date(y, m, d);
+      if (dt.getFullYear() !== y || dt.getMonth() !== m || dt.getDate() !== d) return null;
+      return dt;
+    }
+
+    function todayMidnight() {
+      var t = new Date();
+      t.setHours(0, 0, 0, 0);
+      return t;
+    }
+
+    /* ---------------------------------------------------------------
+       Status simulator
+    --------------------------------------------------------------- */
+    function setLeaseSimStatus(status, btn) {
+      // Update simulator button styles
+      document.querySelectorAll('[data-lsim]').forEach(function (b) {
+        b.classList.toggle('btn-primary', b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
+      });
+
+      // Update the Status badge in Lease Summary
+      var badge = document.getElementById('ld-status-badge');
+      var badgeMap = {
+        upcoming:   ['Upcoming',   'badge badge-prepaid'],
+        active:     ['Active',     'badge badge-active'],
+        expired:    ['Ended',      'badge badge-closed'],
+        terminated: ['Terminated', 'badge badge-terminated']
+      };
+      var bm = badgeMap[status] || badgeMap.active;
+      badge.textContent = bm[0];
+      badge.className   = bm[1];
+
+      // Toggle header action buttons via data-status-show
+      document.querySelectorAll('[data-status-show]').forEach(function (btn) {
+        var allowed = btn.getAttribute('data-status-show').split(',');
+        btn.style.display = allowed.indexOf(status) !== -1 ? '' : 'none';
+      });
+
+      // Toggle RCS card behaviour
+      var addBtn = document.getElementById('ld-rcs-add');
+      if (status === 'active') {
+        // Full add / edit / remove
+        addBtn.style.display = '';
+        addBtn.className = 'btn btn-primary !py-2 !text-sm';
+        addBtn.removeAttribute('disabled');
+        addBtn.removeAttribute('title');
+        addBtn.setAttribute('onclick', "openScheduleModal('add')");
+        setFutureRowActions('active');
+      } else if (status === 'upcoming') {
+        // Disabled (visible but locked)
+        addBtn.style.display = '';
+        addBtn.className = 'btn btn-disabled !py-2 !text-sm';
+        addBtn.setAttribute('disabled', '');
+        addBtn.setAttribute('title', 'Schedule rent changes only on active leases. This lease starts on 15/04/2026.');
+        addBtn.removeAttribute('onclick');
+        setFutureRowActions('upcoming');
+      } else {
+        // expired or terminated — hide add button + hide edit/remove
+        addBtn.style.display = 'none';
+        setFutureRowActions('readonly');
+      }
+
+      // Early-Termination section view depends on status.
+      applyTermViewForStatus(status);
+    }
+
+    // Control future row Edit + Remove buttons based on lease status
+    function setFutureRowActions(mode) {
+      var futureRows = document.querySelectorAll('#ld-rcs-tbody tr[data-rcs-past="false"]');
+      futureRows.forEach(function (row) {
+        var cell = row.querySelector('.rcs-action-cell');
+        if (!cell) return;
+        if (mode === 'active') {
+          cell.innerHTML =
+            '<button class="text-royal-blue font-poppins font-semibold text-sm" onclick="openScheduleModal(\'edit\', this.closest(\'tr\'))">Edit</button>' +
+            '<span class="muted" aria-hidden="true"> · </span>' +
+            '<button class="text-deep-red font-poppins font-semibold text-sm" style="color:var(--color-status-overdue)" onclick="openRemoveModal(this.closest(\'tr\'))">Remove</button>';
+        } else if (mode === 'upcoming') {
+          var tip = 'Schedule rent changes only on active leases. This lease starts on 15/04/2026.';
+          cell.innerHTML =
+            '<button class="text-royal-blue font-poppins font-semibold text-sm btn-disabled" disabled title="' + tip + '" style="opacity:0.45;cursor:not-allowed">Edit</button>' +
+            '<span class="muted" aria-hidden="true"> · </span>' +
+            '<button class="font-poppins font-semibold text-sm btn-disabled" disabled title="' + tip + '" style="opacity:0.45;cursor:not-allowed;color:var(--color-status-overdue)">Remove</button>';
+        } else {
+          // expired or terminated — hide
+          cell.innerHTML = '';
+        }
+      });
+    }
+
+    // Initialise simulator at "active"
+    setLeaseSimStatus('active', document.querySelector('[data-lsim="active"]'));
+
+    /* ---------------------------------------------------------------
+       Schedule / Edit modal
+    --------------------------------------------------------------- */
+    function clearScheduleErr(fieldId) {
+      var err = document.getElementById(fieldId + '-error');
+      var inp = document.getElementById(fieldId);
+      if (err) { err.textContent = ''; err.classList.remove('show'); }
+      if (inp) inp.classList.remove('error');
+    }
+
+    function showScheduleErr(fieldId, msg) {
+      var err = document.getElementById(fieldId + '-error');
+      var inp = document.getElementById(fieldId);
+      if (err) { err.textContent = '⚠ ' + msg; err.classList.add('show'); }
+      if (inp) inp.classList.add('error');
+    }
+
+    function openScheduleModal(mode, row) {
+      document.getElementById('sm-mode').value = mode;
+      document.getElementById('sm-row-id').value = row ? (row.id || '') : '';
+      clearScheduleErr('sm-rent');
+      clearScheduleErr('sm-date');
+
+      var title = document.getElementById('scheduleModalTitle');
+      var submitBtn = document.getElementById('sm-submit');
+
+      if (mode === 'edit' && row) {
+        title.textContent = 'Edit Rent Change';
+        submitBtn.textContent = 'Save Changes';
+        document.getElementById('sm-rent').value = row.getAttribute('data-rcs-rent') || '';
+        document.getElementById('sm-date').value = row.getAttribute('data-rcs-date') || '';
+        document.getElementById('sm-note').value = '';
+      } else {
+        title.textContent = 'Schedule Rent Change';
+        submitBtn.textContent = 'Schedule Rent Change';
+        document.getElementById('sm-rent').value = '';
+        document.getElementById('sm-date').value = '';
+        document.getElementById('sm-note').value = '';
+      }
+
+      document.getElementById('scheduleModal').classList.add('open');
+      document.getElementById('sm-rent').focus();
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').classList.remove('open');
+    }
+
+    function saveSchedule() {
+      var mode   = document.getElementById('sm-mode').value;
+      var rowId  = document.getElementById('sm-row-id').value;
+      var rentRaw = parseInt(document.getElementById('sm-rent').value, 10);
+      var dateStr = document.getElementById('sm-date').value.trim();
+      var ok = true;
+
+      // Validate rent
+      if (!rentRaw || rentRaw <= 0) {
+        showScheduleErr('sm-rent', 'Enter a valid rent amount greater than 0.');
+        ok = false;
+      }
+
+      // Validate date format
+      var effectiveDate = parseDDMMYYYY(dateStr);
+      if (!effectiveDate && ok !== false) { ok = false; }
+      if (!effectiveDate) {
+        showScheduleErr('sm-date', 'Enter a valid date in DD/MM/YYYY format.');
+        ok = false;
+      }
+
+      if (effectiveDate) {
+        var today = todayMidnight();
+        var minDate = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000); // today + 60 days
+
+        // BL-11: must be >= today + 60 days
+        if (effectiveDate < minDate) {
+          showScheduleErr('sm-date', 'Effective date must be at least 60 days from today (BL-11).');
+          ok = false;
+        }
+
+        // Must be < lease end date
+        var leaseEnd = parseDDMMYYYY(LEASE_END_DATE);
+        if (leaseEnd && effectiveDate >= leaseEnd) {
+          showScheduleErr('sm-date', 'Effective date must be before the lease ends on ' + LEASE_END_DATE + '.');
+          ok = false;
+        }
+
+        // No duplicate effective date (exclude current row when editing)
+        if (!document.getElementById('sm-date-error').classList.contains('show')) {
+          var allRows = document.querySelectorAll('#ld-rcs-tbody tr[data-rcs-past="false"]');
+          for (var i = 0; i < allRows.length; i++) {
+            var r = allRows[i];
+            if (mode === 'edit' && r.id === rowId) continue; // skip self
+            if (r.getAttribute('data-rcs-date') === dateStr) {
+              showScheduleErr('sm-date', 'A rent change is already scheduled for this date.');
+              ok = false;
+              break;
+            }
+          }
+        }
+
+        // Rent must differ from the immediately preceding rent
+        if (ok && rentRaw) {
+          var precedingRent = CURRENT_RENT;
+          // Find the most recent past/applied row for reference (simplified: use CURRENT_RENT)
+          // For edit mode, check preceding from chain; simplified for prototype
+          var existingRows = document.querySelectorAll('#ld-rcs-tbody tr[data-rcs-past="false"]');
+          // Sort by date ascending to find the from-rent at this position
+          var datesSorted = [];
+          existingRows.forEach(function (r) {
+            if (mode === 'edit' && r.id === rowId) return;
+            var d = parseDDMMYYYY(r.getAttribute('data-rcs-date'));
+            if (d && d < effectiveDate) {
+              datesSorted.push({ date: d, to: parseInt(r.getAttribute('data-rcs-rent'), 10) });
+            }
+          });
+          datesSorted.sort(function (a, b) { return b.date - a.date; }); // desc
+          if (datesSorted.length > 0) precedingRent = datesSorted[0].to;
+
+          if (rentRaw === precedingRent) {
+            showScheduleErr('sm-rent', 'The new rent must differ from the current scheduled rent (' + fmtRupee(precedingRent) + ').');
+            ok = false;
+          }
+        }
+      }
+
+      if (!ok) return;
+
+      if (mode === 'edit') {
+        // Update the existing row in the DOM
+        var existingRow = document.getElementById(rowId);
+        if (existingRow) {
+          var fromRent = parseInt(existingRow.getAttribute('data-rcs-from'), 10);
+          existingRow.setAttribute('data-rcs-date', dateStr);
+          existingRow.setAttribute('data-rcs-rent', rentRaw);
+          var cells = existingRow.querySelectorAll('td');
+          cells[0].textContent = dateStr;
+          cells[1].innerHTML = fmtRupee(fromRent) + ' → ' + fmtRupee(rentRaw);
+          // cells[2] (Scheduled on) + cells[3] (Scheduled by) stay unchanged
+        }
+        closeScheduleModal();
+        gsToast.success('Rent change updated');
+      } else {
+        // Add new row
+        var tbody = document.getElementById('ld-rcs-tbody');
+        var newId = 'rcs-row-' + rcsNextId++;
+        var precedingRentForAdd = CURRENT_RENT;
+        var futureRows2 = document.querySelectorAll('#ld-rcs-tbody tr[data-rcs-past="false"]');
+        var sorted2 = [];
+        futureRows2.forEach(function (r) {
+          var d = parseDDMMYYYY(r.getAttribute('data-rcs-date'));
+          if (d && d < effectiveDate) {
+            sorted2.push({ date: d, to: parseInt(r.getAttribute('data-rcs-rent'), 10) });
+          }
+        });
+        sorted2.sort(function (a, b) { return b.date - a.date; });
+        if (sorted2.length > 0) precedingRentForAdd = sorted2[0].to;
+
+        var tr = document.createElement('tr');
+        tr.id = newId;
+        tr.setAttribute('data-rcs-past', 'false');
+        tr.setAttribute('data-rcs-date', dateStr);
+        tr.setAttribute('data-rcs-rent', rentRaw);
+        tr.setAttribute('data-rcs-from', precedingRentForAdd);
+        tr.innerHTML =
+          '<td>' + dateStr + '</td>' +
+          '<td>' + fmtRupee(precedingRentForAdd) + ' → ' + fmtRupee(rentRaw) + '</td>' +
+          '<td>28/05/2026</td>' +
+          '<td>Raj Sharma · Admin</td>' +
+          '<td><span class="badge badge-prepaid">Scheduled</span></td>' +
+          '<td class="rcs-action-cell">' +
+            '<button class="text-royal-blue font-poppins font-semibold text-sm" onclick="openScheduleModal(\'edit\', this.closest(\'tr\'))">Edit</button>' +
+            '<span class="muted" aria-hidden="true"> · </span>' +
+            '<button class="text-deep-red font-poppins font-semibond text-sm" style="color:var(--color-status-overdue)" onclick="openRemoveModal(this.closest(\'tr\'))">Remove</button>' +
+          '</td>';
+        tbody.appendChild(tr);
+
+        // Hide empty state if needed, ensure table visible
+        document.getElementById('ld-rcs-empty').style.display = 'none';
+        document.getElementById('ld-rcs-table-wrap').style.display = '';
+        closeScheduleModal();
+        gsToast.success('Rent change scheduled');
+      }
+    }
+
+    /* ---------------------------------------------------------------
+       Remove confirmation modal
+    --------------------------------------------------------------- */
+    function openRemoveModal(row) {
+      var rentAmt = parseInt(row.getAttribute('data-rcs-rent'), 10);
+      var dateStr = row.getAttribute('data-rcs-date');
+      document.getElementById('removeModalBody').textContent =
+        'Remove the scheduled rent change of ' + fmtRupee(rentAmt) + ' effective ' + dateStr +
+        '? The rent will continue at the previous scheduled amount.';
+      document.getElementById('rm-row-id').value = row.id;
+      document.getElementById('removeModal').classList.add('open');
+    }
+
+    function closeRemoveModal() {
+      document.getElementById('removeModal').classList.remove('open');
+    }
+
+    function confirmRemove() {
+      var rowId = document.getElementById('rm-row-id').value;
+      var row = document.getElementById(rowId);
+      if (row) row.remove();
+      closeRemoveModal();
+      gsToast.success('Rent change removed');
+
+      // If no future rows remain, swap to empty state
+      var remaining = document.querySelectorAll('#ld-rcs-tbody tr[data-rcs-past="false"]');
+      if (remaining.length === 0) {
+        // Only the past/applied row remains — table still shows (past row stays)
+        // If ALL rows are gone (should not happen with the locked past row), show empty state
+        var allRows = document.querySelectorAll('#ld-rcs-tbody tr');
+        if (allRows.length === 0) {
+          document.getElementById('ld-rcs-table-wrap').style.display = 'none';
+          document.getElementById('ld-rcs-empty').style.display = '';
+        }
+      }
+    }
+
+    /* ---------------------------------------------------------------
+       Early Termination — per-tenant consent → Admin terminates (BL-08/BL-09)
+       Every tenant must raise a request; only then does the Early Terminate
+       button enable, and the Admin must enter a reason to terminate.
+    --------------------------------------------------------------- */
+    function ldTodayStr() {
+      var d = new Date();
+      var p = function (n) { return (n < 10 ? '0' : '') + n; };
+      return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+    }
+    function raiseTermRequest(row) {
+      if (!row) return;
+      row.dataset.requested = 'true';
+      var badge = row.querySelector('[data-term-status]');
+      if (badge) { badge.textContent = 'Requested'; badge.className = 'badge badge-paid'; }
+      var dateCell = row.querySelector('[data-term-date]');
+      if (dateCell) { dateCell.textContent = ldTodayStr(); dateCell.classList.remove('muted'); }
+      var btn = row.querySelector('[data-term-btn]');
+      if (btn) btn.style.display = 'none';
+      updateTermState();
+    }
+    /* Drive the section's appearance from the lease status:
+       terminated → read-only record (all requested, no actions);
+       active / upcoming → interactive consent flow reset to Pending. */
+    function applyTermViewForStatus(status) {
+      var rows = document.querySelectorAll('#ld-term-tbody [data-term-row]');
+      var footer = document.getElementById('ld-term-footer');
+      var done = document.getElementById('ld-term-done');
+      if (status === 'terminated') {
+        rows.forEach(function (r) {
+          r.dataset.requested = 'true';
+          var badge = r.querySelector('[data-term-status]');
+          if (badge) { badge.textContent = 'Requested'; badge.className = 'badge badge-paid'; }
+          var dateCell = r.querySelector('[data-term-date]');
+          if (dateCell && (!dateCell.textContent || dateCell.textContent.trim() === '—')) {
+            dateCell.textContent = '01/05/2026';
+            dateCell.classList.remove('muted');
+          }
+          var btn = r.querySelector('[data-term-btn]');
+          if (btn) btn.style.display = 'none';
+        });
+        if (footer) footer.style.display = 'none';
+        if (done) done.style.display = '';
+      } else {
+        /* Reset to the interactive Pending state for the consent flow preview. */
+        rows.forEach(function (r) {
+          r.dataset.requested = 'false';
+          var badge = r.querySelector('[data-term-status]');
+          if (badge) { badge.textContent = 'Pending'; badge.className = 'badge badge-partial'; }
+          var dateCell = r.querySelector('[data-term-date]');
+          if (dateCell) { dateCell.textContent = '—'; dateCell.classList.add('muted'); }
+          var btn = r.querySelector('[data-term-btn]');
+          if (btn) btn.style.display = '';
+        });
+        if (footer) footer.style.display = '';
+        if (done) done.style.display = 'none';
+        updateTermState();
+      }
+    }
+    function updateTermState() {
+      var rows = document.querySelectorAll('#ld-term-tbody [data-term-row]');
+      var total = rows.length, requested = 0;
+      rows.forEach(function (r) { if (r.dataset.requested === 'true') requested++; });
+      var prog = document.getElementById('ld-term-progress');
+      if (prog) prog.textContent = requested + ' of ' + total + ' tenants have requested termination.';
+      var btn = document.getElementById('ld-term-btn');
+      if (!btn) return;
+      if (total > 0 && requested === total) {
+        btn.className = 'btn btn-danger !py-2 !text-sm';
+        btn.removeAttribute('disabled');
+        btn.removeAttribute('title');
+        btn.setAttribute('onclick', 'openTerminateModal()');
+      } else {
+        btn.className = 'btn btn-disabled !py-2 !text-sm';
+        btn.setAttribute('disabled', '');
+        btn.setAttribute('title', 'All tenants must raise a termination request first.');
+        btn.removeAttribute('onclick');
+      }
+    }
+    function clearTermErr() {
+      var e = document.getElementById('tm-reason-error');
+      var i = document.getElementById('tm-reason');
+      if (e) { e.textContent = ''; e.classList.remove('show'); }
+      if (i) i.classList.remove('error');
+    }
+    function openTerminateModal() {
+      document.getElementById('tm-reason').value = '';
+      clearTermErr();
+      document.getElementById('terminateModal').classList.add('open');
+    }
+    function closeTerminateModal() {
+      document.getElementById('terminateModal').classList.remove('open');
+    }
+    function confirmTerminate() {
+      var input = document.getElementById('tm-reason');
+      var reason = (input.value || '').trim();
+      if (reason.length < 5) {
+        var e = document.getElementById('tm-reason-error');
+        if (e) { e.textContent = 'Enter a reason (at least 5 characters).'; e.classList.add('show'); }
+        input.classList.add('error');
+        return;
+      }
+      closeTerminateModal();
+      /* Reflect terminated status — also hides the Early Termination section
+         (it is data-status-show="upcoming,active"). */
+      setLeaseSimStatus('terminated', document.querySelector('[data-lsim="terminated"]'));
+      gsToast.success('Lease terminated — reason recorded.');
+    }
+    updateTermState();
+
+    /* ---------------------------------------------------------------
+       Modal backdrop / Escape handling
+    --------------------------------------------------------------- */
+    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) backdrop.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(function (m) {
+          m.classList.remove('open');
+        });
+      }
+    });
+  </script>
 </body>
 </html>

@@ -67,10 +67,10 @@
         <div class="flex items-center justify-between flex-wrap gap-3 flex-1 min-w-0">
           <h1 class="page-title">Lease #L-2103</h1>
           <div class="flex items-center gap-2 flex-wrap">
-            <!-- TODO: replace placeholder once docs/planning/features/<date>-lease-renewal-flow.md ships -->
-            <button id="ld-btn-renew" class="btn btn-primary !py-2 !text-sm" data-status-show="active,expired" onclick="gsToast.info('Renewal flow — coming soon')">Renew Lease</button>
-            <!-- TODO: replace placeholder once docs/planning/features/<date>-early-termination-flow.md ships -->
-            <button id="ld-btn-terminate" class="btn btn-danger !py-2 !text-sm" data-status-show="upcoming,active" onclick="gsToast.info('Early termination flow — coming soon')">Early Terminate</button>
+            <!-- Renew opens the Create Lease wizard in renew mode: title "Renew Lease",
+                 starts at the Tenants step, property/unit/room locked (no Back), tenants +
+                 rent + deposit pre-filled from this lease (renew=<leaseId>). -->
+            <a id="ld-btn-renew" href="create-lease.html?renew=2103" class="btn btn-primary !py-2 !text-sm" data-status-show="active,expired">Renew Lease</a>
           </div>
         </div>
       </header>
@@ -82,7 +82,7 @@
           <div class="flex gap-2 flex-wrap" role="group" aria-label="Preview lease status">
             <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="upcoming" onclick="setLeaseSimStatus('upcoming',this)">Upcoming</button>
             <button type="button" class="btn btn-primary !py-1 !px-3 !text-sm" data-lsim="active" onclick="setLeaseSimStatus('active',this)">Active</button>
-            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="expired" onclick="setLeaseSimStatus('expired',this)">Expired</button>
+            <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="expired" onclick="setLeaseSimStatus('expired',this)">Ended</button>
             <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-lsim="terminated" onclick="setLeaseSimStatus('terminated',this)">Terminated</button>
           </div>
         </div>
@@ -129,7 +129,6 @@
             </div>
             <div class="text-sm muted">+91 98765 43290 · rohan.mehta@example.com</div>
           </div>
-          <a href="users.html?tenant=rohan-mehta" class="text-royal-blue font-poppins font-semibold text-sm">View profile</a>
         </div>
         <!-- Co-tenant -->
         <div class="flex items-center gap-3 py-3 last:border-b-0">
@@ -141,7 +140,6 @@
             </div>
             <div class="text-sm muted">+91 98765 43291 · priya.mehta@example.com</div>
           </div>
-          <a href="users.html?tenant=priya-mehta" class="text-royal-blue font-poppins font-semibold text-sm">View profile</a>
         </div>
       </section>
 
@@ -211,6 +209,44 @@
         </div>
       </section>
 
+      <!-- ---- BLOCK 5 — Early Termination (per-tenant consent → Admin terminates) ---- -->
+      <!-- Visible for upcoming/active (the consent flow) and terminated (read-only record). -->
+      <section class="card mb-6" data-status-show="upcoming,active,terminated">
+        <h3 class="section-title">Early Termination</h3>
+        <p class="text-sm muted mb-4">Every tenant on this lease must raise a termination request before the lease can be ended early. Tenants raise the request from their own portal; once <strong>all</strong> tenants have requested, an Admin can terminate the lease by entering a reason. There is no automatic approval.</p>
+
+        <div class="p-0 overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Tenant</th><th>Role</th><th>Request status</th><th>Requested on</th><th>Action</th></tr>
+            </thead>
+            <tbody id="ld-term-tbody">
+              <tr data-term-row data-requested="false">
+                <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td>
+                <td>Primary</td>
+                <td><span class="badge badge-partial" data-term-status>Pending</span></td>
+                <td class="muted" data-term-date>—</td>
+                <td><button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-term-btn onclick="raiseTermRequest(this.closest('tr'))">Raise request</button></td>
+              </tr>
+              <tr data-term-row data-requested="false">
+                <td class="font-poppins font-semibold text-charcoal">Priya Mehta</td>
+                <td>Co-tenant</td>
+                <td><span class="badge badge-partial" data-term-status>Pending</span></td>
+                <td class="muted" data-term-date>—</td>
+                <td><button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" data-term-btn onclick="raiseTermRequest(this.closest('tr'))">Raise request</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between flex-wrap gap-3 mt-4" id="ld-term-footer" style="border-top:1px solid var(--color-light-gray);padding-top:16px;">
+          <div class="text-sm muted" id="ld-term-progress">0 of 2 tenants have requested termination.</div>
+          <button id="ld-term-btn" class="btn btn-disabled !py-2 !text-sm" disabled title="All tenants must raise a termination request first.">Early Terminate</button>
+        </div>
+        <!-- Shown instead of the action footer when the lease is already terminated. -->
+        <div class="text-sm muted mt-4" id="ld-term-done" style="display:none;border-top:1px solid var(--color-light-gray);padding-top:16px;">This lease was terminated early after all tenants requested termination.</div>
+      </section>
+
     </main>
   </div><!-- /.app-shell -->
 
@@ -259,6 +295,25 @@
         <button type="button" class="btn btn-secondary" onclick="closeRemoveModal()">Keep schedule</button>
         <button type="button" class="btn btn-danger" onclick="confirmRemove()">Remove</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Early Termination reason modal -->
+  <div class="modal-backdrop" id="terminateModal" role="dialog" aria-modal="true" aria-labelledby="terminateModalTitle">
+    <div class="modal" style="max-width:480px">
+      <h3 id="terminateModalTitle" class="m-0">Early Terminate Lease</h3>
+      <p class="text-sm muted mt-2 mb-4">All tenants have requested termination. Enter a reason to terminate this lease early. This cannot be undone.</p>
+      <form id="terminateForm" novalidate onsubmit="event.preventDefault(); confirmTerminate();">
+        <div class="mb-4">
+          <label class="label" for="tm-reason">Reason for termination <span style="color:var(--color-saffron)" aria-hidden="true">*</span></label>
+          <textarea id="tm-reason" class="input" rows="3" placeholder="e.g. Mutual agreement — tenants relocating" aria-required="true" oninput="clearTermErr()"></textarea>
+          <div class="field-error" id="tm-reason-error"></div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" onclick="closeTerminateModal()">Cancel</button>
+          <button type="submit" class="btn btn-danger">Terminate Lease</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -406,6 +461,9 @@
         addBtn.style.display = 'none';
         setFutureRowActions('readonly');
       }
+
+      // Early-Termination section view depends on status.
+      applyTermViewForStatus(status);
     }
 
     // Control future row Edit + Remove buttons based on lease status
@@ -655,6 +713,116 @@
         }
       }
     }
+
+    /* ---------------------------------------------------------------
+       Early Termination — per-tenant consent → Admin terminates (BL-08/BL-09)
+       Every tenant must raise a request; only then does the Early Terminate
+       button enable, and the Admin must enter a reason to terminate.
+    --------------------------------------------------------------- */
+    function ldTodayStr() {
+      var d = new Date();
+      var p = function (n) { return (n < 10 ? '0' : '') + n; };
+      return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+    }
+    function raiseTermRequest(row) {
+      if (!row) return;
+      row.dataset.requested = 'true';
+      var badge = row.querySelector('[data-term-status]');
+      if (badge) { badge.textContent = 'Requested'; badge.className = 'badge badge-paid'; }
+      var dateCell = row.querySelector('[data-term-date]');
+      if (dateCell) { dateCell.textContent = ldTodayStr(); dateCell.classList.remove('muted'); }
+      var btn = row.querySelector('[data-term-btn]');
+      if (btn) btn.style.display = 'none';
+      updateTermState();
+    }
+    /* Drive the section's appearance from the lease status:
+       terminated → read-only record (all requested, no actions);
+       active / upcoming → interactive consent flow reset to Pending. */
+    function applyTermViewForStatus(status) {
+      var rows = document.querySelectorAll('#ld-term-tbody [data-term-row]');
+      var footer = document.getElementById('ld-term-footer');
+      var done = document.getElementById('ld-term-done');
+      if (status === 'terminated') {
+        rows.forEach(function (r) {
+          r.dataset.requested = 'true';
+          var badge = r.querySelector('[data-term-status]');
+          if (badge) { badge.textContent = 'Requested'; badge.className = 'badge badge-paid'; }
+          var dateCell = r.querySelector('[data-term-date]');
+          if (dateCell && (!dateCell.textContent || dateCell.textContent.trim() === '—')) {
+            dateCell.textContent = '01/05/2026';
+            dateCell.classList.remove('muted');
+          }
+          var btn = r.querySelector('[data-term-btn]');
+          if (btn) btn.style.display = 'none';
+        });
+        if (footer) footer.style.display = 'none';
+        if (done) done.style.display = '';
+      } else {
+        /* Reset to the interactive Pending state for the consent flow preview. */
+        rows.forEach(function (r) {
+          r.dataset.requested = 'false';
+          var badge = r.querySelector('[data-term-status]');
+          if (badge) { badge.textContent = 'Pending'; badge.className = 'badge badge-partial'; }
+          var dateCell = r.querySelector('[data-term-date]');
+          if (dateCell) { dateCell.textContent = '—'; dateCell.classList.add('muted'); }
+          var btn = r.querySelector('[data-term-btn]');
+          if (btn) btn.style.display = '';
+        });
+        if (footer) footer.style.display = '';
+        if (done) done.style.display = 'none';
+        updateTermState();
+      }
+    }
+    function updateTermState() {
+      var rows = document.querySelectorAll('#ld-term-tbody [data-term-row]');
+      var total = rows.length, requested = 0;
+      rows.forEach(function (r) { if (r.dataset.requested === 'true') requested++; });
+      var prog = document.getElementById('ld-term-progress');
+      if (prog) prog.textContent = requested + ' of ' + total + ' tenants have requested termination.';
+      var btn = document.getElementById('ld-term-btn');
+      if (!btn) return;
+      if (total > 0 && requested === total) {
+        btn.className = 'btn btn-danger !py-2 !text-sm';
+        btn.removeAttribute('disabled');
+        btn.removeAttribute('title');
+        btn.setAttribute('onclick', 'openTerminateModal()');
+      } else {
+        btn.className = 'btn btn-disabled !py-2 !text-sm';
+        btn.setAttribute('disabled', '');
+        btn.setAttribute('title', 'All tenants must raise a termination request first.');
+        btn.removeAttribute('onclick');
+      }
+    }
+    function clearTermErr() {
+      var e = document.getElementById('tm-reason-error');
+      var i = document.getElementById('tm-reason');
+      if (e) { e.textContent = ''; e.classList.remove('show'); }
+      if (i) i.classList.remove('error');
+    }
+    function openTerminateModal() {
+      document.getElementById('tm-reason').value = '';
+      clearTermErr();
+      document.getElementById('terminateModal').classList.add('open');
+    }
+    function closeTerminateModal() {
+      document.getElementById('terminateModal').classList.remove('open');
+    }
+    function confirmTerminate() {
+      var input = document.getElementById('tm-reason');
+      var reason = (input.value || '').trim();
+      if (reason.length < 5) {
+        var e = document.getElementById('tm-reason-error');
+        if (e) { e.textContent = 'Enter a reason (at least 5 characters).'; e.classList.add('show'); }
+        input.classList.add('error');
+        return;
+      }
+      closeTerminateModal();
+      /* Reflect terminated status — also hides the Early Termination section
+         (it is data-status-show="upcoming,active"). */
+      setLeaseSimStatus('terminated', document.querySelector('[data-lsim="terminated"]'));
+      gsToast.success('Lease terminated — reason recorded.');
+    }
+    updateTermState();
 
     /* ---------------------------------------------------------------
        Modal backdrop / Escape handling

@@ -172,7 +172,7 @@
       var row = document.querySelectorAll('#tbl-inbox tbody tr')[openIdx];
       var map = { read:['Read','badge badge-prepaid'], replied:['Replied','badge badge-paid'] };
       row.dataset.status = status;
-      row.querySelector('td:nth-child(5)').innerHTML = '<span class="'+map[status][1]+'">'+map[status][0]+'</span>';
+      row.querySelector('td:nth-child(6)').innerHTML = '<span class="'+map[status][1]+'">'+map[status][0]+'</span>';
       document.getElementById('msgStatusBadge').innerHTML = '<span class="'+map[status][1]+'">'+map[status][0]+'</span>';
       if(window.Paginator) Paginator.refresh('tbl-inbox');
       closeMsg();

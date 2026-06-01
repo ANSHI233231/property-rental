@@ -110,3 +110,27 @@ No formal tests were added this session. The major surfaces that need TCs after 
 - Daily-at-00:00-IST cron with `WHERE billing_anchor_day = EXTRACT(DAY FROM CURRENT_DATE)` filter.
 - `contact_messages.is_priority` column + sort key (deferred from the Priority Support discussion — moot now that Priority Support was removed from the catalogue).
 - Manual invoice generation surface (removed from v1 — re-evaluate for v2).
+
+---
+
+## Task — Clone Admin Property & Lease pages for Property Manager (assigned-scoped)
+
+- Status: ✅ Completed
+- Plan: `docs/planning/features/2026-05-29-pm-property-lease-clone.md` (approved)
+
+### Delivered
+- **NEW `pm/create-lease.html`** — cloned from `admin/create-lease.html` (full wizard + renew mode). PM chrome swapped in (sidebar/tabbar/more-sheet/account from PM pages, Leases active, Cancel → `leases.html`). `PROPERTIES`/`UNITS`/`TENANTS` scoped to the 3 assigned properties (Green Valley id1, Sai Heights id2, Mayur Vihar id3); Rohini Greens (id4) + its unit + the lone property-4 tenant lease removed so the wizard never offers unassigned inventory. Title → Property Manager.
+- **`pm/unit-detail.html`** — re-cloned from admin to parity: Rooms section + Leases "Type" column (Leases after Rooms), unit + per-room "+ Create Lease" → `create-lease.html?unitId/roomId`, gated hidden on Retired/Under-Maintenance. PM chrome; Properties marked active in sidebar/tabbar.
+- **`pm/lease-detail.html`** — re-cloned from admin to parity: Renew → `create-lease.html?renew=2103`; per-co-tenant-consent Early Termination section + Terminated read-only record view; no "View profile". PM chrome.
+- **`pm/leases.html`** — "+ New Lease" → `create-lease.html`; row "Renew" → `create-lease.html?renew=2103`; stub modal + `alert()` removed; banner de-references "Renewed"; the one "Renewed" row badge → "Ended".
+- **`pm/properties.html` + `pm/property-detail.html`** — verified already assigned-scoped, no admin-only actions (no Reassign PM), unit rows → `pm/unit-detail.html`; left intact (kept PM past-tenure sections — an admin clone would have destroyed them).
+- **Lease status labels standardized** (admin + pm): fixed set Active/Upcoming/Ended/Terminated; simulator button "Expired" → "Ended" on both lease-detail pages. Maintenance "Closed" / delegation "Expired" / unit "Listed" left untouched (not lease statuses).
+
+### Verification
+- `node --check` on extracted inline JS of pm/create-lease, pm/unit-detail, pm/lease-detail — all pass.
+- Scope grep: no Rohini/Dwarka/other-org property names in PM active data.
+- PM nav contains only PM links (no Users/Organization/Delegations/Master Data/Audit).
+
+### Sync
+- SRS §3 PM page row updated to add `create-lease.html` + renew/consent-termination wording.
+- `docs/planning/prototype-changes.md` — 2 rows appended (PM parity + status standardization).
