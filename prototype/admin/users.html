@@ -95,6 +95,11 @@
             <span class="filter-tile-count" data-pg-count></span>
             <span class="filter-tile-label">Maintenance</span>
           </button>
+          <button type="button" class="filter-tile" data-tile-for="tbl-users" data-tile-filter="security-guard"
+                  onclick="Paginator.setFilter('tbl-users','security-guard',this)">
+            <span class="filter-tile-count" data-pg-count></span>
+            <span class="filter-tile-label">Security Guards</span>
+          </button>
           <button type="button" class="filter-tile" data-tile-for="tbl-users" data-tile-filter="tenant"
                   onclick="Paginator.setFilter('tbl-users','tenant',this)">
             <span class="filter-tile-count" data-pg-count></span>
@@ -284,6 +289,45 @@
                    onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
                 <span class="action-link-sep" aria-hidden="true">&middot;</span>
                 <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link">Activate</a>
+              </td>
+            </tr>
+            <!-- Security Guard rows — gate-level, assigned-property scope -->
+            <tr data-role="security-guard" data-status="active">
+              <td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Ramesh Yadav <span class="muted text-xs">(Green Valley)</span></td>
+              <td>Security Guard</td>
+              <td>9810045123</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
+                   data-target-name="Ramesh Yadav"
+                   data-target-role="Security Guard"
+                   data-target-scope="Green Valley"
+                   data-target-dashboard="../security/dashboard.html"
+                   onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
+              </td>
+            </tr>
+            <tr data-role="security-guard" data-status="active">
+              <td data-pg-serial class="muted"></td>
+              <td class="font-poppins font-semibold text-charcoal">Sita Devi <span class="muted text-xs">(Sai Heights)</span></td>
+              <td>Security Guard</td>
+              <td>9810045124</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <a href="#" onclick="event.preventDefault(); openEditUser(this)" class="action-link">Edit</a>
+                <span class="action-link-sep imper-sep" aria-hidden="true">&middot;</span>
+                <a href="#" class="action-link imper-link"
+                   data-target-name="Sita Devi"
+                   data-target-role="Security Guard"
+                   data-target-scope="Sai Heights"
+                   data-target-dashboard="../security/dashboard.html"
+                   onclick="event.preventDefault(); openStartImpersonation(this)">Impersonate</a>
+                <span class="action-link-sep" aria-hidden="true">&middot;</span>
+                <a href="#" onclick="event.preventDefault(); openStatusToggle(this)" class="action-link danger">Deactivate</a>
               </td>
             </tr>
             <!-- Tenant rows — Edit + Impersonate -->
@@ -782,6 +826,15 @@
             <div id="editSpecCheckboxes" class="grid grid-cols-2 gap-2 mt-1"></div>
           </div>
 
+          <div class="mt-4" id="editPropRow" style="display:none">
+            <label class="label">Assigned properties <span class="muted font-normal">(the gates this guard covers)</span></label>
+            <div class="grid grid-cols-2 gap-2 mt-1">
+              <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="edit-guard-prop" value="green-valley" style="accent-color:var(--color-saffron);"> Green Valley, Dwarka</label>
+              <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="edit-guard-prop" value="sai-heights" style="accent-color:var(--color-saffron);"> Sai Heights, Lajpat Nagar</label>
+              <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="edit-guard-prop" value="mayur-vihar" style="accent-color:var(--color-saffron);"> Mayur Vihar Residency</label>
+            </div>
+          </div>
+
           <hr class="my-5 border-mid-gray" />
         </div>
 
@@ -952,6 +1005,21 @@
         specRow.style.display = '';
       } else {
         specRow.style.display = 'none';
+      }
+
+      // Assigned properties — only for Security Guards; pre-check from the name's "(Property)" scope.
+      var propRow = document.getElementById('editPropRow');
+      if (role === 'security-guard') {
+        var scopeSpan = nameCell ? nameCell.querySelector('.muted') : null;
+        var scope = scopeSpan ? scopeSpan.textContent.replace(/[()]/g, '').trim().toLowerCase() : '';
+        document.querySelectorAll('#editPropRow input[name="edit-guard-prop"]').forEach(function (cb) {
+          var labelText = cb.parentElement.textContent.toLowerCase();
+          var key = scope.split(',')[0].trim();
+          cb.checked = !!key && labelText.indexOf(key) >= 0;
+        });
+        propRow.style.display = '';
+      } else {
+        propRow.style.display = 'none';
       }
 
       document.getElementById('editUserModal').classList.add('open');

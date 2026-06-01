@@ -74,103 +74,73 @@
         <div>
           <h1 class="page-title">Rent Overview</h1>
         </div>
-        <button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('recordPaymentModal').classList.add('open')">+ Record Payment</button>
+        <a href="record-payment.html" class="btn btn-primary !py-2 !text-sm">+ Record Payment</a>
       </header>
 
       <!-- Success banner (hidden by default, shown after recording payment) -->
       <div id="paymentSuccessBanner" class="alert mb-6" style="display:none; background:var(--bg-paid); border-left-color:var(--color-status-paid); color:var(--color-status-paid);">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0" style="width:18px;height:18px;margin-top:2px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <div><strong class="font-poppins">Payment recorded successfully.</strong> The rent table has been updated.</div>
+        <div id="paymentSuccessText"><strong class="font-poppins">Payment recorded successfully.</strong> The rent table has been updated.</div>
       </div>
 
       <section class="section">
         <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-value" style="color:var(--color-status-paid)">₹12,00,000</div><div class="kpi-meta">80% of expected</div></div>
-          <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--color-status-overdue)">₹3,00,000</div><div class="kpi-meta">8 units · 5+ days late</div></div>
-          <div class="kpi"><div class="kpi-label">Partial</div><div class="kpi-value" style="color:var(--color-status-partial)">8</div><div class="kpi-meta">Units · partial payment</div></div>
-          <div class="kpi"><div class="kpi-label">Prepaid</div><div class="kpi-value" style="color:var(--color-status-prepaid)">3</div><div class="kpi-meta">Excess auto-applied next period</div></div>
+          <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-value" id="kpiCollected" style="color:var(--color-status-paid)">—</div><div class="kpi-meta" id="kpiCollectedMeta">—</div></div>
+          <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-value" id="kpiOverdue" style="color:var(--color-status-overdue)">—</div><div class="kpi-meta" id="kpiOverdueMeta">—</div></div>
+          <div class="kpi"><div class="kpi-label">Expected</div><div class="kpi-value" id="kpiExpected">—</div><div class="kpi-meta" id="kpiExpectedMeta">—</div></div>
+          <div class="kpi"><div class="kpi-label">Late Fees</div><div class="kpi-value" id="kpiLateFees" style="color:var(--color-status-overdue)">—</div><div class="kpi-meta">Accrued · auto-calculated</div></div>
         </div>
-      </section>
-
-      <!-- Overdue table -->
-      <section class="section">
-        <h3 class="section-title">Overdue tenants — May 2026</h3>
-        <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
-            <thead>
-              <tr><th>Tenant</th><th>Unit</th><th>Room</th><th>Property</th><th>Due Date</th><th>Outstanding</th><th>Late Fee</th><th>Days Late</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Raj Sharma + Priya</td>
-                <td>3A</td>
-                <td>Green Valley, Dwarka</td>
-                <td>05/05/2026</td>
-                <td>₹18,000</td>
-                <td style="color:var(--color-status-overdue)">₹360</td>
-                <td>4</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td>
-                <td>2B</td>
-                <td>Green Valley, Dwarka</td>
-                <td>01/05/2026</td>
-                <td>₹22,000</td>
-                <td style="color:var(--color-status-overdue)">₹440</td>
-                <td>8</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Aman Khan</td>
-                <td>1C</td>
-                <td>Rohini Greens</td>
-                <td>03/05/2026</td>
-                <td>₹15,500</td>
-                <td style="color:var(--color-status-overdue)">₹310</td>
-                <td>6</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="text-xs muted mt-3">Late fee = 2% of outstanding × full weeks overdue. Calculated automatically — PMs do not enter it manually.</p>
+        <p class="text-sm muted mt-3" id="rentPeriodLabel">Showing: All months (cumulative)</p>
       </section>
 
       <!-- Rent collection table -->
       <section class="section">
-        <h3 class="section-title">All units — May 2026</h3>
-
-        <div class="filter-tiles mb-4">
-          <button type="button" class="filter-tile active" data-tile-for="tbl-rent" data-tile-filter="all"
-                  onclick="Paginator.setFilter('tbl-rent','all',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">All</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-rent" data-tile-filter="paid"
-                  onclick="Paginator.setFilter('tbl-rent','paid',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Paid</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-rent" data-tile-filter="partial"
-                  onclick="Paginator.setFilter('tbl-rent','partial',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Partial</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-rent" data-tile-filter="overdue"
-                  onclick="Paginator.setFilter('tbl-rent','overdue',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Overdue</span>
-          </button>
-          <button type="button" class="filter-tile" data-tile-for="tbl-rent" data-tile-filter="prepaid"
-                  onclick="Paginator.setFilter('tbl-rent','prepaid',this)">
-            <span class="filter-tile-count" data-pg-count></span>
-            <span class="filter-tile-label">Pre-paid</span>
-          </button>
+        <!-- View tabs + shared period control. Both views are read-only. -->
+        <div class="flex items-end justify-between flex-wrap gap-4 mb-4">
+          <div class="view-tabs" role="tablist" aria-label="Rent view">
+            <button type="button" class="view-tab" role="tab" id="rtab-lease" data-rent-view="lease" aria-selected="true">Lease-wise</button>
+            <button type="button" class="view-tab" role="tab" id="rtab-property" data-rent-view="property" aria-selected="false">Property-wise</button>
+          </div>
+          <div>
+            <label class="label" for="rent-month">Month</label>
+            <select id="rent-month" class="input" style="min-width:220px">
+              <option value="">All months (cumulative)</option>
+              <option value="2026-05">May 2026</option>
+              <option value="2026-04">Apr 2026</option>
+              <option value="2026-03">Mar 2026</option>
+              <option value="2026-02">Feb 2026</option>
+              <option value="2026-01">Jan 2026</option>
+            </select>
+          </div>
         </div>
 
-        <section class="card mb-4">
-          <div class="grid md:grid-cols-5 gap-4">
+        <!-- Status tiles are rendered by the rent-ledger script (different sets per view). -->
+        <div class="filter-tiles mb-4" id="rentTiles"></div>
+
+        <!-- Lease-wise filters only (hidden in the Property-wise view). -->
+        <section class="card mb-4" id="rentFilterCard">
+          <div class="grid md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div>
               <label class="label" for="rent-search">Tenant</label>
               <input id="rent-search" class="input" placeholder="Tenant name" data-pg-search="tbl-rent" />
+            </div>
+            <div>
+              <label class="label" for="rent-lease-status">Lease status</label>
+              <select id="rent-lease-status" class="input" onchange="Paginator.setAttrFilter('tbl-rent','data-lease-status',this.value)">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ended">Ended</option>
+                <option value="terminated">Terminated</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="rent-type">Lease type</label>
+              <select id="rent-type" class="input" onchange="Paginator.setAttrFilter('tbl-rent','data-lease-type',this.value)">
+                <option value="">All types</option>
+                <option value="unit">Unit-wise</option>
+                <option value="room">Room-wise</option>
+              </select>
             </div>
             <div>
               <label class="label" for="rent-prop">Property</label>
@@ -212,109 +182,10 @@
         <div class="card p-0 overflow-x-auto">
           <table class="data-table" id="tbl-rent">
             <thead>
-              <tr><th class="w-12">#</th><th>Tenant</th><th>Unit</th><th>Property</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th><th>Actions</th></tr>
+              <tr><th class="w-12">#</th><th>Tenant</th><th>Month</th><th>Unit</th><th>Room</th><th>Property</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th></tr>
             </thead>
             <tbody>
-              <tr data-status="paid" data-tenant="rohan-mehta" data-property="green-valley" data-unit="7C" data-room="a" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Rohan Mehta</td><td>7C</td><td>Room A</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹22,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="anjali-verma" data-property="sai-heights" data-unit="4B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Anjali Verma</td><td>4B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹32,000</td><td>₹32,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="suresh-kumar" data-property="sai-heights" data-unit="1A" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>1A</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹26,000</td><td>₹26,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="priya-patel" data-property="green-valley" data-unit="2A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Priya Patel</td><td>2A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹19,500</td><td>₹19,500</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="akash-joshi" data-property="mayur-vihar" data-unit="4A" data-room="b" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Akash Joshi</td><td>4A</td><td>Room B</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹33,000</td><td>₹33,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="kavita-singh" data-property="mayur-vihar" data-unit="5C" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Kavita Singh</td><td>5C</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹28,000</td><td>₹28,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="divya-nair" data-property="rohini-greens" data-unit="2D" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>2D</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹21,000</td><td>₹21,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="sanjay-rawat" data-property="green-valley" data-unit="6A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Sanjay Rawat</td><td>6A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹20,500</td><td>₹20,500</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="meena-gupta" data-property="sai-heights" data-unit="3B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Meena Gupta</td><td>3B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹27,000</td><td>₹27,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="paid" data-tenant="neha-jain" data-property="sai-heights" data-unit="8B" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Neha Jain</td><td>8B</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹29,000</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="partial" data-tenant="vikram-mehta" data-property="green-valley" data-unit="2B" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Vikram Mehta</td><td>2B</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹22,000</td><td>₹10,000</td>
-                <td><span class="badge badge-partial">Partial</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="partial" data-tenant="rahul-tiwari" data-property="mayur-vihar" data-unit="9A" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Rahul Tiwari</td><td>9A</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹35,000</td><td>₹20,000</td>
-                <td><span class="badge badge-partial">Partial</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="partial" data-tenant="mohan-das" data-property="green-valley" data-unit="10B" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Mohan Das</td><td>10B</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹25,000</td><td>₹15,000</td>
-                <td><span class="badge badge-partial">Partial</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="overdue" data-tenant="raj-sharma-priya" data-property="green-valley" data-unit="3A" data-room="" data-pm="sunita-arora"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Raj Sharma + Priya</td><td>3A</td><td>—</td><td>Green Valley</td><td>Sunita Arora</td><td>₹18,000</td><td>₹0</td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="overdue" data-tenant="aman-khan" data-property="rohini-greens" data-unit="1C" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Aman Khan</td><td>1C</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹15,500</td><td>₹0</td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="overdue" data-tenant="sunita-chauhan" data-property="rohini-greens" data-unit="3C" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Sunita Chauhan</td><td>3C</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹18,000</td><td>₹0</td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="overdue" data-tenant="pooja-bhatia" data-property="sai-heights" data-unit="11C" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Pooja Bhatia</td><td>11C</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹31,000</td><td>₹0</td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="prepaid" data-tenant="vikram-singh" data-property="mayur-vihar" data-unit="5B" data-room="" data-pm="pooja-khanna"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Vikram Singh</td><td>5B</td><td>—</td><td>Mayur Vihar</td><td>Pooja Khanna</td><td>₹34,000</td><td>₹40,000</td>
-                <td><span class="badge badge-prepaid">Pre-paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="prepaid" data-tenant="divya-nair" data-property="rohini-greens" data-unit="6D" data-room="" data-pm="anil-kapoor"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Divya Nair</td><td>6D</td><td>—</td><td>Rohini Greens</td><td>Anil Kapoor</td><td>₹23,000</td><td>₹28,000</td>
-                <td><span class="badge badge-prepaid">Pre-paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
-              <tr data-status="prepaid" data-tenant="suresh-kumar" data-property="sai-heights" data-unit="6C" data-room="" data-pm="manoj-verma"><td data-pg-serial class="muted"></td>
-                <td class="font-poppins font-semibold text-charcoal">Suresh Kumar</td><td>6C</td><td>—</td><td>Sai Heights</td><td>Manoj Verma</td><td>₹29,000</td><td>₹35,000</td>
-                <td><span class="badge badge-prepaid">Pre-paid</span></td>
-                <td><a href="#" onclick="event.preventDefault(); document.getElementById('recordPaymentModal').classList.add('open')" class="action-link">Record</a></td>
-              </tr>
+              <!-- rows generated by the period/rent script below -->
             </tbody>
           </table>
           <div class="pagination" data-paginate-for="tbl-rent" data-per-page="10" aria-label="Pagination">
@@ -339,75 +210,6 @@
   </div>
 
   <!-- Record Payment Modal (Admin — covers all org's leases across all PMs) -->
-  <div class="modal-backdrop" id="recordPaymentModal">
-    <form class="modal" style="max-width:540px;" onsubmit="event.preventDefault(); document.getElementById('recordPaymentModal').classList.remove('open'); document.getElementById('paymentSuccessBanner').style.display='flex';">
-      <h3>Record Payment</h3>
-      <p class="muted text-sm mt-1 mb-5">Recording on behalf of a Property Manager. Select the lease, enter the amount received, and confirm.</p>
-
-      <div class="mb-4">
-        <label class="label" for="ap-lease">Lease (Tenant · Unit · Property)</label>
-        <select id="ap-lease" class="input" data-searchable>
-          <option>Raj + Priya Sharma · Unit 3A · Green Valley (PM: Sunita Arora)</option>
-          <option>Vikram Mehta · Unit 2B · Green Valley (PM: Sunita Arora)</option>
-          <option>Anjali Verma · Unit 4B · Sai Heights (PM: Manoj Verma)</option>
-          <option>Aman Khan · Unit 1C · Rohini Greens (PM: Anil Kapoor)</option>
-          <option>Akash Joshi · Unit 4A · Mayur Vihar (PM: Pooja Khanna)</option>
-        </select>
-      </div>
-
-      <div class="mb-4">
-        <label class="label" for="ap-room">Room <span class="muted" style="font-weight:400;font-size:12px;">(room-based leases only)</span></label>
-        <select id="ap-room" class="input">
-          <option value="">Whole unit / not room-based</option>
-          <option value="a">Room A</option>
-          <option value="b">Room B</option>
-          <option value="c">Room C</option>
-          <option value="d">Room D</option>
-        </select>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="label" for="ap-amount">Amount (₹)</label>
-          <input id="ap-amount" type="text" class="input" placeholder="e.g. 18,000" />
-          <div class="field-error" id="ap-amount-err">Enter a valid amount.</div>
-        </div>
-        <div>
-          <label class="label" for="ap-date">Payment Date</label>
-          <input data-max-date="today" data-datepicker id="ap-date" type="text" class="input" placeholder="DD/MM/YYYY" value="09/05/2026" />
-          <div class="field-error" id="ap-date-err">Enter a valid date (DD/MM/YYYY).</div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="label" for="ap-method">Payment Method</label>
-          <select id="ap-method" class="input">
-            <option>Cash</option>
-            <option>Bank Transfer</option>
-            <option>UPI</option>
-            <option>Cheque</option>
-          </select>
-        </div>
-        <div>
-          <label class="label" for="ap-ref">Reference (optional)</label>
-          <input id="ap-ref" type="text" class="input" placeholder="UPI ref / cheque no." />
-        </div>
-      </div>
-
-      <div class="mb-4">
-        <label class="label" for="ap-notes">Notes (optional)</label>
-        <textarea id="ap-notes" class="input" rows="2" placeholder="Any additional context for the audit log."></textarea>
-      </div>
-
-      <p class="text-xs muted mb-4">This payment will be recorded in the audit log with your Admin credentials (BL-10). The tenant's outstanding balance will update immediately.</p>
-
-      <div class="flex justify-end gap-3">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('recordPaymentModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Record Payment</button>
-      </div>
-    </form>
-  </div>
 
   <nav class="tabbar" aria-label="Admin navigation (mobile)">
     <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
@@ -416,6 +218,282 @@
     <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+
+  <script>
+    /* Rent ledger + period (month) summary.
+       One mock dataset drives BOTH the table rows AND the KPI cards, so the
+       cumulative / per-month figures always reconcile with the rows on screen.
+       Runs during parse (before paginate.js) so the rows exist when the
+       Paginator initialises on DOMContentLoaded. */
+    (function () {
+      var MONTHS = [
+        { key: '2026-05', label: 'May 2026' },
+        { key: '2026-04', label: 'Apr 2026' },
+        { key: '2026-03', label: 'Mar 2026' },
+        { key: '2026-02', label: 'Feb 2026' },
+        { key: '2026-01', label: 'Jan 2026' }
+      ];
+      var CURRENT = '2026-05';           // only the current month carries arrears
+      var LATE_FEE_RATE = 0.02;
+
+      // One row per lease. `ms`/`mp` = current-month status + amount paid.
+      // Past months are modelled as collected in full (status paid, paid = rent).
+      // These 20 ACTIVE leases mirror admin/leases.html (L-2101..L-2120) — same
+      // tenant · property · unit · rent — so the rent roll = the active subset of all leases.
+      var ROSTER = [
+        { t: 'Rohan Mehta',        s: 'rohan-mehta',      u: '7C',  rm: 'a', p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 22000, ms: 'paid',    mp: 22000 },
+        { t: 'Anjali Verma',       s: 'anjali-verma',     u: '4B',  rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 32000, ms: 'paid',    mp: 32000 },
+        { t: 'Suresh Kumar',       s: 'suresh-kumar',     u: '1A',  rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 26000, ms: 'paid',    mp: 26000 },
+        { t: 'Priya Patel',        s: 'priya-patel',      u: '2A',  rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 19500, ms: 'paid',    mp: 19500 },
+        { t: 'Akash Joshi',        s: 'akash-joshi',      u: '4A',  rm: 'b', p: 'mayur-vihar',   pl: 'Mayur Vihar',  pm: 'pooja-khanna', pml: 'Pooja Khanna', rent: 33000, ms: 'paid',    mp: 33000 },
+        { t: 'Kavita Singh',       s: 'kavita-singh',     u: '5C',  rm: '',  p: 'mayur-vihar',   pl: 'Mayur Vihar',  pm: 'pooja-khanna', pml: 'Pooja Khanna', rent: 28000, ms: 'paid',    mp: 28000 },
+        { t: 'Divya Nair',         s: 'divya-nair',       u: '2D',  rm: '',  p: 'rohini-greens', pl: 'Rohini Greens',pm: 'anil-kapoor',  pml: 'Anil Kapoor',  rent: 21000, ms: 'paid',    mp: 21000 },
+        { t: 'Sanjay Rawat',       s: 'sanjay-rawat',     u: '6A',  rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 20500, ms: 'paid',    mp: 20500 },
+        { t: 'Meena Gupta',        s: 'meena-gupta',      u: '3B',  rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 27000, ms: 'paid',    mp: 27000 },
+        { t: 'Neha Jain',          s: 'neha-jain',        u: '8B',  rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 29000, ms: 'paid',    mp: 29000 },
+        { t: 'Vikram Mehta',       s: 'vikram-mehta',     u: '2B',  rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 22000, ms: 'partial', mp: 10000 },
+        { t: 'Rahul Tiwari',       s: 'rahul-tiwari',     u: '9A',  rm: '',  p: 'mayur-vihar',   pl: 'Mayur Vihar',  pm: 'pooja-khanna', pml: 'Pooja Khanna', rent: 35000, ms: 'partial', mp: 20000 },
+        { t: 'Mohan Das',          s: 'mohan-das',        u: '10B', rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 25000, ms: 'partial', mp: 15000 },
+        { t: 'Raj Sharma + Priya', s: 'raj-sharma-priya', u: '3A',  rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 18000, ms: 'overdue', mp: 0 },
+        { t: 'Aman Khan',          s: 'aman-khan',        u: '1C',  rm: '',  p: 'rohini-greens', pl: 'Rohini Greens',pm: 'anil-kapoor',  pml: 'Anil Kapoor',  rent: 15500, ms: 'overdue', mp: 0 },
+        { t: 'Sunita Chauhan',     s: 'sunita-chauhan',   u: '3C',  rm: '',  p: 'rohini-greens', pl: 'Rohini Greens',pm: 'anil-kapoor',  pml: 'Anil Kapoor',  rent: 18000, ms: 'overdue', mp: 0 },
+        { t: 'Pooja Bhatia',       s: 'pooja-bhatia',     u: '11C', rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 31000, ms: 'overdue', mp: 0 },
+        { t: 'Vikram Singh',       s: 'vikram-singh',     u: '5B',  rm: '',  p: 'mayur-vihar',   pl: 'Mayur Vihar',  pm: 'pooja-khanna', pml: 'Pooja Khanna', rent: 34000, ms: 'prepaid', mp: 40000 },
+        { t: 'Divya Nair',         s: 'divya-nair',       u: '6D',  rm: '',  p: 'rohini-greens', pl: 'Rohini Greens',pm: 'anil-kapoor',  pml: 'Anil Kapoor',  rent: 23000, ms: 'prepaid', mp: 28000 },
+        { t: 'Suresh Kumar',       s: 'suresh-kumar',     u: '6C',  rm: '',  p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 29000, ms: 'prepaid', mp: 35000 },
+        // Non-active leases (mirror admin/leases.html) — present so the Lease status
+        // filter has data. They are NOT on the active rent roll, so financial columns
+        // show "—" and they are excluded from the KPI / property-total sums.
+        { t: 'Aditi Joshi',        s: 'aditi-joshi',      u: '1B',     rm: '',  p: 'green-valley',  pl: 'Green Valley', pm: 'sunita-arora', pml: 'Sunita Arora', rent: 19500, ms: 'paid', mp: 0, ls: 'upcoming' },
+        { t: 'Sunil Kapoor',       s: 'sunil-kapoor',     u: 'PG-101', rm: 'a', p: 'sai-heights',   pl: 'Sai Heights',  pm: 'manoj-verma',  pml: 'Manoj Verma',  rent: 7500,  ms: 'paid', mp: 0, ls: 'upcoming' },
+        { t: 'Pradeep Yadav',      s: 'pradeep-yadav',    u: '12A',    rm: '',  p: 'mayur-vihar',   pl: 'Mayur Vihar',  pm: 'pooja-khanna', pml: 'Pooja Khanna', rent: 17000, ms: 'paid', mp: 0, ls: 'ended' },
+        { t: 'Karan Malhotra',     s: 'karan-malhotra',   u: '8D',     rm: '',  p: 'rohini-greens', pl: 'Rohini Greens',pm: 'anil-kapoor',  pml: 'Anil Kapoor',  rent: 16000, ms: 'paid', mp: 0, ls: 'terminated' }
+      ];
+
+      function rupee(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+      function roomLabel(rm) { return rm === 'a' ? 'Room A' : rm === 'b' ? 'Room B' : rm === 'c' ? 'Room C' : rm === 'd' ? 'Room D' : '—'; }
+      function badge(st) {
+        var map = { paid: ['badge-paid', 'Paid'], partial: ['badge-partial', 'Partial'], overdue: ['badge-overdue', 'Overdue'], prepaid: ['badge-prepaid', 'Pre-paid'] };
+        var b = map[st] || map.paid;
+        return '<span class="badge ' + b[0] + '">' + b[1] + '</span>';
+      }
+      // Status + paid for a lease in a given month (current month = its arrears, past = paid in full).
+      function cellFor(L, key) {
+        if (key === CURRENT) return { st: L.ms, pd: L.mp };
+        return { st: 'paid', pd: L.rent };
+      }
+
+      // ---------- Shared cells ----------
+      function dataAttrs(L) {
+        return ' data-tenant="' + L.s + '" data-property="' + L.p + '" data-unit="' + L.u + '" data-room="' + L.rm + '" data-pm="' + L.pm + '"'
+          + ' data-lease-type="' + (L.rm ? 'room' : 'unit') + '" data-lease-status="' + (L.ls || 'active') + '"';
+      }
+      // The lease (property · unit · room) is the record, so it's the bold lead cell;
+      // the tenant is just the person on it, shown in normal weight.
+      function idCells(L) {
+        var sub = 'Unit ' + L.u + (L.rm ? ' · ' + roomLabel(L.rm) : '');
+        return '<td data-pg-serial class="muted"></td>'
+          + '<td><div class="font-poppins font-semibold text-charcoal">' + L.pl + '</div><div class="text-xs muted">' + sub + '</div></td>'
+          + '<td>' + L.t + '</td>'
+          + '<td>' + L.pml + '</td>';
+      }
+
+      // Non-active leases (upcoming / ended / terminated) aren't on the active rent
+      // roll — render their lease-status badge and dashes for the financial columns.
+      function leaseStatusBadge(ls) {
+        var map = { upcoming: ['badge-prepaid', 'Upcoming'], ended: ['badge-closed', 'Ended'], terminated: ['badge-terminated', 'Terminated'] };
+        var b = map[ls] || map.ended;
+        return '<span class="badge ' + b[0] + '">' + b[1] + '</span>';
+      }
+      function nonActiveRow(L, cumulative) {
+        var dash = '<td class="muted">—</td>';
+        var fin = cumulative ? (dash + dash + dash) : ('<td>' + rupee(L.rent) + '</td>' + dash);
+        return '<tr data-status="' + L.ls + '"' + dataAttrs(L) + '>'
+          + idCells(L) + fin + '<td>' + leaseStatusBadge(L.ls) + '</td></tr>';
+      }
+
+      // ---------- Single-month view: one row per lease for that month ----------
+      var THEAD_MONTHLY = '<tr><th class="w-12">#</th><th>Property · Unit</th><th>Tenant</th><th>PM</th><th>Rent</th><th>Paid</th><th>Status</th></tr>';
+      function monthlyRow(L, key) {
+        if (L.ls && L.ls !== 'active') return nonActiveRow(L, false);
+        var c = cellFor(L, key);
+        return '<tr data-status="' + c.st + '"' + dataAttrs(L) + '>'
+          + idCells(L)
+          + '<td>' + rupee(L.rent) + '</td><td>' + rupee(c.pd) + '</td><td>' + badge(c.st) + '</td></tr>';
+      }
+
+      // ---------- Cumulative view: one row per lease, totalled across all months ----------
+      var THEAD_CUMULATIVE = '<tr><th class="w-12">#</th><th>Property · Unit</th><th>Tenant</th><th>PM</th><th>Billed</th><th>Collected</th><th>Outstanding</th><th>Standing</th></tr>';
+      function aggregate(L) {
+        var billed = 0, collected = 0;
+        MONTHS.forEach(function (m) { var c = cellFor(L, m.key); billed += L.rent; collected += c.pd; });
+        var out = billed - collected;
+        return { billed: billed, collected: collected, out: out, standing: out > 0 ? 'due' : (out < 0 ? 'advance' : 'cleared') };
+      }
+      function standingBadge(st) {
+        var map = { cleared: ['badge-paid', 'Cleared'], due: ['badge-overdue', 'Due'], advance: ['badge-prepaid', 'In advance'] };
+        var b = map[st] || map.cleared;
+        return '<span class="badge ' + b[0] + '">' + b[1] + '</span>';
+      }
+      function outCell(out) {
+        if (out > 0) return '<span style="color:var(--color-status-overdue)">' + rupee(out) + '</span>';
+        if (out < 0) return '<span style="color:var(--color-status-prepaid)">–' + rupee(Math.abs(out)) + '</span>';
+        return '<span class="muted">₹0</span>';
+      }
+      function cumulativeRow(L) {
+        if (L.ls && L.ls !== 'active') return nonActiveRow(L, true);
+        var a = aggregate(L);
+        return '<tr data-status="' + a.standing + '"' + dataAttrs(L) + '>'
+          + idCells(L)
+          + '<td>' + rupee(a.billed) + '</td><td>' + rupee(a.collected) + '</td><td>' + outCell(a.out) + '</td><td>' + standingBadge(a.standing) + '</td></tr>';
+      }
+
+      // ---------- Property-wise view: leases aggregated by property ----------
+      var THEAD_PROPERTY = '<tr><th class="w-12">#</th><th>Property</th><th>Units</th><th>Billed</th><th>Collected</th><th>Outstanding</th><th>Standing</th></tr>';
+      function propertyRows(scope) {
+        var order = [], groups = {};
+        ROSTER.forEach(function (L) {
+          if (L.ls && L.ls !== 'active') return;   // property totals = active rent roll only
+          if (!groups[L.p]) { groups[L.p] = { slug: L.p, label: L.pl, units: 0, billed: 0, collected: 0 }; order.push(L.p); }
+          var g = groups[L.p];
+          g.units += 1;
+          MONTHS.forEach(function (m) {
+            if (scope && m.key !== scope) return;
+            var c = cellFor(L, m.key);
+            g.billed += L.rent; g.collected += c.pd;
+          });
+        });
+        return order.map(function (slug) {
+          var g = groups[slug];
+          var out = g.billed - g.collected;
+          var standing = out > 0 ? 'due' : (out < 0 ? 'advance' : 'cleared');
+          return '<tr data-status="' + standing + '" data-property="' + g.slug + '">'
+            + '<td data-pg-serial class="muted"></td>'
+            + '<td class="font-poppins font-semibold text-charcoal">' + g.label + '</td>'
+            + '<td>' + g.units + '</td>'
+            + '<td>' + rupee(g.billed) + '</td><td>' + rupee(g.collected) + '</td><td>' + outCell(out) + '</td><td>' + standingBadge(standing) + '</td></tr>';
+        }).join('');
+      }
+
+      // ---------- Status tiles (a different set per view) ----------
+      var MONTHLY_TILES = [
+        { k: 'all', label: 'All' }, { k: 'paid', label: 'Paid' }, { k: 'partial', label: 'Partial' },
+        { k: 'overdue', label: 'Overdue' }, { k: 'prepaid', label: 'Pre-paid' }
+      ];
+      var CUMULATIVE_TILES = [
+        { k: 'all', label: 'All' }, { k: 'cleared', label: 'Cleared' }, { k: 'due', label: 'Due' }, { k: 'advance', label: 'In advance' }
+      ];
+      var tilesWrap = document.getElementById('rentTiles');
+      function renderTiles(set) {
+        if (!tilesWrap) return;
+        tilesWrap.innerHTML = set.map(function (t) {
+          var oc = "Paginator.setFilter('tbl-rent','" + t.k + "',this)";
+          return '<button type="button" class="filter-tile' + (t.k === 'all' ? ' active' : '') + '"'
+            + ' data-tile-for="tbl-rent" data-tile-filter="' + t.k + '" onclick="' + oc + '">'
+            + '<span class="filter-tile-count" data-pg-count></span>'
+            + '<span class="filter-tile-label">' + t.label + '</span></button>';
+        }).join('');
+      }
+
+      // ---------- KPI summary (scope = '' cumulative, or a month key) ----------
+      function setText(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+      function compute(scope) {
+        var k = { col: 0, exp: 0, ovd: 0, ovdCount: 0, late: 0, leases: 0 };
+        MONTHS.forEach(function (m) {
+          if (scope && m.key !== scope) return;
+          ROSTER.forEach(function (L) {
+            if (L.ls && L.ls !== 'active') return;   // rent roll = active leases only
+            var c = cellFor(L, m.key);
+            k.col += c.pd; k.exp += L.rent; k.leases += 1;
+            if (c.st === 'overdue') { k.ovd += (L.rent - c.pd); k.ovdCount += 1; }
+            if (c.st === 'overdue' || c.st === 'partial') k.late += Math.round(L.rent * LATE_FEE_RATE);
+          });
+        });
+        return k;
+      }
+      function monthLabel(key) {
+        for (var i = 0; i < MONTHS.length; i++) if (MONTHS[i].key === key) return MONTHS[i].label;
+        return key;
+      }
+      function updateKpis(scope) {
+        var k = compute(scope);
+        var pct = k.exp ? Math.round(k.col / k.exp * 100) : 0;
+        setText('kpiCollected', rupee(k.col));
+        setText('kpiCollectedMeta', pct + '% of expected');
+        setText('kpiOverdue', rupee(k.ovd));
+        setText('kpiOverdueMeta', k.ovdCount + (k.ovdCount === 1 ? ' unit · unpaid' : ' units · unpaid'));
+        setText('kpiExpected', rupee(k.exp));
+        setText('kpiExpectedMeta', scope ? (k.leases + ' units billed') : (MONTHS.length + ' months billed'));
+        setText('kpiLateFees', rupee(k.late));
+        setText('rentPeriodLabel', 'Showing: ' + (scope ? monthLabel(scope) : 'All months (cumulative)'));
+      }
+
+      // ---------- Render a view (tab = 'lease' | 'property'; scope '' = cumulative) ----------
+      var table = document.getElementById('tbl-rent');
+      var thead = table ? table.tHead : null;
+      var tbody = table ? table.tBodies[0] : null;
+      function render(tab, scope) {
+        var cumulative = !scope;
+        var tileSet;
+        if (tab === 'property') {
+          if (thead) thead.innerHTML = THEAD_PROPERTY;
+          tileSet = CUMULATIVE_TILES;                     // standing tiles (cleared/due/advance)
+          if (tbody) tbody.innerHTML = propertyRows(scope);
+        } else {
+          if (thead) thead.innerHTML = cumulative ? THEAD_CUMULATIVE : THEAD_MONTHLY;
+          tileSet = cumulative ? CUMULATIVE_TILES : MONTHLY_TILES;
+          if (tbody) tbody.innerHTML = ROSTER.map(function (L) { return cumulative ? cumulativeRow(L) : monthlyRow(L, scope); }).join('');
+        }
+        renderTiles(tileSet);
+        updateKpis(scope);                                // org-wide totals — same in both tabs
+        // The previous view's active tile key may not exist here — reset to "All" and
+        // recompute pagination + tile counts against the freshly-built rows.
+        if (window.Paginator) Paginator.setFilter('tbl-rent', 'all', tilesWrap ? tilesWrap.querySelector('.filter-tile') : null);
+      }
+
+      // ---------- View tabs + shared Month filter ----------
+      var currentView = 'lease';
+      var mSel = document.getElementById('rent-month');
+      var filterCard = document.getElementById('rentFilterCard');
+
+      // Clear the lease-only filters so stale data-unit/room/pm/property constraints
+      // (which property rows don't carry) can't hide the property view.
+      function resetLeaseFilters() {
+        var prop = document.getElementById('rent-prop');
+        if (prop) {
+          prop.value = '';
+          if (window.SearchableSelect) SearchableSelect.refresh(prop);
+          prop.dispatchEvent(new Event('change', { bubbles: true })); // cascade rebuilds unit/room + clears their filters
+        }
+        var pm = document.getElementById('rent-pm');
+        if (pm) { pm.value = ''; if (window.Paginator) Paginator.setAttrFilter('tbl-rent', 'data-pm', ''); }
+        var type = document.getElementById('rent-type');
+        if (type) { type.value = ''; if (window.Paginator) Paginator.setAttrFilter('tbl-rent', 'data-lease-type', ''); }
+        var lstat = document.getElementById('rent-lease-status');
+        if (lstat) { lstat.value = ''; if (window.Paginator) Paginator.setAttrFilter('tbl-rent', 'data-lease-status', ''); }
+        var search = document.getElementById('rent-search');
+        if (search) { search.value = ''; if (window.Paginator) Paginator.setSearch('tbl-rent', ''); }
+      }
+
+      function switchView(view) {
+        if (view === currentView) return;
+        currentView = view;
+        Array.prototype.forEach.call(document.querySelectorAll('[data-rent-view]'), function (b) {
+          b.setAttribute('aria-selected', b.getAttribute('data-rent-view') === view ? 'true' : 'false');
+        });
+        if (filterCard) filterCard.style.display = (view === 'property') ? 'none' : '';
+        resetLeaseFilters();
+        render(view, mSel ? mSel.value : '');
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-rent-view]'), function (b) {
+        b.addEventListener('click', function () { switchView(b.getAttribute('data-rent-view')); });
+      });
+      if (mSel) mSel.addEventListener('change', function () { render(currentView, this.value); });
+      render(currentView, mSel ? mSel.value : '');
+    })();
+  </script>
+
   <script src="../assets/validation.js"></script>
   <script src="../assets/date-picker.js"></script>
   <script src="../assets/impersonation.js"></script>
@@ -464,5 +542,99 @@
   </div>
   <script src="../assets/toast.js"></script>
   <script src="../assets/searchable-select.js"></script>
+  <script>
+    /* Show the success banner after redirect from record-payment.html. */
+    (function () {
+      var msg = sessionStorage.getItem('rentPaymentMsg');
+      if (!msg) return;
+      sessionStorage.removeItem('rentPaymentMsg');
+      var banner = document.getElementById('paymentSuccessBanner');
+      var text = document.getElementById('paymentSuccessText');
+      if (text) text.innerHTML = '<strong class="font-poppins">' + msg + '</strong> The rent table has been updated.';
+      if (banner) banner.style.display = 'flex';
+      if (window.gsToast) gsToast(msg);
+      window.scrollTo(0, 0);
+    })();
+  </script>
+  <script>
+    /* Dependent filters: Property → Unit → Room.
+       Membership is derived from the table rows themselves (single source of
+       truth), so the dropdowns never offer a unit/room that isn't in scope. */
+    (function () {
+      function ready(fn) {
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+        else fn();
+      }
+      ready(function () {
+        var table = document.getElementById('tbl-rent');
+        var propSel = document.getElementById('rent-prop');
+        var unitSel = document.getElementById('rent-unit');
+        var roomSel = document.getElementById('rent-room');
+        if (!table || !propSel || !unitSel || !roomSel) return;
+
+        // Master option lists (value + label, order preserved, incl. the "All …" entry).
+        function snapshot(sel) {
+          return Array.prototype.map.call(sel.options, function (o) { return { value: o.value, label: o.textContent }; });
+        }
+        var ALL_UNITS = snapshot(unitSel);
+        var ALL_ROOMS = snapshot(roomSel);
+
+        // Membership maps from the rows: property → its units, unit → its rooms.
+        var unitsByProp = {}, roomsByUnit = {};
+        Array.prototype.forEach.call(table.tBodies[0].rows, function (tr) {
+          var p = tr.getAttribute('data-property') || '';
+          var u = tr.getAttribute('data-unit') || '';
+          var r = tr.getAttribute('data-room') || '';
+          if (p && u) (unitsByProp[p] = unitsByProp[p] || {})[u] = true;
+          if (u && r) (roomsByUnit[u] = roomsByUnit[u] || {})[r] = true;
+        });
+
+        // Rebuild a select to only the allowed values; keep the current pick if still
+        // valid, else fall back to "All". Returns the resulting value.
+        function rebuild(sel, master, allow) {
+          var cur = sel.value;
+          sel.innerHTML = '';
+          master.forEach(function (o) {
+            if (o.value === '' || allow(o.value)) {
+              var opt = document.createElement('option');
+              opt.value = o.value; opt.textContent = o.label;
+              sel.appendChild(opt);
+            }
+          });
+          var keep = Array.prototype.some.call(sel.options, function (o) { return o.value === cur; });
+          sel.value = keep ? cur : '';
+          if (sel.hasAttribute('data-searchable') && window.SearchableSelect) SearchableSelect.refresh(sel);
+          return sel.value;
+        }
+
+        function unitsAllowed(p) {
+          return function (u) { return !p || !!(unitsByProp[p] && unitsByProp[p][u]); };
+        }
+        function roomsAllowed(p, u) {
+          return function (r) {
+            if (u) return !!(roomsByUnit[u] && roomsByUnit[u][r]);
+            if (p) { var us = unitsByProp[p] || {}; for (var uu in us) if (roomsByUnit[uu] && roomsByUnit[uu][r]) return true; return false; }
+            return true;
+          };
+        }
+
+        function refreshUnits() { return rebuild(unitSel, ALL_UNITS, unitsAllowed(propSel.value)); }
+        function refreshRooms() { return rebuild(roomSel, ALL_ROOMS, roomsAllowed(propSel.value, unitSel.value)); }
+
+        // Property changed → re-scope Unit then Room, re-applying each filter (a
+        // programmatic value change does not fire the select's own onchange).
+        propSel.addEventListener('change', function () {
+          Paginator.setAttrFilter('tbl-rent', 'data-unit', refreshUnits());
+          Paginator.setAttrFilter('tbl-rent', 'data-room', refreshRooms());
+        });
+        unitSel.addEventListener('change', function () {
+          Paginator.setAttrFilter('tbl-rent', 'data-room', refreshRooms());
+        });
+
+        refreshUnits();
+        refreshRooms();
+      });
+    })();
+  </script>
 </body>
 </html>
