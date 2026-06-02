@@ -165,7 +165,7 @@ Three routing classes: **Public** (no auth) · **Platform** (Super Admin, no org
 - Due date = same day each month from lease start. If start = 31st and month has no 31st, use the last day of that month.
 - Payment fields: amount, date, **method (from Master Data Payment Methods — NR-3)**, reference number, recorded-by (auto-stamped).
 - Period statuses: `paid` · `partial` · `overdue` · `prepaid`.
-- **Overdue:** auto-set 5 calendar days past due date (BL-12). **Late fee:** 2% of outstanding × full weeks overdue (BL-13). **Prepaid:** excess auto-applied to next period (BL-11).
+- **Overdue:** auto-set 5 calendar days past due date (BL-12). **Late fee:** 2% of the period's outstanding × full weeks overdue, non-compounded, **capped at the period's month-end** (≈8% max per period) (BL-13). **Prepaid:** excess auto-applied to next period (BL-11).
 - **Only PROPERTY_MANAGER and ADMIN record payments** (BL-10); Tenant / Maintenance are view-only.
 
 ### Module 6 — Organizations & Subscriptions (SAAS)
@@ -223,7 +223,7 @@ These rules **must be enforced by the backend**, not just the UI:
 | BL-10 | Only PMs record payments; tenants cannot self-record | Prevents fake records |
 | BL-11 | Concurrent co-tenant payment for same period → first closes the period, second auto-marked `prepaid` for next period | No lost money, no double-credit |
 | BL-12 | Period becomes `overdue` exactly 5 calendar days past due date | Predictable, simple |
-| BL-13 | Late fee = 2% of outstanding × full weeks overdue, added to payable amount automatically | No manual math |
+| BL-13 | Late fee = 2% of the period's outstanding × full weeks overdue (non-compounded), **capped at the period's month-end** (≈8% max per period), added to the payable amount automatically | No manual math, predictable ceiling |
 | BL-14 | Maintenance description ≥ 30 chars; resolution notes ≥ 20 chars | Forces real records |
 | BL-15 | Closed requests cannot be reopened by anyone (incl. Admin) | Clean history |
 | BL-16 | Maintenance staff: `read + update` only — cannot `create`, **cannot self-assign** (the PM/Admin assigns), and **cannot close** (the tenant closes, per BL-21) | Role separation |
@@ -305,7 +305,8 @@ These extend the hard rules for the current engagement and are enforced at the A
 2. Day 5+: status → `overdue` automatically.
 3. End of week 1: late fee = 2% × outstanding added to balance.
 4. End of week 2: another 2% × current outstanding added. (Not compounded retroactively — applied per full week.)
-5. When PM records payment, late fee is collected as part of the amount.
+5. **Cap:** a period's late fee stops accruing at that period's own month-end (`effective_date = min(payment date, period month-end)`) — ≈4 full weeks ⇒ ~8% maximum per period.
+6. When PM records payment, late fee is collected as part of the amount.
 
 ---
 
@@ -363,7 +364,7 @@ These extend the hard rules for the current engagement and are enforced at the A
 ### Engineering — Don't
 - Don't allow tenants to write payments — even via API. **BL-10 is a hard rule** (only PM + Admin record payments).
 - Public **Organization** sign-up **is** in scope (Super Admin approval gate, NR-5/NR-6). **Tenant self-signup is not** — tenant accounts auto-create at lease signing; PM/Maintenance are Admin-created.
-- Don't compound late fees retroactively. 2% × outstanding × full-weeks-overdue, evaluated per period.
+- Don't compound late fees retroactively. 2% × outstanding × full-weeks-overdue, evaluated per period, **capped at the period's month-end** (≈8% max per period — `effective_date = min(payment date, period month-end)`).
 - Don't auto-approve co-tenant terminations after a timeout. **BL-09: no silent approvals.**
 - Don't introduce SMS/email/WhatsApp **business** notifications — out of scope (transactional auth emails like password reset are allowed).
 - Don't accept file uploads (lease scans, ID copies, damage photos) — out of scope.

@@ -58,156 +58,120 @@
         <div>
           <h1 class="page-title">Rent Collection</h1>
         </div>
+        <a href="record-payment.html" class="btn btn-primary !py-2 !text-sm">+ Record Payment</a>
       </header>
 
-      <section class="card mb-6">
-        <div class="grid md:grid-cols-3 gap-4">
-          <div>
-            <label class="label" for="unit-select">Unit</label>
-            <select id="unit-select" class="input" data-searchable>
-              <option>3A — Raj + Priya Sharma · ₹18,000</option>
-              <option>1B — Gupta family · ₹22,000</option>
-              <option>2B — Vikram Mehta · ₹22,000</option>
-              <option>4A — Akash Joshi · ₹20,000</option>
-            </select>
-          </div>
-          <div>
-            <label class="label" for="period-filter">Period filter</label>
-            <select id="period-filter" class="input"><option>Last 6 months</option><option>Last 12 months</option><option>Lease lifetime</option></select>
-          </div>
-          <div>
-            <label class="label" for="status-filter">Status</label>
-            <select id="status-filter" class="input"><option>All</option><option>Overdue</option><option>Partial</option><option>Paid</option><option>Prepaid</option></select>
-          </div>
+      <!-- Success banner -->
+      <div id="paymentSuccessBanner" class="alert mb-6" style="display:none; background:var(--bg-paid); border-left-color:var(--color-status-paid); color:var(--color-status-paid);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0" style="width:18px;height:18px;margin-top:2px;" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div id="paymentSuccessText"><strong class="font-poppins">Payment recorded successfully.</strong> The rent table has been updated.</div>
+      </div>
+
+      <!-- KPI tiles (computed over PM-scoped leases — never filtered) -->
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Monthly Rent</div><div class="kpi-value" id="kpiTotalDue">—</div><div class="kpi-meta">current month</div></div>
+          <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-value" id="kpiCollected" style="color:var(--color-status-paid)">—</div><div class="kpi-meta">this month</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-value" id="kpiOutstanding" style="color:var(--color-status-partial)">—</div><div class="kpi-meta">all unsettled periods</div></div>
+          <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-value" id="kpiOverdue" style="color:var(--color-status-overdue)">—</div><div class="kpi-meta">leases past due</div></div>
         </div>
       </section>
 
-      <!-- Tenant context -->
-      <section class="card mb-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 class="m-0">Unit 3A · Raj Sharma + Priya Sharma <span class="text-xs muted">(co-tenants)</span></h3>
-            <p class="text-sm muted mt-1">Lease: 01/04/2025 → 31/03/2026 · Rent ₹18,000 · Due on 5th of each month</p>
-          </div>
-          <div class="flex gap-2">
-            <span class="badge badge-overdue">May 2026 · Overdue</span>
-            <span class="text-sm muted">Outstanding: <strong class="text-charcoal">₹18,360</strong> (incl. ₹360 late fee)</span>
+      <section class="section">
+        <!-- View tabs (no Portfolio for PM) -->
+        <div class="flex items-end justify-between flex-wrap gap-4 mb-4">
+          <div class="view-tabs" role="tablist" aria-label="Rent view">
+            <button type="button" class="view-tab" role="tab" id="rtab-lease" data-rent-view="lease" aria-selected="true">By Lease</button>
+            <button type="button" class="view-tab" role="tab" id="rtab-building" data-rent-view="building" aria-selected="false">By Building</button>
           </div>
         </div>
-      </section>
 
-      <!-- Periods table -->
-      <section class="card p-0 overflow-x-auto">
-        <table class="data-table" id="tbl-pm-rent">
-          <thead>
-            <tr><th class="w-12">#</th><th>Period</th><th>Due Date</th><th>Status</th><th>Due</th><th>Paid</th><th>Late Fee</th><th>Action</th></tr>
-          </thead>
-          <tbody>
-            <tr><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">May 2026</td>
-              <td>05/05/2026</td>
-              <td><span class="badge badge-overdue">Overdue</span></td>
-              <td>₹18,000</td>
-              <td>₹0</td>
-              <td style="color:var(--color-status-overdue)">₹360</td>
-              <td><button class="btn btn-primary !py-2 !text-sm" onclick="document.getElementById('payModal').classList.add('open')">Record Payment</button></td>
-            </tr>
-            <tr><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Apr 2026</td>
-              <td>05/04/2026</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td>₹18,000</td>
-              <td>₹18,000</td>
-              <td>—</td>
-              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
-            </tr>
-            <tr><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Mar 2026</td>
-              <td>05/03/2026</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td>₹18,000</td>
-              <td>₹18,000</td>
-              <td>—</td>
-              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
-            </tr>
-            <tr><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Feb 2026</td>
-              <td>05/02/2026</td>
-              <td><span class="badge badge-prepaid">Prepaid</span></td>
-              <td>₹18,000</td>
-              <td>₹36,000 <span class="text-xs muted">(2 months together)</span></td>
-              <td>—</td>
-              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
-            </tr>
-            <tr><td data-pg-serial class="muted"></td>
-              <td class="font-poppins font-semibold text-charcoal">Jan 2026</td>
-              <td>05/01/2026</td>
-              <td><span class="badge badge-paid">Paid</span></td>
-              <td>₹18,000</td>
-              <td>₹0 <span class="text-xs muted">(applied from Feb prepay)</span></td>
-              <td>—</td>
-              <td><button class="btn btn-secondary !py-2 !text-sm">View</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="pagination" data-paginate-for="tbl-pm-rent" data-per-page="10" aria-label="Pagination">
-          <div class="pagination-info">Showing <span data-pg-from>1</span>–<span data-pg-to>6</span> of <span data-pg-total>6</span></div>
-          <div class="pagination-controls">
-            <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">‹</button>
-            <div class="pagination-pages" data-pg-pages></div>
-            <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">›</button>
-          </div>
-          <div class="pagination-per-page">
-            <label for="per-page-tbl-pm-rent" class="sr-only">Rows per page</label>
-            <select id="per-page-tbl-pm-rent" data-pg-per-page><option value="10" selected>10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option></select>
+        <!-- Filters (By Lease tab only) -->
+        <div class="card mb-4" id="rentFilterCard">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label class="label" for="rent-search">Search</label>
+              <input id="rent-search" class="input" placeholder="Tenant / unit / property" />
+            </div>
+            <div>
+              <label class="label" for="rent-status">Status</label>
+              <select id="rent-status" class="input">
+                <option value="">All</option>
+                <option value="Paid">Paid</option>
+                <option value="Partial">Partial</option>
+                <option value="Outstanding">Outstanding</option>
+                <option value="Overdue">Overdue</option>
+                <option value="Prepaid">Prepaid</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="rent-prop">Property</label>
+              <select id="rent-prop" class="input" data-searchable>
+                <option value="">All properties</option>
+              </select>
+            </div>
           </div>
         </div>
-      </section>
 
-      <p class="text-xs muted mt-3">A period becomes <strong>Overdue</strong> 5 calendar days past the due date. Late fee = 2% of outstanding balance per full week overdue, calculated automatically.</p>
+        <!-- By-Lease table -->
+        <div class="card p-0 overflow-x-auto" id="rentTableCard">
+          <table class="data-table" id="tbl-rent">
+            <thead>
+              <tr>
+                <th>Lease</th>
+                <th>Tenant(s)</th>
+                <th>Property &middot; Unit</th>
+                <th>Due Date</th>
+                <th>Monthly Rent</th>
+                <th>Outstanding</th>
+                <th>Late Fee</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="rentTbody"></tbody>
+          </table>
+          <div class="pagination" data-paginate-for="tbl-rent" data-per-page="10" aria-label="Pagination">
+            <div class="pagination-info">Showing <span data-pg-from></span>&#8211;<span data-pg-to></span> of <span data-pg-total></span></div>
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" data-pg-prev aria-label="Previous page">&#8249;</button>
+              <div class="pagination-pages" data-pg-pages></div>
+              <button type="button" class="pagination-btn" data-pg-next aria-label="Next page">&#8250;</button>
+            </div>
+            <div class="pagination-per-page">
+              <label for="per-page-tbl-rent" class="sr-only">Rows per page</label>
+              <select id="per-page-tbl-rent" data-pg-per-page>
+                <option value="10" selected>10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- By-Building view -->
+        <div id="rentBuildingCard" style="display:none;"></div>
+      </section>
     </main>
   </div>
 
-  <!-- Record Payment Modal -->
-  <div class="modal-backdrop" id="payModal">
-    <form class="modal" style="max-width:520px;" onsubmit="event.preventDefault(); document.getElementById('payModal').classList.remove('open');">
-      <h3>Record Payment — May 2026</h3>
-      <p class="muted text-sm mt-1 mb-5">Unit 3A · Raj + Priya Sharma · ₹18,000 due + ₹360 late fee</p>
-
-      <div class="grid grid-cols-2 gap-4">
+  <!-- By-Building: leases popup -->
+  <div class="modal-backdrop" id="buildingModal" role="dialog" aria-modal="true" aria-labelledby="bm-title">
+    <div class="modal" style="max-width:920px;">
+      <div class="flex items-start justify-between gap-3 mb-4">
         <div>
-          <label class="label" for="amt">Amount (₹)</label>
-          <input id="amt" class="input" type="number" min="1" required placeholder="18360" />
+          <h3 id="bm-title" class="m-0">Leases</h3>
+          <div class="text-sm muted" id="bm-sub"></div>
         </div>
-        <div>
-          <label class="label" for="paydate">Date</label>
-          <input data-max-date="today" data-datepicker id="paydate" class="input" type="text" placeholder="DD/MM/YYYY" value="09/05/2026"/>
-        </div>
-        <div>
-          <label class="label" for="method">Method</label>
-          <select id="method" class="input"><option>UPI</option><option>NEFT</option><option>Cash</option><option>Cheque</option></select>
-        </div>
-        <div>
-          <label class="label" for="ref">Reference no.</label>
-          <input id="ref" class="input" placeholder="UPI txn / cheque no." />
-        </div>
+        <button type="button" class="btn btn-secondary !py-1 !px-3 !text-sm" onclick="closeBuilding()">Close</button>
       </div>
-
-      <div class="mt-4">
-        <label class="label">Recorded by</label>
-        <input class="input" value="Sunita Arora (auto)" disabled />
+      <div class="overflow-x-auto" style="max-height:60vh;overflow-y:auto;">
+        <table class="data-table" style="margin:0">
+          <thead><tr><th>Lease</th><th>Tenant(s)</th><th>Unit</th><th>Monthly Rent</th><th>Outstanding</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="bm-body"></tbody>
+        </table>
       </div>
-
-      <div class="alert mt-5">
-        <strong class="font-poppins">Tip — Prepayment</strong>
-        <div>If the tenant pays more than ₹18,360, the excess is automatically marked as <span class="badge badge-prepaid">Prepaid</span> for June 2026 — no manual adjustment.</div>
-      </div>
-
-      <div class="flex justify-end gap-3 mt-6">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('payModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save Payment</button>
-      </div>
-    </form>
+    </div>
   </div>
 
   <nav class="tabbar" aria-label="PM navigation (mobile)">
@@ -218,11 +182,7 @@
     <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
-  <script src="../assets/validation.js"></script>
-  <script src="../assets/date-picker.js"></script>
-  <script src="../assets/paginate.js"></script>
-  <script src="../assets/impersonation.js"></script>
-  <!-- More bottom sheet (PM overflow nav) -->
+
   <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
   <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="more-sheet-handle" aria-hidden="true"></div>
@@ -253,7 +213,215 @@
       Sign out
     </a>
   </div>
+
   <script src="../assets/toast.js"></script>
   <script src="../assets/searchable-select.js"></script>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/paginate.js"></script>
+  <script src="../assets/rent-settings.js"></script>
+  <script src="../assets/rent-engine.js"></script>
+  <script src="../assets/rent-data.js"></script>
+  <script>
+    var E = window.RentEngine, D = window.RentData;
+    // PM scope: properties 1 (Green Valley), 2 (Sai Heights), 4 (Mayur Vihar Apartments)
+    // Sunita Arora is managing these properties for this prototype session.
+    var PM_PROPERTY_IDS = [1, 2, 4];
+
+    function statusBadgeClass(ds) {
+      var map = { 'Paid': 'badge-paid', 'Prepaid': 'badge-prepaid', 'Partial': 'badge-partial',
+        'Outstanding': 'badge-closed', 'Overdue': 'badge-overdue', 'Partial Paid': 'badge-overdue' };
+      return map[ds] || 'badge-closed';
+    }
+    function statusBadge(ds) { return '<span class="badge ' + statusBadgeClass(ds) + '">' + ds + '</span>'; }
+    function rupee(n) { return E.rupee(n); }
+    function outCell(n) {
+      if (n > 0) return '<span style="color:var(--color-status-overdue)">' + rupee(n) + '</span>';
+      return '<span class="muted">&#8377;0</span>';
+    }
+
+    // PM-scoped rows
+    var ALL_ROWS = D.forPm(PM_PROPERTY_IDS).map(function (lease) {
+      return E.computeRentStatus(lease, E.TODAY_MS);
+    });
+
+    function renderKpis() {
+      var totalDue = 0, collected = 0, outstanding = 0, overdueCount = 0;
+      ALL_ROWS.forEach(function (r) {
+        totalDue += r.rentAmount; collected += r.collectedThisMonth;
+        outstanding += r.totalOutstanding;
+        if (r.displayStatus === 'Overdue' || r.displayStatus === 'Partial Paid') overdueCount++;
+      });
+      document.getElementById('kpiTotalDue').textContent = rupee(totalDue);
+      document.getElementById('kpiCollected').textContent = rupee(collected);
+      document.getElementById('kpiOutstanding').textContent = rupee(outstanding);
+      document.getElementById('kpiOverdue').textContent = String(overdueCount);
+    }
+
+    function buildPropertyFilter() {
+      var seen = {}, props = [];
+      ALL_ROWS.forEach(function (r) {
+        if (!seen[r.propertyId]) { seen[r.propertyId] = true; props.push({ id: r.propertyId, name: r.propertyName }); }
+      });
+      var sel = document.getElementById('rent-prop');
+      props.forEach(function (p) {
+        var opt = document.createElement('option'); opt.value = String(p.id); opt.textContent = p.name; sel.appendChild(opt);
+      });
+      if (window.SearchableSelect) SearchableSelect.refresh('rent-prop');
+    }
+
+    function unitCell(r) {
+      var prop = '<span class="font-poppins font-semibold text-charcoal">' + r.propertyName + '</span>';
+      var unit = r.unitLabel; if (r.leaseType === 'room' && r.roomLabel) unit += ' &middot; ' + r.roomLabel;
+      return prop + '<br><span class="text-xs muted">' + unit + '</span>';
+    }
+    function tenantCell(r) {
+      var t = r.tenantName;
+      if (r.coTenantCount > 0) t += ' <span class="text-xs muted">+' + r.coTenantCount + ' co-tenant' + (r.coTenantCount > 1 ? 's' : '') + '</span>';
+      return t;
+    }
+    function actionCell(r) {
+      var detail = '<a href="../admin/lease-detail.html?id=' + r.leaseId + '" class="text-royal-blue font-poppins font-semibold text-sm" style="white-space:nowrap;">View Detail</a>';
+      var record = '';
+      if (r.displayStatus !== 'Paid' && r.displayStatus !== 'Prepaid') {
+        record = ' &nbsp;&#183;&nbsp; <a href="record-payment.html?lease=' + r.leaseId + '" class="text-royal-blue font-poppins font-semibold text-sm" style="white-space:nowrap;">Record Payment</a>';
+      }
+      return detail + record;
+    }
+    function buildRows(rows) {
+      if (!rows.length) return '<tr><td colspan="9" class="p-4 text-sm muted">No rent records found.</td></tr>';
+      return rows.map(function (r) {
+        return '<tr data-status="' + r.displayStatus + '" data-property="' + r.propertyId + '"'
+          + ' data-search="' + (r.tenantName + ' ' + r.unitLabel + ' ' + r.propertyName).toLowerCase() + '">'
+          + '<td class="font-poppins font-semibold text-charcoal">' + r.leaseCode + '<div class="text-xs muted" style="font-weight:400;">' + (r.leaseType === 'room' ? 'Room-wise' : 'Unit-wise') + '</div></td>'
+          + '<td>' + tenantCell(r) + '</td>'
+          + '<td>' + unitCell(r) + '</td>'
+          + '<td class="text-sm">' + r.dueDate + '</td>'
+          + '<td>' + rupee(r.rentAmount) + '</td>'
+          + '<td>' + outCell(r.totalOutstanding) + '</td>'
+          + '<td>' + (r.feeOutstandingTotal > 0 ? '<span style="color:var(--color-status-overdue)">' + rupee(r.feeOutstandingTotal) + '</span>' : '<span class="muted">&#8212;</span>') + '</td>'
+          + '<td>' + statusBadge(r.displayStatus) + '</td>'
+          + '<td>' + actionCell(r) + '</td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    var filterStatus = '', filterProp = '', filterSearch = '';
+    function applyFilters() {
+      var rows = ALL_ROWS.filter(function (r) {
+        if (filterStatus) {
+          if (filterStatus === 'Overdue') { if (r.displayStatus !== 'Overdue' && r.displayStatus !== 'Partial Paid') return false; }
+          else if (r.displayStatus !== filterStatus) return false;
+        }
+        if (filterProp && String(r.propertyId) !== filterProp) return false;
+        if (filterSearch) {
+          var h = (r.tenantName + ' ' + r.unitLabel + ' ' + r.propertyName).toLowerCase();
+          if (h.indexOf(filterSearch) === -1) return false;
+        }
+        return true;
+      });
+      document.getElementById('rentTbody').innerHTML = buildRows(rows);
+      if (window.Paginator) Paginator.refresh('tbl-rent');
+    }
+
+    var BUILDING_GROUPS = {};
+    function buildingRowHtml(r) {
+      var unit = r.unitLabel; if (r.leaseType === 'room' && r.roomLabel) unit += ' &middot; ' + r.roomLabel;
+      return '<tr><td class="font-poppins font-semibold text-charcoal">' + r.leaseCode + '<div class="text-xs muted" style="font-weight:400;">' + (r.leaseType === 'room' ? 'Room-wise' : 'Unit-wise') + '</div></td>'
+        + '<td>' + tenantCell(r) + '</td><td class="text-sm">' + unit + '</td>'
+        + '<td>' + rupee(r.rentAmount) + '</td><td>' + outCell(r.totalOutstanding) + '</td>'
+        + '<td>' + statusBadge(r.displayStatus) + '</td><td>' + actionCell(r) + '</td></tr>';
+    }
+    function renderBuilding() {
+      var groups = {}, order = [];
+      ALL_ROWS.forEach(function (r) {
+        if (!groups[r.propertyId]) { groups[r.propertyId] = { name: r.propertyName, rows: [], totalDue: 0, totalOutstanding: 0, collected: 0 }; order.push(r.propertyId); }
+        var g = groups[r.propertyId]; g.rows.push(r); g.totalDue += r.rentAmount; g.totalOutstanding += r.totalOutstanding; g.collected += r.collectedThisMonth;
+      });
+      BUILDING_GROUPS = groups;
+      var nowD = new Date(E.TODAY_MS);
+      var mLabel = E.MONTHS[nowD.getUTCMonth()] + ' ' + nowD.getUTCFullYear();
+      var html = '<div class="flex items-center justify-between flex-wrap gap-2 mb-4">'
+        + '<h3 class="m-0 font-poppins font-semibold text-charcoal" style="font-size:15px;">Collection overview</h3>'
+        + '<span class="badge badge-prepaid">' + mLabel + '</span></div>';
+      order.forEach(function (pid) {
+        var g = groups[pid];
+        var collected = g.collected;                       // collected THIS month
+        var rate = g.totalDue > 0 ? Math.min(100, Math.round(collected / g.totalDue * 100)) : 100;
+        var barColor = rate >= 80 ? 'var(--color-status-paid)' : rate >= 60 ? 'var(--color-status-partial)' : 'var(--color-status-overdue)';
+        html += '<div class="card mb-4">'
+          + '<div class="flex items-center justify-between flex-wrap gap-3 mb-3">'
+          + '<h3 class="m-0 font-poppins font-semibold text-charcoal" style="font-size:15px;">' + g.name + '</h3>'
+          + '<span class="text-sm muted">' + g.rows.length + ' lease' + (g.rows.length !== 1 ? 's' : '') + '</span></div>'
+          + '<div class="flex items-center gap-3 mb-3">'
+          + '<div style="flex:1;height:10px;border-radius:999px;background:var(--color-light-gray);overflow:hidden">'
+          + '<div style="height:100%;width:' + rate + '%;background:' + barColor + '"></div></div>'
+          + '<span class="font-poppins font-semibold text-sm" style="color:' + barColor + ';min-width:40px;text-align:right;">' + rate + '%</span></div>'
+          + '<div class="flex items-center justify-between flex-wrap gap-3">'
+          + '<div class="flex flex-wrap gap-4 text-sm">'
+          + '<span class="muted">Monthly rent: <strong class="text-charcoal">' + rupee(g.totalDue) + '</strong></span>'
+          + '<span class="muted">Collected: <strong style="color:var(--color-status-paid)">' + rupee(collected) + '</strong></span>'
+          + '<span class="muted">Outstanding: <strong style="color:var(--color-status-overdue)">' + rupee(g.totalOutstanding) + '</strong></span></div>'
+          + '<button type="button" class="btn btn-secondary !py-2 !text-sm" onclick="openBuilding(' + pid + ')">See leases (' + g.rows.length + ') &rarr;</button>'
+          + '</div></div>';
+      });
+      document.getElementById('rentBuildingCard').innerHTML = html;
+    }
+    function openBuilding(pid) {
+      var g = BUILDING_GROUPS[pid]; if (!g) return;
+      document.getElementById('bm-title').textContent = g.name;
+      var rate = g.totalDue > 0 ? Math.min(100, Math.round(g.collected / g.totalDue * 100)) : 100;
+      document.getElementById('bm-sub').innerHTML = g.rows.length + ' lease' + (g.rows.length !== 1 ? 's' : '')
+        + ' &middot; Monthly rent <strong class="text-charcoal">' + rupee(g.totalDue) + '</strong>'
+        + ' &middot; Collected <strong style="color:var(--color-status-paid)">' + rupee(g.collected) + '</strong>'
+        + ' &middot; Outstanding <strong style="color:var(--color-status-overdue)">' + rupee(g.totalOutstanding) + '</strong>'
+        + ' &middot; Rate <strong>' + rate + '%</strong>';
+      document.getElementById('bm-body').innerHTML = g.rows.map(buildingRowHtml).join('');
+      document.getElementById('buildingModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeBuilding() {
+      document.getElementById('buildingModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeBuilding(); });
+
+    var currentView = 'lease';
+    function switchView(view) {
+      if (view === currentView) return;
+      currentView = view;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-rent-view]'), function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-rent-view') === view ? 'true' : 'false');
+      });
+      document.getElementById('rentTableCard').style.display = view === 'lease' ? '' : 'none';
+      document.getElementById('rentFilterCard').style.display = view === 'lease' ? '' : 'none';
+      document.getElementById('rentBuildingCard').style.display = view === 'building' ? '' : 'none';
+      if (view === 'building') renderBuilding();
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rent-view]'), function (b) {
+      b.addEventListener('click', function () { switchView(b.getAttribute('data-rent-view')); });
+    });
+
+    renderKpis();
+    buildPropertyFilter();
+    applyFilters();
+
+    document.getElementById('rent-search').addEventListener('input', function () { filterSearch = this.value.toLowerCase().trim(); applyFilters(); });
+    document.getElementById('rent-status').addEventListener('change', function () { filterStatus = this.value; applyFilters(); });
+    document.getElementById('rent-prop').addEventListener('change', function () { filterProp = this.value; applyFilters(); });
+
+    (function () {
+      var msg = sessionStorage.getItem('rentPaymentMsg');
+      if (!msg) return;
+      sessionStorage.removeItem('rentPaymentMsg');
+      var banner = document.getElementById('paymentSuccessBanner');
+      var text = document.getElementById('paymentSuccessText');
+      if (text) text.innerHTML = '<strong class="font-poppins">' + msg + '</strong> The rent table has been updated.';
+      if (banner) banner.style.display = 'flex';
+      if (window.gsToast) gsToast(msg);
+      window.scrollTo(0, 0);
+    })();
+  </script>
 </body>
 </html>

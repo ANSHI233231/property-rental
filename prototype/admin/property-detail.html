@@ -404,7 +404,7 @@
         var d = new Date(); d.setDate(d.getDate() + 60);
         var dd = ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
         document.getElementById('rentChangeBannerText').textContent =
-          'Tenants must be notified by ' + dd + ' before this rent takes effect. Effective date: ' + dd + ' (60 days from today). (BL-11)';
+          'Tenants must be notified by ' + dd + ' before this rent takes effect. Effective date: ' + dd + ' (60 days from today).';
         banner.style.display = 'flex';
       } else {
         banner.style.display = 'none';

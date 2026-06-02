@@ -2,12 +2,14 @@
 
 | Field | Value |
 |---|---|
-| Status         | proposed |
+| Status         | in-progress |
 | Started        | 2026-06-02 |
 | Shipped        | — |
-| SRS row        | BL-10, BL-11, BL-12, BL-13 (rent/late-fee) — no rule change; period-first is a UI/data-model rework |
-| Test cases     | TC-RP-PF-01..14 (below) |
+| SRS row        | BL-10, BL-11, BL-12; **BL-13 CHANGED — month-end cap added** (see §1) — SRS §5 + Settings copy synced ✅ |
+| Test cases     | TC-RP-PF-01..14 (below) + the doc's late-fee cases |
 | Prototype todo | row in `docs/planning/prototype-changes.md` on ship |
+| Scope          | **All roles** — admin + PM + tenant. Built on a single-source `assets/rent-engine.js`. |
+| Reference      | `docs/planning/RENT_COLLECTION_CONTEXT.md` (period-first model, allocator, receipts, status). |
 
 ---
 
@@ -15,8 +17,9 @@
 > "On rent collection / Record Payment, we need to collect against a **billing period** — without it, how do we collect? Based on that period and the payment date we show the **late fee**, and that billing period keeps showing until the month's amount is received." (Reference: a period-first Record Payment screen from another portal.)
 
 **Decisions locked with the user (2026-06-02):**
-- **Plan first, no code yet.**
-- **Late-fee rule stays BL-13 as-is** — 2% × outstanding × **full weeks** overdue, **non-compounded**, **NO month-end cap** (the reference screenshot's "capped at month-end" is **dropped**; BL-13 is sacrosanct).
+- **Build all roles** (admin + PM + tenant) this pass, on a single-source `assets/rent-engine.js`.
+- **Adopt the month-end cap (REVERSES the earlier "no cap" choice).** Late fee = 2% × period-outstanding × full weeks overdue, **non-compounded**, with `effective_date = min(paymentDate, period_last_day)` so each period maxes at ~4 weeks ≈ **8% of that period's outstanding**. This is a deliberate **change to BL-13** by the user; SRS §5 (BL-13 text) and the Settings "Late fee" copy must be re-synced (Working rule #9). Allocator + status model adopted verbatim from `RENT_COLLECTION_CONTEXT.md`.
+- The reference doc also resolves the two open questions: **rework** the page (not augment) and **single selected period that only biases the default amount** — the allocator always pays **oldest-unsettled-first** and overflows forward.
 
 ## 2. Plan
 
@@ -92,21 +95,32 @@ Each lease carries `periods[]`, one per month from lease start → current month
 - [x] Plan-first (no code). — user
 - [x] BL-13 unchanged, no month-end cap. — user
 - [ ] Confirm: **rework the existing `admin/record-payment.html`** into period-first (replacing amount-first as the primary flow)? Or keep amount-first and add the period picker on top?
-- [ ] Confirm single-period select + auto surplus-rollover (vs multi-select periods).
-- [ ] Awaiting go-ahead to build.
+- [x] Single selected period that biases the default amount; allocator pays oldest-first + overflow (per reference doc). — resolved by `RENT_COLLECTION_CONTEXT.md`
+- [x] Built all roles.
+- [x] SRS §5 (BL-13 row + Module 5 late-fee walkthrough + engineering "Don't") + Settings "Late fee" copy re-synced for the **month-end cap** (Working rule #9). Solution Overview docx regen only if its copy cites the cap.
 
 ## 5. Execution log
-- 2026-06-02 — plan authored after analysing the reference screenshot vs the current amount-first `record-payment.html`. Decisions: plan-first; BL-13 no cap.
+- 2026-06-02 — plan authored (decisions: plan-first; originally BL-13 no cap).
+- 2026-06-02 — user supplied `docs/planning/RENT_COLLECTION_CONTEXT.md` (period-first reference). Decisions revised: **adopt month-end cap (BL-13 change)**; **build all roles**; rework (not augment); single-period default + oldest-first allocator.
+- 2026-06-02 — BUILT: `assets/rent-engine.js` + `assets/rent-data.js` (orchestrator, verified); `admin/record-payment.html` reworked; `admin/rent.html`, `pm/rent-collection.html`, `pm/record-payment.html` (new), `tenant/rent.html` (gharsetu-frontend). Verified via Node harness + inline-script syntax.
+- 2026-06-02 — refinements (see prototype-changes 2026-06-02 "period-first refinements"): Settings-driven late fee (`rent-settings.js`), cumulative-due default, allocation Remaining+Total/Settled, no-default method, BL-code removal, Monthly-Rent rename, Collected-this-month, Partial-Paid rename, Overdue-filter=tile, lease-type rows, accrued-fee column, By-Building popup + month badge + this-month collected, Portfolio tab removed, sidebar-label consistency.
 
-## 6. Files changed (planned)
+## 6. Files changed (built)
 | File | Change |
 |------|--------|
-| prototype/admin/record-payment.html | rework to period-first: context cards, Billing Period combobox, per-period state, late-fee-by-date, live Payment Summary; reuse allocation maths + history |
-| prototype/admin/rent.html | (no change — Record Payment entry button already links here) |
-| docs/planning/prototype-changes.md | ledger row on ship |
+| prototype/assets/rent-engine.js (NEW) | period-first engine — allocate, computeRentStatus, computeFeeForPeriod (month-end cap), feeOwedAtTime, unsettledPeriods, cumulativeDueThrough, collectedThisMonth, feeOutstandingTotal, groupTransactions |
+| prototype/assets/rent-data.js (NEW) | canonical 8-lease roster (numeric ids, both lease types, all statuses) |
+| prototype/assets/rent-settings.js (NEW) | single-source late-fee rate + grace (localStorage), edited on Settings page |
+| prototype/admin/record-payment.html | reworked to period-first |
+| prototype/admin/rent.html | listing reworked to engine; By Lease/By Building; Portfolio removed |
+| prototype/pm/rent-collection.html | PM listing (reworked) |
+| prototype/pm/record-payment.html (NEW) | PM period-first record payment |
+| prototype/tenant/rent.html | tenant Rent & Payments reworked |
+| prototype/admin/settings.html | late-fee rate/grace hydrate + persist to rent-settings.js |
+| docs/planning/prototype-changes.md | ledger rows (built + refinements) |
 
 ## 7. App-port
-Server returns each lease's billing periods with per-period `outstanding_rent` and a **derived** late fee (BL-13) for a given payment date; the payment posts against a `period_id` (or allocates oldest-first across periods). BL-10 (Admin/PM only), BL-11 (overpayment → prepaid credit), BL-12 (overdue at due+5), BL-13 (2%×outstanding×full weeks, non-compounded, no cap) all enforced server-side. Status is computed, never stored.
+Server returns each lease's billing periods with per-period `outstanding_rent` and a **derived** late fee for a given payment date; the payment posts against a `period_id` (or allocates oldest-first across periods). BL-10 (Admin/PM only), BL-11 (overpayment → prepaid credit), BL-12 (overdue at due+5), **BL-13 (2%×outstanding×full weeks, non-compounded, MONTH-END CAPPED — `effective=min(payDate, monthEnd)`)** all enforced server-side. Rate + grace read from the Settings table. Status is computed, never stored.
 
 ## 9. Cross-references
 - `admin/record-payment.html` (current amount-first page), `admin/rent.html` (rent roll), `admin/lease-detail.html` Rent Collection schedule.

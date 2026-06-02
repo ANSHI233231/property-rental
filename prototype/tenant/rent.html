@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-  <title>My Rent · GharSetu</title>
+  <title>Rent &amp; Payments · GharSetu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -31,9 +31,9 @@
         </button>
         <div class="account-menu" id="accountMenu" role="menu">
           <div class="account-menu-header">
-            <div class="account-menu-avatar">RM</div>
+            <div class="account-menu-avatar">RS</div>
             <div>
-              <div class="account-menu-name">Rohan</div>
+              <div class="account-menu-name">Raj</div>
               <div class="account-menu-role">Tenant</div>
             </div>
           </div>
@@ -54,116 +54,49 @@
       <header class="topbar">
         <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div>
-          <h1 class="page-title">My Rent</h1>
+          <h1 class="page-title">Rent &amp; Payments</h1>
         </div>
       </header>
 
-      <!-- Rent Change Banner — shown when a future rent change is scheduled -->
-      <div class="alert mb-6" role="status" aria-live="polite" style="background:#FEF3C7; border-left:4px solid #F59E0B; color:#92400E;">
-        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-        </svg>
-        <div>
-          <strong class="font-poppins">Your rent will change to ₹19,500 effective 15/07/2026.</strong>
-          <div class="text-xs mt-1" style="opacity:0.85">This change was scheduled by your Property Manager. The 60-day notice has been respected.</div>
-        </div>
-      </div>
-
-      <!-- Current period status -->
+      <!-- KPI tiles (cumulative across all tenant leases) -->
       <section class="section">
-        <h3 class="section-title">Current Period</h3>
-        <div class="card border-l-4" style="border-left-color: var(--color-status-overdue);">
-          <div class="flex items-start justify-between flex-wrap gap-3">
-            <div>
-              <div class="flex gap-2 items-center mb-2">
-                <span class="badge badge-overdue">Overdue</span>
-                <span class="text-sm muted">Period: May 2026 · Due 05/05/2026</span>
-              </div>
-              <div class="font-poppins font-bold text-2xl text-charcoal">₹18,360 due</div>
-              <p class="text-sm" style="color:var(--color-status-overdue)">Includes ₹360 late fee · 4 calendar days past due date</p>
-              <p class="text-sm muted mt-3">Payment is recorded by your Property Manager (Sunita Arora) after you pay them. Pay via UPI / NEFT / Cash / Cheque as usual.</p>
-            </div>
-          </div>
+        <div class="kpi-grid" id="tenantKpiGrid">
+          <div class="kpi"><div class="kpi-label">Monthly Rent</div><div class="kpi-value" id="kpiMonthlyRent">&#8212;</div><div class="kpi-meta">current lease(s)</div></div>
+          <div class="kpi"><div class="kpi-label">Total Paid</div><div class="kpi-value" id="kpiTotalPaid" style="color:var(--color-status-paid)">&#8212;</div><div class="kpi-meta">lifetime</div></div>
+          <div class="kpi"><div class="kpi-label">Security Deposit</div><div class="kpi-value" id="kpiDeposit">&#8212;</div><div class="kpi-meta">refunded at lease end</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-value" id="kpiOutstanding" style="color:var(--color-status-overdue)">&#8212;</div><div class="kpi-meta">all unsettled periods</div></div>
         </div>
       </section>
 
-      <!-- KPI summary -->
-      <section class="section">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Monthly Rent</div><div class="kpi-value">₹18,000</div><div class="kpi-meta">Locked at signing</div></div>
-          <div class="kpi"><div class="kpi-label">Security Deposit</div><div class="kpi-value">₹36,000</div><div class="kpi-meta">Refunded at lease end</div></div>
-          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-value" style="color:var(--color-status-overdue)">₹18,360</div><div class="kpi-meta">Incl. late fee</div></div>
-          <div class="kpi"><div class="kpi-label">Paid this year</div><div class="kpi-value" style="color:var(--color-status-paid)">₹72,000</div><div class="kpi-meta">4 of 5 periods</div></div>
-        </div>
+      <!-- Per-lease current month cards -->
+      <section class="section" id="currentMonthSection">
+        <h3 class="section-title">Current Month</h3>
+        <div id="currentMonthCards"></div>
       </section>
 
-      <!-- Full payment history -->
+      <!-- Payment history (merged across all leases) -->
       <section class="section">
         <h3 class="section-title">Payment History</h3>
         <div class="card p-0 overflow-x-auto">
-          <table class="data-table">
+          <table class="data-table" id="tbl-hist">
             <thead>
-              <tr><th>Period</th><th>Status</th><th>Due Date</th><th>Amount</th><th>Paid On</th><th>Method</th><th>Reference</th></tr>
+              <tr>
+                <th>Payment</th>
+                <th>Property &middot; Unit</th>
+                <th>Period(s)</th>
+                <th>Amount</th>
+                <th>Late Fee</th>
+                <th>Paid On</th>
+                <th>Method</th>
+                <th>Reference</th>
+                <th>Status</th>
+                <th>Receipt</th>
+              </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">May 2026</td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td>05/05/2026</td>
-                <td>₹18,360 <span class="text-xs muted">(+ late fee)</span></td>
-                <td class="muted">—</td>
-                <td class="muted">—</td>
-                <td class="muted">—</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Apr 2026</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td>05/04/2026</td>
-                <td>₹18,000</td>
-                <td>03/04/2026</td>
-                <td>UPI</td>
-                <td>UPI/4012/2026</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Mar 2026</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td>05/03/2026</td>
-                <td>₹18,000</td>
-                <td>05/03/2026</td>
-                <td>UPI</td>
-                <td>UPI/3019/2026</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Feb 2026</td>
-                <td><span class="badge badge-prepaid">Prepaid</span></td>
-                <td>05/02/2026</td>
-                <td>₹36,000 <span class="text-xs muted">(2 months together)</span></td>
-                <td>02/02/2026</td>
-                <td>UPI</td>
-                <td>UPI/2008/2026</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Jan 2026</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td>05/01/2026</td>
-                <td>—</td>
-                <td class="muted">applied from Feb prepay</td>
-                <td class="muted">—</td>
-                <td class="muted">—</td>
-              </tr>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Dec 2025</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td>05/12/2025</td>
-                <td>₹18,000</td>
-                <td>04/12/2025</td>
-                <td>NEFT</td>
-                <td>NEFT/91220</td>
-              </tr>
-            </tbody>
+            <tbody id="histTbody"></tbody>
           </table>
         </div>
-        <p class="text-xs muted mt-3">Periods turn <span class="badge badge-overdue">Overdue</span> 5 calendar days after the due date. Late fees are calculated automatically (2% of outstanding × full weeks overdue).</p>
+        <p class="text-xs muted mt-3">Periods turn <span class="badge badge-overdue">Overdue</span> 5 calendar days after the due date. Late fees are calculated automatically (2% of outstanding per full week overdue, capped at month-end).</p>
       </section>
     </main>
   </div>
@@ -176,17 +109,15 @@
     <button type="button" class="tab" aria-label="More" aria-haspopup="dialog" onclick="openAccountSheet()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
   </nav>
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
-  <script src="../assets/validation.js"></script>
-  <script src="../assets/impersonation.js"></script>
   <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
   <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="account-sheet-handle" aria-hidden="true"></div>
     <a href="leases.html" class="account-menu-link" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>My Leases</a>
     <div class="account-menu-divider"></div>
     <div class="account-menu-header">
-      <div class="account-menu-avatar">RM</div>
+      <div class="account-menu-avatar">RS</div>
       <div>
-        <div class="account-menu-name">Rohan</div>
+        <div class="account-menu-name">Raj</div>
         <div class="account-menu-role">Tenant</div>
       </div>
     </div>
@@ -200,6 +131,167 @@
       Sign out
     </a>
   </div>
+
   <script src="../assets/toast.js"></script>
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/rent-settings.js"></script>
+  <script src="../assets/rent-engine.js"></script>
+  <script src="../assets/rent-data.js"></script>
+  <script>
+    var E = window.RentEngine, D = window.RentData;
+    // Tenant scope: Raj Sharma (tenantId = 1) — primary tenant on lease L1 (co-tenant: Priya Sharma)
+    var TENANT_ID = 1;
+
+    var leases = D.forTenant(TENANT_ID);
+    var statuses = leases.map(function (l) { return E.computeRentStatus(l, E.TODAY_MS); });
+
+    function rupee(n) { return E.rupee(n); }
+
+    function statusBadgeClass(ds) {
+      var map = { 'Paid': 'badge-paid', 'Prepaid': 'badge-prepaid', 'Partial': 'badge-partial',
+        'Outstanding': 'badge-closed', 'Overdue': 'badge-overdue', 'Partial Paid': 'badge-overdue' };
+      return map[ds] || 'badge-closed';
+    }
+    function statusBadge(ds) { return '<span class="badge ' + statusBadgeClass(ds) + '">' + ds + '</span>'; }
+
+    // ── KPI tiles (cumulative across all tenant leases) ────────────────────────
+    function renderKpis() {
+      var monthlyRent = 0, totalPaid = 0, deposit = 0, outstanding = 0;
+      statuses.forEach(function (s) {
+        monthlyRent += s.rentAmount;
+        totalPaid += s.lifetimePaid;
+        deposit += s.securityDeposit;
+        outstanding += s.totalOutstanding;
+      });
+      document.getElementById('kpiMonthlyRent').textContent = rupee(monthlyRent);
+      document.getElementById('kpiTotalPaid').textContent = rupee(totalPaid);
+      document.getElementById('kpiDeposit').textContent = rupee(deposit);
+      document.getElementById('kpiOutstanding').textContent = rupee(outstanding);
+      if (outstanding <= 0) {
+        document.getElementById('kpiOutstanding').style.color = 'var(--color-status-paid)';
+      }
+    }
+
+    // ── Per-lease current month cards (read-only) ─────────────────────────────
+    function renderCurrentMonthCards() {
+      var html = '';
+      statuses.forEach(function (s, i) {
+        var lease = leases[i];
+        var borderColor = s.displayStatus === 'Paid' || s.displayStatus === 'Prepaid'
+          ? 'var(--color-status-paid)'
+          : (s.displayStatus === 'Overdue' || s.displayStatus === 'Partial Paid')
+            ? 'var(--color-status-overdue)' : 'var(--color-status-partial)';
+        var unitLabel = s.unitLabel; if (s.leaseType === 'room' && s.roomLabel) unitLabel += ' &middot; ' + s.roomLabel;
+        html += '<div class="card mb-4" style="border-left:4px solid ' + borderColor + ';">'
+          + '<div class="flex items-start justify-between flex-wrap gap-3">'
+          + '<div>'
+          + '<div class="font-poppins font-semibold text-charcoal" style="font-size:15px;">' + s.propertyName + ' &middot; ' + unitLabel + '</div>'
+          + '<div class="text-sm muted mt-1">' + s.leaseCode + ' &middot; Due day ' + s.rentDueDay + ' &middot; ' + s.dueDate + '</div>'
+          + '</div>'
+          + statusBadge(s.displayStatus)
+          + '</div>';
+
+        if (s.displayStatus === 'Paid' || s.displayStatus === 'Prepaid') {
+          html += '<div class="mt-3">'
+            + '<span class="font-poppins font-semibold text-lg" style="color:var(--color-status-paid)">' + rupee(s.rentAmount) + '</span>'
+            + ' <span class="text-sm muted">'
+            + (s.displayStatus === 'Prepaid' ? 'Prepaid — next period covered' : (s.lastPaymentDate ? 'Paid on ' + s.lastPaymentDate : 'Paid'))
+            + '</span>'
+            + '</div>';
+        } else {
+          var totalDue = s.outstanding + s.lateFee;
+          html += '<div class="mt-3">'
+            + '<span class="font-poppins font-bold text-2xl text-charcoal">' + rupee(totalDue) + ' due</span>'
+            + (s.lateFee > 0 ? '<p class="text-sm mt-1" style="color:var(--color-status-overdue)">Includes ' + rupee(s.lateFee) + ' late fee</p>' : '')
+            + '</div>'
+            + '<p class="text-sm muted mt-3">Payment is recorded by your Property Manager (' + s.pmName + ') after you pay them. Pay via UPI / NEFT / Cash / Cheque as usual.</p>';
+        }
+        html += '</div>';
+      });
+      if (!html) {
+        html = '<div class="card"><p class="muted text-sm">No active leases found.</p></div>';
+      }
+      document.getElementById('currentMonthCards').innerHTML = html;
+    }
+
+    // ── Merged payment history (all leases, newest first) ────────────────────
+    function renderHistory() {
+      var allTxns = [];
+      leases.forEach(function (lease, i) {
+        var s = statuses[i];
+        var unitLabel = s.unitLabel; if (s.leaseType === 'room' && s.roomLabel) unitLabel += ' &middot; ' + s.roomLabel;
+        var unitProp = s.propertyName + ' &middot; ' + unitLabel;
+        E.groupTransactions(lease).forEach(function (t) {
+          allTxns.push({ t: t, unitProp: unitProp, leaseId: lease.id });
+        });
+        // Also add unsettled periods as pending rows
+        var unsettled = s.unsettledPeriods;
+        unsettled.forEach(function (p) {
+          if (p.rentPaid <= 0 && p.feePaid <= 0) {
+            allTxns.push({ pending: true, p: p, unitProp: unitProp, dueDate: p.dueDate, rentAmount: p.rentForPeriod, feeOwed: p.feeOwedAsOf, leaseId: lease.id });
+          }
+        });
+      });
+
+      // Sort: real transactions by date desc; pending rows go to top by period
+      var txnRows = allTxns.filter(function (x) { return !x.pending; });
+      var pendingRows = allTxns.filter(function (x) { return x.pending; });
+      txnRows.sort(function (a, b) { return E.parseDate(b.t.paymentDate) - E.parseDate(a.t.paymentDate); });
+      pendingRows.sort(function (a, b) {
+        if (a.p.periodYear !== b.p.periodYear) return b.p.periodYear - a.p.periodYear;
+        return b.p.periodMonth - a.p.periodMonth;
+      });
+
+      var rows = pendingRows.concat(txnRows);
+
+      if (!rows.length) {
+        document.getElementById('histTbody').innerHTML = '<tr><td colspan="10" class="p-4 text-sm muted">No payment history yet.</td></tr>';
+        return;
+      }
+
+      var html = '';
+      rows.forEach(function (x) {
+        if (x.pending) {
+          var p = x.p;
+          var statusLabel = p.feeOutstanding > 0 ? 'Overdue' : 'Outstanding';
+          var badgeCls = p.feeOutstanding > 0 ? 'badge-overdue' : 'badge-closed';
+          var totalDue = p.rentOutstanding + p.feeOutstanding;
+          html += '<tr>'
+            + '<td class="muted">&#8212;</td>'
+            + '<td class="text-sm muted">' + x.unitProp + '</td>'
+            + '<td class="font-poppins font-semibold text-charcoal">' + p.label + '</td>'
+            + '<td>' + rupee(p.rentOutstanding) + '</td>'
+            + '<td>' + (p.feeOutstanding > 0 ? '<span style="color:var(--color-status-overdue)">' + rupee(p.feeOutstanding) + '</span>' : '<span class="muted">&#8212;</span>') + '</td>'
+            + '<td class="muted">&#8212;</td>'
+            + '<td class="muted">&#8212;</td>'
+            + '<td class="muted">&#8212;</td>'
+            + '<td><span class="badge ' + badgeCls + '">' + statusLabel + '</span></td>'
+            + '<td class="muted">&#8212;</td>'
+            + '</tr>';
+        } else {
+          var t = x.t;
+          html += '<tr>'
+            + '<td class="font-poppins font-semibold text-charcoal">' + t.payNo + '</td>'
+            + '<td class="text-sm muted">' + x.unitProp + '</td>'
+            + '<td>' + t.periodsCovered.join(', ') + '</td>'
+            + '<td>' + rupee(t.totalRent) + '</td>'
+            + '<td>' + (t.totalFee > 0 ? '<span style="color:var(--color-status-overdue)">' + rupee(t.totalFee) + '</span>' : '<span class="muted">&#8212;</span>') + '</td>'
+            + '<td class="text-sm">' + t.paymentDate + '</td>'
+            + '<td>' + t.methodName + '</td>'
+            + '<td class="text-xs muted">' + (t.reference || '&#8212;') + '</td>'
+            + '<td><span class="badge badge-paid">Paid</span></td>'
+            + '<td><button type="button" class="text-royal-blue font-poppins font-semibold text-xs" style="background:none;border:0;cursor:pointer;padding:0;" onclick="gsToast(\'' + t.payNo + ' receipt (demo)\')">Receipt</button></td>'
+            + '</tr>';
+        }
+      });
+      document.getElementById('histTbody').innerHTML = html;
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    renderKpis();
+    renderCurrentMonthCards();
+    renderHistory();
+  </script>
 </body>
 </html>

@@ -55,40 +55,30 @@
         </div>
       </header>
 
-      <!-- Gate KPIs — clickable to the filtered visitor log -->
+      <!-- Gate KPIs — clickable to the filtered visitor log. Values from the
+           single source (security-visitors.js) so they match the Visitors page. -->
       <section class="section">
         <div class="kpi-grid">
           <a class="kpi" href="visitors.html">
-            <div class="kpi-label">Today's Visits</div>
-            <div class="kpi-value">14</div>
+            <div class="kpi-label">Visitors in Log</div>
+            <div class="kpi-value" id="kpi-total">0</div>
             <div class="kpi-meta">Across your assigned gates</div>
           </a>
           <a class="kpi" href="visitors.html?tbl-visitors_f=awaiting">
             <div class="kpi-label">Awaiting Tenant</div>
-            <div class="kpi-value" style="color:var(--color-status-partial)">1</div>
+            <div class="kpi-value" id="kpi-awaiting" style="color:var(--color-status-partial)">0</div>
             <div class="kpi-meta">Gate requests pending approval</div>
           </a>
           <a class="kpi" href="visitors.html?tbl-visitors_f=checked-in">
             <div class="kpi-label">Checked-in Now</div>
-            <div class="kpi-value" style="color:var(--color-status-paid)">5</div>
+            <div class="kpi-value" id="kpi-checkedin" style="color:var(--color-status-paid)">0</div>
             <div class="kpi-meta">Currently inside</div>
           </a>
           <a class="kpi" href="visitors.html?tbl-visitors_f=denied">
-            <div class="kpi-label">Denied Today</div>
-            <div class="kpi-value" style="color:var(--color-status-overdue)">2</div>
+            <div class="kpi-label">Denied</div>
+            <div class="kpi-value" id="kpi-denied" style="color:var(--color-status-overdue)">0</div>
             <div class="kpi-meta">Turned away at the gate</div>
           </a>
-        </div>
-      </section>
-
-      <!-- Quick action -->
-      <section class="section">
-        <div class="card flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <div class="font-poppins font-semibold text-charcoal">Visitor at the gate?</div>
-            <div class="text-sm muted">Log an unannounced arrival and route an approval request to the tenant.</div>
-          </div>
-          <a href="visitors.html" class="btn btn-primary \!py-2 \!text-sm">Open Gate Console →</a>
         </div>
       </section>
 
@@ -100,16 +90,8 @@
         </div>
         <div class="card p-0 overflow-x-auto">
           <table class="data-table">
-            <thead><tr><th>Visitor</th><th>Property · Unit</th><th>Purpose</th><th>Since</th><th>Status</th></tr></thead>
-            <tbody>
-              <tr>
-                <td class="font-poppins font-semibold text-charcoal">Imran Sheikh</td>
-                <td>Green Valley, Dwarka<div class="text-xs muted">Unit 3A · Raj Sharma</div></td>
-                <td>Delivery — Amazon</td>
-                <td class="text-xs">2 min ago</td>
-                <td><span class="badge badge-partial">Awaiting tenant</span></td>
-              </tr>
-            </tbody>
+            <thead><tr><th>Visitor</th><th>Property · Unit</th><th>Purpose</th><th>When</th><th>Status</th></tr></thead>
+            <tbody id="awaitingBody"></tbody>
           </table>
         </div>
       </section>
@@ -125,7 +107,7 @@
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
-  <!-- More bottom sheet (PM overflow nav) -->
+  <!-- More bottom sheet (Security overflow nav) -->
     <div class="more-sheet-title">More options</div>
     <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
@@ -151,6 +133,27 @@
       Sign out
     </a>
   </div>
-  <script src="../assets/toast.js"></script>
+  <script src="../assets/security-visitors.js"></script>
+  <script>
+    /* Dashboard KPIs + awaiting list from the single source (security-visitors.js). */
+    (function () {
+      var SV = window.SecurityVisitors; if (!SV) return;
+      var s = SV.summary();
+      function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = n; }
+      set('kpi-total', s.total); set('kpi-awaiting', s.awaiting);
+      set('kpi-checkedin', s.checkedIn); set('kpi-denied', s.denied);
+      var body = document.getElementById('awaitingBody');
+      if (body) {
+        var rows = SV.byStatus('awaiting');
+        body.innerHTML = rows.length ? rows.map(function (v) {
+          return '<tr><td class="font-poppins font-semibold text-charcoal">' + v.name + '</td>' +
+            '<td>' + SV.propertyLabel(v.property) + '<div class="text-xs muted">Unit ' + v.unit + ' &middot; ' + v.tenant + '</div></td>' +
+            '<td>' + v.purpose + '</td>' +
+            '<td class="text-xs">' + v.when + '</td>' +
+            '<td><span class="badge badge-partial">Awaiting tenant</span></td></tr>';
+        }).join('') : '<tr><td colspan="5" class="p-4 text-sm muted">No gate requests awaiting tenant approval.</td></tr>';
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -58,24 +58,24 @@
       <div class="profile-grid">
         <section class="profile-card">
           <div class="profile-header">
-            <div class="profile-avatar-lg">SA</div>
-            <div class="profile-name">Sunita Arora</div>
-            <span class="profile-role">Property Manager</span>
+            <div class="profile-avatar-lg">RG</div>
+            <div class="profile-name">Ramesh Gupta</div>
+            <span class="profile-role">Security Guard</span>
           </div>
 
           <h3>Account</h3>
-          <div class="profile-row"><span class="field">Name</span><span class="value">Sunita Arora</span></div>
-          <div class="profile-row"><span class="field">Email</span><span class="value">sunita@gharsetu.in</span></div>
-          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx34</span></div>
-          <div class="profile-row"><span class="field">Assigned properties</span><span class="value">Green Valley · Sai Heights · Mayur Vihar</span></div>
-          <div class="profile-row"><span class="field">Past assignments</span><span class="value text-sm" style="color:var(--color-slate);">Rohini Greens (09/2024–03/2025) · Dwarka West Tower (03/2024–08/2024)</span></div>
+          <div class="profile-row"><span class="field">Name</span><span class="value">Ramesh Gupta</span></div>
+          <div class="profile-row"><span class="field">Email</span><span class="value">ramesh@gharsetu.in</span></div>
+          <div class="profile-row"><span class="field">Phone</span><span class="value">+91 98xxxxxx21</span></div>
+          <div class="profile-row"><span class="field">Assigned gates</span><span class="value">Green Valley · Sai Heights · Mayur Vihar</span></div>
+          <div class="profile-row"><span class="field">Shift</span><span class="value">Day shift · 07:00–19:00 IST</span></div>
           <div class="profile-row"><span class="field">Member since</span><span class="value">02/06/2024</span></div>
           <div class="profile-row"><span class="field">Account status</span><span class="value"><span class="badge badge-active">Active</span></span></div>
 
           <div class="mt-6 flex gap-2 flex-wrap">
             <button class="btn btn-secondary !py-2 !text-sm" onclick="openEditProfile()">Edit details</button>
           </div>
-          <p class="text-xs muted mt-3">Property assignments are managed by Admin. PMs can be assigned to multiple properties.</p>
+          <p class="text-xs muted mt-3">Gate assignments are managed by Admin. A guard can be assigned to multiple property gates.</p>
         </section>
 
         <section class="profile-card">
@@ -101,11 +101,11 @@
           <table class="data-table">
             <thead><tr><th>When</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
             <tbody>
-              <tr><td>26/05/2026 11:42</td><td>Recorded payment</td><td>Lease #L-2103 · ₹18,000</td><td>106.51.xx.xx</td></tr>
-              <tr><td>26/05/2026 09:18</td><td>Closed maintenance request</td><td>#MR-3041 · Unit 7C</td><td>106.51.xx.xx</td></tr>
-              <tr><td>25/05/2026 16:30</td><td>Approved visitor entry</td><td>Unit 3A · Green Valley</td><td>106.51.xx.xx</td></tr>
-              <tr><td>24/05/2026 14:15</td><td>Sent rent reminder</td><td>3 tenants</td><td>106.51.xx.xx</td></tr>
-              <tr><td>24/05/2026 09:00</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
+              <tr><td>26/05/2026 09:42</td><td>Checked in visitor</td><td>Meena Rao · Unit 2A · Green Valley</td><td>106.51.xx.xx</td></tr>
+              <tr><td>26/05/2026 09:05</td><td>Logged gate arrival</td><td>Imran Sheikh · Unit 3A · routed to tenant</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 16:30</td><td>Checked out visitor</td><td>Suresh Nair · Unit 3A · Green Valley</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 10:15</td><td>Denied visitor entry</td><td>Unknown Vendor · Unit 3A · code mismatch</td><td>106.51.xx.xx</td></tr>
+              <tr><td>24/05/2026 07:00</td><td>Signed in</td><td>—</td><td>106.51.xx.xx</td></tr>
             </tbody>
           </table>
         </div>
@@ -121,7 +121,7 @@
   <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
   <script src="../assets/validation.js"></script>
   <script src="../assets/impersonation.js"></script>
-  <!-- More bottom sheet (PM overflow nav) -->
+  <!-- More bottom sheet (Security overflow nav) -->
     <div class="more-sheet-title">More options</div>
     <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
     <a href="profile.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
