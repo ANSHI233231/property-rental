@@ -241,10 +241,16 @@
       if(!code||code.length!==2){codeErr.textContent='Code must be exactly 2 letters.';codeErr.classList.add('show');document.getElementById('addCode').classList.add('error');return;}
       codeErr.classList.remove('show');document.getElementById('addCode').classList.remove('error');
       var tbody=document.querySelector('#tbl-state tbody'); var tr=document.createElement('tr'); tr.dataset.name=name; tr.dataset.status='active';
-      tr.innerHTML='<td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td><td>'+escHtml(code)+'</td><td>0 properties · 0 cities</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\',\''+escHtml(code)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
-      tbody.appendChild(tr); announce(escHtml(name)+' added.'); closeAddModal();
+      tr.innerHTML='<td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td><td>'+escHtml(code)+'</td><td>0 properties · 0 cities</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\',\''+escHtml(code)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
+      tbody.appendChild(tr); if(window.Paginator)Paginator.refresh('tbl-state'); announce(escHtml(name)+' added.'); closeAddModal();
     }
-    function openEditModal(name, code) { lastFocusTrigger=document.activeElement; document.getElementById('editModalTitle').textContent='Edit — '+name; document.getElementById('editName').value=name; document.getElementById('editCode').value=code||''; document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus(); }
+    var editingRow=null;
+    function openEditModal(name, code) {
+      lastFocusTrigger=document.activeElement; editingRow=null;
+      var rows=document.querySelectorAll('#tbl-state tbody tr');
+      for(var i=0;i<rows.length;i++){ if((rows[i].dataset.name||'')===name){ editingRow=rows[i]; break; } }
+      document.getElementById('editModalTitle').textContent='Edit — '+name; document.getElementById('editName').value=name; document.getElementById('editCode').value=code||''; document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus();
+    }
     function submitEditForm() {
       var name=document.getElementById('editName').value.trim(); var err=document.getElementById('editNameError');
       if(!name||name.length<2||name.length>60){err.textContent=name?'Name must be 2–60 characters.':'Name is required.';err.classList.add('show');document.getElementById('editName').classList.add('error');return;}
@@ -252,6 +258,14 @@
       var code=document.getElementById('editCode').value.trim().toUpperCase(); var codeErr=document.getElementById('editCodeError');
       if(!code||code.length!==2){codeErr.textContent='Code must be exactly 2 letters.';codeErr.classList.add('show');document.getElementById('editCode').classList.add('error');return;}
       codeErr.classList.remove('show');document.getElementById('editCode').classList.remove('error');
+      if(editingRow){
+        var tds=editingRow.querySelectorAll('td');  // [0]#, [1]Name, [2]Code, [3]Used by, [4]Status, [5]Actions
+        if(tds[1]) tds[1].textContent=name;
+        if(tds[2]) tds[2].textContent=code;
+        editingRow.dataset.name=name;
+        var editLink=tds[5]?tds[5].querySelector('a'):null;
+        if(editLink) editLink.setAttribute('onclick',"event.preventDefault(); openEditModal('"+name.replace(/'/g,"\\'")+"','"+code.replace(/'/g,"\\'")+"')");
+      }
       document.getElementById('editModal').classList.remove('open'); announce('Updated to '+name+'.'); if(lastFocusTrigger) lastFocusTrigger.focus();
     }
     function openDeactivateConfirm(id, name) { lastFocusTrigger=document.activeElement; pendingDeactivateId=id; pendingDeactivateName=name; document.getElementById('deactivateModalTitle').textContent='Deactivate "'+name+'"?'; document.getElementById('deactivateModal').classList.add('open'); document.getElementById('deactivateConfirmBtn').focus(); }

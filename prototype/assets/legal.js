@@ -62,28 +62,19 @@ window.renderLegalDoc = function (key, containerId) {
   var s = doc.sections;
   var ICON = '<span class="legal-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/></svg></span>';
   function body(sec) { return '<div class="legal-body">' + window.GHARSETU_mdToHtml(sec.body) + '</div>'; }
-  function card(sec, cls, feat) {
+  function card(sec, cls) {
     return '<section class="legal-card ' + (cls || '') + '">'
       +   '<h2>' + ICON + '<span>' + sec.heading + '</span></h2>'
       +   body(sec)
-      +   (feat ? '<div class="legal-feat-panel" aria-hidden="true"></div>' : '')
       + '</section>';
   }
 
-  /* Bento: featured Overview (col-8) · two stacked on the right (col-4) ·
-     two on the bottom row (col-6 each) · any extras full-width. */
+  /* Uniform card grid — every section is an equal card that flows/merges into
+     the grid (no oversized featured card, no empty decorative panel). Accent
+     colour alternates for rhythm. */
   var bento = '<div class="legal-bento">';
-  if (s[0]) bento += card(s[0], 'feat legal-col-8', true);
-  if (s[1] || s[2]) {
-    bento += '<div class="legal-right">';
-    if (s[1]) bento += card(s[1], 'accent-blue');
-    if (s[2]) bento += card(s[2], 'accent-slate');
-    bento += '</div>';
-  }
-  if (s[3]) bento += card(s[3], 'legal-col-6');
-  if (s[4]) bento += card(s[4], 'accent-blue legal-col-6');
-  for (var i = 5; i < s.length; i++) {
-    bento += card(s[i], (i % 2 ? 'accent-blue' : '') + ' legal-col-12');
+  for (var i = 0; i < s.length; i++) {
+    bento += card(s[i], i % 2 ? 'accent-blue' : '');
   }
   bento += '</div>';
 

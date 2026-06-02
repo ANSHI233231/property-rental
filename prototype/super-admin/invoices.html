@@ -90,32 +90,6 @@
              belongs in a v2 admin tool, not as a permanent button. -->
       </header>
 
-      <!-- KPI strip -->
-      <section class="section">
-        <div class="kpi-grid">
-          <div class="kpi">
-            <div class="kpi-label">Total Issued</div>
-            <div class="kpi-value">25</div>
-            <div class="kpi-meta">Feb–May 2026</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Outstanding</div>
-            <div class="kpi-value" style="color:var(--color-status-partial)">8</div>
-            <div class="kpi-meta">₹23,992 past due</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Paid This Month</div>
-            <div class="kpi-value" style="color:var(--color-status-paid)">6</div>
-            <div class="kpi-meta">May 2026</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Cancelled This Month</div>
-            <div class="kpi-value" style="color:var(--color-slate)">2</div>
-            <div class="kpi-meta">May 2026</div>
-          </div>
-        </div>
-      </section>
-
       <!-- Filter tiles -->
       <section class="section">
         <div class="filter-tiles">
@@ -145,14 +119,11 @@
             <label class="label" for="filter-org">Organization</label>
             <select id="filter-org" class="input" onchange="Paginator.setAttrFilter('tbl-invoices','data-org',this.value)">
               <option value="">All organizations</option>
-              <option>Triline Properties</option>
-              <option>Saffron Stays Pvt Ltd</option>
-              <option>Himalaya Homes</option>
-              <option>Sunrise Realty</option>
-              <option>Green Valley Estates</option>
-              <option>Metro Housing Co</option>
-              <option>Capital Residency</option>
-              <option>Blue Horizon Pvt Ltd</option>
+              <option>Delhi Dwellings Ltd</option>
+              <option>Cityscape Rentals</option>
+              <option>Green Valley Co-living</option>
+              <option>Urban Nest Homes</option>
+              <option>Sunrise Rentals</option>
             </select>
           </div>
           <div>
@@ -167,21 +138,23 @@
           <div>
             <label class="label" for="filter-month-start">From month</label>
             <select id="filter-month-start" class="input">
-              <option value="">Any</option>
+              <option value="" selected>Any</option>
+              <option value="2026-01">Jan 2026</option>
               <option value="2026-02">Feb 2026</option>
               <option value="2026-03">Mar 2026</option>
               <option value="2026-04">Apr 2026</option>
-              <option value="2026-05" selected>May 2026</option>
+              <option value="2026-05">May 2026</option>
             </select>
           </div>
           <div>
             <label class="label" for="filter-month-end">To month</label>
             <select id="filter-month-end" class="input">
-              <option value="">Any</option>
+              <option value="" selected>Any</option>
+              <option value="2026-01">Jan 2026</option>
               <option value="2026-02">Feb 2026</option>
               <option value="2026-03">Mar 2026</option>
               <option value="2026-04">Apr 2026</option>
-              <option value="2026-05" selected>May 2026</option>
+              <option value="2026-05">May 2026</option>
             </select>
           </div>
         </div>
@@ -194,336 +167,7 @@
             <thead>
               <tr><th>#</th><th>Invoice #</th><th>Org</th><th>Plan</th><th>Period</th><th>Amount</th><th>Status</th><th>Issued</th><th>Due</th><th>Action</th></tr>
             </thead>
-            <tbody>
-              <!-- 25 mock rows across 8 orgs, 4 months, mixed statuses -->
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0042</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Triline Properties</div><div class="muted" style="font-size:12px;">admin@triline.co.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">21/05/2026 → 20/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">28/05/2026</td>
-                <td class="text-xs muted">08/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0042" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="premium">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0041</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Saffron Stays Pvt Ltd</div><div class="muted" style="font-size:12px;">contact@saffronstays.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Premium</span></td>
-                <td class="muted text-xs">05/05/2026 → 04/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹6,999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">12/05/2026</td>
-                <td class="text-xs" style="color:var(--color-status-partial);">12/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0041" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0040</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Himalaya Homes</div><div class="muted" style="font-size:12px;">info@himalayahomes.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">08/05/2026 → 07/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">15/05/2026</td>
-                <td class="text-xs" style="color:var(--color-status-overdue);">15/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0040" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0039</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Sunrise Realty</div><div class="muted" style="font-size:12px;">accounts@sunriserealty.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">12/05/2026 → 11/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">19/05/2026</td>
-                <td class="text-xs muted">08/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0039" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="cancelled" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0038</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Green Valley Estates</div><div class="muted" style="font-size:12px;">hello@greenvalleyestates.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">15/05/2026 → 14/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-closed">Cancelled</span></td>
-                <td class="text-xs muted">22/05/2026</td>
-                <td class="text-xs muted">08/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0038" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0037</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Metro Housing Co</div><div class="muted" style="font-size:12px;">billing@metrohousing.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">18/05/2026 → 17/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">25/05/2026</td>
-                <td class="text-xs" style="color:var(--color-status-overdue);">25/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0037" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="premium">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0036</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Capital Residency</div><div class="muted" style="font-size:12px;">ops@capitalresidency.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Premium</span></td>
-                <td class="muted text-xs">25/05/2026 → 24/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹6,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">01/06/2026</td>
-                <td class="text-xs muted">08/05/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0036" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-05-0035</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Blue Horizon Pvt Ltd</div><div class="muted" style="font-size:12px;">finance@bluehorizon.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">28/05/2026 → 27/06/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">04/06/2026</td>
-                <td class="text-xs" style="color:var(--color-status-partial);">04/06/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-05-0035" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <!-- April 2026 rows -->
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0031</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Triline Properties</div><div class="muted" style="font-size:12px;">admin@triline.co.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">21/04/2026 → 20/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">28/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0031" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0030</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Saffron Stays Pvt Ltd</div><div class="muted" style="font-size:12px;">contact@saffronstays.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">05/04/2026 → 04/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">12/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0030" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0029</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Himalaya Homes</div><div class="muted" style="font-size:12px;">info@himalayahomes.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">08/04/2026 → 07/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">15/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0029" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="cancelled" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0028</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Sunrise Realty</div><div class="muted" style="font-size:12px;">accounts@sunriserealty.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">12/04/2026 → 11/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-closed">Cancelled</span></td>
-                <td class="text-xs muted">19/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0028" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0027</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Green Valley Estates</div><div class="muted" style="font-size:12px;">hello@greenvalleyestates.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">15/04/2026 → 14/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">22/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0027" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-04-0026</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Metro Housing Co</div><div class="muted" style="font-size:12px;">billing@metrohousing.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">18/04/2026 → 17/05/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">25/04/2026</td>
-                <td class="text-xs muted">08/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-04-0026" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <!-- March 2026 rows -->
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-03-0021</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Triline Properties</div><div class="muted" style="font-size:12px;">admin@triline.co.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">21/03/2026 → 20/04/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">28/03/2026</td>
-                <td class="text-xs muted">08/03/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-03-0021" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-03-0020</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Saffron Stays Pvt Ltd</div><div class="muted" style="font-size:12px;">contact@saffronstays.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">05/03/2026 → 04/04/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">12/03/2026</td>
-                <td class="text-xs" style="color:var(--color-status-overdue);">12/03/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-03-0020" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-03-0019</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Himalaya Homes</div><div class="muted" style="font-size:12px;">info@himalayahomes.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">08/03/2026 → 07/04/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">15/03/2026</td>
-                <td class="text-xs muted">08/03/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-03-0019" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-03-0018</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Sunrise Realty</div><div class="muted" style="font-size:12px;">accounts@sunriserealty.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">12/03/2026 → 11/04/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">19/03/2026</td>
-                <td class="text-xs muted">08/03/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-03-0018" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="standard">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-03-0017</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Capital Residency</div><div class="muted" style="font-size:12px;">ops@capitalresidency.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Standard</span></td>
-                <td class="muted text-xs">25/03/2026 → 24/04/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹2,999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">01/04/2026</td>
-                <td class="text-xs" style="color:var(--color-status-overdue);">01/04/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-03-0017" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <!-- February 2026 rows -->
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0012</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Triline Properties</div><div class="muted" style="font-size:12px;">admin@triline.co.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">21/02/2026 → 20/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">28/02/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0012" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0011</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Saffron Stays Pvt Ltd</div><div class="muted" style="font-size:12px;">contact@saffronstays.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">05/02/2026 → 04/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">12/02/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0011" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0010</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Himalaya Homes</div><div class="muted" style="font-size:12px;">info@himalayahomes.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">08/02/2026 → 07/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">15/02/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0010" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0009</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Sunrise Realty</div><div class="muted" style="font-size:12px;">accounts@sunriserealty.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">12/02/2026 → 11/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">19/02/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0009" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="cancelled" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0008</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Green Valley Estates</div><div class="muted" style="font-size:12px;">hello@greenvalleyestates.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">15/02/2026 → 14/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-closed">Cancelled</span></td>
-                <td class="text-xs muted">22/02/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0008" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="issued" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0007</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Metro Housing Co</div><div class="muted" style="font-size:12px;">billing@metrohousing.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">18/02/2026 → 17/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-prepaid">Issued</span></td>
-                <td class="text-xs muted">25/02/2026</td>
-                <td class="text-xs" style="color:var(--color-status-overdue);">25/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0007" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="cancelled" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0006</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Capital Residency</div><div class="muted" style="font-size:12px;">ops@capitalresidency.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">25/02/2026 → 24/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-closed">Cancelled</span></td>
-                <td class="text-xs muted">04/03/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0006" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-              <tr data-status="paid" data-plan="basic">
-                <td data-pg-serial></td>
-                <td class="font-mono text-xs">INV-2026-02-0005</td>
-                <td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">Blue Horizon Pvt Ltd</div><div class="muted" style="font-size:12px;">finance@bluehorizon.in</div></td>
-                <td><span class="muted" style="font-size:12px;">Basic</span></td>
-                <td class="muted text-xs">28/02/2026 → 27/03/2026</td>
-                <td class="font-poppins font-semibold text-charcoal">₹999</td>
-                <td><span class="badge badge-paid">Paid</span></td>
-                <td class="text-xs muted">07/03/2026</td>
-                <td class="text-xs muted">08/02/2026</td>
-                <td><a href="invoice-detail.html?id=INV-2026-02-0005" style="color:var(--color-royal-blue);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>
-              </tr>
-            </tbody>
+            <tbody><!-- rows generated by the invoice roster script below --></tbody>
           </table>
           <div class="pagination" data-paginate-for="tbl-invoices" data-per-page="10">
             <div class="pagination-info">Showing <span data-pg-from></span>–<span data-pg-to></span> of <span data-pg-total></span></div>
@@ -576,7 +220,91 @@
     <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
     <a href="../login.html" class="more-sheet-link danger" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
   </div>
+  <script>
+    /* Invoice roster — generated from the platform's APPROVED organizations only
+       (pending orgs aren't billed). Single source so it can't drift from organizations.html. */
+    (function () {
+      var ORGS = [
+        { name: 'Delhi Dwellings Ltd',    email: 'raj@delhidwellings.in',   plan: 'premium',  since: '2026-01', until: null },
+        { name: 'Cityscape Rentals',      email: 'meera@cityscape.in',      plan: 'standard', since: '2026-02', until: null },
+        { name: 'Green Valley Co-living', email: 'sneha@greenvalley.co',    plan: 'standard', since: '2026-03', until: null },
+        { name: 'Urban Nest Homes',       email: 'vikram@urbannest.in',     plan: 'basic',    since: '2026-04', until: null },
+        { name: 'Sunrise Rentals',        email: 'rohit@sunriserentals.in', plan: 'basic',    since: '2025-11', until: '2026-04' }
+      ];
+      var MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05'];
+      var PLAN_LABEL = { basic: 'Basic', standard: 'Standard', premium: 'Premium' };
+      var PRICE = { basic: 999, standard: 2999, premium: 6999 };
+      var LAST = { '01':'31','02':'28','03':'31','04':'30','05':'31' };
+      function rupee(n) { return '\u20b9' + Number(n).toLocaleString('en-IN'); }
+      var out = [], seq = {};
+      ORGS.forEach(function (o) {
+        MONTHS.forEach(function (mk) {
+          if (mk < o.since) return;
+          if (o.until && mk > o.until) return;
+          var yyyy = mk.split('-')[0], mm = mk.split('-')[1];
+          var status = (o.until === mk) ? 'cancelled' : (mk === '2026-05' ? 'issued' : 'paid');
+          seq[mk] = (seq[mk] || 40) + 1;
+          var num = 'INV-' + mk + '-' + ('000' + seq[mk]).slice(-4);
+          var badge = status === 'paid' ? '<span class="badge badge-paid">Paid</span>'
+                    : status === 'issued' ? '<span class="badge badge-prepaid">Issued</span>'
+                    : '<span class="badge badge-closed">Cancelled</span>';
+          out.push({ mk: mk, html:
+            '<tr data-status="' + status + '" data-plan="' + o.plan + '" data-org="' + o.name + '" data-month="' + mk + '">'
+            + '<td data-pg-serial></td>'
+            + '<td class="font-mono text-xs">' + num + '</td>'
+            + '<td><div class="font-poppins font-semibold text-charcoal" style="font-size:14px;">' + o.name + '</div><div class="muted" style="font-size:12px;">' + o.email + '</div></td>'
+            + '<td><span class="muted" style="font-size:12px;">' + PLAN_LABEL[o.plan] + '</span></td>'
+            + '<td class="muted text-xs">01/' + mm + '/' + yyyy + ' \u2192 ' + LAST[mm] + '/' + mm + '/' + yyyy + '</td>'
+            + '<td class="font-poppins font-semibold text-charcoal">' + rupee(PRICE[o.plan]) + '</td>'
+            + '<td>' + badge + '</td>'
+            + '<td class="text-xs muted">05/' + mm + '/' + yyyy + '</td>'
+            + '<td class="text-xs muted">10/' + mm + '/' + yyyy + '</td>'
+            + '<td><a href="invoice-detail.html?id=' + num + '" style="color:var(--color-royal-blue);font-family:Poppins,sans-serif;font-weight:600;font-size:13px;text-decoration:none;">View detail</a></td>'
+            + '</tr>' });
+        });
+      });
+      out.sort(function (a, b) { return a.mk < b.mk ? 1 : (a.mk > b.mk ? -1 : 0); });  // newest month first
+      var tb = document.querySelector('#tbl-invoices tbody');
+      if (tb) tb.innerHTML = out.map(function (r) { return r.html; }).join('');
+    })();
+  </script>
   <script src="../assets/paginate.js"></script>
   <script src="../assets/toast.js"></script>
+  <script>
+    /* From/To month filter. The selects had no handler and rows carried no month —
+       derive YYYY-MM from each invoice number (INV-YYYY-MM-…) and AND-combine a
+       range predicate with the existing tile / org / plan filters. */
+    (function () {
+      var tbody = document.querySelector('#tbl-invoices tbody');
+      var startSel = document.getElementById('filter-month-start');
+      var endSel = document.getElementById('filter-month-end');
+      if (!tbody || !startSel || !endSel) return;
+
+      Array.prototype.forEach.call(tbody.rows, function (tr) {
+        var num = tr.cells[1] ? tr.cells[1].textContent : '';
+        var m = /INV-(\d{4})-(\d{2})/.exec(num);
+        if (m) tr.setAttribute('data-month', m[1] + '-' + m[2]);
+        // Org filter also had no row attribute — derive it from the Org cell so it works.
+        var orgCell = tr.cells[2] && tr.cells[2].firstElementChild;
+        if (orgCell) tr.setAttribute('data-org', orgCell.textContent.trim());
+      });
+
+      function applyMonthFilter() {
+        if (!window.Paginator) return;
+        var s = startSel.value, e = endSel.value;     // '' = open-ended; 'YYYY-MM' sorts lexically
+        Paginator.setPredicate('tbl-invoices', function (tr) {
+          var mo = tr.getAttribute('data-month') || '';
+          if (s && mo < s) return false;
+          if (e && mo > e) return false;
+          return true;
+        });
+      }
+      startSel.addEventListener('change', applyMonthFilter);
+      endSel.addEventListener('change', applyMonthFilter);
+      // Apply the default selection (May → May) once the Paginator is ready.
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyMonthFilter);
+      else applyMonthFilter();
+    })();
+  </script>
 </body>
 </html>

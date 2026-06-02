@@ -91,38 +91,24 @@
         <div class="kpi-grid">
           <a class="kpi" href="organizations.html">
             <div class="kpi-label">Organizations</div>
-            <div class="kpi-value">12</div>
-            <div class="kpi-meta">10 active · 2 deactivated</div>
+            <div class="kpi-value">8</div>
+            <div class="kpi-meta">4 active · 3 pending · 1 deactivated</div>
           </a>
           <a class="kpi" href="organizations.html?filter=pending">
             <div class="kpi-label">Pending Sign-ups</div>
             <div class="kpi-value" style="color:var(--color-status-partial)">3</div>
-            <div class="kpi-meta">Oldest: 5 days waiting</div>
+            <div class="kpi-meta">Oldest: 21/05/2026</div>
           </a>
-          <a class="kpi" href="organizations.html">
+          <a class="kpi" href="organizations.html?filter=active">
             <div class="kpi-label">Total Active Users</div>
-            <div class="kpi-value">187</div>
-            <div class="kpi-meta">Across all organizations</div>
+            <div class="kpi-value">66</div>
+            <div class="kpi-meta">Across 4 active organizations</div>
           </a>
           <a class="kpi" href="plans.html">
-            <div class="kpi-label">Plan Coverage</div>
-            <div class="kpi-value">87%</div>
-            <div class="kpi-meta">Active-user cap utilization</div>
+            <div class="kpi-label">Cap Utilization</div>
+            <div class="kpi-value">53%</div>
+            <div class="kpi-meta">24 of 45 capped seats used</div>
           </a>
-        </div>
-      </section>
-
-      <!-- Pending alert -->
-      <section class="section">
-        <div class="alert" role="alert">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;color:var(--color-status-partial)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div>
-            <strong class="font-poppins">3 organizations awaiting your review</strong>
-            <div class="mt-1">Oldest: Saffron Stays Pvt Ltd · submitted 21/05/2026</div>
-            <div class="mt-2">
-              <a href="organizations.html?filter=pending" class="font-poppins font-semibold" style="color:var(--color-status-partial)">Review pending →</a>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -132,21 +118,21 @@
         <div class="card">
           <h3 class="section-title">Plan Distribution</h3>
           <div class="flex flex-col items-center">
-            <!-- Inline SVG donut chart: Basic(navy)=4, Standard(royal-blue)=5, Premium(saffron)=1, total=10 active -->
+            <!-- Inline SVG donut chart: Basic(navy)=4, Standard(royal-blue)=3, Premium(saffron)=1, total=8 organizations -->
             <!-- Circumference = 2π×70 ≈ 439.82; segments calculated proportionally -->
-            <svg width="200" height="200" viewBox="0 0 200 200" aria-label="Plan distribution chart: Basic 4, Standard 5, Premium 1" role="img">
+            <svg width="200" height="200" viewBox="0 0 200 200" aria-label="Plan distribution chart: Basic 4, Standard 3, Premium 1" role="img">
               <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-mid-gray)" stroke-width="28"/>
-              <!-- Basic: 4/10 = 40% = 175.93 of 439.82 -->
+              <!-- Basic: 4/8 = 50% = 219.91 of 439.82 -->
               <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-navy)" stroke-width="28"
-                stroke-dasharray="175.93 263.89" stroke-dashoffset="109.96" transform="rotate(-90 100 100)"/>
-              <!-- Standard: 5/10 = 50% = 219.91 -->
+                stroke-dasharray="219.91 219.91" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+              <!-- Standard: 3/8 = 37.5% = 164.93 -->
               <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-royal-blue)" stroke-width="28"
-                stroke-dasharray="219.91 219.91" stroke-dashoffset="-65.97" transform="rotate(-90 100 100)"/>
-              <!-- Premium: 1/10 = 10% = 43.98 -->
+                stroke-dasharray="164.93 274.89" stroke-dashoffset="-219.91" transform="rotate(-90 100 100)"/>
+              <!-- Premium: 1/8 = 12.5% = 54.98 -->
               <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-saffron)" stroke-width="28"
-                stroke-dasharray="43.98 395.84" stroke-dashoffset="-285.88" transform="rotate(-90 100 100)"/>
-              <text x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Poppins,sans-serif" font-weight="700" font-size="28" fill="var(--color-navy)">10</text>
-              <text x="100" y="120" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="12" fill="var(--color-slate)">Active orgs</text>
+                stroke-dasharray="54.98 384.84" stroke-dashoffset="-384.84" transform="rotate(-90 100 100)"/>
+              <text x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Poppins,sans-serif" font-weight="700" font-size="28" fill="var(--color-navy)">8</text>
+              <text x="100" y="120" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="12" fill="var(--color-slate)">Organizations</text>
             </svg>
             <!-- Legend -->
             <div class="flex gap-6 mt-4 text-sm font-poppins font-semibold">
@@ -156,7 +142,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <span style="width:14px;height:14px;border-radius:3px;background:var(--color-royal-blue);display:inline-block"></span>
-                <span>Standard · 5</span>
+                <span>Standard · 3</span>
               </div>
               <div class="flex items-center gap-2">
                 <span style="width:14px;height:14px;border-radius:3px;background:var(--color-saffron);display:inline-block"></span>
@@ -177,27 +163,27 @@
             </thead>
             <tbody>
               <tr>
-                <td><a href="organization-detail.html?id=1" class="font-poppins font-semibold text-charcoal" style="color:var(--color-charcoal);text-decoration:none">Saffron Stays Pvt Ltd</a></td>
-                <td>Standard</td>
-                <td>26/05/2026</td>
+                <td><a href="organization-detail.html?id=6" class="font-poppins font-semibold text-charcoal" style="color:var(--color-charcoal);text-decoration:none">Urban Nest Homes</a></td>
+                <td>Basic</td>
+                <td>01/04/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
                 <td><a href="organization-detail.html?id=5" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Green Valley Co-living</a></td>
                 <td>Standard</td>
-                <td>24/05/2026</td>
+                <td>10/03/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
-                <td><a href="organization-detail.html?id=6" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Urban Nest Homes</a></td>
-                <td>Basic</td>
-                <td>20/05/2026</td>
+                <td><a href="organization-detail.html?id=7" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Cityscape Rentals</a></td>
+                <td>Standard</td>
+                <td>05/02/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
               <tr>
                 <td><a href="organization-detail.html?id=4" class="font-poppins font-semibold" style="color:var(--color-charcoal);text-decoration:none">Delhi Dwellings Ltd</a></td>
                 <td>Premium</td>
-                <td>15/05/2026</td>
+                <td>15/01/2026</td>
                 <td><span class="badge badge-active" aria-label="Status: Active">Active</span></td>
               </tr>
             </tbody>
@@ -214,11 +200,11 @@
               <tr><th>When</th><th>Action</th><th>By</th><th>Organization</th></tr>
             </thead>
             <tbody>
-              <tr><td>26/05/2026 09:14</td><td>Approved organization</td><td>Aayush Kumar</td><td>Saffron Stays Pvt Ltd</td></tr>
-              <tr><td>25/05/2026 17:02</td><td>Changed plan Basic → Standard</td><td>Aayush Kumar</td><td>Green Valley Co-living</td></tr>
-              <tr><td>24/05/2026 11:30</td><td>Approved organization</td><td>Aayush Kumar</td><td>Green Valley Co-living</td></tr>
-              <tr><td>22/05/2026 14:15</td><td>Deactivated organization</td><td>Aayush Kumar</td><td>Sunrise Rentals</td></tr>
-              <tr><td>20/05/2026 10:05</td><td>Approved organization</td><td>Aayush Kumar</td><td>Urban Nest Homes</td></tr>
+              <tr><td>25/05/2026 10:20</td><td>Sign-up received</td><td>System</td><td>Metro Nest Properties</td></tr>
+              <tr><td>23/05/2026 14:05</td><td>Sign-up received</td><td>System</td><td>Greenleaf Housing</td></tr>
+              <tr><td>21/05/2026 09:30</td><td>Sign-up received</td><td>System</td><td>Saffron Stays Pvt Ltd</td></tr>
+              <tr><td>18/04/2026 16:40</td><td>Deactivated organization</td><td>Aayush Kumar</td><td>Sunrise Rentals</td></tr>
+              <tr><td>01/04/2026 11:00</td><td>Approved organization</td><td>Aayush Kumar</td><td>Urban Nest Homes</td></tr>
             </tbody>
           </table>
         </div>

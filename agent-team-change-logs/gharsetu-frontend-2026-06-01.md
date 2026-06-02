@@ -252,3 +252,135 @@ Scope of THIS session's work (frontend / prototype only — no apps/, no SRS, no
 - **Pages:** `index.html` (hybrid bento/glass homepage + full-page DECK: desktop-only flip-per-gesture, slim fixed 56px header, is-tall internal-scroll, focus zoom/blur, clamp()-responsive 768→1440, closing CTA+footer screen), `login` (glass + Preview-as-Role modal), `forgot-password`, `reset-password`, `organization-signup` (glass 3-card), `contact` (glass form + info), `privacy`/`terms` (legal bento). Domain placeholders → `anshika.tlitech.net`. Section headings → sparkles; personas char-reveal + animated paths.
 - **Verification:** all touched JS parses; deck behaviour Playwright-verified across 768/900/1080 (no h-overflow, header fixed on every screen, all sections fit, CTA+footer together). Records: `docs/planning/features/2026-06-01-public-pages-redesign-v2.md` + `docs/planning/prototype-changes.md` row + this log (follow-ups 1–21).
 - **NOT done (intentionally):** apps/web port, SRS edits, feature_list.json state flips (worker≠checker). Deck is homepage-only; mobile/reduced-motion keep the normal flowing layout.
+
+---
+
+## Task 10 — Admin small-fix pass (dashboard / properties / leases / users) — orchestrator-direct
+- **Status:** ✅ Completed · prototype-only, no app code, no SRS/feature_list change. Full per-change detail in `docs/planning/prototype-changes.md` (7 rows dated 2026-06-01, this batch).
+1. **Dashboard — Lease Expirations table:** each row's Lease ID linked to `lease-detail.html?id=<id>` (`text-royal-blue` anchor, Leases-page convention). 4 rows.
+2. **Properties — room tiles:** added **Available Rooms** (→ create-lease) + **Total Rooms** (30; `<button>` filtering to has-rooms) beside Available Units.
+3. **Upcoming lease date refresh:** L-2245 (Aditi Joshi, GV 1B) `01/04/2026→31/03/2027` ⇒ `01/07/2026→30/06/2027` (old start was in the past vs today 01/06/2026). 4 files: admin+pm `unit-detail.html` (display) + admin+pm `create-lease.html` (mock arrays).
+4. **Leases — filters + cleanup:** added **Termination-requested (Yes/No)** filter (`data-termination`; flagged L-2114 active-pending + L-2080 terminated) and a **Unit** searchable filter (rule #18; options built from the roster in the IIFE before `searchable-select.js` inits). **Removed the "Pending Co-Tenant Consent" section** (phantom lease, not in roster).
+5. **Users — actions to buttons + Impersonate last:** all 29 action cells → compact buttons (`btn … !py-1 !px-3 !text-sm`): Edit/Reset `btn-secondary`, Deactivate `btn-danger`/Activate `btn-secondary`, **Impersonate `btn-primary`, moved last**. Dropped `·` separators; wrapped in a flex row. Kept `imper-link` class + `data-target-*` + inactive-row hide. Patched `confirmStatusToggle` (tag-agnostic selector + `btn-danger`↔`btn-secondary` swap).
+6. **Properties — Occupancy column removed** (header + 14 cells) and **edit-form off-by-one fixed**: `editPropertyRow` ignored the leading `<td data-pg-serial>` cell, so every field loaded one column off (serial→Name, Name→Address, …). Re-indexed to c[1]/c[2]/c[3]/c[4]/c[6]. **CSV export** had the same bug + missing Rooms → now maps explicit cells [1..6], drops Occupancy.
+- **Verification:** scripted transforms reported expected match counts (29 user cells, 14 occupancy cells); grep confirms 0 leftover `action-link` anchors, 0 stale `01/04/2026`, consent section gone. No commit (awaiting user instruction).
+- **Process note:** these logs (this entry + the `prototype-changes.md` rows) were written after the user flagged that the session's edits weren't yet logged — the per-task append should have happened incrementally per CLAUDE.md Working rule #5.
+
+## Task 11 — Lease deep-link param fix (Properties + PM dashboard)
+- **Status:** ✅ Completed · prototype-only.
+- **Bug:** "Upcoming Leases" tile (admin Properties) + "Upcoming" KPI (PM dashboard) linked `leases.html?filter=upcoming`, but the Paginator deep-link param is `<tableId>_f` (`tbl-leases_f`). Wrong param ignored → page defaulted to Active.
+- **Fix:** 3 links → `?tbl-leases_f=upcoming` / `=active` (`admin/properties.html` ×2, `pm/dashboard.html` ×1). Both leases tables share id `tbl-leases`, so the param prefix matches; the Paginator activates the matching tile + filters on init.
+- **Found (deferred):** other dashboard `?filter=` KPI links (maintenance/properties/rent) use an inconsistent convention and likely don't filter; `super-admin/organizations.html?filter=pending` works via a custom handler. Offered the user a full audit.
+- **Verification:** grep confirms 0 remaining `leases.html?filter=`. No commit.
+
+## Task 12 — Delegations: dedicated Detail page (replaces drawer) + Activity Log removal
+- **Status:** ✅ Completed · prototype-only. Plan: `docs/planning/features/2026-06-01-delegation-detail-page.md` (authored before code per Working rule #2; status in-progress).
+- **NEW `admin/delegation-detail.html`** — full page reached from each row's **View**. Detail **card** (name + role chip + status badge; Tasks granted chips · Window `start → end · N days` + "N days remaining" for Active · Created by · **Revoked by** only when revoked) + **"Actions taken during this window"** table (When/Action badge/Target) with a real empty state. Reads `?id=<n>` from a `DELEGATIONS` array, **numeric ids 1–7** (rule #19), `findDelegationById` via `Number()`. Prototype clock 01/06/2026 for days-remaining; HTML-escaped output; unknown id → "Delegation not found" + back link. Chrome copied from `delegations.html` (Delegations nav active); reuses `.task-chip`/`.role-chip-*`/`.card`/`.divider`/`.data-table`/badges — no new tokens.
+- **`admin/delegations.html`** — 7 View links rewired `#`+`openDetailDrawer('slug')` → `delegation-detail.html?id=<n>` (sunita=1, manoj=2, raju=3, pooja=4, sunita-expired=5, manoj-expired=6, anil-revoked=7); removed the **Activity Log** button, the side-drawer markup, `.detail-drawer*` CSS, and `drawerData`/`openDetailDrawer`/`closeDetailDrawer` JS; Escape handler trimmed to the revoke modal. Earlier in the task: **Revoked tab "Revoked by" column removed** (th + cell) — that data now renders on the detail card.
+- **`admin/delegation-activity.html` DELETED** — user decision: don't maintain two action views; the global Activity Log is superseded by the per-delegation page. Confirmed 0 repo-wide references before deleting.
+- **Verification:** `DELEGATIONS` parses (7 entries, ids 1–7, statuses active×3/upcoming/expired×2/revoked); Pooja(4)=0 actions → empty state; Anil(7) revoked-by present; inline-script brace/paren balance 0/0; grep shows 0 dangling `delegation-activity`/`openDetailDrawer`/`detail-drawer` refs. No commit.
+
+## Task 12b — Delegation Detail: clearer actions + sidebar Master Data fix
+- **Actions table made self-explanatory.** Each action now carries a friendly **`label`** (e.g. "Rent changed", "Payment recorded", "Request raised"), the raw audit **`code`** (e.g. `UNIT_RENT_UPDATED`), and a plain-English **`detail`** sentence with concrete specifics (amounts, before→after rent, tenant + unit + property, priority, resolution, reason). Table columns are now **When (IST) · Action · What changed** — Action shows the friendly label badge only; "What changed" shows the sentence. (The raw audit code was initially shown in small mono beneath the badge, but removed per user feedback — label + code read as the same action twice.) All 16 actions across the 7 delegations enriched.
+- **Sidebar Master Data section fix.** The new page had been written with the wrong classes (`sidebar-section-title` span + `sidebar-section-chev`), which the CSS doesn't size — so the icon + chevron rendered huge. Replaced with the canonical markup from `delegations.html`: `<svg class="section-icon">` (database-cylinder) + text + `<svg class="section-chev">`, both sized by the existing `.sidebar-section-header .section-icon/.section-chev` rules.
+- **Verification:** data parses, all actions complete, script brace/paren balance 0/0, `section-icon` present and no `sidebar-section-title` remnant. No commit.
+
+## Task 13 — Admin nav rename (Rent → Rent collection) + Audit "Actor" → "User"
+- **Sidebar "Rent" → "Rent collection"** across all 25 admin pages (20 top-level + 5 `master-data/` subpages) via a scoped script matching `href=".../rent.html" class="sidebar-link"` (lazy-stops at the link's own `Rent</a>`, so the mobile **tabbar stays "Rent"** — short label, like "Maint."). 25/27 sidebar files updated (2 had no rent link).
+- **Audit Log "Actor" → "User"** on `admin/audit-log.html`: column header, `Actor role`→`User role`, `Actor name`→`User name`, and ids `actor-role`/`actor-search` → `user-role`/`user-search` with their `for=`. Confirmed no JS referenced the old ids; grep shows 0 remaining `actor` anywhere in the prototype.
+- No commit.
+
+## Task 14 — Check Availability page (PLAN only) + PM properties admin-parity
+- **Plan authored** for a new **Check Availability** search-and-lease page: `docs/planning/features/2026-06-01-check-availability.md` (proposed, 12 TCs, 5 open decisions). Left filter rail (dates/type/property/city/state/BHK/bath/kitchen/rent·area ranges/amenities — facets from the master assets) → center result cards of available units/rooms → click card → details popup → **Create Lease** reuses the existing `create-lease.html?unitId=&roomId=` deep-link (lands Step 4). Entry: a "Check Availability" button beside Add Property on `properties.html`. **No code yet** — awaiting sign-off.
+- **PM properties admin-parity (executed):** removed the **Occupancy** column from `pm/properties.html` (header + 5 cells), matching the admin change. Verified 8 cols header=rows. Did **not** copy admin-only items that don't map to PM (room summary tiles → PM tiles are tenure pagination; edit-form fix → no PM property CRUD; CSV export → none). Upcoming-lease date already mirrored to `pm/unit-detail.html`. No commit.
+
+## Task 15 — Rent Collection completion (tiles + query-time status model + Portfolio tab)
+- **Status:** ✅ Completed · prototype-only. Plan: `docs/planning/features/2026-06-01-rent-collection-completion.md`.
+- **Top tiles** → Total Due · Collected · Outstanding · Overdue (Total Due = Collected + Outstanding; Overdue = count + "N leases past due"). `updateKpis` recomputes from ROSTER×MONTHS.
+- **Query-time payment status (never stored):** `computeStatus(due, collected, dueDay)` → Paid / Partially Paid / Outstanding / Overdue / Prepaid (precedence prepaid>paid>overdue>outstanding>partial; overdue at due-day+5, BL-12). ROSTER dropped stored `ms`, now `mp` (collected) + `dd` (due day). Months → June 2026 (`TODAY_DAY=12`, `GRACE_DAYS=5`); `cellFor` derives status; `badge()` + `MONTHLY_TILES` relabelled (Outstanding=grey `badge-closed`, Partially Paid=amber). Verified: paid 10/partial 2/overdue 4/outstanding 1/prepaid 3; reconciles.
+- **Portfolio tab (3rd view):** `#rentPortfolio` (Summary card: Total Properties 4 · Active Leases 20 · Monthly Due · Collection Rate + progress bar; Month-by-Month Trend table). `monthAgg(key)` aggregates Due+Collected over the **same** month → rate June 80% / past 100%, clamped ≤100% (**507% cross-period bug avoided**). `render()` toggles table/tiles/filters vs portfolio cards; added June to the Month dropdown; `#rentTableCard` id added.
+- **Verified:** inline script parses (`new Function`); status counts + KPI reconciliation + portfolio aggregates via DOM-stub. No commit.
+- **Carry-over:** SRS NR for "payment status is derived, not stored"; optional tab rename (Lease-wise/Property-wise → By Lease/By Building) to match reference; consider defaulting the Month filter to June.
+
+## Task 16 — Check Availability page (built) + Privacy/Terms blue-card removal
+*(work spans 2026-06-02)*
+- **Check Availability — BUILT** (plan `docs/planning/features/2026-06-01-check-availability.md`, audited then built on recommended defaults D1–D6).
+  - NEW `admin/check-availability.html`: left filter rail + center result cards + details popup. `PROPERTIES/UNITS/ROOMS` numeric-id mock (ids match `create-lease.html`) → flat `INVENTORY`. Filters: Looking-for (Both/Units/Rooms), Available-from date, Property (searchable), State→City cascade, Property type, Bedrooms/Bathrooms min, Kitchen, Rent range, Area range, Amenities (match-all). Card click → popup (attribute grid + amenities) → **Create Lease** = existing `create-lease.html?unitId=&roomId=` deep-link (lands Step 4). Mobile: filters slide-in sheet.
+  - NEW `assets/amenities.js` — single source for the 8 amenities (+ `amenityName()`), fixing the plan's missing-asset gap.
+  - `admin/properties.html`: **Check Availability** topbar button (Export · Check Availability · + Add Property).
+  - `assets/styles.css`: `.avail-layout/.avail-filters/.avail-grid/.avail-card/.avail-chip` + mobile filter-sheet (compose existing tokens, no new colors).
+  - **Verified (DOM-stub):** script parses; 5 unit + 7 room cards (12 in Both); every deep-link unit/room id resolves in `create-lease.html`; no-double-count (room-based units show rooms only). No commit.
+- **Privacy/Terms blue card removed** (user): the empty navy `legal-feat-panel` in the Overview card made the page uneven. `legal.js` `renderLegalDoc` flattened from the 12-col bento (col-8 feat + right stack + col-6/12 spans) to a **uniform 2-col card grid**; `card()` no longer takes/emits the feat panel; dropped `height:100%`; removed `.legal-feat-panel`/`.legal-col-*`/`.legal-right`/`.legal-card.feat` CSS. Affects privacy + terms (shared). `node --check` OK; no stale refs. No commit.
+
+## Task 17 — Super Admin dashboard: remove pending alert + fix tile nav
+- Removed the **"3 organizations awaiting your review"** alert section (redundant with the Pending Sign-ups tile).
+- Fixed KPI tile destinations: **Total Active Users** → `organizations.html?filter=active` (was generic). Pending Sign-ups (`?filter=pending`) + Plan Coverage (`plans.html`) already correct; Organizations → all. `organizations.html` honours `?filter=pending|active|deactivated|all` after Paginator init, so all four cards now land on the right filtered view. Verified: alert gone (0 matches), all hrefs map to accepted filter values. No commit.
+
+## Task 18 — Check Availability: type-checkbox + load-on-scroll + moved to Leases; Super Admin data reconciled
+*(2026-06-02)*
+- **Check Availability enhancements** (`admin/check-availability.html`):
+  - Property type filter → **checkbox list** (multi-select match-any, from `GHARSETU_PROPERTY_TYPES`); `<select>` removed; `selectedTypes()` + predicate `types.length && indexOf(propType)<0`.
+  - **Load-on-scroll**: `renderCards` → batches of 9 via `appendBatch()` + `IntersectionObserver` on `#availMore`. Refactored card HTML into `cardHTML()`.
+  - **More data**: +5 properties (varied type/city/state) + deterministic generator → 66 cards (59 unit/7 room), 8 batches; 4 types, 4 cities. Generated ids 9xxx (not in create-lease → deep-link opens wizard normally).
+  - **Sticky desktop + mobile sheet** confirmed already in place (`.avail-filters` sticky; ≤1023px slide-in via the "Filters" toggle).
+  - **Entry moved Properties → Leases** (user): removed button from `properties.html`; added beside "+ New Lease" on `leases.html`; page sidebar/more-sheet active + back-link re-pointed Properties→Leases.
+  - Verified: script parses; counts; button on leases (1) not properties (0).
+- **Super Admin dashboard data reconciled to `organizations.html`** (8 orgs): tiles Organizations 8 (4 active/3 pending/1 deactivated) · Pending 3 (Oldest 21/05/2026) · Total Active Users 66 (42+12+4+8) · Cap Utilization 53% (24/45, relabelled from bogus "Plan Coverage 87%"); donut → all-8 (Basic 4/Standard 3/Premium 1, arcs re-proportioned, centre "8"); Recently Approved → the 4 truly-active orgs (removed pending Saffron shown as Active); Recent Platform Activity rewritten coherently. No commit.
+
+## Task 19 — Check Availability checkbox filters + show occupied; Plans filter fix; Invoices dup-strip
+*(2026-06-02)*
+- **Check Availability** (`admin/check-availability.html`):
+  - **Bedrooms/Bathrooms/Kitchen → checkbox lists**; **Rent/Area → grouped range checkboxes** (Below ₹10k, ₹10k–15k, …; Below 500, 500–800, …). Generic `passGroup()` + `renderChecks()`; removed min/max inputs + `readNum`.
+  - **Show occupied** (fix contradiction with the wizard): include occupied units/rooms (real 101/102/10501/10502/20102/20203 + ~⅓ generated) → 72 cards (48 avail / 24 occ); per-card Available(green)/Occupied(grey) badge + "frees <date>"; new **Status** filter; popup badges status + **disables Create Lease for occupied**; count label "N results".
+  - Verified: script parses; 48/24 split; status filter + disabled-occupied logic present.
+- **Super Admin Plans** (`plans.html` + `plans.js`): "View list" linked `?plan=<numeric id>` but the org list only accepts plan **slugs** → fixed to `?plan=<slug>`; corrected `plans.js` Standard `orgs` 5→3 to match the org list + dashboard. `node --check` OK.
+- **Super Admin Invoices** (`invoices.html`): removed the top KPI strip (Total Issued/Outstanding/Paid/Cancelled) — duplicated the filter-tile row below; tiles retained.
+- No commit.
+
+## Task 20 — Super Admin Invoices: month filter (+ org filter) fixed
+- The From/To **month** selects had no `onchange` and rows had no month attr → inert. Added a script that derives `data-month` (YYYY-MM) from each invoice number and wires both selects to a `Paginator.setPredicate` range filter (AND-combines with tile/org/plan). Defaults flipped May→May ⇒ **Any→Any** so the page doesn't load pre-hidden. Same fix for the **Organization** filter (rows had no `data-org` → derived from the Org cell). Verified: script parses, org cell text matches option values, 4 months of data. No commit.
+
+## Task 21 — Super Admin audit fixes + master CRUD bugfix + several follow-ups (2026-06-02)
+Result of the "go through super admin pages" audit + the user's follow-ups. All prototype-only, no commit. Detail in `docs/planning/prototype-changes.md` (7 rows dated 2026-06-02).
+- **Invoices reconciled** to the 5 *approved* orgs via a JS roster generator (18 invoices, 13 paid/4 issued/1 cancelled, ₹999/₹2,999/₹6,999). Was billing a phantom org set.
+- **Master Add/Edit bug fixed across all 9 master pages** (4 super-admin + 5 admin): Add was missing the leading `data-pg-serial` cell (column shift); Edit never updated the row. Now add prepends the serial cell + `Paginator.refresh`, and edit writes back via an `editingRow` lookup. Verified serial cells present + scripts parse on all 9.
+- **Payment Methods → "Reference required" column** (+ checkbox, `data-ref`, `refRequired` in `payment-methods.js`); wired super-admin invoice-detail Mark Paid to hide/not-require the ref field for Cash.
+- **Visit Purposes → "Requires details" column** (+ checkbox, `data-detail`). Consuming visitor-form wiring deferred.
+- **Business Types "Other" removed** (master + `business-types.js`).
+- **Admin Organization invoices:** removed meaningless Issued from/to date filter; added the missing Plan column.
+- **Admin Delegations "All" tab** now renders one combined table (was 4 stacked panels).
+- **Verification:** all 9 masters serial-present + balanced; invoices generator 18 rows; delegations parses; payment-methods 6 cols; visit-purposes 7 cols.
+- **STILL OPEN (flagged to user):** (1) audit item #2 — super-admin `organization-detail.html` shows a Pending org (Saffron) with an *activated* plan history + 18 active users (incoherent for Pending); (2) wiring consuming visitor forms to show a detail input when a visit purpose has `requires-detail`.
+
+---
+
+## Task 22 — Admin nav reorder (sidebar + more-sheet, all 28 admin pages)
+- **Status:** Completed · prototype-only. No app code. No commit.
+- **Started:** 2026-06-02
+- **Completed:** 2026-06-02
+- **Method:** Node.js script `scripts/reorder-admin-nav.js` — tokenizes top-level sidebar children (11 `<a>` + 1 `<div class="sidebar-section">` Master Data block) and more-sheet tokens (anchors + the Master Data group header+sublinks); re-emits in the canonical order; idempotent on re-run.
+- **Sidebar new order:** Dashboard → Properties → Leases → Rent collection → Maintenance → Visitors → Users → Delegations → Master Data (section block) → Settings → Organization → Audit Log.
+- **More-sheet new order:** Properties → Leases → Visitors → Users → Delegations → Master Data group → Settings → Organization → Audit Log → My Profile → Sign out.
+- **Files changed:** 28 of 28 admin pages (23 `prototype/admin/*.html` + 5 `prototype/admin/master-data/*.html`) all reordered; `scripts/reorder-admin-nav.js` added.
+- **Verification:**
+  - All 28 pages: 11 `sidebar-link` anchors + 1 `masterdata` section present after reorder; 10 `more-sheet-link` anchors (excl. masterdata group) in correct sequence.
+  - `admin/master-data/amenities.html`: `../` prefix preserved on all 11 top-level links; bare `href="amenities.html"` sublink active class intact.
+  - `admin/dashboard.html` has `sidebar-link active` = 1; `admin/leases.html` active = 1.
+  - Pages with no active `sidebar-link` (master-data subpages, profile, master-data.html) each have active `sidebar-section-header` on the Master Data block instead.
+  - Idempotency: second run reports 0 files changed.
+- **Notes:** Bottom tabbar unchanged. No hrefs, SVGs, labels, or `active` classes altered.
+- **2026-06-02 follow-up:** the one-off `scripts/reorder-admin-nav.js` was **deleted** after the reorder was applied + verified (untracked, not referenced by any page, idempotent — nothing to re-run). The `scripts/` folder is gone.
+
+---
+
+## Task 23 — Lease-detail Security Deposit · renew fix · Settings · Organization · invoice GST · Record-Payment plan (2026-06-02)
+Orchestrator-direct batch of user-driven follow-ups after the nav reorder. All prototype + docs. No commit. Ledger rows in `docs/planning/prototype-changes.md` (dated 2026-06-02).
+
+- **Lease detail — Security Deposit section (NEW).** Added a Security Deposit block (deposit ₹36,000; KPIs total/refunded/balance; refunds table + empty state) with a **Record Deposit Refund** modal (Full/Partial toggle, amount validated ≤ balance, method from `payment-methods.js` with method-aware reference field honouring `refRequired`, date, note; button locks to "Fully refunded" at ₹0 balance). **Refund gated to ended/terminated leases** via `data-status-show="expired,terminated"` (+ a note for upcoming/active explaining why it's disabled). **Layout:** Rent Change Schedule and Security Deposit now sit **side-by-side 6:6** (`lg:grid-cols-2 … items-start`); Rent Collection stays full-width below.
+- **Lease detail — Tenants merged into the Lease Summary card.** The separate Tenants card was removed; Lease Summary is now a 2-col card (left = summary rows incl. `#ld-status-badge`; right = Tenants in a fixed-height **scroll** container `max-height:340px; overflow-y:auto`) so the card height stays constant as co-tenants grow.
+- **Renew Lease fix.** `admin/create-lease.html?renew=2114` was landing on the default step because the `RENEWALS` map only had key `'2103'`; the leases reconciliation had re-keyed the renewable lease to `2114`. Added the `'2114'` entry (unit 103, two co-tenants, ₹18,000 / ₹36,000 deposit). Renew mode now correctly lands on the Tenants step (Step 4) with the title swapped to "Renew Lease". **Why it broke:** the lease-id reconciliation (Task 8) changed the link's `renew=` id but the RENEWALS lookup wasn't updated in lockstep.
+- **Settings page.** Removed the read-only "last changed by …" metadata line and the standalone Cancel button (+ dead `cancelSettings`/`backToSettings` fns). Save now **stays on the same page** (toast + Recent-changes table) instead of swapping to a success card; removed the duplicate "Saving…" toast (one success toast only); removed the "Full history in the Audit Log" link. **Save button redesigned** — `btn-primary` when dirty, save icon + `#saveBtnLabel`, min-width 172px.
+- **Organization page.** Subscription Plan History — plan value rendered as a **badge consistently** across rows (one row was plain text). Added a **Property cap** row (`#sub-property-cap-display`) + Active-properties + a Property-cap column in the history table; JS reads `plan.propertyCap` (null → "Unlimited properties").
+- **Admin invoice detail.** Removed the "GST line item — deferred (see planning note §4 Q2)" row.
+- **Record Payment — period-first model (PLAN ONLY, no code).** Authored `docs/planning/features/2026-06-02-record-payment-period-first.md` (status `proposed`, 14 TCs). User decisions locked: **plan-first** + **keep BL-13 unchanged (no month-end cap)** — the reference screenshot's month-end cap is dropped. Two sign-off questions remain (rework-vs-augment; single-period+rollover vs multi-select). No page code written.
+- **Verification:** lease-detail Security-Deposit/refund markup present (22 hits) + merged-tenants scroll container present; create-lease has the `'2114'` renew key; settings `#saveBtnLabel` present, dead fns + read-only line + audit link all gone; org property-cap wiring present (5 hits); invoice-detail has no GST line (only `fonts.gstatic.com` remains).

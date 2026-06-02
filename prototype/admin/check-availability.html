@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  <title>Check Availability · Admin · GharSetu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">Ghar<span>Setu</span></a>
+      <button type="button" class="drawer-close" aria-label="Close menu" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <nav class="sidebar-nav">
+<a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+<a href="properties.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+<a href="leases.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+<a href="rent.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent collection</a>
+<a href="maintenance.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maintenance</a>
+<a href="visitors.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+<a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+<a href="delegations.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
+<div class="sidebar-section collapsed">
+          <div class="sidebar-section-header" role="button" tabindex="0" aria-expanded="false" onclick="toggleSidebarSection(this)" onkeydown="if(event.key==='Enter'||event.key===' '){toggleSidebarSection(this)}">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v4c0 1.657 4.03 3 9 3s9-1.343 9-3V5"/><path d="M3 9v4c0 1.657 4.03 3 9 3s9-1.343 9-3V9"/><path d="M3 13v4c0 1.657 4.03 3 9 3s9-1.343 9-3v-4"/></svg>
+            Master Data
+            <svg class="section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <a href="master-data/property-types.html" class="sidebar-sublink">Property Types</a>
+          <a href="master-data/amenities.html" class="sidebar-sublink">Amenities</a>
+          <a href="master-data/specializations.html" class="sidebar-sublink">Maintenance Specializations</a>
+          <a href="master-data/categories.html" class="sidebar-sublink">Categories</a>
+          <a href="master-data/visit-purposes.html" class="sidebar-sublink">Visit Purposes</a>
+        </div>
+<a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+<a href="organization.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+<a href="audit-log.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="account-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu" onclick="toggleAccountMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="account-trigger-label">Account</span>
+          <svg class="account-trigger-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu">
+          <div class="account-menu-header">
+            <div class="account-menu-avatar">RS</div>
+            <div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div>
+          </div>
+          <div class="account-menu-divider"></div>
+          <a href="profile.html" class="account-menu-link" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+          <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <button type="button" class="drawer-toggle" aria-label="Open menu" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div>
+          <h1 class="page-title">Check Availability</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary !py-2 !text-sm avail-filter-toggle" onclick="openAvailFilters()">Filters</button>
+          <a href="leases.html" class="btn btn-secondary !py-2 !text-sm">Back to Leases</a>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="avail-layout">
+          <!-- ── Filter rail ── -->
+          <div class="avail-filters-backdrop" id="availFiltersBackdrop" onclick="closeAvailFilters()" aria-hidden="true"></div>
+          <form class="card avail-filters" id="availFilters" onsubmit="return false">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="section-title" style="margin:0">Filters</h3>
+              <button type="button" class="text-royal-blue font-poppins font-semibold text-sm" onclick="clearAvailFilters()">Clear all</button>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Looking for</span>
+              <div class="view-tabs mt-1" role="tablist" aria-label="Looking for">
+                <button type="button" class="view-tab" role="tab" data-lf="both" aria-selected="true">Both</button>
+                <button type="button" class="view-tab" role="tab" data-lf="unit" aria-selected="false">Units</button>
+                <button type="button" class="view-tab" role="tab" data-lf="room" aria-selected="false">Rooms</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Status</span>
+              <div id="af-status-g" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="label" for="af-from">Available from</label>
+                <input data-datepicker data-pair-max="af-to" placeholder="DD/MM/YYYY" id="af-from" type="text" class="input" oninput="applyFilters()" onchange="applyFilters()" />
+              </div>
+              <div>
+                <label class="label" for="af-to">Up to</label>
+                <input data-datepicker data-pair-min="af-from" placeholder="DD/MM/YYYY" id="af-to" type="text" class="input" oninput="applyFilters()" onchange="applyFilters()" />
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="label" for="af-property">Property</label>
+              <select id="af-property" class="input" data-searchable onchange="applyFilters()"><option value="">All properties</option></select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="label" for="af-state">State</label>
+                <select id="af-state" class="input" onchange="onStateChange()"><option value="">All</option></select>
+              </div>
+              <div>
+                <label class="label" for="af-city">City</label>
+                <select id="af-city" class="input" onchange="applyFilters()"><option value="">All</option></select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Property type</span>
+              <div id="af-types" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Bedrooms</span>
+              <div id="af-bed" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Bathrooms</span>
+              <div id="af-bath" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Kitchen</span>
+              <div id="af-kitchen-g" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Rent</span>
+              <div id="af-rent-g" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div class="mb-4">
+              <span class="label">Area</span>
+              <div id="af-area-g" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+
+            <div>
+              <span class="label">Amenities</span>
+              <div id="af-amenities" class="mt-1" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+          </form>
+
+          <!-- ── Results ── -->
+          <div class="avail-results">
+            <div class="avail-results-head">
+              <div class="font-poppins font-semibold text-charcoal" id="availCount">—</div>
+            </div>
+            <div class="avail-grid" id="availGrid"></div>
+            <div id="availMore" class="text-sm muted" style="text-align:center;padding:20px;display:none">Loading more…</div>
+            <div class="card" id="availEmpty" style="display:none;text-align:center;padding:40px">
+              <p class="muted">No available units or rooms match these filters.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Details popup -->
+  <div class="modal-backdrop" id="availPopup" role="dialog" aria-modal="true" aria-labelledby="apTitle">
+    <div class="modal" style="max-width:560px">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 id="apTitle" style="margin:0">—</h3>
+          <div class="text-sm muted mt-1" id="apSub">—</div>
+        </div>
+        <span class="badge badge-paid" id="apBadge">Available</span>
+      </div>
+      <hr class="divider" />
+      <div class="grid grid-cols-2 gap-x-6 gap-y-3" id="apGrid"></div>
+      <div class="mt-4">
+        <div class="label">Amenities</div>
+        <div class="flex flex-wrap gap-1 mt-2" id="apAmenities"></div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="btn btn-secondary" onclick="closeAvailPopup()">Cancel</button>
+        <a href="#" class="btn btn-primary" id="apCreateLease">Create Lease</a>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Admin navigation (mobile)">
+    <a href="dashboard.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>Dashboard</a>
+    <a href="maintenance.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>Maint.</a>
+    <a href="rent.html" class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 8h11a3 3 0 0 1 0 6H8"/></svg>Rent</a>
+    <button type="button" class="tab tab-more" aria-label="More options" aria-haspopup="dialog" onclick="openMore()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
+  </nav>
+  <div class="drawer-backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
+
+  <!-- More bottom sheet -->
+  <div class="more-sheet-backdrop" onclick="closeMore()" aria-hidden="true"></div>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="more-sheet-handle" aria-hidden="true"></div>
+    <div class="more-sheet-title">More options</div>
+    <a href="properties.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Properties</a>
+    <a href="leases.html" class="more-sheet-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Leases</a>
+    <a href="visitors.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Visitors</a>
+    <a href="users.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+    <a href="delegations.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Delegations</a>
+    <div class="more-sheet-section-header">Master Data</div>
+    <a href="master-data/property-types.html" class="more-sheet-sublink">Property Types</a>
+    <a href="master-data/amenities.html" class="more-sheet-sublink">Amenities</a>
+    <a href="master-data/specializations.html" class="more-sheet-sublink">Maintenance Specializations</a>
+    <a href="master-data/categories.html" class="more-sheet-sublink">Categories</a>
+    <a href="master-data/visit-purposes.html" class="more-sheet-sublink">Visit Purposes</a>
+    <a href="settings.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</a>
+    <a href="organization.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Organization</a>
+    <a href="audit-log.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/></svg>Audit Log</a>
+    <a href="profile.html" class="more-sheet-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>My Profile</a>
+    <a href="../login.html" class="more-sheet-link danger" role="menuitem" onclick="closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+    </div>
+  <div class="account-sheet-backdrop" onclick="closeAccountSheet()" aria-hidden="true"></div>
+  <div class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-label="Account menu">
+    <div class="account-sheet-handle" aria-hidden="true"></div>
+    <div class="account-menu-header"><div class="account-menu-avatar">RS</div><div><div class="account-menu-name">Raj</div><div class="account-menu-role">Admin</div></div></div>
+    <div class="account-menu-divider"></div>
+    <a href="profile.html" class="account-menu-link" role="menuitem" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
+    <a href="../login.html" class="account-menu-link danger" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>
+  </div>
+
+  <script src="../assets/validation.js"></script>
+  <script src="../assets/date-picker.js"></script>
+  <script src="../assets/impersonation.js"></script>
+  <script src="../assets/property-types.js"></script>
+  <script src="../assets/locations.js"></script>
+  <script src="../assets/amenities.js"></script>
+  <script>
+  (function () {
+    /* ── Inventory (numeric ids match create-lease.html so deep-links resolve).
+       Only AVAILABLE inventory is listed. Whole-unit-leasable units (hasRooms:false)
+       become unit cards; room-based units (hasRooms:true) are represented by their
+       available ROOMS only — never also as a parent-unit card (no double-count). ── */
+    var PROPERTIES = [
+      { id: 1, slug: 'green-valley',     name: 'Green Valley Apartments', city: 'Delhi',     state: 'DL', type: 'apartment-complex' },
+      { id: 2, slug: 'sai-heights',      name: 'Sai Heights',             city: 'Delhi',     state: 'DL', type: 'apartment-complex' },
+      { id: 3, slug: 'mayur-vihar',      name: 'Mayur Vihar Residency',   city: 'Delhi',     state: 'DL', type: 'apartment-complex' },
+      { id: 4, slug: 'rohini-greens',    name: 'Rohini Greens',           city: 'Delhi',     state: 'DL', type: 'independent-building' },
+      // Extra properties (varied type/city/state) so the type-checkbox + city filters
+      // are meaningful and there's enough inventory to demonstrate load-on-scroll.
+      { id: 5, slug: 'aravali-villas',   name: 'Aravali Villas',          city: 'Gurugram',  state: 'HR', type: 'villa' },
+      { id: 6, slug: 'noida-heights',    name: 'Noida Heights',           city: 'Noida',     state: 'UP', type: 'apartment-complex' },
+      { id: 7, slug: 'faridabad-floors', name: 'Faridabad Floors',        city: 'Faridabad', state: 'HR', type: 'independent-floor' },
+      { id: 8, slug: 'dwarka-residency', name: 'Dwarka Residency',        city: 'Delhi',     state: 'DL', type: 'apartment-complex' },
+      { id: 9, slug: 'gurgaon-greens',   name: 'Gurgaon Greens',          city: 'Gurugram',  state: 'HR', type: 'independent-building' }
+    ];
+    var UNITS = [
+      { id: 103, propertyId: 1, label: '3A', type: '2 BHK', bedrooms: 2, bathrooms: 2, kitchen: true, area: 820, floor: 3, rent: 20000, deposit: 40000, status: 'available', hasRooms: false, availableFrom: '01/07/2026', amenityIds: ['lift','parking','security','power-backup'] },
+      { id: 104, propertyId: 1, label: '7C', type: '2 BHK', bedrooms: 2, bathrooms: 2, kitchen: true, area: 880, floor: 7, rent: 22000, deposit: 44000, status: 'listed',    hasRooms: false, availableFrom: '15/06/2026', amenityIds: ['lift','parking','security','cctv','gym'] },
+      { id: 301, propertyId: 3, label: '1A', type: '2 BHK', bedrooms: 2, bathrooms: 1, kitchen: true, area: 800, floor: 1, rent: 16000, deposit: 32000, status: 'available', hasRooms: false, availableFrom: '01/07/2026', amenityIds: ['parking','security'] },
+      { id: 302, propertyId: 3, label: '2B', type: '2 BHK', bedrooms: 2, bathrooms: 2, kitchen: true, area: 800, floor: 2, rent: 22000, deposit: 44000, status: 'available', hasRooms: false, availableFrom: '10/07/2026', amenityIds: ['lift','parking','power-backup','security'] },
+      { id: 401, propertyId: 4, label: '2C', type: '2 BHK', bedrooms: 2, bathrooms: 2, kitchen: true, area: 900, floor: 2, rent: 19000, deposit: 38000, status: 'available', hasRooms: false, availableFrom: '01/08/2026', amenityIds: ['parking','security','cctv'] },
+      // Occupied whole units (mirror create-lease occupancy) — shown with an Occupied badge.
+      { id: 101, propertyId: 1, label: '1A', type: '2 BHK', bedrooms: 2, bathrooms: 2, kitchen: true, area: 820,  floor: 1, rent: 18000, deposit: 36000, status: 'occupied', hasRooms: false, occupiedUntil: '31/03/2026', amenityIds: ['lift','parking','security'] },
+      { id: 102, propertyId: 1, label: '2B', type: '3 BHK', bedrooms: 3, bathrooms: 2, kitchen: true, area: 1140, floor: 2, rent: 24000, deposit: 48000, status: 'occupied', hasRooms: false, occupiedUntil: '30/06/2026', amenityIds: ['lift','parking','security','power-backup','gym'] },
+      // Room-based containers — not unit cards; their rooms are listed instead.
+      { id: 105, propertyId: 1, label: '5B',     type: '3 BHK (shared)', hasRooms: true, amenityIds: ['lift','parking','security'] },
+      { id: 201, propertyId: 2, label: 'PG-101', type: 'PG Unit',        hasRooms: true, amenityIds: ['lift','security','power-backup','cctv'] },
+      { id: 202, propertyId: 2, label: 'PG-202', type: 'PG Unit',        hasRooms: true, amenityIds: ['security','parking'] }
+    ];
+    var ROOMS = [
+      { id: 10503, unitId: 105, label: 'Room C', rent: 6500, deposit: 13000, area: 150, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/07/2026' },
+      { id: 10504, unitId: 105, label: 'Room D', rent: 6000, deposit: 12000, area: 140, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/07/2026' },
+      { id: 20101, unitId: 201, label: 'Room A', rent: 6500, deposit: 13000, area: 145, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '15/06/2026' },
+      { id: 20103, unitId: 201, label: 'Room C', rent: 6500, deposit: 13000, area: 145, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/07/2026' },
+      { id: 20104, unitId: 201, label: 'Room D', rent: 6000, deposit: 12000, area: 135, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/07/2026' },
+      { id: 20201, unitId: 202, label: 'Room A', rent: 5500, deposit: 11000, area: 130, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/06/2026' },
+      { id: 20202, unitId: 202, label: 'Room B', rent: 5500, deposit: 11000, area: 130, bathrooms: 1, kitchen: true, status: 'available', availableFrom: '01/07/2026' },
+      // Occupied rooms (mirror create-lease occupancy) — shown with an Occupied badge.
+      { id: 10501, unitId: 105, label: 'Room A', rent: 6500, deposit: 13000, area: 150, bathrooms: 1, kitchen: true, status: 'occupied', occupiedUntil: '15/02/2027' },
+      { id: 10502, unitId: 105, label: 'Room B', rent: 6500, deposit: 13000, area: 150, bathrooms: 1, kitchen: true, status: 'occupied', occupiedUntil: '31/03/2026' },
+      { id: 20102, unitId: 201, label: 'Room B', rent: 7000, deposit: 14000, area: 145, bathrooms: 1, kitchen: true, status: 'occupied', occupiedUntil: '31/12/2026' },
+      { id: 20203, unitId: 202, label: 'Room C', rent: 6000, deposit: 12000, area: 130, bathrooms: 1, kitchen: true, status: 'occupied', occupiedUntil: '30/09/2026' }
+    ];
+
+    /* ── Synthetic extra inventory (deterministic) so there's enough to demonstrate
+       load-on-scroll. These ids (9xxx) aren't in create-lease.html — their "Create
+       Lease" deep-link opens the wizard normally (unknown id → no pre-seed), which is
+       a graceful fallback for the prototype. ── */
+    (function generateInventory() {
+      var TYPES = ['1 BHK', '2 BHK', '3 BHK', 'Studio'];
+      var AMEN = ['cctv','gym','lift','parking','power-backup','security','swimming-pool','water-softener'];
+      var FROM = ['01/06/2026','15/06/2026','01/07/2026','15/07/2026','01/08/2026'];
+      var OCC  = ['31/12/2026','30/09/2026','28/02/2027','30/06/2026','31/03/2027'];
+      var uid = 9000;
+      PROPERTIES.forEach(function (p, pi) {
+        for (var i = 0; i < 6; i++) {
+          var t = TYPES[(pi + i) % TYPES.length];
+          var bed = t === 'Studio' ? 0 : parseInt(t, 10);
+          var rent = 12000 + (((pi * 3 + i * 7) % 14) * 2000);   // 12k–38k, deterministic
+          var a = (pi + i) % (AMEN.length - 2);
+          var occupied = ((pi + i) % 3 === 0);                   // ~1 in 3 occupied
+          UNITS.push({
+            id: uid++, propertyId: p.id, label: (pi + 1) + '0' + (i + 1), type: t,
+            bedrooms: bed || null, bathrooms: bed >= 2 ? 2 : 1, kitchen: (i % 5 !== 0),
+            area: 480 + (((pi * 7 + i * 13) % 12) * 60), floor: (i % 8) + 1,
+            rent: rent, deposit: rent * 2, status: occupied ? 'occupied' : 'available', hasRooms: false,
+            availableFrom: occupied ? null : FROM[(pi + i) % FROM.length],
+            occupiedUntil: occupied ? OCC[(pi + i) % OCC.length] : null,
+            amenityIds: AMEN.slice(a, a + 3)
+          });
+        }
+      });
+    })();
+
+    function propById(id) { for (var i=0;i<PROPERTIES.length;i++) if (PROPERTIES[i].id===id) return PROPERTIES[i]; return null; }
+    function unitById(id) { for (var i=0;i<UNITS.length;i++) if (UNITS[i].id===id) return UNITS[i]; return null; }
+    function rupee(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+    /* Build one flat card list. kind 'unit' | 'room'. */
+    function buildInventory() {
+      var out = [];
+      function norm(status) { return (status === 'available' || status === 'listed') ? 'available' : 'occupied'; }
+      UNITS.forEach(function (u) {
+        if (u.hasRooms) return;                       // room-based → handled via ROOMS
+        var p = propById(u.propertyId);
+        var st = norm(u.status);
+        out.push({
+          key: 'u' + u.id, kind: 'unit', unitId: u.id, roomId: null, propertyId: u.propertyId,
+          property: p.name, city: p.city, state: p.state, propType: p.type,
+          label: 'Unit ' + u.label, type: u.type, bedrooms: u.bedrooms, bathrooms: u.bathrooms,
+          kitchen: u.kitchen, area: u.area, floor: u.floor, rent: u.rent, deposit: u.deposit,
+          status: st, availableFrom: st === 'occupied' ? u.occupiedUntil : u.availableFrom,
+          occupiedUntil: u.occupiedUntil || null, amenityIds: u.amenityIds || []
+        });
+      });
+      ROOMS.forEach(function (r) {
+        var u = unitById(r.unitId); var p = propById(u.propertyId);
+        var st = norm(r.status);
+        out.push({
+          key: 'r' + r.id, kind: 'room', unitId: u.id, roomId: r.id, propertyId: u.propertyId,
+          property: p.name, city: p.city, state: p.state, propType: p.type,
+          label: 'Unit ' + u.label + ' · ' + r.label, type: u.type, bedrooms: null, bathrooms: r.bathrooms,
+          kitchen: r.kitchen, area: r.area, floor: null, rent: r.rent, deposit: r.deposit,
+          status: st, availableFrom: st === 'occupied' ? r.occupiedUntil : r.availableFrom,
+          occupiedUntil: r.occupiedUntil || null, amenityIds: (u.amenityIds || [])
+        });
+      });
+      return out;
+    }
+    var INVENTORY = buildInventory();
+
+    /* ── Populate filter facets from the single-source masters ── */
+    function fillProperties() {
+      var sel = document.getElementById('af-property');
+      PROPERTIES.forEach(function (p) { var o=document.createElement('option'); o.value=String(p.id); o.textContent=p.name; sel.appendChild(o); });
+    }
+    function fillTypes() {
+      var wrap = document.getElementById('af-types');
+      wrap.innerHTML = (window.GHARSETU_PROPERTY_TYPES || [])
+        .filter(function (t) { return t.status !== 'deactivated'; })
+        .map(function (t) {
+          return '<label class="flex items-center gap-2" style="cursor:pointer;font-family:Inter,sans-serif;font-size:14px;color:var(--color-charcoal)">'
+            + '<input type="checkbox" name="af-type" value="' + t.id + '" style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="applyFilters()" /> '
+            + esc(t.name) + '</label>';
+        }).join('');
+    }
+    function fillStates() {
+      var sel = document.getElementById('af-state');
+      (window.GHARSETU_STATES || []).forEach(function (s) { var o=document.createElement('option'); o.value=s.code||s.id||s.abbr||s.name; o.textContent=s.name; sel.appendChild(o); });
+    }
+    function fillCities(stateCode) {
+      var sel = document.getElementById('af-city');
+      sel.innerHTML = '<option value="">All</option>';
+      (window.GHARSETU_CITIES || []).forEach(function (c) {
+        if (stateCode && c.state !== stateCode) return;
+        var o=document.createElement('option'); o.value=c.name; o.textContent=c.name; sel.appendChild(o);
+      });
+    }
+    function fillAmenities() {
+      var wrap = document.getElementById('af-amenities');
+      wrap.innerHTML = (window.GHARSETU_AMENITIES || []).map(function (a) {
+        return '<label class="flex items-center gap-2" style="cursor:pointer;font-family:Inter,sans-serif;font-size:14px;color:var(--color-charcoal)">'
+          + '<input type="checkbox" name="af-amenity" value="' + a.id + '" style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="applyFilters()" /> '
+          + esc(a.name) + '</label>';
+      }).join('');
+    }
+
+    window.onStateChange = function () {
+      var st = document.getElementById('af-state').value;
+      fillCities(st);
+      applyFilters();
+    };
+
+    /* ── DD/MM/YYYY compare ── */
+    function parseDMY(s) { var m=/^(\d{2})\/(\d{2})\/(\d{4})/.exec(s||''); return m ? new Date(+m[3],+m[2]-1,+m[1]) : null; }
+
+    function bhkOf(type) { var m=/^(\d+)\s*BHK/i.exec(type||''); return m ? +m[1] : null; }
+
+    function selectedAmenities() {
+      return Array.prototype.map.call(document.querySelectorAll('input[name="af-amenity"]:checked'), function(c){return c.value;});
+    }
+    function selectedTypes() {
+      return Array.prototype.map.call(document.querySelectorAll('input[name="af-type"]:checked'), function(c){return c.value;});
+    }
+    function bhkVal(it) { return it.bedrooms != null ? it.bedrooms : bhkOf(it.type); }
+
+    /* ── Checkbox-group buckets (each carries a predicate over the item) ── */
+    var STATUS_BUCKETS = [
+      { id: 'available', label: 'Available', test: function (it) { return it.status === 'available'; } },
+      { id: 'occupied',  label: 'Occupied',  test: function (it) { return it.status === 'occupied'; } }
+    ];
+    var BED_BUCKETS = [
+      { id: 'studio', label: 'Studio',  test: function (it) { return it.type === 'Studio'; } },
+      { id: '1',      label: '1 BHK',   test: function (it) { return bhkVal(it) === 1; } },
+      { id: '2',      label: '2 BHK',   test: function (it) { return bhkVal(it) === 2; } },
+      { id: '3',      label: '3+ BHK',  test: function (it) { return bhkVal(it) != null && bhkVal(it) >= 3; } }
+    ];
+    var BATH_BUCKETS = [
+      { id: '1', label: '1 bathroom',  test: function (it) { return it.bathrooms === 1; } },
+      { id: '2', label: '2 bathrooms', test: function (it) { return it.bathrooms === 2; } },
+      { id: '3', label: '3+ bathrooms',test: function (it) { return it.bathrooms != null && it.bathrooms >= 3; } }
+    ];
+    var KITCHEN_BUCKETS = [
+      { id: 'yes', label: 'Has kitchen', test: function (it) { return !!it.kitchen; } },
+      { id: 'no',  label: 'No kitchen',  test: function (it) { return !it.kitchen; } }
+    ];
+    var RENT_BUCKETS = [
+      { id: 'r1', label: 'Below ₹10,000',       test: function (it) { return it.rent < 10000; } },
+      { id: 'r2', label: '₹10,000 – ₹15,000',   test: function (it) { return it.rent >= 10000 && it.rent < 15000; } },
+      { id: 'r3', label: '₹15,000 – ₹20,000',   test: function (it) { return it.rent >= 15000 && it.rent < 20000; } },
+      { id: 'r4', label: '₹20,000 – ₹30,000',   test: function (it) { return it.rent >= 20000 && it.rent < 30000; } },
+      { id: 'r5', label: 'Above ₹30,000',       test: function (it) { return it.rent >= 30000; } }
+    ];
+    var AREA_BUCKETS = [
+      { id: 'a1', label: 'Below 500 sq ft',      test: function (it) { return it.area != null && it.area < 500; } },
+      { id: 'a2', label: '500 – 800 sq ft',      test: function (it) { return it.area != null && it.area >= 500 && it.area < 800; } },
+      { id: 'a3', label: '800 – 1,000 sq ft',    test: function (it) { return it.area != null && it.area >= 800 && it.area < 1000; } },
+      { id: 'a4', label: 'Above 1,000 sq ft',    test: function (it) { return it.area != null && it.area >= 1000; } }
+    ];
+
+    function renderChecks(containerId, name, buckets) {
+      document.getElementById(containerId).innerHTML = buckets.map(function (b) {
+        return '<label class="flex items-center gap-2" style="cursor:pointer;font-family:Inter,sans-serif;font-size:14px;color:var(--color-charcoal)">'
+          + '<input type="checkbox" name="' + name + '" value="' + b.id + '" style="width:18px;height:18px;accent-color:var(--color-saffron)" onchange="applyFilters()" /> '
+          + esc(b.label) + '</label>';
+      }).join('');
+    }
+    function checkedVals(name) {
+      return Array.prototype.map.call(document.querySelectorAll('input[name="' + name + '"]:checked'), function (c) { return c.value; });
+    }
+    /* An item passes a group if no bucket is checked, or it matches ANY checked bucket. */
+    function passGroup(checked, buckets, it) {
+      if (!checked.length) return true;
+      for (var i = 0; i < buckets.length; i++) {
+        if (checked.indexOf(buckets[i].id) >= 0 && buckets[i].test(it)) return true;
+      }
+      return false;
+    }
+
+    window.applyFilters = function () {
+      var lf = document.querySelector('[data-lf][aria-selected="true"]').getAttribute('data-lf');
+      var propId = document.getElementById('af-property').value;
+      var st = document.getElementById('af-state').value;
+      var city = document.getElementById('af-city').value;
+      var types = selectedTypes();
+      var statusC = checkedVals('af-status');
+      var bedC = checkedVals('af-bed'), bathC = checkedVals('af-bath'), kitC = checkedVals('af-kitchen');
+      var rentC = checkedVals('af-rent'), areaC = checkedVals('af-area');
+      var from = parseDMY(document.getElementById('af-from').value);
+      var ams = selectedAmenities();
+
+      var rows = INVENTORY.filter(function (it) {
+        if (lf !== 'both' && it.kind !== lf) return false;
+        if (propId && String(it.propertyId) !== propId) return false;
+        if (st && it.state !== st) return false;
+        if (city && it.city !== city) return false;
+        if (types.length && types.indexOf(it.propType) < 0) return false;
+        if (!passGroup(statusC, STATUS_BUCKETS, it)) return false;
+        if (!passGroup(bedC, BED_BUCKETS, it)) return false;
+        if (!passGroup(bathC, BATH_BUCKETS, it)) return false;
+        if (!passGroup(kitC, KITCHEN_BUCKETS, it)) return false;
+        if (!passGroup(rentC, RENT_BUCKETS, it)) return false;
+        if (!passGroup(areaC, AREA_BUCKETS, it)) return false;
+        if (from) { var af = parseDMY(it.availableFrom); if (!af || af > from) return false; }
+        if (ams.length) { for (var i=0;i<ams.length;i++) if (it.amenityIds.indexOf(ams[i])<0) return false; }
+        return true;
+      });
+      renderCards(rows);
+    };
+
+    function typeChip(kind) {
+      return kind === 'room'
+        ? '<span class="badge badge-renewed">Room-wise</span>'
+        : '<span class="badge badge-closed">Unit-wise</span>';
+    }
+    function cardHTML(it) {
+      var facts = [];
+      var bhk = it.bedrooms != null ? it.bedrooms : bhkOf(it.type);
+      if (bhk != null) facts.push(bhk + ' BHK');
+      if (it.bathrooms != null) facts.push(it.bathrooms + ' bath');
+      if (it.area != null) facts.push(it.area + ' sq ft');
+      if (it.floor != null) facts.push('Floor ' + it.floor);
+      var chips = it.amenityIds.slice(0, 3).map(function (a) { return '<span class="avail-chip">' + esc(window.amenityName(a)) + '</span>'; }).join('');
+      var extra = it.amenityIds.length > 3 ? '<span class="avail-chip">+' + (it.amenityIds.length - 3) + '</span>' : '';
+      var occupied = it.status === 'occupied';
+      var statusBadge = occupied
+        ? '<span class="badge badge-closed">Occupied</span>'
+        : '<span class="badge badge-paid">Available</span>';
+      var when = occupied
+        ? ('Occupied · frees ' + esc(it.occupiedUntil || '—'))
+        : ('Available from ' + esc(it.availableFrom));
+      return '<button type="button" class="avail-card" onclick="openAvailPopup(\'' + it.key + '\')">'
+        + '<div class="flex items-center justify-between gap-2 mb-1">' + typeChip(it.kind)
+        + statusBadge + '</div>'
+        + '<div class="font-poppins font-semibold text-charcoal" style="font-size:15px">' + esc(it.property) + '</div>'
+        + '<div class="text-xs muted">' + esc(it.label) + ' · ' + esc(it.type) + '</div>'
+        + '<div class="avail-facts text-xs muted mt-2">' + facts.map(function(f){return '<span>'+esc(f)+'</span>';}).join('') + '</div>'
+        + '<div class="font-poppins font-semibold text-charcoal mt-2" style="font-size:16px">' + rupee(it.rent) + '<span class="text-xs muted font-normal">/month</span></div>'
+        + '<div class="text-xs muted mt-1">' + when + '</div>'
+        + (chips ? '<div class="avail-facts mt-3">' + chips + extra + '</div>' : '')
+        + '</button>';
+    }
+
+    /* Load-on-scroll: render in batches; an IntersectionObserver on the #availMore
+       sentinel appends the next batch as it nears the viewport. */
+    var PAGE_SIZE = 9, _rows = [], _shown = 0, _io = null;
+    function appendBatch() {
+      var grid = document.getElementById('availGrid');
+      var slice = _rows.slice(_shown, _shown + PAGE_SIZE);
+      grid.insertAdjacentHTML('beforeend', slice.map(cardHTML).join(''));
+      _shown += slice.length;
+      var more = document.getElementById('availMore');
+      if (more) {
+        var left = _rows.length - _shown;
+        more.style.display = left > 0 ? '' : 'none';
+        more.textContent = left > 0 ? ('Loading more… (' + left + ' more)') : '';
+      }
+    }
+    function setupObserver() {
+      var more = document.getElementById('availMore');
+      if (!more || !('IntersectionObserver' in window)) return;
+      if (_io) _io.disconnect();
+      _io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && _shown < _rows.length) appendBatch();
+      }, { rootMargin: '300px' });
+      _io.observe(more);
+    }
+    function renderCards(rows) {
+      _rows = rows; _shown = 0;
+      var grid = document.getElementById('availGrid');
+      var empty = document.getElementById('availEmpty');
+      grid.innerHTML = '';
+      document.getElementById('availCount').textContent =
+        rows.length + (rows.length === 1 ? ' result' : ' results');
+      empty.style.display = rows.length ? 'none' : '';
+      appendBatch();          // first page
+      setupObserver();        // lazy-load the rest on scroll
+    }
+
+    /* ── Details popup ── */
+    var _byKey = {};
+    INVENTORY.forEach(function (it) { _byKey[it.key] = it; });
+    window.openAvailPopup = function (key) {
+      var it = _byKey[key]; if (!it) return;
+      var occupied = it.status === 'occupied';
+      document.getElementById('apTitle').textContent = it.property;
+      document.getElementById('apSub').textContent = it.label + ' · ' + it.type + ' · ' + it.city + ', ' + it.state;
+      var badgeEl = document.getElementById('apBadge');
+      badgeEl.className = 'badge ' + (occupied ? 'badge-closed' : 'badge-paid');
+      badgeEl.textContent = occupied ? 'Occupied' : 'Available';
+      var bhk = it.bedrooms != null ? it.bedrooms : bhkOf(it.type);
+      var rows = [
+        ['Type', it.kind === 'room' ? 'Room-wise' : 'Unit-wise'],
+        ['Bedrooms', bhk != null ? (bhk + ' BHK') : '—'],
+        ['Bathrooms', it.bathrooms != null ? String(it.bathrooms) : '—'],
+        ['Kitchen', it.kitchen ? 'Yes' : 'No'],
+        ['Area', it.area != null ? (it.area + ' sq ft') : '—'],
+        ['Floor', it.floor != null ? String(it.floor) : '—'],
+        ['Monthly rent', rupee(it.rent)],
+        ['Security deposit', rupee(it.deposit)],
+        [occupied ? 'Occupied till' : 'Available from', occupied ? (it.occupiedUntil || '—') : it.availableFrom]
+      ];
+      document.getElementById('apGrid').innerHTML = rows.map(function (r) {
+        return '<div><div class="label">' + r[0] + '</div><div class="text-sm text-charcoal font-poppins font-semibold mt-1">' + esc(r[1]) + '</div></div>';
+      }).join('');
+      document.getElementById('apAmenities').innerHTML = it.amenityIds.length
+        ? it.amenityIds.map(function (a) { return '<span class="avail-chip">' + esc(window.amenityName(a)) + '</span>'; }).join('')
+        : '<span class="text-sm muted">None listed</span>';
+      var cl = document.getElementById('apCreateLease');
+      if (occupied) {
+        // Can't lease an occupied unit/room — disable the action.
+        cl.removeAttribute('href');
+        cl.classList.add('btn-disabled');
+        cl.setAttribute('aria-disabled', 'true');
+        cl.textContent = 'Occupied — can’t lease';
+      } else {
+        cl.setAttribute('href', 'create-lease.html?unitId=' + it.unitId + (it.roomId ? '&roomId=' + it.roomId : ''));
+        cl.classList.remove('btn-disabled');
+        cl.removeAttribute('aria-disabled');
+        cl.textContent = 'Create Lease';
+      }
+      document.getElementById('availPopup').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+    window.closeAvailPopup = function () {
+      document.getElementById('availPopup').classList.remove('open');
+      document.body.style.overflow = '';
+    };
+    document.getElementById('availPopup').addEventListener('click', function (e) { if (e.target === this) closeAvailPopup(); });
+
+    /* ── Looking-for segmented control ── */
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lf]'), function (b) {
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(document.querySelectorAll('[data-lf]'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+        applyFilters();
+      });
+    });
+
+    /* ── Mobile filter sheet ── */
+    window.openAvailFilters = function () {
+      document.getElementById('availFilters').classList.add('open');
+      document.getElementById('availFiltersBackdrop').classList.add('open');
+    };
+    window.closeAvailFilters = function () {
+      document.getElementById('availFilters').classList.remove('open');
+      document.getElementById('availFiltersBackdrop').classList.remove('open');
+    };
+
+    window.clearAvailFilters = function () {
+      document.getElementById('availFilters').reset();
+      document.getElementById('af-property').value = '';
+      if (window.SearchableSelect) SearchableSelect.refresh(document.getElementById('af-property'));
+      fillCities('');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-lf]'), function (x) { x.setAttribute('aria-selected', x.getAttribute('data-lf') === 'both' ? 'true' : 'false'); });
+      applyFilters();
+    };
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeAvailPopup(); closeAvailFilters(); }
+    });
+
+    /* ── Init ── */
+    fillProperties(); fillTypes(); fillStates(); fillCities(''); fillAmenities();
+    renderChecks('af-status-g', 'af-status', STATUS_BUCKETS);
+    renderChecks('af-bed', 'af-bed', BED_BUCKETS);
+    renderChecks('af-bath', 'af-bath', BATH_BUCKETS);
+    renderChecks('af-kitchen-g', 'af-kitchen', KITCHEN_BUCKETS);
+    renderChecks('af-rent-g', 'af-rent', RENT_BUCKETS);
+    renderChecks('af-area-g', 'af-area', AREA_BUCKETS);
+    if (window.SearchableSelect) SearchableSelect.initAll();
+    applyFilters();
+  })();
+  </script>
+  <script src="../assets/toast.js"></script>
+</body>
+</html>

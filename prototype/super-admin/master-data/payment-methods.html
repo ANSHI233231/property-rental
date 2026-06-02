@@ -88,11 +88,12 @@
       <section class="card p-0 overflow-x-auto">
         <table class="data-table" id="tbl-payment">
           <thead>
-            <tr><th class="w-12">#</th><th>Name</th><th>Used by (payments)</th><th>Status</th><th>Actions</th></tr>
+            <tr><th class="w-12">#</th><th>Name</th><th>Reference required</th><th>Used by (payments)</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr data-name="UPI" data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-name="UPI" data-status="active" data-ref="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">UPI</td>
+              <td>Yes</td>
               <td>187</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
@@ -100,8 +101,9 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 187 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="NEFT / Bank Transfer" data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-name="NEFT / Bank Transfer" data-status="active" data-ref="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">NEFT / Bank Transfer</td>
+              <td>Yes</td>
               <td>94</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
@@ -109,8 +111,9 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 94 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Cash" data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-name="Cash" data-status="active" data-ref="no"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Cash</td>
+              <td class="muted">No</td>
               <td>12</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
@@ -118,8 +121,9 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 12 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="Cheque" data-status="active"><td data-pg-serial class="muted"></td>
+            <tr data-name="Cheque" data-status="active" data-ref="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">Cheque</td>
+              <td>Yes</td>
               <td>3</td>
               <td><span class="badge badge-active">Active</span></td>
               <td class="flex items-center gap-3 flex-wrap">
@@ -127,8 +131,9 @@
                 <button class="btn btn-disabled !py-1 !px-3 !text-sm" aria-disabled="true" title="Cannot deactivate — currently used by 3 record(s). Retire those references first.">Deactivate</button>
               </td>
             </tr>
-            <tr data-name="IMPS" data-status="active" id="row-imps"><td data-pg-serial class="muted"></td>
+            <tr data-name="IMPS" data-status="active" id="row-imps" data-ref="yes"><td data-pg-serial class="muted"></td>
               <td class="font-poppins font-semibold text-charcoal">IMPS</td>
+              <td>Yes</td>
               <td>0</td>
               <td id="badge-imps"><span class="badge badge-active">Active</span></td>
               <td id="actions-imps">
@@ -167,6 +172,12 @@
           <div class="field-error" id="addNameError"></div>
           <p class="text-xs muted mt-1">2–60 characters.</p>
         </div>
+        <div class="mt-4">
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+            <input type="checkbox" id="addRefRequired" checked style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Reference required
+          </label>
+          <p class="text-xs muted mt-1">When on, a reference field (e.g. UPI/transaction ID, cheque no.) is shown wherever this method is selected.</p>
+        </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
           <button type="submit" class="btn btn-primary">Add Payment Method</button>
@@ -183,6 +194,12 @@
           <label class="label" for="editName">Name</label>
           <input id="editName" name="name" class="input" minlength="2" maxlength="60" />
           <div class="field-error" id="editNameError"></div>
+        </div>
+        <div class="mt-4">
+          <label class="flex items-center gap-2" style="cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;color:var(--color-charcoal)">
+            <input type="checkbox" id="editRefRequired" style="width:18px;height:18px;accent-color:var(--color-saffron)" /> Reference required
+          </label>
+          <p class="text-xs muted mt-1">When on, a reference field is shown wherever this method is selected.</p>
         </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
@@ -236,15 +253,35 @@
       if (!name) { err.textContent = 'Name is required.'; err.classList.add('show'); document.getElementById('addName').classList.add('error'); return; }
       if (name.length < 2 || name.length > 60) { err.textContent = 'Name must be 2–60 characters.'; err.classList.add('show'); document.getElementById('addName').classList.add('error'); return; }
       err.classList.remove('show'); document.getElementById('addName').classList.remove('error');
-      var tbody = document.querySelector('#tbl-payment tbody'); var tr = document.createElement('tr'); tr.dataset.name = name; tr.dataset.status = 'active';
-      tr.innerHTML = '<td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td><td>0</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
-      tbody.appendChild(tr); announce(escHtml(name)+' added.'); closeAddModal();
+      var refReq = document.getElementById('addRefRequired').checked;
+      var refCell = refReq ? '<td>Yes</td>' : '<td class="muted">No</td>';
+      var tbody = document.querySelector('#tbl-payment tbody'); var tr = document.createElement('tr'); tr.dataset.name = name; tr.dataset.status = 'active'; tr.dataset.ref = refReq ? 'yes' : 'no';
+      tr.innerHTML = '<td data-pg-serial class="muted"></td><td class="font-poppins font-semibold text-charcoal">'+escHtml(name)+'</td>'+refCell+'<td>0</td><td><span class="badge badge-active">Active</span></td><td><div class="flex items-center gap-3"><a href="#" class="text-royal-blue font-poppins font-semibold" onclick="event.preventDefault(); openEditModal(\''+escHtml(name)+'\')">Edit</a><button class="btn btn-danger !py-1 !px-3 !text-sm" onclick="openDeactivateConfirm(null,\''+escHtml(name)+'\')">Deactivate</button></div></td>';
+      tbody.appendChild(tr); if(window.Paginator)Paginator.refresh('tbl-payment'); announce(escHtml(name)+' added.'); closeAddModal();
     }
-    function openEditModal(name) { lastFocusTrigger = document.activeElement; document.getElementById('editModalTitle').textContent = 'Edit — '+name; document.getElementById('editName').value = name; document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus(); }
+    var editingRow=null;
+    function openEditModal(name) {
+      lastFocusTrigger = document.activeElement; editingRow=null;
+      var rows=document.querySelectorAll('#tbl-payment tbody tr');
+      for(var i=0;i<rows.length;i++){ if((rows[i].dataset.name||'')===name){ editingRow=rows[i]; break; } }
+      document.getElementById('editModalTitle').textContent = 'Edit — '+name; document.getElementById('editName').value = name;
+      document.getElementById('editRefRequired').checked = editingRow ? (editingRow.dataset.ref !== 'no') : true;
+      document.getElementById('editModal').classList.add('open'); document.getElementById('editName').focus();
+    }
     function submitEditForm() {
       var name = document.getElementById('editName').value.trim(); var err = document.getElementById('editNameError');
       if (!name || name.length < 2 || name.length > 60) { err.textContent = name ? 'Name must be 2–60 characters.' : 'Name is required.'; err.classList.add('show'); document.getElementById('editName').classList.add('error'); return; }
-      err.classList.remove('show'); document.getElementById('editName').classList.remove('error'); document.getElementById('editModal').classList.remove('open'); announce('Updated to '+name+'.'); if (lastFocusTrigger) lastFocusTrigger.focus();
+      err.classList.remove('show'); document.getElementById('editName').classList.remove('error');
+      var refReq = document.getElementById('editRefRequired').checked;
+      if(editingRow){
+        var tds=editingRow.querySelectorAll('td');  // [0]#, [1]Name, [2]Ref required, [3]Used by, [4]Status, [5]Actions
+        if(tds[1]) tds[1].textContent=name;
+        if(tds[2]){ tds[2].textContent = refReq ? 'Yes' : 'No'; tds[2].className = refReq ? '' : 'muted'; }
+        editingRow.dataset.name=name; editingRow.dataset.ref = refReq ? 'yes' : 'no';
+        var editLink=tds[5]?tds[5].querySelector('a'):null;
+        if(editLink) editLink.setAttribute('onclick',"event.preventDefault(); openEditModal('"+name.replace(/'/g,"\\'")+"')");
+      }
+      document.getElementById('editModal').classList.remove('open'); announce('Updated to '+name+'.'); if (lastFocusTrigger) lastFocusTrigger.focus();
     }
     function openDeactivateConfirm(id, name) { lastFocusTrigger = document.activeElement; pendingDeactivateId = id; pendingDeactivateName = name; document.getElementById('deactivateModalTitle').textContent = 'Deactivate "'+name+'"?'; document.getElementById('deactivateModal').classList.add('open'); document.getElementById('deactivateConfirmBtn').focus(); }
     document.getElementById('deactivateConfirmBtn').addEventListener('click', function() {

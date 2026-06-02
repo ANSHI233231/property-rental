@@ -159,7 +159,6 @@
             </tbody>
           </table>
         </div>
-        <p class="muted" style="font-size:12px;margin-top:8px;">GST line item deferred — see planning note §4 Q2.</p>
       </section>
 
       <!-- Status timeline card -->
@@ -212,7 +211,7 @@
           <select id="payment-method" class="input" aria-required="true" onchange="onPaymentMethodChange()"></select>
           <div class="field-error" id="payment-method-error"></div>
         </div>
-        <div class="mt-4">
+        <div class="mt-4" id="payment-ref-field">
           <label class="label" for="payment-ref" id="payment-ref-label">Payment reference <span style="color:var(--color-saffron)">*</span></label>
           <input id="payment-ref" type="text" class="input" placeholder="Pick a payment method first" aria-required="true" disabled oninput="validateMarkPaid()" />
           <div class="field-error" id="payment-ref-error"></div>
@@ -349,13 +348,20 @@
       var refLabel = document.getElementById('payment-ref-label');
       var method = window.gsPaymentMethodById && window.gsPaymentMethodById(sel.value);
       var methodErr = document.getElementById('payment-method-error');
+      var refField = document.getElementById('payment-ref-field');
       if (methodErr) { methodErr.textContent = ''; methodErr.classList.remove('show'); }
 
-      if (method) {
+      if (method && method.refRequired === false) {
+        // Master says no reference needed for this method (e.g. Cash) — hide the field.
+        if (refField) refField.style.display = 'none';
+        ref.value = ''; ref.disabled = true;
+      } else if (method) {
+        if (refField) refField.style.display = '';
         refLabel.innerHTML = method.refLabel + ' <span style="color:var(--color-saffron)">*</span>';
         ref.placeholder = method.refPlaceholder;
         ref.disabled = false;
       } else {
+        if (refField) refField.style.display = '';
         refLabel.innerHTML = 'Payment reference <span style="color:var(--color-saffron)">*</span>';
         ref.placeholder = 'Pick a payment method first';
         ref.value = '';
@@ -371,7 +377,9 @@
       var refErr = document.getElementById('payment-ref-error');
       var btn = document.getElementById('markPaidSubmitBtn');
       refErr.textContent = ''; refErr.classList.remove('show'); ref.classList.remove('error');
-      var ok = !!sel.value && !!ref.value.trim();
+      var method = window.gsPaymentMethodById && window.gsPaymentMethodById(sel.value);
+      var refNeeded = !method || method.refRequired !== false;
+      var ok = !!sel.value && (!refNeeded || !!ref.value.trim());
       if (ok) {
         btn.classList.remove('btn-disabled'); btn.classList.add('btn-primary'); btn.disabled = false;
       } else {
@@ -388,11 +396,12 @@
         methodErr.textContent = 'Please select a payment method.'; methodErr.classList.add('show');
         sel.focus(); return;
       }
-      if (!ref.value.trim()) {
+      var method = window.gsPaymentMethodById(sel.value);
+      var refNeeded = !method || method.refRequired !== false;
+      if (refNeeded && !ref.value.trim()) {
         refErr.textContent = 'Payment reference is required.'; refErr.classList.add('show'); ref.classList.add('error');
         ref.focus(); return;
       }
-      var method = window.gsPaymentMethodById(sel.value);
       var methodName = method ? method.name : '';
       var refLabelText = method ? method.refLabel : 'Payment Reference';
 

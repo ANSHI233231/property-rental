@@ -7,8 +7,7 @@ window.GHARSETU_BUSINESS_TYPES = [
   { id: 'housing_society',     name: 'Housing Society',          orgs: 2, status: 'active' },
   { id: 'individual_landlord', name: 'Individual Landlord',      orgs: 4, status: 'active' },
   { id: 'property_mgmt_firm',  name: 'Property Management Firm', orgs: 2, status: 'active' },
-  { id: 'co_living',           name: 'Co-living',                orgs: 1, status: 'active' },
-  { id: 'other',               name: 'Other',                    orgs: 1, status: 'active' }
+  { id: 'co_living',           name: 'Co-living',                orgs: 1, status: 'active' }
 ];
 
 /* Render the active types into a <select> (keeps the leading placeholder option).

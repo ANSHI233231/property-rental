@@ -7,24 +7,26 @@
  * slug         — stable machine handle for code references; never used as the PK
  * name         — display label
  * status       — 'active' | 'deactivated' (only 'active' enters dropdowns)
+ * refRequired  — whether a payment-reference field is shown/required when this
+ *                method is selected (Super-Admin master toggle). Cash needs none.
  * refLabel     — what to ask for in the "Payment reference" field for this method
  *                (e.g. UPI wants a UPI ref / transaction id; Cash wants a receipt #)
  * refPlaceholder — input placeholder shown when this method is selected
  */
 window.GHARSETU_PAYMENT_METHODS = [
-  { id: 1, slug: 'upi',     name: 'UPI',                  status: 'active',
+  { id: 1, slug: 'upi',     name: 'UPI',                  status: 'active', refRequired: true,
     refLabel: 'UPI transaction ID',
     refPlaceholder: 'e.g. 412345678901' },
-  { id: 2, slug: 'neft',    name: 'NEFT / Bank Transfer', status: 'active',
+  { id: 2, slug: 'neft',    name: 'NEFT / Bank Transfer', status: 'active', refRequired: true,
     refLabel: 'UTR / NEFT reference',
     refPlaceholder: 'e.g. UTRN12345678' },
-  { id: 3, slug: 'cash',    name: 'Cash',                 status: 'active',
+  { id: 3, slug: 'cash',    name: 'Cash',                 status: 'active', refRequired: false,
     refLabel: 'Receipt number',
     refPlaceholder: 'e.g. RCPT-001234' },
-  { id: 4, slug: 'cheque',  name: 'Cheque',               status: 'active',
+  { id: 4, slug: 'cheque',  name: 'Cheque',               status: 'active', refRequired: true,
     refLabel: 'Cheque number',
     refPlaceholder: 'e.g. 000456' },
-  { id: 5, slug: 'imps',    name: 'IMPS',                 status: 'active',
+  { id: 5, slug: 'imps',    name: 'IMPS',                 status: 'active', refRequired: true,
     refLabel: 'IMPS reference',
     refPlaceholder: 'e.g. IMPS123456789' }
 ];

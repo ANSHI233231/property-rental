@@ -39,7 +39,7 @@ window.GHARSETU_PLANS = [
   { id: 1, slug: 'basic',    name: 'Basic',    cap: 5,    propertyCap: 1,    orgs: 4, status: 'active', popular: false,
     priceInr: 99900,
     features: ['rent', 'maintenance', 'visitors'] },
-  { id: 2, slug: 'standard', name: 'Standard', cap: 20,   propertyCap: null, orgs: 5, status: 'active', popular: true,
+  { id: 2, slug: 'standard', name: 'Standard', cap: 20,   propertyCap: null, orgs: 3, status: 'active', popular: true,
     priceInr: 299900,
     features: ['rent', 'maintenance', 'visitors', 'per-room', 'impersonation', 'settings'] },
   { id: 3, slug: 'premium',  name: 'Premium',  cap: null, propertyCap: null, orgs: 1, status: 'active', popular: false,
